@@ -149,14 +149,15 @@ signals_at_points = np.zeros((points_output.shape[1], domain.topology.dim, num_s
 # -----------------------------------------------------
 ### -> Full field
 x = u_n.function_space.tabulate_dof_coordinates()
-r = np.maximum(1e-8, np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)) #cheat to avoid NaN at r=0
-all_u_n_exact = u_2D_PSV_rt(r, np.roll(src_t(dt*np.arange(num_steps)), -2), rho.value, mu.value, dt) if storeAllSteps else np.zeros((1,2,num_steps))
+
+#r = np.maximum(1e-8, np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)) #cheat to avoid NaN at r=0
+all_u_n_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], np.roll(src_t(dt*np.arange(num_steps)), -2), U0, rho.value,lambda_.value, mu.value, dt) if storeAllSteps else np.zeros((x.shape[0],2,num_steps))
 
 ### -> At few points
 if len(points_output_on_proc)>0:
     x = points_output_on_proc
-    r = np.maximum(1e-8, np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)) #cheat to avoid NaN at r=0
-    signals_at_points_exact = u_2D_PSV_rt(r, np.roll(src_t(dt*np.arange(num_steps)), -2), rho.value, mu.value, dt)
+    #r = np.maximum(1e-8, np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)) #cheat to avoid NaN at r=0
+    signals_at_points_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], np.roll(src_t(dt*np.arange(num_steps)), -2), U0, rho.value,lambda_.value, mu.value, dt)
 #
 # -----------------------------------------------------
 

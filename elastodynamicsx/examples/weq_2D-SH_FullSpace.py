@@ -47,13 +47,14 @@ rho     = fem.Constant(domain, PETSc.ScalarType(1))
 #
 X0_src = np.array([length/2,height/2,0]) #center
 R0_src = 0.1 #radius
-nrm   = 1/(np.pi*R0_src**2) #normalize to int[src_x(x) dx]=1
+nrm   = 1/(np.pi*R0_src**2) #normalize to int[src_x(x) dx]=1   #?
 #
 src_x = lambda x: nrm * np.array(np.linalg.norm(x-X0_src[:,np.newaxis], axis=0)<=R0_src, dtype=PETSc.ScalarType) #source(x)
 if True: #check and correct normalization
     F_ = fem.Function(V) #body force
     F_.interpolate(src_x)
     nrmFE = domain.comm.allreduce( fem.assemble_scalar(fem.form(F_ * ufl.dx)) , op=MPI.SUM)
+    #ligne au dessus ??
     nrm = nrm/nrmFE
     print('norm of FE source term, before correction', nrmFE )
 
