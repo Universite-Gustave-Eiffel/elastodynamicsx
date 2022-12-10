@@ -6,9 +6,9 @@ import ufl
 
 class TimeStepper:
 
-    def build(dt, V, a_tt, a_xx, L, **kwargs):
+    def build(*args, **kwargs):
         tscheme = kwargs.get('timescheme', 'leapfrog')
-        if tscheme.lower() == 'leapfrog': return LeapFrog(dt, V, a_tt, a_xx, L)
+        if tscheme.lower() == 'leapfrog': return LeapFrog(*args) #args = (dt, V, a_tt, a_xx, L)
         else: print('TODO')
 
     def __init__(self, dt):

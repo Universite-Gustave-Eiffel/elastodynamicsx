@@ -34,8 +34,8 @@ V = fem.VectorFunctionSpace(domain, ("CG", 2))
 # -----------------------------------------------------
 #                 Material parameters
 # -----------------------------------------------------
-mu      = fem.Constant(domain, PETSc.ScalarType(1))
 rho     = fem.Constant(domain, PETSc.ScalarType(1))
+mu      = fem.Constant(domain, PETSc.ScalarType(1))
 lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
 #
 # -----------------------------------------------------
@@ -133,7 +133,7 @@ u_n = tStepper.u_n
 #                    define outputs
 # -----------------------------------------------------
 ### -> Store all time steps ? -> YES if debug & learning // NO if big calc.
-storeAllSteps = True
+storeAllSteps = False
 all_u = [fem.Function(V) for i in range(num_steps)] if storeAllSteps else None #all steps are stored here
 #
 ### -> Extract signals at few points
