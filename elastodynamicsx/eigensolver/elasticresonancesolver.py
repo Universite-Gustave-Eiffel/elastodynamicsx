@@ -1,6 +1,6 @@
 #TODO: documentation
 
-from dolfinx import fem
+from dolfinx import fem, plot
 from petsc4py import PETSc
 from slepc4py import SLEPc
 import ufl
@@ -23,9 +23,9 @@ class ElasticResonanceSolver(SLEPc.EPS):
         rho, lambda_, mu = 1, 2, 1
         eps = ElasticResonanceSolver.build_isotropicMaterial(rho, lambda_, mu, V, bcs=[bc], nev=8)
         eps.solve()
+        eps.plot()
         freqs = eps.getEigenfrequencies()
         print('First resonance frequencies:', freqs)
-
     """
 
     def build_isotropicMaterial(rho, lambda_, mu, function_space, bcs=[], **kwargs):
@@ -111,19 +111,39 @@ class ElasticResonanceSolver(SLEPc.EPS):
         """Returns the error estimate on the computed eigenvalues"""
         return np.array([self.computeError(i, SLEPc.EPS.ErrorType.RELATIVE) for i in range(self.__getNout())]) # Compute error for i-th eigenvalue
     
-    def plot(self, which='all'):
+    def plot(self, which='all', **kwargs):
         """
         Plots the desired modeshapes
         which: 'all', or an integer, or a list of integers, or a slice object
             -> the same as for getEigenmodes
         """
         indexes = _slice_array(np.arange(self.__getNout()), which)
-        nbrows = int(np.ceil(np.sqrt(indexes.size)))
-        nbcols = int(np.ceil(indexes.size/nbrows))
-        plotter = pyvista.Plotter(shape=(nbrows, nbcols))
-        #...TODO
+        eigenmodes = self.getEigenmodes(which)
+        eigenfreqs = self.getEigenfrequencies()
+        #
+        topology, cell_types, geom = plot.create_vtk_mesh(self.function_space)
+        grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
+        nbcomps = eigenmodes[0].x.array.size // geom.shape[0] #number of components
+        if nbcomps < 3:
+            z0s = np.zeros((geom.shape[0], 3-nbcomps), dtype=eigenmodes[0].x.array.dtype)
+        for i, eigM in zip(indexes, eigenmodes):
+            if nbcomps == 3: grid['eigenmode_'+str(i)] = eigM.x.array.reshape((geom.shape[0], 3)) #ok if 3D. not ok if 2D.
+            else:            grid['eigenmode_'+str(i)] = np.append(eigM.x.array.reshape((geom.shape[0], nbcomps)), z0s, axis=1)
+        #
+        nbcols = int(np.ceil(np.sqrt(indexes.size)))
+        nbrows = int(np.ceil(indexes.size/nbcols))
+        shape  = kwargs.get('shape', (nbrows, nbcols))
+        plotter = pyvista.Plotter(shape=shape)
+        for i in range(shape[0]):
+            for j in range(shape[1]):
+                plotter.subplot(i,j)
+                current_index = i*shape[1] + j
+                if current_index >= indexes.size: break
+                vector = 'eigenmode_'+str(indexes[current_index])
+                plotter.add_text("mode "+str(current_index)+", freq. "+str(round(eigenfreqs[indexes[current_index]],2)), font_size=10)
+                if kwargs.get('wireframe', False): plotter.add_mesh(grid, style='wireframe', color='black')
+                plotter.add_mesh(grid.warp_by_vector(vector, factor=kwargs.get('factor', 1)), scalars=vector)
         plotter.show()
-        pass
     
     def printEigenvalues(self):
         """Prints the computed eigenvalues and error estimates"""

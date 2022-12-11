@@ -72,7 +72,8 @@ eps.solve()
 ### Get the result
 #eps.printEigenvalues()
 eigenfreqs = eps.getEigenfrequencies()
-eigenmodes = eps.getEigenmodes()
+#eigenmodes = eps.getEigenmodes()
+eps.plot(factor=50, wireframe=True)
 
 verbose = False
 if verbose:
@@ -99,14 +100,6 @@ freq_beam = np.array([alpha(i//2) for i in range(nev)])**2 *np.sqrt(E*I_bend/(rh
 print('Eigenfrequencies: comparison with beam theory')
 print('FE:         ', eigenfreqs*scaleFREQ)
 print('Beam theory:', freq_beam*scaleFREQ)
-#
-# -----------------------------------------------------
-
-
-# -----------------------------------------------------
-#                     Post-processing
-# -----------------------------------------------------
-
 #
 # -----------------------------------------------------
 
