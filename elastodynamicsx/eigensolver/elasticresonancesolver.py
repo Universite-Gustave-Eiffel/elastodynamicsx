@@ -3,6 +3,7 @@
 from dolfinx import fem, plot
 from petsc4py import PETSc
 from slepc4py import SLEPc
+from mpi4py import MPI
 import ufl
 import numpy as np
 import pyvista
@@ -21,7 +22,7 @@ class ElasticResonanceSolver(SLEPc.EPS):
         V = dolfinx.fem.VectorFunctionSpace(domain, ("CG", 1))
         #
         rho, lambda_, mu = 1, 2, 1
-        eps = ElasticResonanceSolver.build_isotropicMaterial(rho, lambda_, mu, V, bcs=[bc], nev=8)
+        eps = ElasticResonanceSolver.build_isotropicMaterial(rho, lambda_, mu, V, bcs=[], nev=6+6) #the first 6 resonances are rigid body motion
         eps.solve()
         eps.plot()
         freqs = eps.getEigenfrequencies()
@@ -117,6 +118,7 @@ class ElasticResonanceSolver(SLEPc.EPS):
         which: 'all', or an integer, or a list of integers, or a slice object
             -> the same as for getEigenmodes
         """
+        #inspired from https://docs.pyvista.org/examples/99-advanced/warp-by-vector-eigenmodes.html
         indexes = _slice_array(np.arange(self.__getNout()), which)
         eigenmodes = self.getEigenmodes(which)
         eigenfreqs = self.getEigenfrequencies()
@@ -133,6 +135,7 @@ class ElasticResonanceSolver(SLEPc.EPS):
         nbcols = int(np.ceil(np.sqrt(indexes.size)))
         nbrows = int(np.ceil(indexes.size/nbcols))
         shape  = kwargs.get('shape', (nbrows, nbcols))
+        factor = kwargs.get('factor', 1.)
         plotter = pyvista.Plotter(shape=shape)
         for i in range(shape[0]):
             for j in range(shape[1]):
@@ -140,9 +143,9 @@ class ElasticResonanceSolver(SLEPc.EPS):
                 current_index = i*shape[1] + j
                 if current_index >= indexes.size: break
                 vector = 'eigenmode_'+str(indexes[current_index])
-                plotter.add_text("mode "+str(current_index)+", freq. "+str(round(eigenfreqs[indexes[current_index]],2)), font_size=10)
+                plotter.add_text("mode "+str(indexes[current_index])+", freq. "+str(round(eigenfreqs[indexes[current_index]],2)), font_size=10)
                 if kwargs.get('wireframe', False): plotter.add_mesh(grid, style='wireframe', color='black')
-                plotter.add_mesh(grid.warp_by_vector(vector, factor=kwargs.get('factor', 1)), scalars=vector)
+                plotter.add_mesh(grid.warp_by_vector(vector, factor=factor), scalars=vector)
         plotter.show()
     
     def printEigenvalues(self):

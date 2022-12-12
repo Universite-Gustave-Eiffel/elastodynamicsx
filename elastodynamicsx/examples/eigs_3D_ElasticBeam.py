@@ -1,13 +1,14 @@
-#documentation: TODO
+"""
+Free resonances of a beam clamped at one end, compared against beam theory
 
-#adapted from (legacy Fenics): https://comet-fenics.readthedocs.io/en/latest/demo/modal_analysis_dynamics/cantilever_modal.html
-#see also (Fenicsx): https://mikics.github.io/gsoc-jupyterbook/chapter3/demo_half_loaded_waveguide.html
+adapted from (legacy Fenics): https://comet-fenics.readthedocs.io/en/latest/demo/modal_analysis_dynamics/cantilever_modal.html
+also inspired from (Fenicsx): https://mikics.github.io/gsoc-jupyterbook/chapter3/demo_half_loaded_waveguide.html
+"""
 
 from dolfinx import mesh, fem
 from mpi4py import MPI
 from petsc4py import PETSc
 import numpy as np
-import pyvista
 
 from elastodynamicsx.eigensolver import ElasticResonanceSolver
 
@@ -73,7 +74,7 @@ eps.solve()
 #eps.printEigenvalues()
 eigenfreqs = eps.getEigenfrequencies()
 #eigenmodes = eps.getEigenmodes()
-eps.plot(factor=50, wireframe=True)
+eps.plot(wireframe=True, factor=50)
 
 verbose = False
 if verbose:

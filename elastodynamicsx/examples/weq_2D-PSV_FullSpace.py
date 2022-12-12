@@ -68,9 +68,9 @@ src_t = lambda t: np.sin(2*np.pi*f0 * t) * np.sin(np.pi*t/d0)**2 * (t<d0) * (t>0
 
 ### -> Space-Time function
 #
-U0 = np.array([1,0], dtype=PETSc.ScalarType) #amplitude of the source
+F_0 = np.array([1,0], dtype=PETSc.ScalarType) #amplitude of the source
 #
-def F_body_function(t): return lambda x: U0[:,np.newaxis] * src_t(t) * src_x(x)[np.newaxis,:] #source(x) at a given time
+def F_body_function(t): return lambda x: F_0[:,np.newaxis] * src_t(t) * src_x(x)[np.newaxis,:] #source(x) at a given time
 #
 # -----------------------------------------------------
 
@@ -92,7 +92,7 @@ hx = length/Nx
 c_P = np.sqrt((lambda_.value+2*mu.value)/rho.value) #P-wave velocity
 c_S = np.sqrt(mu.value/rho.value) #S-wave velocity
 lbda0 = c_S/f0
-C_CFL = dt/hx  * c_S # Courant number (Courant-Friedrichs-Lewy condition)
+C_CFL = dt/hx  * c_P # Courant number (Courant-Friedrichs-Lewy condition)
 print('Number of points per wavelength at central frequency: ', round(lbda0/hx, 2))
 print('Number of time steps per period at central frequency: ', round(T0/dt, 2))
 print('CFL condition: Courant number = ', round(C_CFL, 2))
@@ -116,14 +116,16 @@ L    = lambda v  : ufl.dot(F_body, v) * ufl.dx   +   ufl.dot(T_N, v) * ufl.ds
 
 ###
 # Initial conditions
-def initial_condition_u(x):  return np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType)
-def initial_condition_du(x): return np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType)
+u0, v0 = fem.Function(V), fem.Function(V)
+u0.interpolate(lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType))
+v0.interpolate(lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType))
+#
 F_body.interpolate(F_body_function(tstart))
 ###
 
 #  Variational problem
-tStepper = TimeStepper.build(dt, V, a_tt, a_xx, L, scheme='leapfrog')
-tStepper.initial_condition(initial_condition_u, initial_condition_du, t0=tstart)
+tStepper = TimeStepper.build(a_tt, a_xx, L, dt, V, [], scheme='leapfrog')
+tStepper.initial_condition(u0, v0, t0=tstart)
 u_n = tStepper.u_n
 #
 # -----------------------------------------------------
@@ -145,33 +147,6 @@ signals_at_points = np.zeros((points_output.shape[1], domain.topology.dim, num_s
 
 
 # -----------------------------------------------------
-#                    Exact solution
-# -----------------------------------------------------
-### -> Full field
-x = u_n.function_space.tabulate_dof_coordinates()
-
-#r = np.maximum(1e-8, np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)) #cheat to avoid NaN at r=0
-all_u_n_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], np.roll(src_t(dt*np.arange(num_steps)), -2), U0, rho.value,lambda_.value, mu.value, dt) if storeAllSteps else np.zeros((x.shape[0],2,num_steps))
-
-### -> At few points
-if len(points_output_on_proc)>0:
-    x = points_output_on_proc
-    #r = np.maximum(1e-8, np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)) #cheat to avoid NaN at r=0
-    signals_at_points_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], np.roll(src_t(dt*np.arange(num_steps)), -2), U0, rho.value,lambda_.value, mu.value, dt)
-#
-# -----------------------------------------------------
-
-
-###
-# Plotting
-livePlot, i_livePlot = True, 10
-clim = 0.1*np.amax(U0)*np.array([0, 1])
-plotter = CustomVectorPlotter([u_n, u_n if storeAllSteps else None, u_n], clim=clim, warp_factor=0.5/np.amax(clim))
-if len(points_output_on_proc)>0: plotter.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12)
-plotter.show(interactive_update=True) #interactive_update=True pour que l'appel ne soit pas bloquant et que le programme se poursuive
-###
-
-# -----------------------------------------------------
 #                       Solve
 # -----------------------------------------------------
 ### define callfirsts and callbacks
@@ -183,14 +158,15 @@ def cbck_storeFullField(i, tStepper):
 def cbck_storeAtPoints(i, tStepper):
     if len(points_output_on_proc)>0: signals_at_points[:,:,i] = tStepper.u_n.eval(points_output_on_proc, cells_output_on_proc)
 
-def cbck_livePlot(i, tStepper):
-    # Viewing while calculating: Update plotter
-    if livePlot and i%i_livePlot==0:
-        plotter.update_vectors((tStepper.u_n.x.array, all_u_n_exact[:,:,i].flatten(), tStepper.u_n.x.array-all_u_n_exact[:,:,i].flatten()))
-        time.sleep(0.01)
+### enable live plotting
+clim = 0.1*np.amax(F_0)*np.array([0, 1])
+kwplot = { 'clim':clim, 'warp_factor':0.5/np.amax(clim) }
+tStepper.set_live_plotter(live_plotter_step=10, **kwplot) #0 to disable
+if len(points_output_on_proc)>0:
+    tStepper.live_plotter.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
 
 ### Run the big time loop!
-tStepper.run(num_steps, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFullField, cbck_storeAtPoints, cbck_livePlot])
+tStepper.run(num_steps, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFullField, cbck_storeAtPoints])
 ### End of big calc.
 #
 # -----------------------------------------------------
@@ -200,9 +176,14 @@ tStepper.run(num_steps, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFu
 #     Interactive view of all time steps if stored
 # -----------------------------------------------------
 if storeAllSteps: #add a slider to browse through all time steps
+    ### -> Exact solution, Full field
+    x = u_n.function_space.tabulate_dof_coordinates()
+    all_u_n_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], np.roll(src_t(dt*np.arange(num_steps)), -2), F_0, rho.value,lambda_.value, mu.value, dt)
+    #
+    plotter = CustomVectorPlotter(u_n, u_n, u_n, labels=('FE', 'Exact', 'Diff.'), **kwplot)
     def updateTStep(value):
         i = int((value-tstart)/dt)
-        plotter.update_vectors((all_u[i].x.array, all_u_n_exact[:,:,i].flatten(), all_u[i].x.array-all_u_n_exact[:,:,i].flatten()))
+        plotter.update_vectors( all_u[i].x.array, all_u_n_exact[:,:,i].flatten(), all_u[i].x.array-all_u_n_exact[:,:,i].flatten() )
     plotter.add_slider_widget(updateTStep, [tstart, tmax-dt])
     plotter.show(interactive_update=False) #important de desactiver le interactive_update sinon l'appel n'est pas bloquant et le programme se termine
 #
@@ -213,6 +194,10 @@ if storeAllSteps: #add a slider to browse through all time steps
 #              Plot signals at few points
 # -----------------------------------------------------
 if len(points_output_on_proc)>0:
+    ### -> Exact solution, At few points
+    x = points_output_on_proc
+    signals_at_points_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], np.roll(src_t(dt*np.arange(num_steps)), -2), F_0, rho.value,lambda_.value, mu.value, dt)
+    #
     fig, ax = plt.subplots(1,1)
     t = dt*np.arange(num_steps)
     for i in range(len(signals_at_points)):
