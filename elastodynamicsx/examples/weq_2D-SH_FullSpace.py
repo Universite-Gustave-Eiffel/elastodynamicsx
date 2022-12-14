@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from elastodynamicsx.timestepper import TimeStepper
 from elastodynamicsx.plotting import CustomScalarPlotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc
-from elastodynamicsx.analyticalsolutions import u_2D_SH_rt
+from elastodynamicsx.analyticalsolutions import u_2D_SH_rt, int_Fraunhofer_2D
 
 # -----------------------------------------------------
 #                     FE domain
@@ -47,17 +47,12 @@ mu      = fem.Constant(domain, PETSc.ScalarType(1))
 #
 X0_src = np.array([length/2,height/2,0]) #center
 R0_src = 0.1 #radius
-nrm   = 1/(np.pi*R0_src**2) #normalize to int[src_x(x) dx]=1   #?
 #
-src_x = lambda x: nrm * np.array(np.linalg.norm(x-X0_src[:,np.newaxis], axis=0)<=R0_src, dtype=PETSc.ScalarType) #source(x)
-if True: #check and correct normalization
-    F_ = fem.Function(V) #body force
-    F_.interpolate(src_x)
-    nrmFE = domain.comm.allreduce( fem.assemble_scalar(fem.form(F_ * ufl.dx)) , op=MPI.SUM)
-    #ligne au dessus ??
-    nrm = nrm/nrmFE
-    print('norm of FE source term, before correction', nrmFE )
-
+### Gaussian function
+nrm   = 1/(2*np.pi*R0_src**2) #normalize to int[src_x(x) dx]=1
+src_x = lambda x: nrm * np.exp(-1/2*(np.linalg.norm(x-X0_src[:,np.newaxis], axis=0)/R0_src)**2, dtype=PETSc.ScalarType) #source(x)
+fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src) #accounts for the size of the source in the analytical formula
+#
 ### -> Time function
 #
 f0 = 1 #central frequency of the source
@@ -138,7 +133,7 @@ storeAllSteps = False
 all_u = [fem.Function(V) for i in range(num_steps)] if storeAllSteps else None #all steps are stored here
 #
 ### -> Extract signals at few points
-points_output = X0_src[:,np.newaxis] + np.array([[1, 0, 0], [2, 0, 0]]).T
+points_output = X0_src[:,np.newaxis] + np.array([[1, 0, 0], [2, 0, 0], [3, 0, 0]]).T
 points_output_on_proc, cells_output_on_proc = find_points_and_cells_on_proc(points_output, domain)
 signals_at_points = np.zeros((len(points_output_on_proc), 1, num_steps)) #<- output stored here
 #
@@ -177,7 +172,7 @@ if storeAllSteps: #plotter with a slider to browse through all time steps
     ### -> Exact solution, Full field
     x = u_n.function_space.tabulate_dof_coordinates()
     r = np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)
-    all_u_n_exact = u_2D_SH_rt(r, np.roll(src_t(dt*np.arange(num_steps)), -2), rho.value, mu.value, dt)
+    all_u_n_exact = u_2D_SH_rt(r, np.roll(src_t(dt*np.arange(num_steps)), -2), rho.value, mu.value, dt, fn_kdomain_finite_size)
     #
     plotter = CustomScalarPlotter(u_n, u_n, u_n, labels=('FE', 'Exact', 'Diff.'), clim=clim)
     def updateTStep(value):
@@ -196,10 +191,11 @@ if len(points_output_on_proc)>0:
     ### -> Exact solution, At few points
     x = points_output_on_proc
     r = np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)
-    signals_at_points_exact = u_2D_SH_rt(r, np.roll(src_t(dt*np.arange(num_steps)), -2), rho.value, mu.value, dt)
+    signals_at_points_exact = u_2D_SH_rt(r, np.roll(src_t(dt*np.arange(num_steps)), -2), rho.value, mu.value, dt, fn_kdomain_finite_size)
     #
     fig, ax = plt.subplots(1,1)
     t = dt*np.arange(num_steps)
+    ax.set_title('Signals at few points')
     for i in range(len(signals_at_points)):
         ax.plot(t, signals_at_points[i,0,:],     c='C'+str(i), ls='-') #FEM
         ax.plot(t, signals_at_points_exact[i,:], c='C'+str(i), ls='--') #exact
