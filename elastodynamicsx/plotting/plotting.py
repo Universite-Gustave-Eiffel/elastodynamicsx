@@ -7,7 +7,7 @@ import pyvista
 
 class CustomScalarPlotter(pyvista.Plotter):
     
-    def __init__(self, all_scalars, **kwargs):
+    def __init__(self, *all_scalars, **kwargs):
         self.grids=[]
         for u_ in all_scalars:
             if u_ is None: break
@@ -16,13 +16,15 @@ class CustomScalarPlotter(pyvista.Plotter):
             grid.point_data["u"] = u_.x.array
             self.grids.append(grid)
         
-        if len(self.grids)==1: 
-            super().__init__()
+        if len(self.grids)==1:
+            defaultShape = (1,1)
         else:
             pyvista.global_theme.multi_rendering_splitting_position = 0.75
-            super().__init__(shape='1|'+str(len(self.grids)-1))
+            defaultShape = '1|'+str(len(self.grids)-1)
+        shape = kwargs.pop('shape', defaultShape)
+        super().__init__(shape=shape)
 
-        labels = kwargs.pop('labels', ('FE', 'Exact', 'Diff.'))
+        labels = kwargs.pop('labels', ['' for i in range(len(self.grids))])
         show_edges = kwargs.pop('show_edges', True)
         cmap = kwargs.pop('cmap', plt.cm.get_cmap("viridis", 25))
         sargs = dict(title_font_size=25, label_font_size=20, fmt="%.2e", color="black", position_x=0.1, position_y=0.8, width=0.8, height=0.1)
@@ -35,16 +37,16 @@ class CustomScalarPlotter(pyvista.Plotter):
 
         if len(self.grids)>1: self.subplot(0) #resets the focus to first subplot
 
-    def update_scalars(self, all_scalars, render=True):
+    def update_scalars(self, *all_scalars, **kwargs):
         for i, (grid, u_) in enumerate(zip(self.grids, all_scalars)):
             super().update_scalars(u_, mesh=grid, render=False)
-        if render:
+        if kwargs.get('render', True):
             self.render()
 
 
 class CustomVectorPlotter(pyvista.Plotter):
     
-    def __init__(self, all_vectors, **kwargs):
+    def __init__(self, *all_vectors, **kwargs):
         self.grids=[]
         self.warp_factor = kwargs.pop('warp_factor', 1)
         for u_ in all_vectors:
@@ -56,13 +58,15 @@ class CustomVectorPlotter(pyvista.Plotter):
             grid.point_data["u_nrm"] = np.linalg.norm(u_.x.array.reshape((geom.shape[0], 2)), axis=1)
             self.grids.append(grid)
         
-        if len(self.grids)==1: 
-            super().__init__()
+        if len(self.grids)==1:
+            defaultShape = (1,1)
         else:
             pyvista.global_theme.multi_rendering_splitting_position = 0.75
-            super().__init__(shape='1|'+str(len(self.grids)-1))
+            defaultShape = '1|'+str(len(self.grids)-1)
+        shape = kwargs.pop('shape', defaultShape)
+        super().__init__(shape=shape)
 
-        labels = kwargs.pop('labels', ('FE', 'Exact', 'Diff.'))
+        labels = kwargs.pop('labels', ['' for i in range(len(self.grids))])
         show_edges = kwargs.pop('show_edges', True)
         cmap = kwargs.pop('cmap', plt.cm.get_cmap("viridis", 25))
         sargs = dict(title_font_size=25, label_font_size=20, fmt="%.2e", color="black", position_x=0.1, position_y=0.8, width=0.8, height=0.1)
@@ -77,7 +81,7 @@ class CustomVectorPlotter(pyvista.Plotter):
 
         if len(self.grids)>1: self.subplot(0) #resets the focus to first subplot
 
-    def update_vectors(self, all_vectors, render=True):
+    def update_vectors(self, *all_vectors, render=True):
         for i, (grid, u_) in enumerate(zip(self.grids, all_vectors)):
             nbpts = grid.number_of_points
             z0s = np.zeros((nbpts, 1), dtype=u_.dtype)
@@ -87,5 +91,4 @@ class CustomVectorPlotter(pyvista.Plotter):
             super().update_scalars(np.linalg.norm(u_.reshape((nbpts, 2)), axis=1), mesh=grid.warped, render=False)
         if render:
             self.render()
-
 
