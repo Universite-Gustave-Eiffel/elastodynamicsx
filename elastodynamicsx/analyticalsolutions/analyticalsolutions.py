@@ -53,8 +53,10 @@ def green_2D_PSV_xw(x, w, rho=1, lambda_=2, mu=1): #TODO
     c_P = np.sqrt((lambda_+2*mu)/rho)#P-wave velocity   
     c_S = np.sqrt(mu/rho) #S-wave velocity
     r = np.linalg.norm(x, axis=1)# np.sqrt(x[:,0]**2+x[:,1]**2)
-    Psi=1J/4*((hankel2(1, supW(w*r/c_S))/c_S-(c_S/c_P)**2*hankel2(1, supW(w*r/c_P))/c_P)-hankel2(1, supW(w*r/c_S)))
-    Chi=1J/4*((c_S/c_P)**2*hankel2(2, supW(w*r/c_P))-hankel2(2, supW(w*r/c_S)))
+    o_P = w*r/c_P
+    o_S = w*r/c_S
+    Psi=1J/4*( (hankel2(1, o_S)/o_S - (c_S/c_P)**2*hankel2(1, o_P)/o_P) - hankel2(0, o_S))
+    Chi=1J/4*( (c_S/c_P)**2*hankel2(2, o_P) - hankel2(2, o_S) )
     green_xw[:,0,0,:]=1/mu*(Psi+Chi*(x[:,0]/r)**2)
     green_xw[:,0,1,:]=1/mu*(Chi*(x[:,0]/r)*(x[:,1]/r))
     green_xw[:,1,0,:]=green_xw[:,0,1,:]
