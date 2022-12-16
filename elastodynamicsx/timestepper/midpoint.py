@@ -1,10 +1,11 @@
 from dolfinx import fem
+from petsc4py import PETSc
 import ufl
 
 from .timestepper import TimeStepper
 
 
-class MidPoint(TimeStepper):
+class MidPoint_old(TimeStepper):
     """
     Implementation of the 'midpoint' time-stepping scheme, or Average constant acceleration.
     Midpoint is a special case of Newmark-beta methods with beta=0.25 and gamma=0.5 and is unconditionally stable.
@@ -25,6 +26,8 @@ class MidPoint(TimeStepper):
         function_space: the Finite Element functionnal space
         bcs: the set of boundary conditions
         """
+        dt_  = fem.Constant(function_space.mesh, PETSc.ScalarType(dt))
+        four = fem.Constant(function_space.mesh, PETSc.ScalarType(4))
         #
         u, v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
         #
@@ -35,8 +38,8 @@ class MidPoint(TimeStepper):
         self.u_n_bar = fem.Function(function_space) #u_bar(t) = u + dt*u' + dt**2/4 * u''
 
         #
-        self.__a = 4*a_tt(u,v) + dt*dt*a_xx(u, v)
-        self.__L = dt*dt*L(v) + 4*a_tt(self.u_n_bar,v)
+        self.__a = four*a_tt(u,v) + dt_*dt_*a_xx(u, v)
+        self.__L = dt_*dt_*L(v) + four*a_tt(self.u_n_bar,v)
         self.bilinear_form = fem.form(self.__a)
         self.linear_form   = fem.form(self.__L)
         #
@@ -57,12 +60,12 @@ class MidPoint(TimeStepper):
         self.ddu_n.x.array[:] = u.x.array #faux
         self.du_n.x.array[:] = u.x.array #faux
         self.u_n.x.array[:] = u.x.array #faux
-    
+
     def prepareNextIteration(self):
         """Next-time-step function, to prepare next iteration -> Call it after solving"""
-        X_ = self.u_n.function_space.element.interpolation_points #version 0.5 -> X_ = V.element.interpolation_points()
+        dt = self.dt
         self.ddu_nm1.x.array[:] = self.ddu_n.x.array
-        self.ddu_n.interpolate( fem.Expression(4/(self.dt*self.dt)*(self.u_n - self.u_n_bar), X_) )
-        self.du_n.interpolate( fem.Expression(self.du_n + 0.5*self.dt*(self.ddu_n + self.ddu_nm1), X_) )
-        self.u_n_bar.interpolate( fem.Expression(self.u_n + self.dt*self.du_n + 0.25*self.dt*self.dt*self.ddu_n, X_) )
+        self.ddu_n.x.array[:]   = 4/(dt*dt)*(self.u_n.x.array - self.u_n_bar.x.array)
+        self.du_n.x.array[:]    = self.du_n.x.array + 0.5*dt*(self.ddu_n.x.array + self.ddu_nm1.x.array)
+        self.u_n_bar.x.array[:] = self.u_n.x.array  + dt*self.du_n.x.array + 0.25*dt*dt*self.ddu_n.x.array
 

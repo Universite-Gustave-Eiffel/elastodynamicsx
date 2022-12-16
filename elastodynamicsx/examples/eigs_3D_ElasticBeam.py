@@ -1,4 +1,6 @@
 """
+Eigenmodes
+
 Free resonances of a beam clamped at one end, compared against beam theory
 
 adapted from (legacy Fenics): https://comet-fenics.readthedocs.io/en/latest/demo/modal_analysis_dynamics/cantilever_modal.html

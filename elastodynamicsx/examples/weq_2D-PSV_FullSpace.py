@@ -1,7 +1,8 @@
-#documentation: TODO
+"""
+Wave equation (time-domain)
 
-#TODO: source en Hann plutot que rect
-#TODO: tenir compte de la taille de la source dans formule anal
+Propagation of P and SV elastic waves in a 2D, homogeneous isotropic solid, and comparison with an analytical solution
+"""
 
 import time
 from dolfinx import mesh, fem
@@ -48,7 +49,6 @@ lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
 #
 X0_src = np.array([length/2,height/2,0]) #center
 R0_src = 0.1 #radius
-nrm   = 1/(np.pi*R0_src**2) #normalize to int[src_x(x) dx]=1
 #
 ### Gaussian function
 nrm   = 1/(2*np.pi*R0_src**2) #normalize to int[src_x(x) dx]=1
@@ -123,7 +123,6 @@ F_body.interpolate(F_body_function(tstart))
 #  Variational problem
 tStepper = TimeStepper.build(a_tt, a_xx, L, dt, V, [], scheme='leapfrog')
 tStepper.initial_condition(u0, v0, t0=tstart)
-u_n = tStepper.u_n
 #
 # -----------------------------------------------------
 
@@ -174,6 +173,7 @@ tStepper.run(num_steps, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFu
 # -----------------------------------------------------
 if storeAllSteps: #add a slider to browse through all time steps
     ### -> Exact solution, Full field
+    u_n = tStepper.u_n
     x = u_n.function_space.tabulate_dof_coordinates()
     all_u_n_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], np.roll(src_t(dt*np.arange(num_steps)), -2), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
     #

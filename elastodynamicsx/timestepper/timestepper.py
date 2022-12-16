@@ -30,6 +30,10 @@ class TimeStepper:
         scheme = kwargs.pop('scheme', 'unknown')
         if   scheme.lower() == 'leapfrog': return LeapFrog(*args, **kwargs) #args = (a_tt, a_xx, L, dt, V, bcs=[])
         elif scheme.lower() == 'midpoint': return MidPoint(*args, **kwargs) #args = (a_tt, a_xx, L, dt, V, bcs=[])
+        elif scheme.lower() == 'newmark' : return NewmarkBeta(*args, **kwargs) #args = (a_tt, a_xx, L, dt, V, bcs=[], gamma=0.5, beta=0.25)
+        elif scheme.lower() == 'newmark-beta': return NewmarkBeta(*args, **kwargs) #args = (a_tt, a_xx, L, dt, V, bcs=[], gamma=0.5, beta=0.25)
+        elif scheme.lower() == 'g-a-newmark' : return GalphaNewmarkBeta(*args, **kwargs) #args = (a_tt, a_xx, L, dt, V, bcs=[], alpha_m=0, alpha_f=0, gamma=0.5, beta=0.25)
+        elif scheme.lower() == 'midpoint-old': return MidPoint_old(*args, **kwargs) #args = (a_tt, a_xx, L, dt, V, bcs=[])
         else:                              print('TODO')
 
     def __init__(self, dt, bcs=[], **kwargs):
@@ -91,10 +95,19 @@ class TimeStepper:
         **kwargs: important optional parameters are 'callfirsts' and 'callbacks'
            callfirsts: (default=[]) list of functions to be called at the beginning of each iteration (before solving). For instance: update a source term.
                        Each callfirst if of the form: cf = lambda i, timestepper: do_something; where i is the iteration index and timestepper is the timestepper being run
-           callbacks: (detault=[]) similar to callfirsts, but the callbacks are called at the end of each iteration (after solving). For instance: store/save, plot, print, ...
+           callbacks:  (detault=[]) similar to callfirsts, but the callbacks are called at the end of each iteration (after solving). For instance: store/save, plot, print, ...
                        Each callback if of the form: cb = lambda i, timestepper: do_something; where i is the iteration index and timestepper is the timestepper being run
+           -- other optional parameters --
+           live_plotter: (default=None) setting live_plotter={...} will forward these parameters to 'set_live_plotter' (see documentation)
+           verbose     : (default=0) verbosity level. >9 means an info msg before each step
         """
         ###
+        verbose = kwargs.get('verbose', 0)
+        
+        if not kwargs.get('live_plotter', None) is None:
+            if verbose >= 10: PETSc.Sys.Print('Initializing live plotter...')
+            self.set_live_plotter(**kwargs.get('live_plotter'))
+        
         callfirsts = kwargs.get('callfirsts', [lambda i, tStepper: 1]) + self.callfirsts
         callbacks  = kwargs.get('callbacks',  [lambda i, tStepper: 1]) + self.callbacks
         
@@ -104,25 +117,31 @@ class TimeStepper:
         for i in tqdm(range(num_steps)):
             self.t_n += self.dt
             
+            if verbose >= 10: PETSc.Sys.Print('Callfirsts...')
             for callfirst in callfirsts: callfirst(i, self) #<- update stuff #F_body.interpolate(F_body_function(t_n))
 
             # Update the right hand side reusing the initial vector
+            if verbose >= 10: PETSc.Sys.Print('Update the right hand side reusing the initial vector...')
             with self.b.localForm() as loc_b:
                 loc_b.set(0)
             fem.petsc.assemble_vector(self.b, self.linear_form)
             
             # Apply Dirichlet boundary condition to the vector // even without Dirichlet BC this is important for parallel computing
+            if verbose >= 10: PETSc.Sys.Print('Applying BCs and ghostUpdate...')
             fem.petsc.apply_lifting(self.b, [self.bilinear_form], [self.bcs])
             self.b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)
             fem.petsc.set_bc(self.b, self.bcs)
 
             # Solve linear problem
+            if verbose >= 10: PETSc.Sys.Print('Solving...')
             self.solver.solve(self.b, self.u_n.vector)
             self.u_n.x.scatter_forward()
             
             #
+            if verbose >= 10: PETSc.Sys.Print('Time-stepping for next iteration...')
             self.prepareNextIteration()
             
+            if verbose >= 10: PETSc.Sys.Print('Callbacks...')
             for callback in callbacks: callback(i, self) #<- store solution, plot, print, ...
 
     def set_live_plotter(self, live_plotter_step=1, **kwargs):
@@ -150,5 +169,6 @@ class TimeStepper:
 # Import subclasses -- must be done at the end to avoid loop imports
 # -----------------------------------------------------
 from .leapfrog import LeapFrog
-from .midpoint import MidPoint
+from .midpoint import MidPoint_old
+from .newmark  import GalphaNewmarkBeta, NewmarkBeta, MidPoint
 

@@ -8,6 +8,8 @@ import ufl
 import numpy as np
 import pyvista
 
+from elastodynamicsx.plotting import get_3D_array_from_FEFunction
+
 class ElasticResonanceSolver(SLEPc.EPS):
     """
     Convenience class inhereted from SLEPc.EPS, with default parameters and convenience methods that are relevant for computing the resonances of an elastic component.
@@ -125,12 +127,8 @@ class ElasticResonanceSolver(SLEPc.EPS):
         #
         topology, cell_types, geom = plot.create_vtk_mesh(self.function_space)
         grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
-        nbcomps = eigenmodes[0].x.array.size // geom.shape[0] #number of components
-        if nbcomps < 3:
-            z0s = np.zeros((geom.shape[0], 3-nbcomps), dtype=eigenmodes[0].x.array.dtype)
         for i, eigM in zip(indexes, eigenmodes):
-            if nbcomps == 3: grid['eigenmode_'+str(i)] = eigM.x.array.reshape((geom.shape[0], 3)) #ok if 3D. not ok if 2D.
-            else:            grid['eigenmode_'+str(i)] = np.append(eigM.x.array.reshape((geom.shape[0], nbcomps)), z0s, axis=1)
+            grid['eigenmode_'+str(i)] = get_3D_array_from_FEFunction(eigM)
         #
         nbcols = int(np.ceil(np.sqrt(indexes.size)))
         nbrows = int(np.ceil(indexes.size/nbcols))

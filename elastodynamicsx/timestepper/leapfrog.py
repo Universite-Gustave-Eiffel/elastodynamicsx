@@ -1,4 +1,5 @@
 from dolfinx import fem
+from petsc4py import PETSc
 import ufl
 
 from .timestepper import TimeStepper
@@ -25,6 +26,8 @@ class LeapFrog(TimeStepper):
         function_space: the Finite Element functionnal space
         bcs: the set of boundary conditions
         """
+        dt_  = fem.Constant(function_space.mesh, PETSc.ScalarType(dt))
+        two  = fem.Constant(function_space.mesh, PETSc.ScalarType(2))
         #
         u, v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
         #
@@ -33,7 +36,7 @@ class LeapFrog(TimeStepper):
         self.__u_nm2 = fem.Function(function_space)           #u(t-2*dt)
         #
         self.__a = a_tt(u,v)
-        self.__L = dt*dt*L(v) - dt*dt*a_xx(self.__u_nm1, v) + 2*a_tt(self.__u_nm1,v) - a_tt(self.__u_nm2,v)
+        self.__L = dt_*dt_*L(v) - dt_*dt_*a_xx(self.__u_nm1, v) + two*a_tt(self.__u_nm1,v) - a_tt(self.__u_nm2,v)
         self.bilinear_form = fem.form(self.__a)
         self.linear_form   = fem.form(self.__L)
         #

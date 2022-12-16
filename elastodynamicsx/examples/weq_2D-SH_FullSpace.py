@@ -1,7 +1,8 @@
-#documentation: TODO
+"""
+Wave equation (time-domain)
 
-#TODO: source en Hann plutot que rect
-#TODO: tenir compte de la taille de la source dans formule anal
+Propagation of SH elastic waves in a 2D, homogeneous isotropic solid, and comparison with an analytical solution
+"""
 
 import time
 from dolfinx import mesh, fem
@@ -120,7 +121,6 @@ F_body.interpolate(F_body_function(tstart))
 #  Variational problem
 tStepper = TimeStepper.build(a_tt, a_xx, L, dt, V, [], scheme='leapfrog')
 tStepper.initial_condition(u0, v0, t0=tstart)
-u_n = tStepper.u_n
 #
 # -----------------------------------------------------
 
@@ -170,6 +170,7 @@ tStepper.run(num_steps, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFu
 # -----------------------------------------------------
 if storeAllSteps: #plotter with a slider to browse through all time steps
     ### -> Exact solution, Full field
+    u_n = tStepper.u_n
     x = u_n.function_space.tabulate_dof_coordinates()
     r = np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)
     all_u_n_exact = u_2D_SH_rt(r, np.roll(src_t(dt*np.arange(num_steps)), -2), rho.value, mu.value, dt, fn_kdomain_finite_size)
