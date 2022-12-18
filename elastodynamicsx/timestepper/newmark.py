@@ -9,16 +9,16 @@ class GalphaNewmarkBeta(TimeStepper):
     """
     Implementation of the 'g-a-newmark' (Generalized-alpha Newmark) time-stepping scheme, for beta>0. The special case beta=0 is implemented in the LeapFrog class.
     implementation adapted from: https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html
-    
-    /!\ DOES NOT WORK YET IN THE GENERAL CASE, FOR alpha_m, alpha_f > 0 /!\
 
     implicit/explicit? implicit
     accuracy: second-order
     """
-    def __init__(self, m_, k_, L, dt, function_space, bcs=[], **kwargs):
+    def __init__(self, m_, c_, k_, L, dt, function_space, bcs=[], **kwargs):
         """
         m_: function(u,v) that returns the ufl expression of the bilinear form with second derivative on time
                -> usually: m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
+        c_: function(u,v) that returns the ufl expression of the bilinear form with a first derivative on time (damping form)
+               -> for Rayleigh damping: c_ = lambda u,v: eta_m * m_(u,v) + eta_k * k_(u,v)
         k_: function(u,v) that returns the ufl expression of the bilinear form with no derivative on time
                -> used to build the stiffness matrix
                -> usually: k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
@@ -31,14 +31,13 @@ class GalphaNewmarkBeta(TimeStepper):
             gamma: (default = 1/2)
             beta:  (default = 1/4*(gamma+1/2)**2)
         """
-        c_ = lambda u,v: 0 #TODO
-        
         alpha_m = kwargs.get('alpha_m', 0)
         alpha_f = kwargs.get('alpha_f', 0)
         gamma   = kwargs.get('gamma', 1/2 - alpha_m + alpha_f)
         beta    = kwargs.get('beta', 1/4*(gamma+1/2)**2)
         
         self.alpha_m, self.alpha_f, self.gamma, self.beta = alpha_m, alpha_f, gamma, beta
+        self.__intermediate_dt = self.alpha_f
         
         const = lambda c: fem.Constant(function_space.mesh, PETSc.ScalarType(c))
         c1, c2, c3 = const(dt*gamma*(1-alpha_f)/beta), const(dt**2*(1 - (gamma-alpha_f)/beta)), const(dt**3*(1-alpha_f)*(1-gamma/2/beta))
@@ -58,29 +57,29 @@ class GalphaNewmarkBeta(TimeStepper):
 
         #
         self.__a = m1*m_(u,v) + c1*c_(u,v) + dt_*dt_*const(1-alpha_f)*k_(u,v)
-        self.__L = dt_*dt_*L(v) - const(alpha_f)*k_(self.__u_nm1, v) \
+        self.__L = dt_*dt_*L(v) - const(dt*dt*alpha_f)*k_(self.__u_nm1, v) \
                    + c1*c_(self.__u_nm1, v) + c2*c_(self.__v_nm1, v) - c3*c_(self.__a_nm1, v) \
                    + m1*m_(self.__u_nm1, v) + m2*m_(self.__v_nm1, v) - m3*m_(self.__a_nm1, v)
-        
+
         self.bilinear_form = fem.form(self.__a)
         self.linear_form   = fem.form(self.__L)
         #
         super().__init__(dt, bcs, **kwargs)
 
-    def initial_condition(self, u, du, t0=0):
+    def initial_condition(self, u0, v0, t0=0):
         ###
         """
         Apply initial conditions
         
-        u: u at t0
-        du: du/dt at t0
+        u0: u at t0
+        v0: du/dt at t0
         t0: start time (default: 0)
         """
         self.t_n = t0
-        self.__u_nm1.x.array[:] = u.x.array
-        #self.u_n.x.array[:]     = u.x.array #not necessary
-        self.v_n.x.array[:]     = du.x.array
-        self.a_n.x.array[:]     = du.x.array #faux, TODO
+        self.__u_nm1.x.array[:] = u0.x.array
+        #self.u_n.x.array[:]     = u0.x.array #not necessary
+        self.v_n.x.array[:]     = v0.x.array
+        self.a_n.x.array[:]     = v0.x.array #faux, TODO
 
     def prepareNextIteration(self):
         """Next-time-step function, to prepare next iteration -> Call it after solving"""

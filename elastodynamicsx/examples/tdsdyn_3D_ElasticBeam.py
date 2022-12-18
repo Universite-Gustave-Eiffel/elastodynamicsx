@@ -57,8 +57,8 @@ lambda_ = fem.Constant(domain, PETSc.ScalarType(lambda_))
 mu      = fem.Constant(domain, PETSc.ScalarType(mu))
 
 # Rayleigh damping coefficients
-eta_m = fem.Constant(domain, PETSc.ScalarType(0.))
-eta_k = fem.Constant(domain, PETSc.ScalarType(0.))
+eta_m = fem.Constant(domain, PETSc.ScalarType(0.01))
+eta_k = fem.Constant(domain, PETSc.ScalarType(0.01))
 #
 # -----------------------------------------------------
 
@@ -100,6 +100,7 @@ def sigma(u): return lambda_ * ufl.nabla_div(u) * ufl.Identity(u.geometric_dimen
 
 m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
 k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
+c_ = lambda u,v: eta_m*m_(u,v) + eta_k*k_(u,v)
 L  = lambda v  : ufl.dot(F_body, v) * ufl.dx   +   ufl.dot(T_N, v) * ufl.ds
 ###
 
@@ -113,14 +114,15 @@ T_N.interpolate(T_N_function(0))
 ###
 
 # Generalized-alpha method parameters
-alpha_m = 0.
-alpha_f = 0.
+alpha_m = 0.2
+alpha_f = 0.4
 #gamma   = fem.Constant(domain, PETSc.ScalarType(0.5+alpha_f-alpha_m))
 #beta    = fem.Constant(domain, PETSc.ScalarType((gamma+0.5)**2/4.))
 
 #  Variational problem
-tStepper = TimeStepper.build(m_, k_, L, dt, V, bcs=[bc_l], scheme='midpoint', alpha_m=alpha_m, alpha_f=alpha_f)
+tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, bcs=[bc_l], scheme='g-a-newmark', alpha_m=alpha_m, alpha_f=alpha_f)
 tStepper.initial_condition(u0, v0, t0=0)
+#tStepper.solver.view()
 #
 # -----------------------------------------------------
 
@@ -144,26 +146,27 @@ E_damp   = 0
 #                       Solve
 # -----------------------------------------------------
 ### define callfirsts and callbacks
-def cfst_updateSources(i, tStepper):
-    T_N.interpolate(T_N_function(tStepper.t_n - alpha_f))
+def cfst_updateSources(t, tStepper):
+    T_N.interpolate(T_N_function(t))
 
 def cbck_storeAtPoints(i, tStepper):
-    if len(points_output_on_proc)>0: signals_at_points[:,:,i] = tStepper.u_n.eval(points_output_on_proc, cells_output_on_proc)
+    if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = tStepper.u_n.eval(points_output_on_proc, cells_output_on_proc)
 
 def cbck_energies(i, tStepper):
+    global E_damp
     u_n = tStepper.u_n
     v_n = tStepper.v_n
     E_elas = domain.comm.allreduce( fem.assemble_scalar(fem.form( 1/2* k_(u_n, u_n) )) , op=MPI.SUM)
     E_kin  = domain.comm.allreduce( fem.assemble_scalar(fem.form( 1/2* m_(v_n, v_n) )) , op=MPI.SUM)
-    #E_damp+= dt*0 #domain.comm.allreduce( fem.assemble_scalar(fem.form( c_(v_n, v_n) )) , op=MPI.SUM) #TODO!
+    E_damp+= dt*domain.comm.allreduce( fem.assemble_scalar(fem.form( c_(v_n, v_n) )) , op=MPI.SUM)
     E_tot  = E_elas + E_kin + E_damp
-    energies[i,:] = np.array([E_elas, E_kin, E_damp, E_tot])
+    energies[i+1,:] = np.array([E_elas, E_kin, E_damp, E_tot])
 
 ### live plotting params
 clim = 0.4 * L_*B_*H_/(E*B_*H_**3/12) * np.amax(F_0)*np.array([0, 1])
 
 ### Run the big time loop!
-tStepper.run(Nsteps, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints, cbck_energies], live_plotter={'live_plotter_step':1, 'clim':clim})
+tStepper.run(Nsteps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints, cbck_energies], live_plotter={'live_plotter_step':1, 'clim':clim})
 ### End of big calc.
 #
 # -----------------------------------------------------

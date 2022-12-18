@@ -28,17 +28,16 @@ class TimeStepper:
            scheme: available options are: 'leapfrog', 'midpoint'
         """
         scheme = kwargs.pop('scheme', 'unknown')
-        if   scheme.lower() == 'leapfrog': return LeapFrog(*args, **kwargs) #args = (a_tt, a_xx, L, dt, V, bcs=[])
-        elif scheme.lower() == 'midpoint': return MidPoint(*args, **kwargs) #args = (a_tt, a_xx, L, dt, V, bcs=[])
-        elif scheme.lower() == 'newmark' : return NewmarkBeta(*args, **kwargs) #args = (a_tt, a_xx, L, dt, V, bcs=[], gamma=0.5, beta=0.25)
-        elif scheme.lower() == 'newmark-beta': return NewmarkBeta(*args, **kwargs) #args = (a_tt, a_xx, L, dt, V, bcs=[], gamma=0.5, beta=0.25)
-        elif scheme.lower() == 'g-a-newmark' : return GalphaNewmarkBeta(*args, **kwargs) #args = (a_tt, a_xx, L, dt, V, bcs=[], alpha_m=0, alpha_f=0, gamma=0.5, beta=0.25)
-        elif scheme.lower() == 'midpoint-old': return MidPoint_old(*args, **kwargs) #args = (a_tt, a_xx, L, dt, V, bcs=[])
+        if   scheme.lower() == 'leapfrog': return LeapFrog(*args, **kwargs) #args = (m_, k_, L, dt, V, bcs=[])
+        elif scheme.lower() == 'midpoint': return MidPoint(*args, **kwargs) #args = (m_, k_, L, dt, V, bcs=[])
+        elif scheme.lower() in ['newmark', 'newmark-beta'] : return NewmarkBeta(*args, **kwargs) #args = (m_, k_, L, dt, V, bcs=[], gamma=0.5, beta=0.25)
+        elif scheme.lower() == 'g-a-newmark' : return GalphaNewmarkBeta(*args, **kwargs) #args = (m_, k_, L, dt, V, bcs=[], alpha_m=0, alpha_f=0, gamma=0.5, beta=0.25)
         else:                              print('TODO')
 
     def __init__(self, dt, bcs=[], **kwargs):
         #
         self.t_n = 0
+        self.__intermediate_dt = 0
         self.dt  = dt
         self.bcs = bcs
         #
@@ -94,7 +93,7 @@ class TimeStepper:
         num_steps: number of time steps to integrate
         **kwargs: important optional parameters are 'callfirsts' and 'callbacks'
            callfirsts: (default=[]) list of functions to be called at the beginning of each iteration (before solving). For instance: update a source term.
-                       Each callfirst if of the form: cf = lambda i, timestepper: do_something; where i is the iteration index and timestepper is the timestepper being run
+                       Each callfirst if of the form: cf = lambda t, timestepper: do_something; where t is the time at which to evaluate the sources and timestepper is the timestepper being run
            callbacks:  (detault=[]) similar to callfirsts, but the callbacks are called at the end of each iteration (after solving). For instance: store/save, plot, print, ...
                        Each callback if of the form: cb = lambda i, timestepper: do_something; where i is the iteration index and timestepper is the timestepper being run
            -- other optional parameters --
@@ -108,7 +107,7 @@ class TimeStepper:
             if verbose >= 10: PETSc.Sys.Print('Initializing live plotter...')
             self.set_live_plotter(**kwargs.get('live_plotter'))
         
-        callfirsts = kwargs.get('callfirsts', [lambda i, tStepper: 1]) + self.callfirsts
+        callfirsts = kwargs.get('callfirsts', [lambda t, tStepper: 1]) + self.callfirsts
         callbacks  = kwargs.get('callbacks',  [lambda i, tStepper: 1]) + self.callbacks
         
         if self.live_plotter_step > 0:
@@ -118,7 +117,7 @@ class TimeStepper:
             self.t_n += self.dt
             
             if verbose >= 10: PETSc.Sys.Print('Callfirsts...')
-            for callfirst in callfirsts: callfirst(i, self) #<- update stuff #F_body.interpolate(F_body_function(t_n))
+            for callfirst in callfirsts: callfirst(self.t_n - self.dt*self.__intermediate_dt, self) #<- update stuff #F_body.interpolate(F_body_function(t_n))
 
             # Update the right hand side reusing the initial vector
             if verbose >= 10: PETSc.Sys.Print('Update the right hand side reusing the initial vector...')
@@ -169,6 +168,5 @@ class TimeStepper:
 # Import subclasses -- must be done at the end to avoid loop imports
 # -----------------------------------------------------
 from .leapfrog import LeapFrog
-from .midpoint import MidPoint_old
 from .newmark  import GalphaNewmarkBeta, NewmarkBeta, MidPoint
 
