@@ -3,7 +3,7 @@ ElastodynamiCSx is dedicated to the numerical modeling of wave propagation in so
 
 The module provides high level classes to solve common problems in a few lines code:
   * Time-domain problems, using the *TimeStepper* class
-    * Implemented time-stepping schemes: (explicit) *LeapFrog*, (implicit) *MidPoint*
+    * Schemes: (explicit) *LeapFrog*, (implicit) *MidPoint*, *NewmarkBeta*, *GalphaNewmarkBeta*
   * Eigenmodes problems, using the *ElasticResonanceSolver* class
 
 GitHub repository:
@@ -36,6 +36,8 @@ Several examples are provided in the **examples** subfolder:
   * Wave equation, time domain:
     * (2D) homogeneous space, anti-plane line load (SH waves): *weq_2D-SH_FullSpace.py*
     * (2D) homogeneous space, in-plane line load (P-SV waves): *weq_2D-PSV_FullSpace.py*
+  * Structural dynamics, time domain:
+    * (3D) forced vibration of an elastic beam clamped at one end; with Rayleigh damping: *tdsdyn_3D_ElasticBeam.py*
   * Eigenmodes:
     * (3D) resonances of an elastic beam clamped at one end: *eigs_3D_ElasticBeam.py*
     * (3D) resonances of an aluminum cube: *eigs_3D_AluminumCube.py*
