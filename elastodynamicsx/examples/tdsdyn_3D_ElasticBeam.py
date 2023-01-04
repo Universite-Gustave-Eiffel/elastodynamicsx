@@ -150,12 +150,12 @@ def cfst_updateSources(t, tStepper):
     T_N.interpolate(T_N_function(t))
 
 def cbck_storeAtPoints(i, tStepper):
-    if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = tStepper.u_n.eval(points_output_on_proc, cells_output_on_proc)
+    if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = tStepper.u.eval(points_output_on_proc, cells_output_on_proc)
 
 def cbck_energies(i, tStepper):
     global E_damp
-    u_n = tStepper.u_n
-    v_n = tStepper.v_n
+    u_n = tStepper.u
+    v_n = tStepper.v
     E_elas = domain.comm.allreduce( fem.assemble_scalar(fem.form( 1/2* k_(u_n, u_n) )) , op=MPI.SUM)
     E_kin  = domain.comm.allreduce( fem.assemble_scalar(fem.form( 1/2* m_(v_n, v_n) )) , op=MPI.SUM)
     E_damp+= dt*domain.comm.allreduce( fem.assemble_scalar(fem.form( c_(v_n, v_n) )) , op=MPI.SUM)

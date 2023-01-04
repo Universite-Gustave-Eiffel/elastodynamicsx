@@ -3,7 +3,7 @@ ElastodynamiCSx is dedicated to the numerical modeling of wave propagation in so
 
 The module provides high level classes to solve common problems in a few lines code:
   * Time-domain problems, using the *TimeStepper* class
-    * Schemes: (explicit) *LeapFrog*, (implicit) *MidPoint*, *NewmarkBeta*, *GalphaNewmarkBeta*
+    * Schemes: (explicit) *leap frog*, (implicit) *midpoint*, *linear acceleration*, *Newmark-beta*, *HHT-alpha*, *generalized-alpha*
   * Eigenmodes problems, using the *ElasticResonanceSolver* class
 
 GitHub repository:

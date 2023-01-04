@@ -14,9 +14,9 @@ import pyvista
 import matplotlib.pyplot as plt
 
 from elastodynamicsx.timestepper import TimeStepper
-from elastodynamicsx.plotting import CustomVectorPlotter
+from elastodynamicsx.plot import CustomVectorPlotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc
-from elastodynamicsx.analyticalsolutions import u_2D_PSV_rt, int_Fraunhofer_2D
+from elastodynamicsx.examples.analyticalsolutions import u_2D_PSV_rt, int_Fraunhofer_2D
 
 # -----------------------------------------------------
 #                     FE domain
@@ -106,9 +106,10 @@ T_N    = fem.Constant(domain, PETSc.ScalarType((0,0))) #normal traction (Neumann
 def epsilon(u): return ufl.sym(ufl.grad(u))
 def sigma(u): return lambda_ * ufl.nabla_div(u) * ufl.Identity(u.geometric_dimension()) + 2*mu*epsilon(u)
 
-a_tt = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
-a_xx = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
-L    = lambda v  : ufl.dot(F_body, v) * ufl.dx   +   ufl.dot(T_N, v) * ufl.ds
+m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
+c_ = None
+k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
+L  = lambda v  : ufl.dot(F_body, v) * ufl.dx   +   ufl.dot(T_N, v) * ufl.ds
 ###
 
 ###
@@ -121,7 +122,7 @@ F_body.interpolate(F_body_function(tstart))
 ###
 
 #  Variational problem
-tStepper = TimeStepper.build(a_tt, a_xx, L, dt, V, [], scheme='leapfrog')
+tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, [], scheme='leapfrog')
 tStepper.initial_condition(u0, v0, t0=tstart)
 #
 # -----------------------------------------------------
@@ -146,13 +147,13 @@ signals_at_points = np.zeros((points_output.shape[1], domain.topology.dim, num_s
 #                       Solve
 # -----------------------------------------------------
 ### define callfirsts and callbacks
-def cfst_updateSources(i, tStepper):
-    F_body.interpolate(F_body_function(tStepper.t_n))
+def cfst_updateSources(t, tStepper):
+    F_body.interpolate(F_body_function(t))
 
 def cbck_storeFullField(i, tStepper):
-    if storeAllSteps: all_u[i].x.array[:] = tStepper.u_n.x.array
+    if storeAllSteps: all_u[i].x.array[:] = tStepper.u.x.array
 def cbck_storeAtPoints(i, tStepper):
-    if len(points_output_on_proc)>0: signals_at_points[:,:,i] = tStepper.u_n.eval(points_output_on_proc, cells_output_on_proc)
+    if len(points_output_on_proc)>0: signals_at_points[:,:,i] = tStepper.u.eval(points_output_on_proc, cells_output_on_proc)
 
 ### enable live plotting
 clim = 0.1*np.amax(F_0)*np.array([0, 1])
@@ -173,7 +174,7 @@ tStepper.run(num_steps, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFu
 # -----------------------------------------------------
 if storeAllSteps: #add a slider to browse through all time steps
     ### -> Exact solution, Full field
-    u_n = tStepper.u_n
+    u_n = tStepper.u
     x = u_n.function_space.tabulate_dof_coordinates()
     all_u_n_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], np.roll(src_t(dt*np.arange(num_steps)), -2), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
     #

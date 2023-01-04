@@ -8,7 +8,7 @@ import ufl
 import numpy as np
 import pyvista
 
-from elastodynamicsx.plotting import get_3D_array_from_FEFunction
+from elastodynamicsx.plot import get_3D_array_from_FEFunction
 
 class ElasticResonanceSolver(SLEPc.EPS):
     """
