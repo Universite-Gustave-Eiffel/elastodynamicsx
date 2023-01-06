@@ -13,9 +13,10 @@ import numpy as np
 import pyvista
 import matplotlib.pyplot as plt
 
+from elastodynamicsx.pde import BoundaryCondition
 from elastodynamicsx.timestepper import TimeStepper
 from elastodynamicsx.plot import CustomVectorPlotter
-from elastodynamicsx.utils import find_points_and_cells_on_proc
+from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
 from elastodynamicsx.examples.analyticalsolutions import u_2D_PSV_rt, int_Fraunhofer_2D
 
 # -----------------------------------------------------
@@ -25,6 +26,11 @@ length, height = 10, 10
 Nx, Ny = 100, 100
 extent = [[0., 0.], [length, height]]
 domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny])
+boundaries = [(1, lambda x: np.isclose(x[0], 0     )),\
+              (2, lambda x: np.isclose(x[0], length)),\
+              (3, lambda x: np.isclose(x[1], 0     )),\
+              (4, lambda x: np.isclose(x[1], height))]
+facet_tags = make_facet_tags(domain, boundaries)
 #
 V_scalar = fem.FunctionSpace(domain, ("CG", 2))
 V = fem.VectorFunctionSpace(domain, ("CG", 2))
@@ -38,6 +44,19 @@ V = fem.VectorFunctionSpace(domain, ("CG", 2))
 rho     = fem.Constant(domain, PETSc.ScalarType(1))
 mu      = fem.Constant(domain, PETSc.ScalarType(1))
 lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
+#
+# -----------------------------------------------------
+
+
+# -----------------------------------------------------
+#                 Boundary conditions
+# -----------------------------------------------------
+Z_N, Z_T = ufl.sqrt(rho*(lambda_+2*mu)), ufl.sqrt(rho*mu) #P and S mechanical impedances
+bc_l = BoundaryCondition(V, facet_tags, 'td-Dashpot', 1, (Z_N, Z_T))
+bc_r = BoundaryCondition(V, facet_tags, 'td-Dashpot', 2, (Z_N, Z_T))
+bc_b = BoundaryCondition(V, facet_tags, 'td-Dashpot', 3, (Z_N, Z_T))
+bc_t = BoundaryCondition(V, facet_tags, 'td-Dashpot', 4, (Z_N, Z_T))
+bcs = [bc_l, bc_r, bc_b, bc_t]
 #
 # -----------------------------------------------------
 
@@ -99,9 +118,8 @@ print('CFL condition: Courant number = ', round(C_CFL, 2))
 # -----------------------------------------------------
 #                        PDE
 # -----------------------------------------------------
-### Body force 'F_body' and normal traction 'T_N'
+### Body force 'F_body'
 F_body = fem.Function(V) #body force
-T_N    = fem.Constant(domain, PETSc.ScalarType((0,0))) #normal traction (Neumann boundary condition)
 
 def epsilon(u): return ufl.sym(ufl.grad(u))
 def sigma(u): return lambda_ * ufl.nabla_div(u) * ufl.Identity(u.geometric_dimension()) + 2*mu*epsilon(u)
@@ -109,7 +127,7 @@ def sigma(u): return lambda_ * ufl.nabla_div(u) * ufl.Identity(u.geometric_dimen
 m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
 c_ = None
 k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
-L  = lambda v  : ufl.dot(F_body, v) * ufl.dx   +   ufl.dot(T_N, v) * ufl.ds
+L  = lambda v  : ufl.dot(F_body, v) * ufl.dx
 ###
 
 ###
@@ -122,7 +140,7 @@ F_body.interpolate(F_body_function(tstart))
 ###
 
 #  Variational problem
-tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, [], scheme='leapfrog')
+tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, bcs=bcs, scheme='leapfrog')
 tStepper.initial_condition(u0, v0, t0=tstart)
 #
 # -----------------------------------------------------

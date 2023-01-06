@@ -13,8 +13,9 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
+from elastodynamicsx.pde import BoundaryCondition
 from elastodynamicsx.timestepper import TimeStepper
-from elastodynamicsx.utils import find_points_and_cells_on_proc
+from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
 
 # -----------------------------------------------------
 #                     FE domain
@@ -25,6 +26,13 @@ Nx, Ny, Nz = 60, 5, 10
 
 extent = [[0., 0., 0.], [L_, B_, H_]]
 domain = mesh.create_box(MPI.COMM_WORLD, extent, [Nx, Ny, Nz])
+boundaries = [(1, lambda x: np.isclose(x[0], 0 )),\
+              (2, lambda x: np.isclose(x[0], L_)),\
+              (3, lambda x: np.isclose(x[1], 0 )),\
+              (4, lambda x: np.isclose(x[1], B_)),\
+              (5, lambda x: np.isclose(x[2], 0 )),\
+              (6, lambda x: np.isclose(x[2], H_))]
+facet_tags = make_facet_tags(domain, boundaries)
 #
 V = fem.VectorFunctionSpace(domain, ("CG", 1))
 #
@@ -34,13 +42,10 @@ V = fem.VectorFunctionSpace(domain, ("CG", 1))
 # -----------------------------------------------------
 #                 Boundary conditions
 # -----------------------------------------------------
-def left_boundary(x):
-    return np.isclose(x[0], 0)
-
-fdim = domain.topology.dim - 1
-
-u_D_clamp = np.array([0,0,0], dtype=PETSc.ScalarType)
-bc_l = fem.dirichletbc(u_D_clamp, fem.locate_dofs_topological(V, fdim, mesh.locate_entities_boundary(domain, fdim, left_boundary) ), V)
+T_N  = fem.Constant(domain, np.array([0]*3, dtype=PETSc.ScalarType)) #normal traction (Neumann boundary condition)
+bc_l = BoundaryCondition(V, facet_tags, 'Clamp'  , 1)
+bc_r = BoundaryCondition(V, facet_tags, 'Neumann', 2, T_N)
+bcs = [bc_l, bc_r]
 #
 # -----------------------------------------------------
 
@@ -72,8 +77,8 @@ p0  = 1. #max amplitude
 F_0 = p0 * np.array([0,0,1], dtype=PETSc.ScalarType) #source orientation
 cutoff_Tc = 4/5 #release time
 #
-src_t = lambda t: t/cutoff_Tc * (t>0) * (t<=cutoff_Tc)
-def T_N_function(t): return lambda x: src_t(t) * F_0[:,np.newaxis] * np.isclose(x[0], 1)[np.newaxis,:]
+src_t        = lambda t: t/cutoff_Tc * (t>0) * (t<=cutoff_Tc)
+T_N_function = lambda t: src_t(t) * F_0
 #
 # -----------------------------------------------------
 
@@ -91,9 +96,8 @@ dt = T/Nsteps
 # -----------------------------------------------------
 #                        PDE
 # -----------------------------------------------------
-### Body force 'F_body' and normal traction 'T_N'
+### Body force 'F_body'
 F_body = fem.Constant(domain, PETSc.ScalarType((0,0,0))) #body force
-T_N    = fem.Function(V) #normal traction (Neumann boundary condition)
 
 def epsilon(u): return ufl.sym(ufl.grad(u))
 def sigma(u): return lambda_ * ufl.nabla_div(u) * ufl.Identity(u.geometric_dimension()) + 2*mu*epsilon(u)
@@ -101,7 +105,7 @@ def sigma(u): return lambda_ * ufl.nabla_div(u) * ufl.Identity(u.geometric_dimen
 m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
 k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
 c_ = lambda u,v: eta_m*m_(u,v) + eta_k*k_(u,v)
-L  = lambda v  : ufl.dot(F_body, v) * ufl.dx   +   ufl.dot(T_N, v) * ufl.ds
+L  = lambda v  : ufl.dot(F_body, v) * ufl.dx
 ###
 
 ###
@@ -110,17 +114,15 @@ u0, v0 = fem.Function(V), fem.Function(V)
 u0.interpolate(lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType))
 v0.interpolate(lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType))
 #
-T_N.interpolate(T_N_function(0))
+T_N.value = T_N_function(0)
 ###
 
 # Generalized-alpha method parameters
 alpha_m = 0.2
 alpha_f = 0.4
-#gamma   = fem.Constant(domain, PETSc.ScalarType(0.5+alpha_f-alpha_m))
-#beta    = fem.Constant(domain, PETSc.ScalarType((gamma+0.5)**2/4.))
 
 #  Variational problem
-tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, bcs=[bc_l], scheme='g-a-newmark', alpha_m=alpha_m, alpha_f=alpha_f)
+tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, bcs=bcs, scheme='g-a-newmark', alpha_m=alpha_m, alpha_f=alpha_f)
 tStepper.initial_condition(u0, v0, t0=0)
 #tStepper.solver.view()
 #
@@ -147,7 +149,7 @@ E_damp   = 0
 # -----------------------------------------------------
 ### define callfirsts and callbacks
 def cfst_updateSources(t, tStepper):
-    T_N.interpolate(T_N_function(t))
+    T_N.value = T_N_function(t)
 
 def cbck_storeAtPoints(i, tStepper):
     if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = tStepper.u.eval(points_output_on_proc, cells_output_on_proc)

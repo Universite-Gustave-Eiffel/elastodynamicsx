@@ -3,6 +3,7 @@ from petsc4py import PETSc
 import ufl
 
 from .timestepper import OneStepTimeStepper
+from elastodynamicsx.pde import BoundaryCondition
 
 
 class LeapFrog(OneStepTimeStepper):
@@ -38,18 +39,40 @@ class LeapFrog(OneStepTimeStepper):
         self._u_n   = fem.Function(function_space, name="u") #u(t)
         self._u_nm1 = fem.Function(function_space)           #u(t-dt)
         self._u_nm2 = fem.Function(function_space)           #u(t-2*dt)
-        #
+
+        #linear and bilinear forms for mass and stiffness matrices
         self._a = m_(u,v)
         self._L = dt_*dt_*L(v) - dt_*dt_*k_(self._u_nm1, v) + 2*m_(self._u_nm1,v) - m_(self._u_nm2,v)
         
+        #linear and bilinear forms for damping matrix if given
         if not(c_ is None):
             self._a += 0.5*dt_*c_(u,v)
             self._L += 0.5*dt_*c_(self._u_nm2,v)
         
+        #boundary conditions
+        dirichletbcs = [bc for bc in bcs if issubclass(type(bc), fem.DirichletBCMetaClass)]
+        supportedbcs = [bc for bc in bcs if type(bc) == BoundaryCondition]
+        for bc in supportedbcs:
+            if   bc.type == 'dirichlet':
+                dirichletbcs.append(bc.bc)
+            elif bc.type == 'neumann':
+                self._L += dt_*dt_*bc.bc(v)
+            elif bc.type == 'robin':
+                F_bc = dt_*dt_*bc.bc(u,v) #TODO: verifier
+                self._a += ufl.lhs(F_bc)
+                self._L += ufl.rhs(F_bc)
+            elif bc.type == 'td-dashpot':
+                F_bc = 0.5*dt_*bc.bc(u-self._u_nm2,v)
+                self._a += ufl.lhs(F_bc)
+                self._L += ufl.rhs(F_bc)
+            else:
+                raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
+        
+        #compile forms
         self.bilinear_form = fem.form(self._a)
         self.linear_form   = fem.form(self._L)
         #
-        super().__init__(dt, bcs, **kwargs)
+        super().__init__(dt, dirichletbcs, **kwargs)
 
     def initial_condition(self, u, du, t0=0):
         ###
@@ -63,7 +86,7 @@ class LeapFrog(OneStepTimeStepper):
         self._t = t0
         self._u_nm2.x.array[:] = u.x.array #u_nm2 = u(0)
         self._u_nm1.x.array[:] = u.x.array #faux, u_nm1 = u(0) + dt*u'(0)
-        self._u_n.x.array[:] = u.x.array #faux
+        self._u_n.x.array[:]   = u.x.array #faux
     
     def _prepareNextIteration(self):
         """Next-time-step function, to prepare next iteration -> Call it after solving"""
