@@ -52,10 +52,10 @@ lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
 #                 Boundary conditions
 # -----------------------------------------------------
 Z_N, Z_T = ufl.sqrt(rho*(lambda_+2*mu)), ufl.sqrt(rho*mu) #P and S mechanical impedances
-bc_l = BoundaryCondition(V, facet_tags, 'td-Dashpot', 1, (Z_N, Z_T))
-bc_r = BoundaryCondition(V, facet_tags, 'td-Dashpot', 2, (Z_N, Z_T))
-bc_b = BoundaryCondition(V, facet_tags, 'td-Dashpot', 3, (Z_N, Z_T))
-bc_t = BoundaryCondition(V, facet_tags, 'td-Dashpot', 4, (Z_N, Z_T))
+bc_l = BoundaryCondition(V, facet_tags, 'Dashpot', 1, (Z_N, Z_T))
+bc_r = BoundaryCondition(V, facet_tags, 'Dashpot', 2, (Z_N, Z_T))
+bc_b = BoundaryCondition(V, facet_tags, 'Dashpot', 3, (Z_N, Z_T))
+bc_t = BoundaryCondition(V, facet_tags, 'Dashpot', 4, (Z_N, Z_T))
 bcs = [bc_l, bc_r, bc_b, bc_t]
 #
 # -----------------------------------------------------
@@ -105,13 +105,11 @@ dt = (tmax-tstart) / num_steps # time step size
 ###
 # Some control numbers...
 hx = length/Nx
-c_P = np.sqrt((lambda_.value+2*mu.value)/rho.value) #P-wave velocity
 c_S = np.sqrt(mu.value/rho.value) #S-wave velocity
 lbda0 = c_S/f0
-C_CFL = dt/hx  * c_P # Courant number (Courant-Friedrichs-Lewy condition)
 print('Number of points per wavelength at central frequency: ', round(lbda0/hx, 2))
 print('Number of time steps per period at central frequency: ', round(T0/dt, 2))
-print('CFL condition: Courant number = ', round(C_CFL, 2))
+print('CFL condition: Courant number = ', round(TimeStepper.CFL(V, ufl.sqrt((lambda_+2*mu)/rho), dt), 2))
 ###
 
 

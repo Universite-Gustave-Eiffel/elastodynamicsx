@@ -61,7 +61,7 @@ class LeapFrog(OneStepTimeStepper):
                 F_bc = dt_*dt_*bc.bc(u,v) #TODO: verifier
                 self._a += ufl.lhs(F_bc)
                 self._L += ufl.rhs(F_bc)
-            elif bc.type == 'td-dashpot':
+            elif bc.type == 'dashpot':
                 F_bc = 0.5*dt_*bc.bc(u-self._u_nm2,v)
                 self._a += ufl.lhs(F_bc)
                 self._L += ufl.rhs(F_bc)
@@ -72,7 +72,7 @@ class LeapFrog(OneStepTimeStepper):
         self.bilinear_form = fem.form(self._a)
         self.linear_form   = fem.form(self._L)
         #
-        super().__init__(dt, dirichletbcs, **kwargs)
+        super().__init__(m_, c_, k_, L, dt, function_space, dirichletbcs, **kwargs)
 
     def initial_condition(self, u, du, t0=0):
         ###

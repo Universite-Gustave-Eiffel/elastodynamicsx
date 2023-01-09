@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from elastodynamicsx.pde import BoundaryCondition
 from elastodynamicsx.timestepper import TimeStepper
 from elastodynamicsx.plot import CustomScalarPlotter
-from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
+from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
 from elastodynamicsx.examples.analyticalsolutions import u_2D_SH_rt, int_Fraunhofer_2D
 
 # -----------------------------------------------------
@@ -51,10 +51,10 @@ mu      = fem.Constant(domain, PETSc.ScalarType(1))
 #                 Boundary conditions
 # -----------------------------------------------------
 Z = ufl.sqrt(rho*mu) #mechanical impedance
-bc_l = BoundaryCondition(V, facet_tags, 'td-Dashpot', 1, Z)
-bc_r = BoundaryCondition(V, facet_tags, 'td-Dashpot', 2, Z)
-bc_b = BoundaryCondition(V, facet_tags, 'td-Dashpot', 3, Z)
-bc_t = BoundaryCondition(V, facet_tags, 'td-Dashpot', 4, Z)
+bc_l = BoundaryCondition(V, facet_tags, 'Dashpot', 1, Z)
+bc_r = BoundaryCondition(V, facet_tags, 'Dashpot', 2, Z)
+bc_b = BoundaryCondition(V, facet_tags, 'Dashpot', 3, Z)
+bc_t = BoundaryCondition(V, facet_tags, 'Dashpot', 4, Z)
 bcs = [bc_l, bc_r, bc_b, bc_t]
 #
 # -----------------------------------------------------
@@ -106,10 +106,10 @@ dt = (tmax-tstart) / num_steps # time step size
 hx = length/Nx
 c_SH = np.sqrt(mu.value/rho.value) #phase velocity
 lbda0 = c_SH/f0
-C_CFL = dt/hx  * c_SH # Courant number (Courant-Friedrichs-Lewy condition)
+
 print('Number of points per wavelength at central frequency: ', round(lbda0/hx, 2))
 print('Number of time steps per period at central frequency: ', round(T0/dt, 2))
-print('CFL condition: Courant number = ', round(C_CFL, 2))
+print('CFL condition: Courant number = ', round(TimeStepper.CFL(V, ufl.sqrt(mu/rho), dt), 2))
 ###
 
 

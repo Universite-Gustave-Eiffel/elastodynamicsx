@@ -6,9 +6,9 @@ The module provides high level classes to solve common problems in a few lines c
     * Explicit schemes: *leap frog*
     * Implicit schemes: *Newmark-beta*, *midpoint*, *linear acceleration*, *HHT-alpha*, *generalized-alpha*
   * Eigenmodes problems, using the *ElasticResonanceSolver* class
-  * Common boundary conditions, using the BoundaryCondition class
-    * General BCs: *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
-    * Time-domain specific BCs: *Dashpot*
+  * Common boundary conditions, using the *BoundaryCondition* class
+    * BCs involving **u** and **s.n**: *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
+    * BCs involving **v** and **s.n**: *Dashpot*
 
 GitHub repository:
 https://github.com/Universite-Gustave-Eiffel/elastodynamicsx

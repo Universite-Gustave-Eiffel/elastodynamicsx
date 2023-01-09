@@ -89,7 +89,7 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
                 F_bc = dt_*dt_*bc.bc(u,v) #TODO: verifier
                 self._a += ufl.lhs(F_bc)
                 self._L += ufl.rhs(F_bc)
-            elif bc.type == 'td-dashpot':
+            elif bc.type == 'dashpot':
                 d1, d2, d3 = dt * gamma/beta, dt**2 * (1 - gamma/beta), dt**3 * (1 - gamma/beta/2)
                 #
                 F_bc = bc.bc(d1*u - d1*self._u_nm1 + d2*self._v_nm1 + d3*self._a_nm1, v)
@@ -102,13 +102,7 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
         self.bilinear_form = fem.form(self._a)
         self.linear_form   = fem.form(self._L)
         #
-        super().__init__(dt, dirichletbcs, **kwargs)
-
-    @property
-    def v(self): return self._v_n
-
-    @property
-    def a(self): return self._a_n
+        super().__init__(m_, c_, k_, L, dt, function_space, dirichletbcs, **kwargs)
 
     def initial_condition(self, u0, v0, t0=0):
         ###

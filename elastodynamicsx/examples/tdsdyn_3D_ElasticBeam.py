@@ -43,9 +43,10 @@ V = fem.VectorFunctionSpace(domain, ("CG", 1))
 #                 Boundary conditions
 # -----------------------------------------------------
 T_N  = fem.Constant(domain, np.array([0]*3, dtype=PETSc.ScalarType)) #normal traction (Neumann boundary condition)
-bc_l = BoundaryCondition(V, facet_tags, 'Clamp'  , 1)
-bc_r = BoundaryCondition(V, facet_tags, 'Neumann', 2, T_N)
-bcs = [bc_l, bc_r]
+bc_l    = BoundaryCondition(V, facet_tags, 'Clamp'  , 1)
+bc_r    = BoundaryCondition(V, facet_tags, 'Neumann', 2, T_N)
+bc_free = BoundaryCondition(V, facet_tags, 'Free'  , (3,4,5,6))
+bcs = [bc_l, bc_r, bc_free]
 #
 # -----------------------------------------------------
 
@@ -156,11 +157,9 @@ def cbck_storeAtPoints(i, tStepper):
 
 def cbck_energies(i, tStepper):
     global E_damp
-    u_n = tStepper.u
-    v_n = tStepper.v
-    E_elas = domain.comm.allreduce( fem.assemble_scalar(fem.form( 1/2* k_(u_n, u_n) )) , op=MPI.SUM)
-    E_kin  = domain.comm.allreduce( fem.assemble_scalar(fem.form( 1/2* m_(v_n, v_n) )) , op=MPI.SUM)
-    E_damp+= dt*domain.comm.allreduce( fem.assemble_scalar(fem.form( c_(v_n, v_n) )) , op=MPI.SUM)
+    E_elas = tStepper.Energy_elastic()
+    E_kin  = tStepper.Energy_kinetic()
+    E_damp+= tStepper.Energy_damping()
     E_tot  = E_elas + E_kin + E_damp
     energies[i+1,:] = np.array([E_elas, E_kin, E_damp, E_tot])
 

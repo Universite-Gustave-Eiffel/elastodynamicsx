@@ -2,7 +2,10 @@
 
 import time
 from dolfinx import fem
+import ufl
+from mpi4py import MPI
 from petsc4py import PETSc
+import numpy as np
 try: from tqdm import tqdm
 except ModuleNotFoundError: tqdm = lambda x: x
 
@@ -36,8 +39,19 @@ class TimeStepper:
           if scheme.lower() in s_.labels: return s_(*args, **kwargs)
         #
         print('unknown scheme')
+        
+    def CFL(function_space, c_max, dt):
+        """
+        Courant-Friedrichs-Lewy number: CFL = c_max*dt/h, with h the cell diameter
 
-    def __init__(self, dt, bcs=[], **kwargs):
+        see: https://en.wikipedia.org/wiki/Courant%E2%80%93Friedrichs%E2%80%93Lewy_condition
+        """
+        V = function_space
+        if V.num_sub_spaces >0: V = V.sub(0)
+        u, v = ufl.TrialFunction(V), ufl.TestFunction(V)
+        return V.mesh.comm.allreduce( np.amax(fem.assemble_vector(fem.form(v*dt*c_max/ufl.CellDiameter(V)/ufl.CellVolume(V)*ufl.dx)).array) , op=MPI.MAX)
+
+    def __init__(self, m_, c_, k_, L, dt, function_space, bcs=[], **kwargs):
         """
         **kwargs:
             live_plotter = (i, **live_plotter_kwargs):
@@ -48,6 +62,9 @@ class TimeStepper:
         self._t = 0
         self._dt  = dt
         self._bcs = bcs
+        self._m_function = m_
+        self._c_function = c_
+        self._k_function = k_
         #
         self._callfirsts = []
         self._callbacks  = []
@@ -55,7 +72,7 @@ class TimeStepper:
         self.live_plotter_step = 0
         ###
         #note: any inherited class must define the following attributes:
-        #        self._u_n, self.linear_form, self.bilinear_form
+        #        self._u_n, self._v_n, self._a_n, self.linear_form, self.bilinear_form
         ###
         #
         self._compile()
@@ -69,6 +86,25 @@ class TimeStepper:
     
     @property
     def u(self): return self._u_n
+
+    @property
+    def v(self): return self._v_n
+
+    @property
+    def a(self): return self._a_n
+    
+    def Energy_elastic(self):
+        domain = self.u.function_space.mesh
+        return domain.comm.allreduce( fem.assemble_scalar(fem.form( 1/2* self._k_function(self.u, self.u) )) , op=MPI.SUM)
+
+    def Energy_damping(self):
+        domain = self.u.function_space.mesh
+        if self._c_function is None: return 0
+        else:                        return self.dt*domain.comm.allreduce( fem.assemble_scalar(fem.form( self._c_function(self.v, self.v) )) , op=MPI.SUM)
+
+    def Energy_kinetic(self):
+        domain = self.u.function_space.mesh
+        return domain.comm.allreduce( fem.assemble_scalar(fem.form( 1/2* self._m_function(self.v, self.v) )) , op=MPI.SUM)
     
     def initial_condition(self, u, du, t0=0): print('Supercharge me')
 
@@ -130,10 +166,10 @@ class OneStepTimeStepper(TimeStepper):
     Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).
     """
     
-    def __init__(self, dt, bcs=[], **kwargs):
+    def __init__(self, m_, c_, k_, L, dt, function_space, bcs=[], **kwargs):
         #
         self._intermediate_dt = 0
-        super().__init__(dt, bcs, **kwargs)
+        super().__init__(m_, c_, k_, L, dt, function_space, bcs, **kwargs)
 
     def _prepareNextIteration(self): print('Supercharge me')
 
