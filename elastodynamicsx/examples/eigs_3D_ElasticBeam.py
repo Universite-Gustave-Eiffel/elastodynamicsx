@@ -1,4 +1,6 @@
 """
+Eigenmodes
+
 Free resonances of a beam clamped at one end, compared against beam theory
 
 adapted from (legacy Fenics): https://comet-fenics.readthedocs.io/en/latest/demo/modal_analysis_dynamics/cantilever_modal.html
@@ -10,19 +12,28 @@ from mpi4py import MPI
 from petsc4py import PETSc
 import numpy as np
 
+from elastodynamicsx.pde import BoundaryCondition
 from elastodynamicsx.eigensolver import ElasticResonanceSolver
+from elastodynamicsx.utils import make_facet_tags
 
 # -----------------------------------------------------
 #                     FE domain
 # -----------------------------------------------------
-L, B, H = 20., 0.5, 1.
+L_, B_, H_ = 20., 0.5, 1.
 
 Nx = 20
-Ny = int(B/L*Nx)+1
-Nz = int(H/L*Nx)+1
+Ny = int(B_/L_*Nx)+1
+Nz = int(H_/L_*Nx)+1
 
-extent = [[0., 0., 0.], [L, B, H]]
+extent = [[0., 0., 0.], [L_, B_, H_]]
 domain = mesh.create_box(MPI.COMM_WORLD, extent, [Nx, Ny, Nz])
+boundaries = [(1, lambda x: np.isclose(x[0], 0 )),\
+              (2, lambda x: np.isclose(x[0], L_)),\
+              (3, lambda x: np.isclose(x[1], 0 )),\
+              (4, lambda x: np.isclose(x[1], B_)),\
+              (5, lambda x: np.isclose(x[2], 0 )),\
+              (6, lambda x: np.isclose(x[2], H_))]
+facet_tags = make_facet_tags(domain, boundaries)
 #
 V = fem.VectorFunctionSpace(domain, ("CG", 3))
 #
@@ -32,14 +43,8 @@ V = fem.VectorFunctionSpace(domain, ("CG", 3))
 # -----------------------------------------------------
 #                 Boundary condition
 # -----------------------------------------------------
-def clamped_boundary(x):
-    return np.isclose(x[0], 0)
-
-fdim = domain.topology.dim - 1
-boundary_facets = mesh.locate_entities_boundary(domain, fdim, clamped_boundary)
-
-u_D = np.array([0,0,0], dtype=PETSc.ScalarType)
-bc = fem.dirichletbc(u_D, fem.locate_dofs_topological(V, fdim, boundary_facets), V)
+bc_l = BoundaryCondition(V, facet_tags, 'Clamp'  , 1)
+bcs  = [bc_l]
 #
 # -----------------------------------------------------
 
@@ -64,7 +69,7 @@ mu      = fem.Constant(domain, PETSc.ScalarType(mu))
 #                       Solve
 # -----------------------------------------------------
 ### Initialize the solver
-eps = ElasticResonanceSolver.build_isotropicMaterial(rho, lambda_, mu, V, bcs=[bc], nev=6)
+eps = ElasticResonanceSolver.build_isotropicMaterial(rho, lambda_, mu, V, bcs=bcs, nev=6)
 
 ### Run the big calculation!
 eps.solve()
@@ -92,11 +97,11 @@ if verbose:
 from scipy.optimize import root
 from math import cos, cosh
 falpha = lambda x: cos(x)*cosh(x)+1
-alpha = lambda n: root(falpha, (2*n+1)*np.pi/2)['x'][0]
+alpha  = lambda n: root(falpha, (2*n+1)*np.pi/2)['x'][0]
 
 nev = eigenfreqs.size
-I_bend = H*B**3/12*(np.arange(nev)%2==0) + B*H**3/12*(np.arange(nev)%2==1)
-freq_beam = np.array([alpha(i//2) for i in range(nev)])**2 *np.sqrt(E*I_bend/(rho.value*B*H*L**4))/2/np.pi
+I_bend = H_*B_**3/12*(np.arange(nev)%2==0) + B_*H_**3/12*(np.arange(nev)%2==1)
+freq_beam = np.array([alpha(i//2) for i in range(nev)])**2 *np.sqrt(E*I_bend/(rho.value*B_*H_*L_**4))/2/np.pi
 
 print('Eigenfrequencies: comparison with beam theory')
 print('FE:         ', eigenfreqs*scaleFREQ)

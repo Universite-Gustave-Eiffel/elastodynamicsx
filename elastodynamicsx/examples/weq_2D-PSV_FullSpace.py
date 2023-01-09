@@ -1,7 +1,8 @@
-#documentation: TODO
+"""
+Wave equation (time-domain)
 
-#TODO: source en Hann plutot que rect
-#TODO: tenir compte de la taille de la source dans formule anal
+Propagation of P and SV elastic waves in a 2D, homogeneous isotropic solid, and comparison with an analytical solution
+"""
 
 import time
 from dolfinx import mesh, fem
@@ -12,10 +13,11 @@ import numpy as np
 import pyvista
 import matplotlib.pyplot as plt
 
+from elastodynamicsx.pde import BoundaryCondition
 from elastodynamicsx.timestepper import TimeStepper
-from elastodynamicsx.plotting import CustomVectorPlotter
-from elastodynamicsx.utils import find_points_and_cells_on_proc
-from elastodynamicsx.analyticalsolutions import u_2D_PSV_rt, int_Fraunhofer_2D
+from elastodynamicsx.plot import CustomVectorPlotter
+from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
+from elastodynamicsx.examples.analyticalsolutions import u_2D_PSV_rt, int_Fraunhofer_2D
 
 # -----------------------------------------------------
 #                     FE domain
@@ -24,6 +26,11 @@ length, height = 10, 10
 Nx, Ny = 100, 100
 extent = [[0., 0.], [length, height]]
 domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny])
+boundaries = [(1, lambda x: np.isclose(x[0], 0     )),\
+              (2, lambda x: np.isclose(x[0], length)),\
+              (3, lambda x: np.isclose(x[1], 0     )),\
+              (4, lambda x: np.isclose(x[1], height))]
+facet_tags = make_facet_tags(domain, boundaries)
 #
 V_scalar = fem.FunctionSpace(domain, ("CG", 2))
 V = fem.VectorFunctionSpace(domain, ("CG", 2))
@@ -42,13 +49,25 @@ lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
 
 
 # -----------------------------------------------------
+#                 Boundary conditions
+# -----------------------------------------------------
+Z_N, Z_T = ufl.sqrt(rho*(lambda_+2*mu)), ufl.sqrt(rho*mu) #P and S mechanical impedances
+bc_l = BoundaryCondition(V, facet_tags, 'Dashpot', 1, (Z_N, Z_T))
+bc_r = BoundaryCondition(V, facet_tags, 'Dashpot', 2, (Z_N, Z_T))
+bc_b = BoundaryCondition(V, facet_tags, 'Dashpot', 3, (Z_N, Z_T))
+bc_t = BoundaryCondition(V, facet_tags, 'Dashpot', 4, (Z_N, Z_T))
+bcs = [bc_l, bc_r, bc_b, bc_t]
+#
+# -----------------------------------------------------
+
+
+# -----------------------------------------------------
 #                    Source term
 # -----------------------------------------------------
 ### -> Space function
 #
 X0_src = np.array([length/2,height/2,0]) #center
 R0_src = 0.1 #radius
-nrm   = 1/(np.pi*R0_src**2) #normalize to int[src_x(x) dx]=1
 #
 ### Gaussian function
 nrm   = 1/(2*np.pi*R0_src**2) #normalize to int[src_x(x) dx]=1
@@ -86,29 +105,27 @@ dt = (tmax-tstart) / num_steps # time step size
 ###
 # Some control numbers...
 hx = length/Nx
-c_P = np.sqrt((lambda_.value+2*mu.value)/rho.value) #P-wave velocity
 c_S = np.sqrt(mu.value/rho.value) #S-wave velocity
 lbda0 = c_S/f0
-C_CFL = dt/hx  * c_P # Courant number (Courant-Friedrichs-Lewy condition)
 print('Number of points per wavelength at central frequency: ', round(lbda0/hx, 2))
 print('Number of time steps per period at central frequency: ', round(T0/dt, 2))
-print('CFL condition: Courant number = ', round(C_CFL, 2))
+print('CFL condition: Courant number = ', round(TimeStepper.CFL(V, ufl.sqrt((lambda_+2*mu)/rho), dt), 2))
 ###
 
 
 # -----------------------------------------------------
 #                        PDE
 # -----------------------------------------------------
-### Body force 'F_body' and normal traction 'T_N'
+### Body force 'F_body'
 F_body = fem.Function(V) #body force
-T_N    = fem.Constant(domain, PETSc.ScalarType((0,0))) #normal traction (Neumann boundary condition)
 
 def epsilon(u): return ufl.sym(ufl.grad(u))
 def sigma(u): return lambda_ * ufl.nabla_div(u) * ufl.Identity(u.geometric_dimension()) + 2*mu*epsilon(u)
 
-a_tt = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
-a_xx = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
-L    = lambda v  : ufl.dot(F_body, v) * ufl.dx   +   ufl.dot(T_N, v) * ufl.ds
+m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
+c_ = None
+k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
+L  = lambda v  : ufl.dot(F_body, v) * ufl.dx
 ###
 
 ###
@@ -121,9 +138,8 @@ F_body.interpolate(F_body_function(tstart))
 ###
 
 #  Variational problem
-tStepper = TimeStepper.build(a_tt, a_xx, L, dt, V, [], scheme='leapfrog')
+tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, bcs=bcs, scheme='leapfrog')
 tStepper.initial_condition(u0, v0, t0=tstart)
-u_n = tStepper.u_n
 #
 # -----------------------------------------------------
 
@@ -147,13 +163,13 @@ signals_at_points = np.zeros((points_output.shape[1], domain.topology.dim, num_s
 #                       Solve
 # -----------------------------------------------------
 ### define callfirsts and callbacks
-def cfst_updateSources(i, tStepper):
-    F_body.interpolate(F_body_function(tStepper.t_n))
+def cfst_updateSources(t, tStepper):
+    F_body.interpolate(F_body_function(t))
 
 def cbck_storeFullField(i, tStepper):
-    if storeAllSteps: all_u[i].x.array[:] = tStepper.u_n.x.array
+    if storeAllSteps: all_u[i].x.array[:] = tStepper.u.x.array
 def cbck_storeAtPoints(i, tStepper):
-    if len(points_output_on_proc)>0: signals_at_points[:,:,i] = tStepper.u_n.eval(points_output_on_proc, cells_output_on_proc)
+    if len(points_output_on_proc)>0: signals_at_points[:,:,i] = tStepper.u.eval(points_output_on_proc, cells_output_on_proc)
 
 ### enable live plotting
 clim = 0.1*np.amax(F_0)*np.array([0, 1])
@@ -174,6 +190,7 @@ tStepper.run(num_steps, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFu
 # -----------------------------------------------------
 if storeAllSteps: #add a slider to browse through all time steps
     ### -> Exact solution, Full field
+    u_n = tStepper.u
     x = u_n.function_space.tabulate_dof_coordinates()
     all_u_n_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], np.roll(src_t(dt*np.arange(num_steps)), -2), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
     #

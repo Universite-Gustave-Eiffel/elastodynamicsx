@@ -8,6 +8,9 @@ import ufl
 import numpy as np
 import pyvista
 
+from elastodynamicsx.pde import BoundaryCondition
+from elastodynamicsx.plot import get_3D_array_from_FEFunction
+
 class ElasticResonanceSolver(SLEPc.EPS):
     """
     Convenience class inhereted from SLEPc.EPS, with default parameters and convenience methods that are relevant for computing the resonances of an elastic component.
@@ -39,19 +42,18 @@ class ElasticResonanceSolver(SLEPc.EPS):
         def epsilon(u): return ufl.sym(ufl.grad(u))
         def sigma(u): return lambda_ * ufl.nabla_div(u) * ufl.Identity(u.geometric_dimension()) + 2*mu*epsilon(u)
         
-        a_tt = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
-        a_xx = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
+        m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
+        k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
         ###
-        return ElasticResonanceSolver(a_tt, a_xx, function_space, bcs=bcs, **kwargs)
+        return ElasticResonanceSolver(m_, k_, function_space, bcs=bcs, **kwargs)
 
-    def __init__(self, a_tt, a_xx, function_space, bcs=[], **kwargs):
+    def __init__(self, m_, k_, function_space, bcs=[], **kwargs):
         """
-        a_tt: function(u,v) that returns the ufl expression of the bilinear form with second derivative on time
-                 -> used to build the mass matrix
-                 -> usually: a_tt = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
-        a_xx: function(u,v) that returns the ufl expression of the bilinear form with no derivative on time
-                 -> used to build the stiffness matrix
-                 -> usually: a_xx = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
+        m_: function(u,v) that returns the ufl expression of the bilinear form with second derivative on time
+               -> usually: m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
+        k_: function(u,v) that returns the ufl expression of the bilinear form with no derivative on time
+               -> used to build the stiffness matrix
+               -> usually: k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
         function_space: the Finite Element functionnal space
         bcs: the set of boundary conditions
         """
@@ -62,13 +64,27 @@ class ElasticResonanceSolver(SLEPc.EPS):
         
         ### Variational problem
         u, v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
-        m_form = fem.form(a_tt(u,v))
-        k_form = fem.form(a_xx(u,v))
+        m_form = m_(u,v)
+        k_form = k_(u,v)
         #
+        
+        #boundary conditions
+        dirichletbcs = [bc for bc in bcs if issubclass(type(bc), fem.DirichletBCMetaClass)]
+        supportedbcs = [bc for bc in bcs if type(bc) == BoundaryCondition]
+        for bc in supportedbcs:
+            assert(bc.type in ('dirichlet', 'neumann', 'robin'), "unsupported boundary condition {0:s}".format(bc.type))
+            if   bc.type == 'dirichlet':
+                dirichletbcs.append(bc.bc)
+            elif bc.type == 'neumann':
+                pass
+            elif bc.type == 'robin':
+                F_bc    = bc.bc(u,v)
+                k_form += ufl.lhs(F_bc)
+        
         ### assemble mass M and stifness K matrices
-        M = fem.petsc.assemble_matrix(m_form, bcs=bcs)
+        M = fem.petsc.assemble_matrix(fem.form(m_form), bcs=dirichletbcs)
         M.assemble()
-        K = fem.petsc.assemble_matrix(k_form, bcs=bcs)
+        K = fem.petsc.assemble_matrix(fem.form(k_form), bcs=dirichletbcs)
         K.assemble()
         
         #
@@ -89,7 +105,7 @@ class ElasticResonanceSolver(SLEPc.EPS):
 
     def getEigenfrequencies(self):
         """Returns the eigenfrequencies from the computed eigenvalues"""
-        return np.array([np.sqrt(abs(self.getEigenvalue(i).real))/(2*np.pi) for i in range(self.__getNout())]) #abs because rigid body motions may lead to minus zero: -0.00000
+        return np.array([np.sqrt(abs(self.getEigenvalue(i).real))/(2*np.pi) for i in range(self._getNout())]) #abs because rigid body motions may lead to minus zero: -0.00000
 
     def getEigenmodes(self, which='all'):
         """
@@ -102,7 +118,7 @@ class ElasticResonanceSolver(SLEPc.EPS):
             getEigenmodes([3,5]) #returns modes number 4 and 6
             getEigenmodes(slice(0,None,2)) #returns even modes
         """
-        indexes = _slice_array(np.arange(self.__getNout()), which)
+        indexes = _slice_array(np.arange(self._getNout()), which)
         eigenmodes = [ fem.Function(self.function_space) for i in range(np.size(indexes)) ]
         for i, eigM in zip(indexes, eigenmodes):
             self.getEigenpair(i, eigM.vector) # Save eigenvector in eigM
@@ -110,7 +126,7 @@ class ElasticResonanceSolver(SLEPc.EPS):
 
     def getErrors(self):
         """Returns the error estimate on the computed eigenvalues"""
-        return np.array([self.computeError(i, SLEPc.EPS.ErrorType.RELATIVE) for i in range(self.__getNout())]) # Compute error for i-th eigenvalue
+        return np.array([self.computeError(i, SLEPc.EPS.ErrorType.RELATIVE) for i in range(self._getNout())]) # Compute error for i-th eigenvalue
     
     def plot(self, which='all', **kwargs):
         """
@@ -119,18 +135,14 @@ class ElasticResonanceSolver(SLEPc.EPS):
             -> the same as for getEigenmodes
         """
         #inspired from https://docs.pyvista.org/examples/99-advanced/warp-by-vector-eigenmodes.html
-        indexes = _slice_array(np.arange(self.__getNout()), which)
+        indexes = _slice_array(np.arange(self._getNout()), which)
         eigenmodes = self.getEigenmodes(which)
         eigenfreqs = self.getEigenfrequencies()
         #
         topology, cell_types, geom = plot.create_vtk_mesh(self.function_space)
         grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
-        nbcomps = eigenmodes[0].x.array.size // geom.shape[0] #number of components
-        if nbcomps < 3:
-            z0s = np.zeros((geom.shape[0], 3-nbcomps), dtype=eigenmodes[0].x.array.dtype)
         for i, eigM in zip(indexes, eigenmodes):
-            if nbcomps == 3: grid['eigenmode_'+str(i)] = eigM.x.array.reshape((geom.shape[0], 3)) #ok if 3D. not ok if 2D.
-            else:            grid['eigenmode_'+str(i)] = np.append(eigM.x.array.reshape((geom.shape[0], nbcomps)), z0s, axis=1)
+            grid['eigenmode_'+str(i)] = get_3D_array_from_FEFunction(eigM)
         #
         nbcols = int(np.ceil(np.sqrt(indexes.size)))
         nbrows = int(np.ceil(indexes.size/nbcols))
@@ -150,12 +162,12 @@ class ElasticResonanceSolver(SLEPc.EPS):
     
     def printEigenvalues(self):
         """Prints the computed eigenvalues and error estimates"""
-        v = [self.getEigenvalue(i) for i in range(self.__getNout())]
+        v = [self.getEigenvalue(i) for i in range(self._getNout())]
         e = self.getErrors()
         PETSc.Sys.Print("       eigenvalue \t\t\t error ")
         for cv, ce in zip(v, e): PETSc.Sys.Print(cv, '\t', ce)
 
-    def __getNout(self):
+    def _getNout(self):
         """Returns the number of eigenpairs that can be returned. Usually equal to 'nev'."""
         nconv = self.getConverged()
         nev, _, _ = self.getDimensions()

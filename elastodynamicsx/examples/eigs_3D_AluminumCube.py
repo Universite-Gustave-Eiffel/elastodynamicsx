@@ -1,4 +1,6 @@
 """
+Eigenmodes
+
 Free resonances of an aluminum cube, compared against litterature data
 
 Data from: Ogi, H., Sato, K., Asada, T., & Hirao, M. (2002). Complete mode identification for resonance ultrasound spectroscopy. The Journal of the Acoustical Society of America, 112(6), 2553-2557.

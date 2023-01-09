@@ -47,17 +47,26 @@ class CustomScalarPlotter(pyvista.Plotter):
 class CustomVectorPlotter(pyvista.Plotter):
     
     def __init__(self, *all_vectors, **kwargs):
+        ###
         self.grids=[]
-        self.warp_factor = kwargs.pop('warp_factor', 1)
+        
+        if 'warp_factor' in kwargs:
+            self.warp_factor = kwargs.pop('warp_factor')
+        elif 'clim' in kwargs and np.amax(np.abs(kwargs['clim']))>0:
+            self.warp_factor = 0.5/np.amax(np.abs(kwargs['clim']))
+        else:
+            self.warp_factor = 1
+        
         for u_ in all_vectors:
             if u_ is None: break
             topology, cell_types, geom = plot.create_vtk_mesh(u_.function_space)
-            z0s = np.zeros((geom.shape[0], 1), dtype=u_.x.array.dtype)
             grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
-            grid["u"] = np.append(u_.x.array.reshape((geom.shape[0], 2)), z0s, axis=1)
-            grid.point_data["u_nrm"] = np.linalg.norm(u_.x.array.reshape((geom.shape[0], 2)), axis=1)
+            u3D   = get_3D_array_from_FEFunction(u_)
+            grid["u"] = u3D
+            grid.point_data["u_nrm"] = np.linalg.norm(u3D, axis=1)
             self.grids.append(grid)
         
+        nbcomps = max(1, u_.function_space.element.num_sub_elements)
         if len(self.grids)==1:
             defaultShape = (1,1)
         else:
@@ -76,19 +85,39 @@ class CustomVectorPlotter(pyvista.Plotter):
             warped = grid.warp_by_vector("u", factor=self.warp_factor)
             grid.warped = warped
             self.add_mesh(warped, scalars="u_nrm", show_edges=((i==0) and show_edges), lighting=False, scalar_bar_args=sargs, cmap=cmap, **kwargs)
-            self.view_xy()
-            self.camera.zoom(1.3)
+            if nbcomps<3:
+                self.view_xy()
+                self.camera.zoom(1.3)
 
         if len(self.grids)>1: self.subplot(0) #resets the focus to first subplot
 
     def update_vectors(self, *all_vectors, render=True):
         for i, (grid, u_) in enumerate(zip(self.grids, all_vectors)):
             nbpts = grid.number_of_points
-            z0s = np.zeros((nbpts, 1), dtype=u_.dtype)
-            grid["u"] = np.append(u_.reshape((nbpts, 2)), z0s, axis=1)
+            u3D   = get_3D_array_from_nparray(u_, nbpts)
+            grid["u"] = u3D
             #
             super().update_coordinates(grid.warp_by_vector("u", factor=self.warp_factor).points, mesh=grid.warped, render=False)
-            super().update_scalars(np.linalg.norm(u_.reshape((nbpts, 2)), axis=1), mesh=grid.warped, render=False)
+            super().update_scalars(np.linalg.norm(u3D, axis=1), mesh=grid.warped, render=False)
         if render:
             self.render()
+
+def get_3D_array_from_FEFunction(u_):
+    #u_ is a fem.Function
+    nbcomps = max(1, u_.function_space.element.num_sub_elements) #number of components
+    nbpts   = u_.x.array.size // nbcomps
+    if nbcomps < 3:
+        z0s = np.zeros((nbpts, 3-nbcomps), dtype=u_.x.array.dtype)
+        return np.append(u_.x.array.reshape((nbpts, nbcomps)), z0s, axis=1)
+    else:
+        return u_.x.array.reshape((nbpts, 3))
+
+def get_3D_array_from_nparray(u_, nbpts):
+    #u_ is a np.array
+    nbcomps = u_.size//nbpts
+    if nbcomps < 3:
+        z0s = np.zeros((nbpts, 3-nbcomps), dtype=u_.dtype)
+        return np.append(u_.reshape((nbpts, nbcomps)), z0s, axis=1)
+    else:
+        return u_.reshape((nbpts, 3))
 
