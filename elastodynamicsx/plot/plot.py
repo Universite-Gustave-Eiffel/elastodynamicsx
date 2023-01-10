@@ -5,6 +5,36 @@ import matplotlib.pyplot as plt
 from dolfinx import plot
 import pyvista
 
+def plot_mesh(mesh, cell_tags):
+    """
+    Adapted from: https://jsdokken.com/dolfinx-tutorial/chapter3/em.html
+    
+    example of use:
+    
+    from mpi4py import MPI
+    from dolfinx.mesh import create_unit_square
+    from elastodynamicsx.utils import make_tags
+    #
+    domain = create_unit_square(MPI.COMM_WORLD, 10, 10)
+
+    Omegas = [(1, lambda x: x[1] <= 0.5),
+              (2, lambda x: x[1] >= 0.5)]
+    cell_tags = make_tags(domain, Omegas, 'domains')
+    
+    plot_mesh(domain, cell_tags)
+    """
+    plotter = pyvista.Plotter()
+    grid = pyvista.UnstructuredGrid(*plot.create_vtk_mesh(mesh, mesh.topology.dim))
+    num_local_cells = mesh.topology.index_map(mesh.topology.dim).size_local
+    grid.cell_data["Marker"] = cell_tags.values[cell_tags.indices<num_local_cells]
+    grid.set_active_scalars("Marker")
+    actor = plotter.add_mesh(grid, show_edges=True)
+    #
+    if mesh.topology.dim<3:
+        plotter.view_xy()
+    #
+    plotter.show()
+
 class CustomScalarPlotter(pyvista.Plotter):
     
     def __init__(self, *all_scalars, **kwargs):

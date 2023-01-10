@@ -47,13 +47,13 @@ def make_tags(domain, locators, type_='boundaries'):
     #
     domain = create_unit_square(MPI.COMM_WORLD, 10, 10)
     
-    boundaries = [(1, lambda x: np.isclose(x[0], 0)),\
-                  (2, lambda x: np.isclose(x[0], 1)),\
-                  (3, lambda x: np.isclose(x[1], 0)),\
+    boundaries = [(1, lambda x: np.isclose(x[0], 0)),
+                  (2, lambda x: np.isclose(x[0], 1)),
+                  (3, lambda x: np.isclose(x[1], 0)),
                   (4, lambda x: np.isclose(x[1], 1))]
     facet_tags = make_tags(domain, boundaries, 'boundaries')
     
-    Omegas = [(1, lambda x: x[1] <= 0.5),\
+    Omegas = [(1, lambda x: x[1] <= 0.5),
               (2, lambda x: x[1] >= 0.5)]
     cell_tags = make_tags(domain, Omegas, 'domains')
     """

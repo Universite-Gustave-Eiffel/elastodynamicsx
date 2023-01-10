@@ -66,16 +66,28 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
         self._v_nm1 = self._v_n #same convention as for a_n
         self._u_nm1 = fem.Function(function_space, name="u_nm1") #u(t-dt)
         self._a_garb= fem.Function(function_space, name="garbage") #garbage
+        #
+        self._u0 = self._u_nm1
+        self._v0 = self._v_nm1
+        self._a0 = self._a_nm1
 
         #linear and bilinear forms for mass and stiffness matrices
         self._a = m1*m_(u,v) + dt_*dt_*const(1-alpha_f)*k_(u,v)
-        self._L = dt_*dt_*L(v) - const(dt*dt*alpha_f)*k_(self._u_nm1, v) \
-                   + m1*m_(self._u_nm1, v) + m2*m_(self._v_nm1, v) - m3*m_(self._a_nm1, v)
+        self._L = - const(dt*dt*alpha_f)*k_(self._u_nm1, v) \
+                  + m1*m_(self._u_nm1, v) + m2*m_(self._v_nm1, v) - m3*m_(self._a_nm1, v)
+
+        self._m0_form = m_(u,v)
+        self._L0_form =-k_(self._u0, v)
+        
+        if not(L is None):
+            self._L += dt_*dt_*L(v)
+            self._L0_form += L(v)
 
         #linear and bilinear forms for damping matrix if given
         if not(c_ is None):
             self._a += c1*c_(u,v)
             self._L += c1*c_(self._u_nm1, v) + c2*c_(self._v_nm1, v) - c3*c_(self._a_nm1, v)
+            self._L0_form -= c_(self._v0, v)
 
         #boundary conditions
         dirichletbcs = [bc for bc in bcs if issubclass(type(bc), fem.DirichletBCMetaClass)]
@@ -85,16 +97,19 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
                 dirichletbcs.append(bc.bc)
             elif bc.type == 'neumann':
                 self._L += dt_*dt_*bc.bc(v)
+                self._L0_form += bc.bc(v)
             elif bc.type == 'robin':
                 F_bc = dt_*dt_*bc.bc(u,v) #TODO: verifier
                 self._a += ufl.lhs(F_bc)
                 self._L += ufl.rhs(F_bc)
+                self._L0_form += bc.bc(self._u0, v)
             elif bc.type == 'dashpot':
                 d1, d2, d3 = dt * gamma/beta, dt**2 * (1 - gamma/beta), dt**3 * (1 - gamma/beta/2)
                 #
                 F_bc = bc.bc(d1*u - d1*self._u_nm1 + d2*self._v_nm1 + d3*self._a_nm1, v)
                 self._a += ufl.lhs(F_bc)
                 self._L += ufl.rhs(F_bc)
+                self._L0_form += bc.bc(self._v0, v)
             else:
                 raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
         
@@ -104,21 +119,9 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
         #
         super().__init__(m_, c_, k_, L, dt, function_space, dirichletbcs, **kwargs)
 
-    def initial_condition(self, u0, v0, t0=0):
-        ###
-        """
-        Apply initial conditions
-        
-        u0: u at t0
-        v0: du/dt at t0
-        t0: start time (default: 0)
-        """
-        self._t = t0
-        self._u_nm1.x.array[:] = u0.x.array
-        #self._u_n.x.array[:]     = u0.x.array #not necessary
-        self._v_n.x.array[:]     = v0.x.array
-        self._a_n.x.array[:]     = v0.x.array #faux, TODO
-
+    @property
+    def a(self): return self._a_n
+    
     def _prepareNextIteration(self):
         """Next-time-step function, to prepare next iteration -> Call it after solving"""
         dt = self.dt
@@ -127,6 +130,8 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
         self._v_n.x.array[:]   = self._v_nm1.x.array + dt*((1-self.gamma)*self._a_nm1.x.array + self.gamma*self._a_garb.x.array)
         self._a_n.x.array[:]   = self._a_garb.x.array
         self._u_nm1.x.array[:] = self._u_n.x.array
+
+
 
 class HilberHughesTaylor(GalphaNewmarkBeta):
     """

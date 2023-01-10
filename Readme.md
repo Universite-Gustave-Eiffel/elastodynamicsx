@@ -1,14 +1,18 @@
 # ElastodynamiCSx 
-ElastodynamiCSx is dedicated to the numerical modeling of wave propagation in solids using the [FEniCSx](https://fenicsproject.org/) Finite Elements library.    
+ElastodynamiCSx is dedicated to the numerical modeling of wave propagation in solids using the [FEniCSx](https://fenicsproject.org/) Finite Elements library. It deals with the following PDE:
+
+$$\mathbf{M}\mathbf{a} + \mathbf{C}\mathbf{v} + \mathbf{K}(\mathbf{u}) = \mathbf{F}$$,
+
+where $\mathbf{u}$, $\mathbf{v}=\partial_t \mathbf{u}$, $\mathbf{a}=\partial_{t^2}\mathbf{u}$ are the displacement, velocity and acceleration fields, and $\mathbf{M}$, $\mathbf{C} and $\mathbf{K} are the mass, damping and stiffness forms. $\mathbf{K}$ may be a non-linear function of $\mathbf{u}.
 
 The module provides high level classes to solve common problems in a few lines code:
-  * Time-domain problems, using the *TimeStepper* class
+  * Time-domain problems, using the **TimeStepper** class
     * Explicit schemes: *leap frog*
     * Implicit schemes: *Newmark-beta*, *midpoint*, *linear acceleration*, *HHT-alpha*, *generalized-alpha*
-  * Eigenmodes problems, using the *ElasticResonanceSolver* class
-  * Common boundary conditions, using the *BoundaryCondition* class
-    * BCs involving **u** and **s.n**: *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
-    * BCs involving **v** and **s.n**: *Dashpot*
+  * Eigenmodes problems, using the **ElasticResonanceSolver** class
+  * Common boundary conditions, using the **BoundaryCondition** class
+    * BCs involving $\mathbf{u}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
+    * BCs involving $\mathbf{v}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Dashpot*
 
 GitHub repository:
 https://github.com/Universite-Gustave-Eiffel/elastodynamicsx
@@ -58,11 +62,10 @@ Other useful references:
     * [FEniCSx electromagnetic demos](https://mikics.github.io/)
     * [NewFrac FEniCSx Training](https://newfrac.gitlab.io/newfrac-fenicsx-training/index.html)
     * [multiphenicsx](https://github.com/multiphenics/multiphenicsx)
+    * [Multi-point constraints with FEniCS-X](https://github.com/jorgensd/dolfinx_mpc)
   * legacy Fenics:
     * [The COmputational MEchanics Toolbox - COMET](https://comet-fenics.readthedocs.io/en/latest/)
     * [The FEniCS solid tutorial](https://fenics-solid-tutorial.readthedocs.io/en/latest/)
-    * https://www2.karlin.mff.cuni.cz/~hron/fenics-tutorial/index.html
+    * [Fenics tutorial, by Jan Blechta and Jaroslav Hron](https://www2.karlin.mff.cuni.cz/~hron/fenics-tutorial/index.html)
 
-## Authors and contributors
-Pierric Mora (admin), Massina Fengal    
 

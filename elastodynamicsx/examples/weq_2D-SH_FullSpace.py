@@ -130,16 +130,12 @@ L  = lambda v  : ufl.dot(F_body, v) * ufl.dx
 
 ###
 # Initial conditions
-u0, v0 = fem.Function(V), fem.Function(V)
-u0.interpolate(lambda x: np.zeros(x.shape[1], dtype=PETSc.ScalarType))
-v0.interpolate(lambda x: np.zeros(x.shape[1], dtype=PETSc.ScalarType))
+z0s = lambda x: np.zeros(x.shape[1], dtype=PETSc.ScalarType)
 #
-F_body.interpolate(F_body_function(tstart))
-###
 
 #  Variational problem
 tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, bcs=bcs, scheme='leapfrog')
-tStepper.initial_condition(u0, v0, t0=tstart)
+tStepper.initial_condition(u0=z0s, v0=z0s, t0=tstart)
 #
 # -----------------------------------------------------
 
@@ -167,9 +163,9 @@ def cfst_updateSources(t, tStepper):
     F_body.interpolate(F_body_function(t))
 
 def cbck_storeFullField(i, tStepper):
-    if storeAllSteps: all_u[i].x.array[:] = tStepper.u.x.array
+    if storeAllSteps: all_u[i+1].x.array[:] = tStepper.u.x.array
 def cbck_storeAtPoints(i, tStepper):
-    if len(points_output_on_proc)>0: signals_at_points[:,:,i] = tStepper.u.eval(points_output_on_proc, cells_output_on_proc)
+    if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = tStepper.u.eval(points_output_on_proc, cells_output_on_proc)
 
 ### enable live plotting
 clim = 0.1*F_0*np.array([-1, 1])
@@ -178,7 +174,7 @@ if len(points_output_on_proc)>0:
     tStepper.live_plotter.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
 
 ### Run the big time loop!
-tStepper.run(num_steps, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFullField, cbck_storeAtPoints])
+tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFullField, cbck_storeAtPoints])
 ### End of big calc.
 #
 # -----------------------------------------------------
@@ -192,7 +188,7 @@ if storeAllSteps: #plotter with a slider to browse through all time steps
     u_n = tStepper.u
     x = u_n.function_space.tabulate_dof_coordinates()
     r = np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)
-    all_u_n_exact = u_2D_SH_rt(r, np.roll(src_t(dt*np.arange(num_steps)), -2), rho.value, mu.value, dt, fn_kdomain_finite_size)
+    all_u_n_exact = u_2D_SH_rt(r, src_t(dt*np.arange(num_steps)), rho.value, mu.value, dt, fn_kdomain_finite_size)
     #
     plotter = CustomScalarPlotter(u_n, u_n, u_n, labels=('FE', 'Exact', 'Diff.'), clim=clim)
     def updateTStep(value):
@@ -211,7 +207,7 @@ if len(points_output_on_proc)>0:
     ### -> Exact solution, At few points
     x = points_output_on_proc
     r = np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)
-    signals_at_points_exact = u_2D_SH_rt(r, np.roll(src_t(dt*np.arange(num_steps)), -2), rho.value, mu.value, dt, fn_kdomain_finite_size)
+    signals_at_points_exact = u_2D_SH_rt(r, src_t(dt*np.arange(num_steps)), rho.value, mu.value, dt, fn_kdomain_finite_size)
     #
     fig, ax = plt.subplots(1,1)
     t = dt*np.arange(num_steps)

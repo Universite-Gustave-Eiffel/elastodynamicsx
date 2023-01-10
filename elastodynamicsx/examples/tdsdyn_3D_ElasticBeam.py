@@ -45,7 +45,7 @@ V = fem.VectorFunctionSpace(domain, ("CG", 1))
 T_N  = fem.Constant(domain, np.array([0]*3, dtype=PETSc.ScalarType)) #normal traction (Neumann boundary condition)
 bc_l    = BoundaryCondition(V, facet_tags, 'Clamp'  , 1)
 bc_r    = BoundaryCondition(V, facet_tags, 'Neumann', 2, T_N)
-bc_free = BoundaryCondition(V, facet_tags, 'Free'  , (3,4,5,6))
+bc_free = BoundaryCondition(V, facet_tags, 'Free'   , (3,4,5,6))
 bcs = [bc_l, bc_r, bc_free]
 #
 # -----------------------------------------------------
@@ -90,6 +90,11 @@ T_N_function = lambda t: src_t(t) * F_0
 T       = 4
 Nsteps  = 50
 dt = T/Nsteps
+
+# Generalized-alpha method parameters
+alpha_m = 0.2
+alpha_f = 0.4
+kwargsTScheme = dict(scheme='g-a-newmark', alpha_m=alpha_m, alpha_f=alpha_f)
 #
 # -----------------------------------------------------
 
@@ -111,20 +116,11 @@ L  = lambda v  : ufl.dot(F_body, v) * ufl.dx
 
 ###
 # Initial conditions
-u0, v0 = fem.Function(V), fem.Function(V)
-u0.interpolate(lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType))
-v0.interpolate(lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType))
-#
-T_N.value = T_N_function(0)
-###
-
-# Generalized-alpha method parameters
-alpha_m = 0.2
-alpha_f = 0.4
+z0s = lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType)
 
 #  Variational problem
-tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, bcs=bcs, scheme='g-a-newmark', alpha_m=alpha_m, alpha_f=alpha_f)
-tStepper.initial_condition(u0, v0, t0=0)
+tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, bcs=bcs, **kwargsTScheme)
+tStepper.initial_condition(u0=z0s, v0=z0s, t0=0)
 #tStepper.solver.view()
 #
 # -----------------------------------------------------
@@ -174,7 +170,7 @@ tStepper.run(Nsteps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtP
 
 # Plot energies evolution
 plt.figure()
-plt.plot(dt*np.arange(energies.shape[0]), energies)
+plt.plot(dt*np.arange(energies.shape[0]), energies, marker='o', ms=5)
 plt.legend(("elastic", "kinetic", "damping", "total"))
 plt.xlabel("Time")
 plt.ylabel("Energies")

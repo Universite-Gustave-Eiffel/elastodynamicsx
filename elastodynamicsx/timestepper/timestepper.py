@@ -15,8 +15,13 @@ class TimeStepper:
     """
     Base class for solving time-dependent problems.
     """
+    
+    ### --------------------------
+    ### --------- static ---------
+    ### --------------------------
 
     labels = ['supercharge me']
+    petsc_options_t0 = {"ksp_type": "preonly", "pc_type": "lu"} #PETSc options to solve a0 = M_inv.(F(t0) - C.v0 - K(u0))
     
     def build(*args, **kwargs):
         """
@@ -48,9 +53,15 @@ class TimeStepper:
         """
         V = function_space
         if V.num_sub_spaces >0: V = V.sub(0)
-        u, v = ufl.TrialFunction(V), ufl.TestFunction(V)
+        v = ufl.TestFunction(V)
         return V.mesh.comm.allreduce( np.amax(fem.assemble_vector(fem.form(v*dt*c_max/ufl.CellDiameter(V)/ufl.CellVolume(V)*ufl.dx)).array) , op=MPI.MAX)
 
+
+
+    ### --------------------------
+    ### ------- non-static -------
+    ### --------------------------
+    
     def __init__(self, m_, c_, k_, L, dt, function_space, bcs=[], **kwargs):
         """
         **kwargs:
@@ -59,7 +70,7 @@ class TimeStepper:
                 **kwargs: to be passed to pyvista.add_mesh
         """
         #
-        self._t = 0
+        self._t   = 0
         self._dt  = dt
         self._bcs = bcs
         self._m_function = m_
@@ -72,7 +83,10 @@ class TimeStepper:
         self.live_plotter_step = 0
         ###
         #note: any inherited class must define the following attributes:
-        #        self._u_n, self._v_n, self._a_n, self.linear_form, self.bilinear_form
+        #        self._u_n, self._v_n, self._a_n,
+        #        self.linear_form, self.bilinear_form,
+        #        self._u0, self._v0, self._a0
+        #        self._m0_form, self._L0_form
         ###
         #
         self._compile()
@@ -89,9 +103,6 @@ class TimeStepper:
 
     @property
     def v(self): return self._v_n
-
-    @property
-    def a(self): return self._a_n
     
     def Energy_elastic(self):
         domain = self.u.function_space.mesh
@@ -106,7 +117,20 @@ class TimeStepper:
         domain = self.u.function_space.mesh
         return domain.comm.allreduce( fem.assemble_scalar(fem.form( 1/2* self._m_function(self.v, self.v) )) , op=MPI.SUM)
     
-    def initial_condition(self, u, du, t0=0): print('Supercharge me')
+    def initial_condition(self, u0, v0, t0=0):
+        ###
+        """
+        Apply initial conditions
+        
+        u0: u at t0
+        v0: du/dt at t0
+        t0: start time (default: 0)
+        """
+        self._t = t0
+        if type(u0) == type(lambda x:x): self._u0.interpolate(u0)
+        else:                            self._u0.x.array[:] = u0.x.array
+        if type(v0) == type(lambda x:x): self._v0.interpolate(v0)
+        else:                            self._v0.x.array[:] = v0.x.array
 
     def _cbck_livePlot_scalar(self, i, tStepper):
         # Viewing while calculating: Update plotter
@@ -139,10 +163,9 @@ class TimeStepper:
     
     def run(self, num_steps, **kwargs): print('Supercharge me')
 
-
     def set_live_plotter(self, live_plotter_step=1, **kwargs):
         """
-        Enable and configure the plotter for displaying the current result within the run() loop
+        Enable and configure the plotter to display the current result within the run() loop
         
         live_plotter_step: step for refreshing the plot.
             >=0 means no live plot, 1 means refresh at each step, 10 means refresh each 10 steps, ...
@@ -161,6 +184,9 @@ class TimeStepper:
                 self.live_plotter = CustomVectorPlotter(self.u, **kwargs)
                 self._callbacks.append(self._cbck_livePlot_vector)
 
+
+
+
 class OneStepTimeStepper(TimeStepper):
     """
     Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).
@@ -168,10 +194,29 @@ class OneStepTimeStepper(TimeStepper):
     
     def __init__(self, m_, c_, k_, L, dt, function_space, bcs=[], **kwargs):
         #
+        self._i0 = 0
         self._intermediate_dt = 0
         super().__init__(m_, c_, k_, L, dt, function_space, bcs, **kwargs)
 
     def _prepareNextIteration(self): print('Supercharge me')
+    def _initialStep(self, callfirsts, callbacks, verbose=0):
+        """Specific to the initial value step"""
+        
+        ### -------------------------------------------------
+        #   --- first step: given u0 and v0, solve for a0 ---
+        ### -------------------------------------------------
+        #
+        if verbose >= 10: PETSc.Sys.Print('Solving the initial value step')
+        if verbose >= 10: PETSc.Sys.Print('Callfirsts...')
+        for callfirst in callfirsts: callfirst(self.t - 0*self._intermediate_dt, self) #<- update stuff #F_body.interpolate(F_body_function(t))
+        
+        problem = fem.petsc.LinearProblem(self._m0_form, self._L0_form, bcs=self._bcs, u=self._a0, petsc_options=TimeStepper.petsc_options_t0)
+        problem.solve() #known: u0, v0. Solve for a0. u1 requires to solve a new system (loop)
+        
+        if verbose >= 10: PETSc.Sys.Print('Initial value problem solved, entering loop')
+        #no callback because u1 is not solved yet
+        #
+        ### -------------------------------------------------
 
     def run(self, num_steps, **kwargs):
         """
@@ -201,7 +246,9 @@ class OneStepTimeStepper(TimeStepper):
         if self.live_plotter_step > 0:
             self.live_plotter.show(interactive_update=True)
         
-        for i in tqdm(range(num_steps)):
+        self._initialStep(callfirsts, callbacks, verbose=verbose)
+        
+        for i in tqdm(range(self._i0, num_steps)):
             self._t += self.dt
             
             if verbose >= 10: PETSc.Sys.Print('Callfirsts...')
