@@ -128,14 +128,9 @@ k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
 L  = lambda v  : ufl.dot(F_body, v) * ufl.dx
 ###
 
-###
-# Initial conditions
-z0s = lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType)
-#
-
 #  Variational problem
 tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, bcs=bcs, scheme='leapfrog')
-tStepper.initial_condition(u0=z0s, v0=z0s, t0=tstart)
+tStepper.initial_condition(u0=[0,0], v0=[0,0], t0=tstart)
 #
 # -----------------------------------------------------
 

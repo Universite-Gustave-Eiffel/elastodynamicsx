@@ -114,13 +114,9 @@ c_ = lambda u,v: eta_m*m_(u,v) + eta_k*k_(u,v)
 L  = lambda v  : ufl.dot(F_body, v) * ufl.dx
 ###
 
-###
-# Initial conditions
-z0s = lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType)
-
 #  Variational problem
 tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, bcs=bcs, **kwargsTScheme)
-tStepper.initial_condition(u0=z0s, v0=z0s, t0=0)
+tStepper.initial_condition(u0=[0,0,0], v0=[0,0,0], t0=0)
 #tStepper.solver.view()
 #
 # -----------------------------------------------------

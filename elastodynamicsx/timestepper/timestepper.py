@@ -125,12 +125,31 @@ class TimeStepper:
         u0: u at t0
         v0: du/dt at t0
         t0: start time (default: 0)
+        
+        u0 and v0 can be:
+            - function -> interpolated at nodes
+                       -> e.g. u0 = lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType)
+            - scalar (int, float, complex, PETSc.ScalarType)
+                       -> e.g. u0 = 0
+            - array (list, tuple, np.ndarray) or fem.function.Constant
+                       -> e.g. u0 = [0,0,0]
+            - fem.function.Function
+                       -> e.g. u0 = fem.Function(V)
         """
         self._t = t0
-        if type(u0) == type(lambda x:x): self._u0.interpolate(u0)
-        else:                            self._u0.x.array[:] = u0.x.array
-        if type(v0) == type(lambda x:x): self._v0.interpolate(v0)
-        else:                            self._v0.x.array[:] = v0.x.array
+        for selfVal, val in ((self._u0, u0), (self._v0, v0)):
+            if   type(val) == type(lambda x:x):
+                selfVal.interpolate(val)
+            elif issubclass(type(val), fem.function.Constant):
+                selfVal.x.array[:] = np.tile(val.value, np.size(selfVal.x.array)//np.size(val.value))
+            elif type(val) in (list, tuple, np.ndarray):
+                selfVal.x.array[:] = np.tile(val, np.size(selfVal.x.array)//np.size(val))
+            elif type(val) in (int, float, complex, PETSc.ScalarType):
+                selfVal.x.array[:] = val
+            elif issubclass(type(val), fem.function.Function):
+                selfVal.x.array[:] = val.x.array
+            else:
+                raise TypeError("Unknown type of initial value "+str(type(val)))
 
     def _cbck_livePlot_scalar(self, i, tStepper):
         # Viewing while calculating: Update plotter
