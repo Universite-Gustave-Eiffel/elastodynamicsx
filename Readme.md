@@ -5,17 +5,18 @@ $$\mathbf{M}\mathbf{a} + \mathbf{C}\mathbf{v} + \mathbf{K}(\mathbf{u}) = \mathbf
 
 where $\mathbf{u}$, $\mathbf{v}=\partial_t \mathbf{u}$, $\mathbf{a}=\partial_{t^2}\mathbf{u}$ are the displacement, velocity and acceleration fields, $\mathbf{M}$, $\mathbf{C}$ and $\mathbf{K}$ are the mass, damping and stiffness forms, and $\mathbf{F}$ is an applied force. $\mathbf{K}$ may be a non-linear function of $\mathbf{u}$. Various kinds of boundary conditions are supported.
 
-The module provides high level classes to solve common problems in a few lines code:
-  * Time-domain problems, using the **TimeStepper** class
-    * Explicit schemes: *leap frog*
-    * Implicit schemes: *Newmark-beta*, *midpoint*, *linear acceleration*, *HHT-alpha*, *generalized-alpha*
-  * Eigenmodes problems, using the **ElasticResonanceSolver** class
+The module provides high level classes to build and solve common problems in a few lines code:
+
+**build**
   * Common boundary conditions, using the **BoundaryCondition** class
     * BCs involving $\mathbf{u}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
     * BCs involving $\mathbf{v}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Dashpot*
 
-GitHub repository:
-https://github.com/Universite-Gustave-Eiffel/elastodynamicsx
+**solve**
+  * Time-domain problems, using the **TimeStepper** class
+    * Explicit schemes: *leap frog*
+    * Implicit schemes: *Newmark-beta*, *midpoint*, *linear acceleration*, *HHT-alpha*, *generalized-alpha*
+  * Eigenmodes problems, using the **ElasticResonanceSolver** class
 
 ## Dependencies
 ElastodynamiCSx requires FEnicsX / dolfinx v0.4.1 -> see [instructions here](https://github.com/FEniCS/dolfinx#installation)  

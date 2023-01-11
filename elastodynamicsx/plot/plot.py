@@ -39,12 +39,14 @@ class CustomScalarPlotter(pyvista.Plotter):
     
     def __init__(self, *all_scalars, **kwargs):
         self.grids=[]
+        dims = []
         for u_ in all_scalars:
             if u_ is None: break
             topology, cell_types, geom = plot.create_vtk_mesh(u_.function_space)
             grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
             grid.point_data["u"] = u_.x.array
             self.grids.append(grid)
+            dims.append(u_.function_space.mesh.topology.dim)
         
         if len(self.grids)==1:
             defaultShape = (1,1)
@@ -58,12 +60,13 @@ class CustomScalarPlotter(pyvista.Plotter):
         show_edges = kwargs.pop('show_edges', True)
         cmap = kwargs.pop('cmap', plt.cm.get_cmap("viridis", 25))
         sargs = dict(title_font_size=25, label_font_size=20, fmt="%.2e", color="black", position_x=0.1, position_y=0.8, width=0.8, height=0.1)
-        for i,grid in enumerate(self.grids):
+        for i,(grid,dim) in enumerate(zip(self.grids, dims)):
             if len(self.grids)>1: self.subplot(i)
             self.add_text(labels[i])
             self.add_mesh(grid, scalars='u', show_edges=((i==0) and show_edges), lighting=False, scalar_bar_args=sargs, cmap=cmap, **kwargs)
-            self.view_xy()
-            self.camera.zoom(1.3)
+            if dim<3:
+                self.view_xy()
+                self.camera.zoom(1.3)
 
         if len(self.grids)>1: self.subplot(0) #resets the focus to first subplot
 
@@ -72,6 +75,16 @@ class CustomScalarPlotter(pyvista.Plotter):
             super().update_scalars(u_, mesh=grid, render=False)
         if kwargs.get('render', True):
             self.render()
+
+    def add_time_browser(self, update_fields_function, timesteps, **kwargs_slider):
+        self._time_browser_cbck  = update_fields_function
+        self._time_browser_times = timesteps
+        def updateTStep(value):
+            i = np.argmin(np.abs(value-self._time_browser_times))
+            updated_fields = self._time_browser_cbck(i)
+            self.update_scalars(*updated_fields)
+        self.add_slider_widget(updateTStep, [timesteps[0], timesteps[-1]], **kwargs_slider)
+
 
 
 class CustomVectorPlotter(pyvista.Plotter):
@@ -131,6 +144,17 @@ class CustomVectorPlotter(pyvista.Plotter):
             super().update_scalars(np.linalg.norm(u3D, axis=1), mesh=grid.warped, render=False)
         if render:
             self.render()
+
+    def add_time_browser(self, update_fields_function, timesteps, **kwargs_slider):
+        self._time_browser_cbck  = update_fields_function
+        self._time_browser_times = timesteps
+        def updateTStep(value):
+            i = np.argmin(np.abs(value-self._time_browser_times))
+            updated_fields = self._time_browser_cbck(i)
+            self.update_vectors(*updated_fields)
+        self.add_slider_widget(updateTStep, [timesteps[0], timesteps[-1]], **kwargs_slider)
+        
+        
 
 def get_3D_array_from_FEFunction(u_):
     #u_ is a fem.Function

@@ -139,7 +139,7 @@ tStepper.initial_condition(u0=0, v0=0, t0=tstart)
 #                    define outputs
 # -----------------------------------------------------
 ### -> Store all time steps ? -> YES if debug & learning // NO if big calc.
-storeAllSteps = False
+storeAllSteps = True
 all_u = [fem.Function(V) for i in range(num_steps)] if storeAllSteps else None #all steps are stored here
 #
 ### -> Extract signals at few points
@@ -180,16 +180,16 @@ tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_store
 # -----------------------------------------------------
 if storeAllSteps: #plotter with a slider to browse through all time steps
     ### -> Exact solution, Full field
-    u_n = tStepper.u
-    x = u_n.function_space.tabulate_dof_coordinates()
+    x = tStepper.u.function_space.tabulate_dof_coordinates()
     r = np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)
-    all_u_n_exact = u_2D_SH_rt(r, src_t(dt*np.arange(num_steps)), rho.value, mu.value, dt, fn_kdomain_finite_size)
-    #
-    plotter = CustomScalarPlotter(u_n, u_n, u_n, labels=('FE', 'Exact', 'Diff.'), clim=clim)
-    def updateTStep(value):
-        i = int((value-tstart)/dt)
-        plotter.update_scalars(all_u[i].x.array, all_u_n_exact[:,i], all_u[i].x.array-all_u_n_exact[:,i])
-    plotter.add_slider_widget(updateTStep, [tstart, tmax-dt])
+    t = dt*np.arange(num_steps)
+    all_u_n_exact = u_2D_SH_rt(r, src_t(t), rho.value, mu.value, dt, fn_kdomain_finite_size)
+    
+    def update_fields_function(i):
+        return (all_u[i].x.array, all_u_n_exact[:,i], all_u[i].x.array-all_u_n_exact[:,i])
+    
+    plotter = CustomScalarPlotter(tStepper.u, tStepper.u, tStepper.u, labels=('FE', 'Exact', 'Diff.'), clim=clim)
+    plotter.add_time_browser(t, update_fields_function)
     plotter.show()
 #
 # -----------------------------------------------------
@@ -202,10 +202,10 @@ if len(points_output_on_proc)>0:
     ### -> Exact solution, At few points
     x = points_output_on_proc
     r = np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)
-    signals_at_points_exact = u_2D_SH_rt(r, src_t(dt*np.arange(num_steps)), rho.value, mu.value, dt, fn_kdomain_finite_size)
+    t = dt*np.arange(num_steps)
+    signals_at_points_exact = u_2D_SH_rt(r, src_t(t), rho.value, mu.value, dt, fn_kdomain_finite_size)
     #
     fig, ax = plt.subplots(1,1)
-    t = dt*np.arange(num_steps)
     ax.set_title('Signals at few points')
     for i in range(len(signals_at_points)):
         ax.plot(t, signals_at_points[i,0,:],     c='C'+str(i), ls='-') #FEM

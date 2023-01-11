@@ -179,18 +179,18 @@ tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_store
 # -----------------------------------------------------
 #     Interactive view of all time steps if stored
 # -----------------------------------------------------
-if storeAllSteps: #add a slider to browse through all time steps
+if storeAllSteps: #plotter with a slider to browse through all time steps
     ### -> Exact solution, Full field
-    u_n = tStepper.u
-    x = u_n.function_space.tabulate_dof_coordinates()
-    all_u_n_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], src_t(dt*np.arange(num_steps)), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
-    #
-    plotter = CustomVectorPlotter(u_n, u_n, u_n, labels=('FE', 'Exact', 'Diff.'), **kwplot)
-    def updateTStep(value):
-        i = int((value-tstart)/dt)
-        plotter.update_vectors( all_u[i].x.array, all_u_n_exact[:,:,i].flatten(), all_u[i].x.array-all_u_n_exact[:,:,i].flatten() )
-    plotter.add_slider_widget(updateTStep, [tstart, tmax-dt])
-    plotter.show(interactive_update=False) #important de desactiver le interactive_update sinon l'appel n'est pas bloquant et le programme se termine
+    x = tStepper.u.function_space.tabulate_dof_coordinates()
+    t = dt*np.arange(num_steps)
+    all_u_n_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], src_t(t), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
+    
+    def update_fields_function(i):
+        return (all_u[i].x.array, all_u_n_exact[:,:,i].flatten(), all_u[i].x.array-all_u_n_exact[:,:,i].flatten())
+    
+    plotter = CustomVectorPlotter(tStepper.u, tStepper.u, tStepper.u, labels=('FE', 'Exact', 'Diff.'), clim=clim)
+    plotter.add_time_browser(t, update_fields_function)
+    plotter.show()
 #
 # -----------------------------------------------------
 
@@ -201,13 +201,13 @@ if storeAllSteps: #add a slider to browse through all time steps
 if len(points_output_on_proc)>0:
     ### -> Exact solution, At few points
     x = points_output_on_proc
-    signals_at_points_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], src_t(dt*np.arange(num_steps)), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
+    t = dt*np.arange(num_steps)
+    signals_at_points_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], src_t(t), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
     #
     fig, ax = plt.subplots(1,1)
-    t = dt*np.arange(num_steps)
     ax.set_title('Signals at few points')
     for i in range(len(signals_at_points)):
-        ax.plot(t, signals_at_points[i,0,:], c='C'+str(i), ls='-') #FEM
+        ax.plot(t, signals_at_points[i,0,:],       c='C'+str(i), ls='-') #FEM
         ax.plot(t, signals_at_points_exact[i,0,:], c='C'+str(i), ls='--') #exact
     ax.set_xlabel('Time')
     plt.show()
