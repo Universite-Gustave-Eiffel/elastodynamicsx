@@ -13,7 +13,7 @@ import numpy as np
 import pyvista
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import BoundaryCondition
+from elastodynamicsx.pde import BoundaryCondition, PDE, BodyForce, ScalarLinearMaterial
 from elastodynamicsx.timestepper import TimeStepper
 from elastodynamicsx.plot import CustomScalarPlotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
@@ -43,6 +43,9 @@ V = fem.FunctionSpace(domain, ("CG", 2))
 rho     = fem.Constant(domain, PETSc.ScalarType(1))
 mu      = fem.Constant(domain, PETSc.ScalarType(1))
 #lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
+
+mat   = ScalarLinearMaterial(V, rho, mu)
+materials = [mat]
 #
 # -----------------------------------------------------
 
@@ -50,11 +53,11 @@ mu      = fem.Constant(domain, PETSc.ScalarType(1))
 # -----------------------------------------------------
 #                 Boundary conditions
 # -----------------------------------------------------
-Z = ufl.sqrt(rho*mu) #mechanical impedance
-bc_l = BoundaryCondition(V, facet_tags, 'Dashpot', 1, Z)
-bc_r = BoundaryCondition(V, facet_tags, 'Dashpot', 2, Z)
-bc_b = BoundaryCondition(V, facet_tags, 'Dashpot', 3, Z)
-bc_t = BoundaryCondition(V, facet_tags, 'Dashpot', 4, Z)
+Z = mat.Z #mechanical impedance
+bc_l = BoundaryCondition((V, facet_tags, 1), 'Dashpot', Z)
+bc_r = BoundaryCondition((V, facet_tags, 2), 'Dashpot', Z)
+bc_b = BoundaryCondition((V, facet_tags, 3), 'Dashpot', Z)
+bc_t = BoundaryCondition((V, facet_tags, 4), 'Dashpot', Z)
 bcs = [bc_l, bc_r, bc_b, bc_t]
 #
 # -----------------------------------------------------
@@ -86,7 +89,12 @@ src_t = lambda t: np.sin(2*np.pi*f0 * t) * np.sin(np.pi*t/d0)**2 * (t<d0) * (t>0
 F_0 = 1 #amplitude of the source
 #
 def F_body_function(t): return lambda x: F_0 * src_t(t) * src_x(x) #source(x) at a given time
-#
+
+### Body force 'F_body'
+F_body = fem.Function(V) #body force
+gaussianBF = BodyForce(V, None, None, F_body)
+
+bodyforces = [gaussianBF]
 # -----------------------------------------------------
 
 
@@ -116,20 +124,10 @@ print('CFL condition: Courant number = ', round(TimeStepper.CFL(V, ufl.sqrt(mu/r
 # -----------------------------------------------------
 #                        PDE
 # -----------------------------------------------------
-### Body force 'F_body'
-F_body = fem.Function(V) #body force
+pde = PDE(materials=materials, bodyforces=bodyforces)
 
-def epsilon(u): return ufl.nabla_grad(u)
-def sigma(u): return mu*epsilon(u)
-
-m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
-c_ = None
-k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
-L  = lambda v  : ufl.dot(F_body, v) * ufl.dx
-###
-
-#  Variational problem
-tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, bcs=bcs, scheme='leapfrog')
+#  Time integration
+tStepper = TimeStepper.build(pde.m, pde.c, pde.k, pde.L, dt, V, bcs=bcs, scheme='leapfrog')
 tStepper.initial_condition(u0=0, v0=0, t0=tstart)
 #
 # -----------------------------------------------------
@@ -189,7 +187,7 @@ if storeAllSteps: #plotter with a slider to browse through all time steps
         return (all_u[i].x.array, all_u_n_exact[:,i], all_u[i].x.array-all_u_n_exact[:,i])
     
     plotter = CustomScalarPlotter(tStepper.u, tStepper.u, tStepper.u, labels=('FE', 'Exact', 'Diff.'), clim=clim)
-    plotter.add_time_browser(t, update_fields_function)
+    plotter.add_time_browser(update_fields_function, t)
     plotter.show()
 #
 # -----------------------------------------------------

@@ -12,7 +12,7 @@ from mpi4py import MPI
 from petsc4py import PETSc
 import numpy as np
 
-from elastodynamicsx.pde import BoundaryCondition
+from elastodynamicsx.pde import BoundaryCondition, IsotropicElasticMaterial
 from elastodynamicsx.eigensolver import ElasticResonanceSolver
 from elastodynamicsx.utils import make_facet_tags
 
@@ -35,7 +35,7 @@ boundaries = [(1, lambda x: np.isclose(x[0], 0 )),\
               (6, lambda x: np.isclose(x[2], H_))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-V = fem.VectorFunctionSpace(domain, ("CG", 3))
+V = fem.VectorFunctionSpace(domain, ("CG", 2))
 #
 # -----------------------------------------------------
 
@@ -43,7 +43,7 @@ V = fem.VectorFunctionSpace(domain, ("CG", 3))
 # -----------------------------------------------------
 #                 Boundary condition
 # -----------------------------------------------------
-bc_l = BoundaryCondition(V, facet_tags, 'Clamp'  , 1)
+bc_l = BoundaryCondition((V, facet_tags, 1), 'Clamp')
 bcs  = [bc_l]
 #
 # -----------------------------------------------------
@@ -61,6 +61,8 @@ mu      = E / 2 / (1 + nu)
 rho     = fem.Constant(domain, PETSc.ScalarType(rho))
 lambda_ = fem.Constant(domain, PETSc.ScalarType(lambda_))
 mu      = fem.Constant(domain, PETSc.ScalarType(mu))
+
+material = IsotropicElasticMaterial(V, rho, lambda_, mu)
 #
 # -----------------------------------------------------
 
@@ -69,7 +71,7 @@ mu      = fem.Constant(domain, PETSc.ScalarType(mu))
 #                       Solve
 # -----------------------------------------------------
 ### Initialize the solver
-eps = ElasticResonanceSolver.build_isotropicMaterial(rho, lambda_, mu, V, bcs=bcs, nev=6)
+eps = ElasticResonanceSolver(material.m, material.k, V, bcs=bcs, nev=6)
 
 ### Run the big calculation!
 eps.solve()

@@ -13,7 +13,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import BoundaryCondition
+from elastodynamicsx.pde import BoundaryCondition, PDE, BodyForce, IsotropicElasticMaterial, Damping
 from elastodynamicsx.timestepper import TimeStepper
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
 
@@ -43,9 +43,9 @@ V = fem.VectorFunctionSpace(domain, ("CG", 1))
 #                 Boundary conditions
 # -----------------------------------------------------
 T_N  = fem.Constant(domain, np.array([0]*3, dtype=PETSc.ScalarType)) #normal traction (Neumann boundary condition)
-bc_l    = BoundaryCondition(V, facet_tags, 'Clamp'  , 1)
-bc_r    = BoundaryCondition(V, facet_tags, 'Neumann', 2, T_N)
-bc_free = BoundaryCondition(V, facet_tags, 'Free'   , (3,4,5,6))
+bc_l    = BoundaryCondition((V, facet_tags, 1), 'Clamp')
+bc_r    = BoundaryCondition((V, facet_tags, 2), 'Neumann', T_N)
+bc_free = BoundaryCondition((V, facet_tags, (3,4,5,6)), 'Free')
 bcs = [bc_l, bc_r, bc_free]
 #
 # -----------------------------------------------------
@@ -65,12 +65,14 @@ mu      = fem.Constant(domain, PETSc.ScalarType(mu))
 # Rayleigh damping coefficients
 eta_m = fem.Constant(domain, PETSc.ScalarType(0.01))
 eta_k = fem.Constant(domain, PETSc.ScalarType(0.01))
+
+material = IsotropicElasticMaterial(V, rho, lambda_, mu, damping=Damping.build('Rayleigh', eta_m, eta_k))
 #
 # -----------------------------------------------------
 
 
 # -----------------------------------------------------
-#                    Source term
+#               (boundary) Source term
 # -----------------------------------------------------
 ### -> Time function
 #
@@ -102,20 +104,10 @@ kwargsTScheme = dict(scheme='g-a-newmark', alpha_m=alpha_m, alpha_f=alpha_f)
 # -----------------------------------------------------
 #                        PDE
 # -----------------------------------------------------
-### Body force 'F_body'
-F_body = fem.Constant(domain, PETSc.ScalarType((0,0,0))) #body force
+pde = PDE(materials=[material], bodyforces=[])
 
-def epsilon(u): return ufl.sym(ufl.grad(u))
-def sigma(u): return lambda_ * ufl.nabla_div(u) * ufl.Identity(u.geometric_dimension()) + 2*mu*epsilon(u)
-
-m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
-k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
-c_ = lambda u,v: eta_m*m_(u,v) + eta_k*k_(u,v)
-L  = lambda v  : ufl.dot(F_body, v) * ufl.dx
-###
-
-#  Variational problem
-tStepper = TimeStepper.build(m_, c_, k_, L, dt, V, bcs=bcs, **kwargsTScheme)
+#  Time integration
+tStepper = TimeStepper.build(pde.m, pde.c, pde.k, pde.L, dt, V, bcs=bcs, **kwargsTScheme)
 tStepper.initial_condition(u0=[0,0,0], v0=[0,0,0], t0=0)
 #tStepper.solver.view()
 #

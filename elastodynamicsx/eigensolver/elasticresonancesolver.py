@@ -20,32 +20,19 @@ class ElasticResonanceSolver(SLEPc.EPS):
         from dolfinx import mesh, fem
         from mpi4py import MPI
         from elastodynamicsx.eigensolver import ElasticResonanceSolver
+        from elastodynamicsx.pde import IsotropicElasticMaterial
         #
         domain = dolfinx.mesh.create_box(MPI.COMM_WORLD, [[0., 0., 0.], [1., 1., 1.]], [10, 10, 10])
         V = dolfinx.fem.VectorFunctionSpace(domain, ("CG", 1))
         #
         rho, lambda_, mu = 1, 2, 1
-        eps = ElasticResonanceSolver.build_isotropicMaterial(rho, lambda_, mu, V, bcs=[], nev=6+6) #the first 6 resonances are rigid body motion
+        material = IsotropicElasticMaterial(V, rho, lambda_, mu)
+        eps = ElasticResonanceSolver(material.m, material.k, V, bcs=[], nev=6+6) #the first 6 resonances are rigid body motion
         eps.solve()
         eps.plot()
         freqs = eps.getEigenfrequencies()
         print('First resonance frequencies:', freqs)
     """
-
-    def build_isotropicMaterial(rho, lambda_, mu, function_space, bcs=[], **kwargs):
-        """
-        Convenience static method that instanciates a ElasticResonanceSolver for given isotropic mechanical properties
-        """
-        # -----------------------------------------------------
-        #                        PDE
-        # -----------------------------------------------------
-        def epsilon(u): return ufl.sym(ufl.grad(u))
-        def sigma(u): return lambda_ * ufl.nabla_div(u) * ufl.Identity(u.geometric_dimension()) + 2*mu*epsilon(u)
-        
-        m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
-        k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
-        ###
-        return ElasticResonanceSolver(m_, k_, function_space, bcs=bcs, **kwargs)
 
     def __init__(self, m_, k_, function_space, bcs=[], **kwargs):
         """

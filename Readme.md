@@ -11,6 +11,12 @@ The module provides high level classes to build and solve common problems in a f
   * Common boundary conditions, using the **BoundaryCondition** class
     * BCs involving $\mathbf{u}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
     * BCs involving $\mathbf{v}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Dashpot*
+  * Common material laws, using the **Material** class
+    * linear: scalar, isotropic elasticity
+      * damping laws: Rayleigh damping
+    * hyperelastic: in the near future...
+  * **BodyForce** class
+  * **PDE** class: Automatic assembly of several materials and body loads
 
 **solve**
   * Time-domain problems, using the **TimeStepper** class
