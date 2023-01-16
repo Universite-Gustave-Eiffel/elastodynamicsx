@@ -7,7 +7,7 @@ where $\mathbf{u}$, $\mathbf{v}=\partial_t \mathbf{u}$, $\mathbf{a}=\partial_{t^
 
 The module provides high level classes to build and solve common problems in a few lines code:
 
-**build**
+build problems using the **pde** package:
   * Common boundary conditions, using the **BoundaryCondition** class
     * BCs involving $\mathbf{u}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
     * BCs involving $\mathbf{v}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Dashpot*
@@ -18,7 +18,7 @@ The module provides high level classes to build and solve common problems in a f
   * **BodyForce** class
   * **PDE** class: Automatic assembly of several materials and body loads
 
-**solve**
+solve problems using the **solvers** package:
   * Time-domain problems, using the **TimeStepper** class
     * Explicit schemes: *leap frog*
     * Implicit schemes: *Newmark-beta*, *midpoint*, *linear acceleration*, *HHT-alpha*, *generalized-alpha*
@@ -37,13 +37,64 @@ ElastodynamiCSx requires FEnicsX / dolfinx v0.4.1 -> see [instructions here](htt
 **tqdm**
 
 ## Installation
-Clone the repository:
+# With Fenicsx binaries installed
+Clone the repository and install the package:
 ```bash
 git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
-```
-and install the package:
-```bash
 pip3 install .
+```
+# Inside a Fenicsx Docker image
+For the time being the idea is to create a container from a dolfinx image and add elastodynmicsx into it. In the future the following lines should be replaced with a Dockerfile.
+At first time:
+```bash
+#create a shared directory for the docker container
+$shareddir=docker_elastodynamicsx
+mkdir $shareddir
+cd $shareddir
+
+#pull the code
+git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
+
+#grant access to root to the graphical backend (the username inside the container will be 'root')
+#without this access matplotlib and pyvista won't display
+xhost + si:localuser:root
+
+#create a container named 'ElastodynamiCSx' from the dolfinx/dolfinx:stable image
+docker run -it --name ElastodynamiCSx --ipc=host --net=host --env="DISPLAY" -v $(pwd):/root/shared -w /root/shared --volume="$HOME/.Xauthority:/root/.Xauthority:rw" dolfinx/dolfinx:stable /bin/bash
+
+###
+#at this point we are inside the 'ElastodynamiCSx' container
+#
+#-> expand the container with new packages
+###
+
+#get tkinter for the 'TkAgg' matplotlib backend
+apt-get update
+apt-get install python3-tk
+
+#install the code
+cd elastodynamicsx/
+pip3 install .
+pip3 install tqdm
+cd ..
+
+#test
+python3 elastodynamicsx/elastodynamicsx/examples/weq_2D-SH_FullSpace.py
+```
+The other times we just re-use the container:
+```bash
+#grant access to root to graphical backend for plotting inside the container
+#this command needs to be re-run only once after reboot
+xhost + si:localuser:root
+
+#start the 'ElastodynamiCSx' container
+docker start ElastodynamiCSx
+
+#executes the container from the current shell tab or from any other one, possibly from several tabs or windows simultaneously
+docker exec -ti ElastodynamiCSx bash
+
+#test
+python3 elastodynamicsx/elastodynamicsx/examples/weq_2D-SH_FullSpace.py
 ```
 
 ## Examples

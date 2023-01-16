@@ -13,7 +13,7 @@ from petsc4py import PETSc
 import numpy as np
 
 from elastodynamicsx.pde import BoundaryCondition, IsotropicElasticMaterial
-from elastodynamicsx.eigensolver import ElasticResonanceSolver
+from elastodynamicsx.solvers import ElasticResonanceSolver
 from elastodynamicsx.utils import make_facet_tags
 
 # -----------------------------------------------------

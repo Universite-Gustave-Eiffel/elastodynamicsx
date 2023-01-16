@@ -17,10 +17,6 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     scripts=[],
-    #scripts=[
-    #    # TODO: custom the list of python executable files to add to the path at install
-    #    os.path.join('Instrumentation', 'Viewers', 'SignalViewer0D.py'),  # works
-    #    ],
     classifiers=[
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",

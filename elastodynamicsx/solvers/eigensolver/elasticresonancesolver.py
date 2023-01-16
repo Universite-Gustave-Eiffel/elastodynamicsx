@@ -19,7 +19,7 @@ class ElasticResonanceSolver(SLEPc.EPS):
         
         from dolfinx import mesh, fem
         from mpi4py import MPI
-        from elastodynamicsx.eigensolver import ElasticResonanceSolver
+        from elastodynamicsx.solvers import ElasticResonanceSolver
         from elastodynamicsx.pde import IsotropicElasticMaterial
         #
         domain = dolfinx.mesh.create_box(MPI.COMM_WORLD, [[0., 0., 0.], [1., 1., 1.]], [10, 10, 10])

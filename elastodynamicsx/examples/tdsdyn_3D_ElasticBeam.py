@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from elastodynamicsx.pde import BoundaryCondition, PDE, BodyForce, IsotropicElasticMaterial, Damping
-from elastodynamicsx.timestepper import TimeStepper
+from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
 
 # -----------------------------------------------------

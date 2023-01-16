@@ -95,7 +95,7 @@ class LeapFrog(OneStepTimeStepper):
         self._u_nm2.x.array[:] = self._u_nm1.x.array
         self._u_nm1.x.array[:] = self._u_n.x.array
         
-    def _initialStep(self, callfirsts, callbacks, verbose=0):
+    def _initialStep(self, callfirsts, callbacks, verbose=0): #TODO: faux. corriger.
         """Specific to the initial value step"""
         
         ### -------------------------------------------------
@@ -117,6 +117,10 @@ class LeapFrog(OneStepTimeStepper):
         for callback in callbacks: callback(0, self) #<- store solution, plot, print, ...
         #
         ### -------------------------------------------------
+
+    @property
+    def u_nm1(self):
+        return self._u_nm1
 
     @property
     def v(self): #warning: this is v(t-dt)

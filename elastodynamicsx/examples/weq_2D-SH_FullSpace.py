@@ -4,17 +4,15 @@ Wave equation (time-domain)
 Propagation of SH elastic waves in a 2D, homogeneous isotropic solid, and comparison with an analytical solution
 """
 
-import time
 from dolfinx import mesh, fem
 from mpi4py import MPI
 from petsc4py import PETSc
 import ufl
 import numpy as np
-import pyvista
 import matplotlib.pyplot as plt
 
 from elastodynamicsx.pde import BoundaryCondition, PDE, BodyForce, ScalarLinearMaterial
-from elastodynamicsx.timestepper import TimeStepper
+from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import CustomScalarPlotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
 from elastodynamicsx.examples.analyticalsolutions import u_2D_SH_rt, int_Fraunhofer_2D
@@ -137,7 +135,7 @@ tStepper.initial_condition(u0=0, v0=0, t0=tstart)
 #                    define outputs
 # -----------------------------------------------------
 ### -> Store all time steps ? -> YES if debug & learning // NO if big calc.
-storeAllSteps = True
+storeAllSteps = False
 all_u = [fem.Function(V) for i in range(num_steps)] if storeAllSteps else None #all steps are stored here
 #
 ### -> Extract signals at few points

@@ -12,7 +12,7 @@ from petsc4py import PETSc
 import numpy as np
 
 from elastodynamicsx.pde import IsotropicElasticMaterial
-from elastodynamicsx.eigensolver import ElasticResonanceSolver
+from elastodynamicsx.solvers import ElasticResonanceSolver
 
 # -----------------------------------------------------
 #                     FE domain

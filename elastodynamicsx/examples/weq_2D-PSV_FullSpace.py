@@ -4,17 +4,15 @@ Wave equation (time-domain)
 Propagation of P and SV elastic waves in a 2D, homogeneous isotropic solid, and comparison with an analytical solution
 """
 
-import time
 from dolfinx import mesh, fem
 from mpi4py import MPI
 from petsc4py import PETSc
 import ufl
 import numpy as np
-import pyvista
 import matplotlib.pyplot as plt
 
 from elastodynamicsx.pde import BoundaryCondition, PDE, BodyForce, IsotropicElasticMaterial
-from elastodynamicsx.timestepper import TimeStepper
+from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import CustomVectorPlotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
 from elastodynamicsx.examples.analyticalsolutions import u_2D_PSV_rt, int_Fraunhofer_2D
