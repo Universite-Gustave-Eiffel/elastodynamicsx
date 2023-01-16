@@ -25,7 +25,7 @@ solve problems using the **solvers** package:
   * Eigenmodes problems, using the **ElasticResonanceSolver** class
 
 ## Dependencies
-ElastodynamiCSx requires FEnicsX / dolfinx v0.4.1 -> see [instructions here](https://github.com/FEniCS/dolfinx#installation)  
+ElastodynamiCSx requires FEnicsX / dolfinx. Tested with v0.4.1 and v0.5.1 -> see [instructions here](https://github.com/FEniCS/dolfinx#installation)  
 
 ### Other required packages
 **numpy**  
@@ -37,18 +37,20 @@ ElastodynamiCSx requires FEnicsX / dolfinx v0.4.1 -> see [instructions here](htt
 **tqdm**
 
 ## Installation
-# With Fenicsx binaries installed
+### With Fenicsx binaries installed
 Clone the repository and install the package:
 ```bash
 git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
 pip3 install .
 ```
-# Inside a Fenicsx Docker image
+
+### Inside a Fenicsx Docker image
 For the time being the idea is to create a container from a dolfinx image and add elastodynmicsx into it. In the future the following lines should be replaced with a Dockerfile.
+
 At first time:
 ```bash
 #create a shared directory for the docker container
-$shareddir=docker_elastodynamicsx
+shareddir=docker_elastodynamicsx
 mkdir $shareddir
 cd $shareddir
 
@@ -60,6 +62,8 @@ git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
 xhost + si:localuser:root
 
 #create a container named 'ElastodynamiCSx' from the dolfinx/dolfinx:stable image
+#to avoid MIT-SHM errors due to sharing host display :0, we adopt the solution of disabling IPC namespacing with --ipc=host.
+#This solution is given in https://github.com/jessfraz/dockerfiles/issues/359 , although described as not totally satisfacory because of isolation loss. Other more advanced solutions are also given there.
 docker run -it --name ElastodynamiCSx --ipc=host --net=host --env="DISPLAY" -v $(pwd):/root/shared -w /root/shared --volume="$HOME/.Xauthority:/root/.Xauthority:rw" dolfinx/dolfinx:stable /bin/bash
 
 ###
@@ -70,7 +74,7 @@ docker run -it --name ElastodynamiCSx --ipc=host --net=host --env="DISPLAY" -v $
 
 #get tkinter for the 'TkAgg' matplotlib backend
 apt-get update
-apt-get install python3-tk
+apt-get install -y python3-tk
 
 #install the code
 cd elastodynamicsx/
