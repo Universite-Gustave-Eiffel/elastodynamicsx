@@ -9,7 +9,7 @@ setuptools.setup(
     name='ElastodynamiCSx',
     author="Pierric Mora",
     author_email="pierric.mora@univ-eiffel.fr",
-    version="0.11",
+    version="0.12",
     packages=setuptools.find_packages(),
     #url='https://gitlab.com/geoendgroup/ElastodynamiCSx/ElastodynamiCSx',
     license='MIT License',

@@ -3,11 +3,12 @@ ElastodynamiCSx is dedicated to the numerical modeling of wave propagation in so
 
 $$\mathbf{M}\mathbf{a} + \mathbf{C}\mathbf{v} + \mathbf{K}(\mathbf{u}) = \mathbf{F},$$
 
-where $\mathbf{u}$, $\mathbf{v}=\partial_t \mathbf{u}$, $\mathbf{a}=\partial_{t^2}\mathbf{u}$ are the displacement, velocity and acceleration fields, $\mathbf{M}$, $\mathbf{C}$ and $\mathbf{K}$ are the mass, damping and stiffness forms, and $\mathbf{F}$ is an applied force. $\mathbf{K}$ may be a non-linear function of $\mathbf{u}$. Various kinds of boundary conditions are supported.
+where $\mathbf{u}$, $\mathbf{v}=\partial_t \mathbf{u}$, $\mathbf{a}=\partial_t^2\mathbf{u}$ are the displacement, velocity and acceleration fields, $\mathbf{M}$, $\mathbf{C}$ and $\mathbf{K}$ are the mass, damping and stiffness forms, and $\mathbf{F}$ is an applied force. $\mathbf{K}$ may be a non-linear function of $\mathbf{u}$. Various kinds of boundary conditions are supported.
 
-The module provides high level classes to build and solve common problems in a few lines code:
+The module provides high level classes to build and solve common problems in a few lines code.
 
-build problems using the **pde** package:
+## Build problems
+Using the **pde** package:
   * Common boundary conditions, using the **BoundaryCondition** class
     * BCs involving $\mathbf{u}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
     * BCs involving $\mathbf{v}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Dashpot*
@@ -16,16 +17,17 @@ build problems using the **pde** package:
       * damping laws: Rayleigh damping
     * hyperelastic: in the near future...
   * **BodyForce** class
-  * **PDE** class: Automatic assembly of several materials and body loads
+  * **PDE** class: assembles several materials and body forces
 
-solve problems using the **solvers** package:
+## Solve problems
+Using the **solvers** package:
   * Time-domain problems, using the **TimeStepper** class
     * Explicit schemes: *leap frog*
     * Implicit schemes: *Newmark-beta*, *midpoint*, *linear acceleration*, *HHT-alpha*, *generalized-alpha*
   * Eigenmodes problems, using the **ElasticResonanceSolver** class
 
 ## Dependencies
-ElastodynamiCSx requires FEnicsX / dolfinx. Tested with v0.4.1 and v0.5.1 -> see [instructions here](https://github.com/FEniCS/dolfinx#installation)  
+ElastodynamiCSx requires FEnicsX / dolfinx -> see [instructions here](https://github.com/FEniCS/dolfinx#installation). Tested with v0.4.1 and v0.5.1.
 
 ### Other required packages
 **numpy**  
@@ -41,64 +43,85 @@ ElastodynamiCSx requires FEnicsX / dolfinx. Tested with v0.4.1 and v0.5.1 -> see
 Clone the repository and install the package:
 ```bash
 git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
-pip3 install .
+pip3 install ./elastodynamicsx/
+
+#test
+python3 elastodynamicsx/examples/weq_2D-SH_FullSpace.py
 ```
 
 ### Inside a Fenicsx Docker image
-For the time being the idea is to create a container from a dolfinx image and add elastodynmicsx into it. In the future the following lines should be replaced with a Dockerfile.
+Here we show how to build the docker image and propose two ways to use it. In each case the container is given the right to display graphics. The solution adopted to avoid MIT-SHM errors due to sharing host display :0 is to disable IPC namespacing with --ipc=host. It is given [here](https://github.com/jessfraz/dockerfiles/issues/359), although described as not totally satisfacory because of isolation loss. Other more advanced solutions are also given in there.
 
-At first time:
+1. Clone the repository and build a docker image called 'ElastodynamiCSx:latest':
 ```bash
-#create a shared directory for the docker container
-shareddir=docker_elastodynamicsx
-mkdir $shareddir
-cd $shareddir
-
-#pull the code
 git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
+
+#the image relies on dolfinx/dolfinx:stable (see Dockerfile)
+docker build -t ElastodynamiCSx:latest ./elastodynamicsx
+```
+2. Create a single-use container from this image and allows it to display graphics:
+```bash
+#creates a folder meant to be shared with the docker container
+shareddir=docker_shared
+mkdir $shareddir
+
+#copy examples into that shared folder
+cp -r elastodynamicsx/examples $shareddir
 
 #grant access to root to the graphical backend (the username inside the container will be 'root')
 #without this access matplotlib and pyvista won't display
 xhost + si:localuser:root
 
-#create a container named 'ElastodynamiCSx' from the dolfinx/dolfinx:stable image
-#to avoid MIT-SHM errors due to sharing host display :0, we adopt the solution of disabling IPC namespacing with --ipc=host.
-#This solution is given in https://github.com/jessfraz/dockerfiles/issues/359 , although described as not totally satisfacory because of isolation loss. Other more advanced solutions are also given there.
-docker run -it --name ElastodynamiCSx --ipc=host --net=host --env="DISPLAY" -v $(pwd):/root/shared -w /root/shared --volume="$HOME/.Xauthority:/root/.Xauthority:rw" dolfinx/dolfinx:stable /bin/bash
+#creates a container that will self destroy on close
+docker run -it --rm --ipc=host --net=host --env="DISPLAY" -v $(shareddir):/root/$(shareddir) -w /root/$(shareddir) --volume="$HOME/.Xauthority:/root/.Xauthority:rw" ElastodynamiCSx:latest /bin/bash
 
 ###
-#at this point we are inside the 'ElastodynamiCSx' container
-#
-#-> expand the container with new packages
+#at this point we are inside the container
 ###
-
-#get tkinter for the 'TkAgg' matplotlib backend
-apt-get update
-apt-get install -y python3-tk
-
-#install the code
-cd elastodynamicsx/
-pip3 install .
-pip3 install tqdm
-cd ..
 
 #test
-python3 elastodynamicsx/elastodynamicsx/examples/weq_2D-SH_FullSpace.py
+python3 examples/weq_2D-SH_FullSpace.py
 ```
-The other times we just re-use the container:
+2. (alternative) Create a container called 'elastoCSx' that will remain after close and can be accessed through several tabs simultaneously:
 ```bash
-#grant access to root to graphical backend for plotting inside the container
-#this command needs to be re-run only once after reboot
+#creates a folder meant to be shared with the docker container
+shareddir=docker_shared
+mkdir $shareddir
+
+#copy examples into that shared folder
+cp -r elastodynamicsx/examples $shareddir
+
+#grant access to root to the graphical backend (the username inside the container will be 'root')
+#without this access matplotlib and pyvista won't display
 xhost + si:localuser:root
 
-#start the 'ElastodynamiCSx' container
-docker start ElastodynamiCSx
+#creates a container that will remain after close
+docker run -it --name elastoCSx --ipc=host --net=host --env="DISPLAY" -v $(shareddir):/root/$(shareddir) -w /root/$(shareddir) --volume="$HOME/.Xauthority:/root/.Xauthority:rw" ElastodynamiCSx:latest bash
 
-#executes the container from the current shell tab or from any other one, possibly from several tabs or windows simultaneously
-docker exec -ti ElastodynamiCSx bash
+###
+#at this point we are inside the 'elastoCSx' container
+###
 
 #test
-python3 elastodynamicsx/elastodynamicsx/examples/weq_2D-SH_FullSpace.py
+python3 examples/weq_2D-SH_FullSpace.py
+```
+To re-use the 'elastoCSx' container, possibly from several shell tabs or windows simultaneously, use the following:
+```bash
+#this needs to be re-executed once after a reboot
+xhost + si:localuser:root
+
+#starts the container
+docker start elastoCSx
+
+#enters the container; this line can be repeated in another tab or window
+docker exec -it elastoCSx bash
+
+###
+#at this point we are inside the 'elastoCSx' container
+###
+
+#test
+python3 examples/weq_2D-SH_FullSpace.py
 ```
 
 ## Examples
