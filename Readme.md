@@ -3,43 +3,102 @@ ElastodynamiCSx is dedicated to the numerical modeling of wave propagation in so
 
 $$\mathbf{M}\mathbf{a} + \mathbf{C}\mathbf{v} + \mathbf{K}(\mathbf{u}) = \mathbf{F},$$
 
-where $\mathbf{u}$, $\mathbf{v}=\partial_t \mathbf{u}$, $\mathbf{a}=\partial_t^2\mathbf{u}$ are the displacement, velocity and acceleration fields, $\mathbf{M}$, $\mathbf{C}$ and $\mathbf{K}$ are the mass, damping and stiffness forms, and $\mathbf{F}$ is an applied force. $\mathbf{K}$ may be a non-linear function of $\mathbf{u}$. Various kinds of boundary conditions are supported.
+where $\mathbf{u}$, $\mathbf{v}=\partial_t \mathbf{u}$, $\mathbf{a}=\partial_t^2\mathbf{u}$ are the displacement, velocity and acceleration fields, $\mathbf{M}$, $\mathbf{C}$ and $\mathbf{K}$ are the mass, damping and stiffness forms, and $\mathbf{F}$ is an applied force. $\mathbf{K}$ may be a non-linear function of $\mathbf{u}$.
 
 The module provides high level classes to build and solve common problems in a few lines code.
 
 ## Build problems
 Using the **pde** package:
-  * Common boundary conditions, using the **BoundaryCondition** class
+  * Common **material laws**, using the *Material* class
+    * linear: *scalar*, *isotropic* elasticity
+      * damping laws: *Rayleigh* damping
+    * hyperelastic: in the near future...
+  * Define **body forces**, using the *BodyForce* class
+  * **Assemble** several materials and body forces, using the *PDE* class
+  * Common **boundary conditions**, using the *BoundaryCondition* class
     * BCs involving $\mathbf{u}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
     * BCs involving $\mathbf{v}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Dashpot*
-  * Common material laws, using the **Material** class
-    * linear: scalar, isotropic elasticity
-      * damping laws: Rayleigh damping
-    * hyperelastic: in the near future...
-  * **BodyForce** class
-  * **PDE** class: assembles several materials and body forces
+```python
+#V is a dolfinx.fem.function_space
+#cell_tags is a dolfinx.mesh.MeshTags object
+
+from elastodynamicsx.pde import Material, BodyForce, PDE, BoundaryCondition
+
+tag_mat1 = 1 #suppose tag_mat1 refers to cells associated with material no 1
+tag_mat2 = 2 #same for material no 2
+mat1 = Material.build((V, cell_tags, tag_mat1), 'isotropic', rho=1, lambda_=2, mu=1)
+mat2 = Material.build((V, cell_tags, tag_mat2), 'isotropic', rho=2, lambda_=4, mu=2)
+
+f_body = fem.Constant(V.mesh, np.array([0, 0], dtype=PETSc.ScalarType)) #body load
+f1     = BodyForce(V, f_body) #not specifying cell_tags and a specific tag means the entire domain
+
+pde  = PDE(materials=[mat1, mat2], bodyforces=[f1]) #m, c, k, L forms: pde.m, pde.c, pde.k, pde.L
+
+tag_top  = 1       #top boundary
+tags_lbr = (2,3,4) #left, bottom, right boundaries
+T_N  = fem.Constant(V.mesh, np.array([0, 0], dtype=PETSc.ScalarType)) #boundary load
+bc1  = BoundaryCondition((V, facet_tags, tag_top) , 'Neumann', T_N)
+bc2  = BoundaryCondition((V, facet_tags, tags_lbr), 'Dashpot', Z=(mat1.Z_N, mat1.Z_T)) #plane-wave absorbing conditions with P-wave & S-wave impedances of material no1
+bcs  = [bc1, bc2]
+```
 
 ## Solve problems
 Using the **solvers** package:
-  * Time-domain problems, using the **TimeStepper** class
+  * **Time-domain problems**, using the *TimeStepper* class
     * Explicit schemes: *leap frog*
     * Implicit schemes: *Newmark-beta*, *midpoint*, *linear acceleration*, *HHT-alpha*, *generalized-alpha*
-  * Eigenmodes problems, using the **ElasticResonanceSolver** class
+```python
+#Time integration
+from elastodynamicsx.solvers import TimeStepper
+
+dt, num_steps = 0.01, 100 #t=[0..1)
+
+#Initialize the time stepper
+tStepper = TimeStepper.build(pde.m, pde.c, pde.k, pde.L, dt, V, bcs=bcs, scheme='leapfrog')
+tStepper.initial_condition(u0=[0,0], v0=[0,0], t0=0)
+
+#Define a function that will update the source term at each time step
+def update_T_N_function(t, timeStepper):
+    forceVector = np.array([0,1], dtype=PETSc.ScalarType)
+    T_N.value   = np.sin(t)*forceVector
+
+#Loop on time, and live-plot the result
+tStepper.run(num_steps-1, callfirsts=[update_T_N_function], callbacks=[], live_plotter={'live_plotter_step':1, 'clim':[-1,1]})
+
+#the end
+```
+
+  * **Eigenmodes problems**, using the *ElasticResonanceSolver* class
+```python
+#Normal modes
+from elastodynamicsx.solvers import ElasticResonanceSolver
+
+nev = 9 #number of modes to compute
+
+#Initialize the solver
+eps = ElasticResonanceSolver(pde.m, pde.k, V, bcs=[], nev=nev)
+eps.solve()
+
+eigenfreqs = eps.getEigenfrequencies()
+eps.plot()
+
+#the end
+```
 
 ## Dependencies
 ElastodynamiCSx requires FEnicsX / dolfinx -> see [instructions here](https://github.com/FEniCS/dolfinx#installation). Tested with v0.4.1 and v0.5.1.
 
 ### Other required packages
-**numpy**  
-**scipy**  
-**matplotlib**  
-**pyvista**  
+numpy  
+scipy  
+matplotlib  
+pyvista  
 
 ### Optional packages
-**tqdm**
+tqdm
 
 ## Installation
-### With Fenicsx binaries installed
+### Option 1: With Fenicsx binaries installed
 Clone the repository and install the package:
 ```bash
 git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
@@ -49,31 +108,32 @@ pip3 install ./elastodynamicsx/
 python3 elastodynamicsx/examples/weq_2D-SH_FullSpace.py
 ```
 
-### Inside a Fenicsx Docker image
-Here we show how to build the docker image and propose two ways to use it. In each case the container is given the right to display graphics. The solution adopted to avoid MIT-SHM errors due to sharing host display :0 is to disable IPC namespacing with --ipc=host. It is given [here](https://github.com/jessfraz/dockerfiles/issues/359), although described as not totally satisfacory because of isolation loss. Other more advanced solutions are also given in there.
+### Option 2: Inside a Fenicsx Docker image
+Here we show how to build the docker image and propose two ways to use it. In each case the container is given the right to display graphics. The solution adopted to avoid MIT-SHM errors due to sharing host display :0 is to disable IPC namespacing with --ipc=host. It is given [here](https://github.com/jessfraz/dockerfiles/issues/359), although described as not totally satisfactory because of isolation loss. Other more advanced solutions are also given in there.
 
-1. Clone the repository and build a docker image called 'ElastodynamiCSx:latest':
+1. Clone the repository and build a docker image called 'elastodynamicsx:latest':
 ```bash
 git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
 
 #the image relies on dolfinx/dolfinx:stable (see Dockerfile)
-docker build -t ElastodynamiCSx:latest ./elastodynamicsx
+docker build -t elastodynamicsx:latest ./elastodynamicsx
 ```
 2. Create a single-use container from this image and allows it to display graphics:
 ```bash
-#creates a folder meant to be shared with the docker container
+#create a folder meant to be shared with the docker container
 shareddir=docker_shared
 mkdir $shareddir
 
 #copy examples into that shared folder
 cp -r elastodynamicsx/examples $shareddir
+cd $shareddir
 
 #grant access to root to the graphical backend (the username inside the container will be 'root')
 #without this access matplotlib and pyvista won't display
 xhost + si:localuser:root
 
-#creates a container that will self destroy on close
-docker run -it --rm --ipc=host --net=host --env="DISPLAY" -v $(shareddir):/root/$(shareddir) -w /root/$(shareddir) --volume="$HOME/.Xauthority:/root/.Xauthority:rw" ElastodynamiCSx:latest /bin/bash
+#create a container that will self destroy on close
+docker run -it --rm --ipc=host --net=host --env="DISPLAY" -v $(pwd):/root/shared -w /root/shared --volume="$HOME/.Xauthority:/root/.Xauthority:rw" elastodynamicsx:latest bash
 
 ###
 #at this point we are inside the container
@@ -82,42 +142,43 @@ docker run -it --rm --ipc=host --net=host --env="DISPLAY" -v $(shareddir):/root/
 #test
 python3 examples/weq_2D-SH_FullSpace.py
 ```
-2. (alternative) Create a container called 'elastoCSx' that will remain after close and can be accessed through several tabs simultaneously:
+2. (alternative) Create a container called 'ElastoCSx' that will remain after close and can be accessed through several tabs simultaneously:
 ```bash
-#creates a folder meant to be shared with the docker container
+#create a folder meant to be shared with the docker container
 shareddir=docker_shared
 mkdir $shareddir
 
 #copy examples into that shared folder
 cp -r elastodynamicsx/examples $shareddir
+cd $shareddir
 
 #grant access to root to the graphical backend (the username inside the container will be 'root')
 #without this access matplotlib and pyvista won't display
 xhost + si:localuser:root
 
-#creates a container that will remain after close
-docker run -it --name elastoCSx --ipc=host --net=host --env="DISPLAY" -v $(shareddir):/root/$(shareddir) -w /root/$(shareddir) --volume="$HOME/.Xauthority:/root/.Xauthority:rw" ElastodynamiCSx:latest bash
+#create a container that will remain after close
+docker run -it --name ElastoCSx --ipc=host --net=host --env="DISPLAY" -v $(pwd):/root/shared -w /root/shared --volume="$HOME/.Xauthority:/root/.Xauthority:rw" elastodynamicsx:latest bash
 
 ###
-#at this point we are inside the 'elastoCSx' container
+#at this point we are inside the 'ElastoCSx' container
 ###
 
 #test
 python3 examples/weq_2D-SH_FullSpace.py
 ```
-To re-use the 'elastoCSx' container, possibly from several shell tabs or windows simultaneously, use the following:
+To re-use the 'ElastoCSx' container use the following:
 ```bash
 #this needs to be re-executed once after a reboot
 xhost + si:localuser:root
 
-#starts the container
-docker start elastoCSx
+#start the container
+docker start ElastoCSx
 
-#enters the container; this line can be repeated in another tab or window
-docker exec -it elastoCSx bash
+#enter the container; this line can be repeated in another tab or window
+docker exec -it ElastoCSx bash
 
 ###
-#at this point we are inside the 'elastoCSx' container
+#at this point we are inside the 'ElastoCSx' container
 ###
 
 #test
@@ -130,9 +191,9 @@ Several examples are provided in the **examples** subfolder:
     * (2D) homogeneous space, anti-plane line load (SH waves): *weq_2D-SH_FullSpace.py*
     * (2D) homogeneous space, in-plane line load (P-SV waves): *weq_2D-PSV_FullSpace.py*
   * Structural dynamics, time domain:
-    * (3D) forced vibration of an elastic beam clamped at one end; with Rayleigh damping: *tdsdyn_3D_ElasticBeam.py*
+    * (3D) forced vibration of an elastic beam clamped at one end, with Rayleigh damping - adapted from [COMET](https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html): *tdsdyn_3D_ElasticBeam.py*
   * Eigenmodes:
-    * (3D) resonances of an elastic beam clamped at one end: *eigs_3D_ElasticBeam.py*
+    * (3D) resonances of an elastic beam clamped at one end - adapted from [COMET](https://comet-fenics.readthedocs.io/en/latest/demo/modal_analysis_dynamics/cantilever_modal.html): *eigs_3D_ElasticBeam.py*
     * (3D) resonances of an aluminum cube: *eigs_3D_AluminumCube.py*
 
 Reference for the analytical solutions:

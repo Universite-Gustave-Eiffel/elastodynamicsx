@@ -8,6 +8,35 @@ class Material():
     i.e. the lhs of a pde such as defined in the PDE class. An instance represents a single (possibly arbitrarily space-dependent) material.
     """
     
+    
+    ### --------------------------
+    ### --------- static ---------
+    ### --------------------------
+
+    labels = ['supercharge me']
+    
+    def build(functionspace_tags_marker, type_, *args, **kwargs):
+        """
+        Convenience static method that instanciates the required material
+        
+        -- Input --
+        *args:    passed to the required material
+        **kwargs: passed to the required material
+           type_: available options are:
+                     'scalar'
+                     'isotropic'
+        """
+        allMaterials = (ScalarLinearMaterial, IsotropicElasticMaterial)
+        for Mat in allMaterials:
+          if type_.lower() in Mat.labels: return Mat(functionspace_tags_marker, *args, **kwargs)
+        #
+        raise TypeError('unknown material type: '+type_)
+
+
+    ### --------------------------
+    ### ------- non-static -------
+    ### --------------------------
+    
     def __init__(self, functionspace_tags_marker, rho, sigma, is_linear, **kwargs):
         self._rho = rho
         self._sigma = sigma
@@ -48,3 +77,9 @@ class Material():
 #
 def epsilon_vector(u): return ufl.sym(ufl.grad(u))
 def epsilon_scalar(u): return ufl.nabla_grad(u)
+
+# -----------------------------------------------------
+# Import subclasses -- must be done at the end to avoid loop imports
+# -----------------------------------------------------
+from .elasticmaterial import ScalarLinearMaterial, IsotropicElasticMaterial
+

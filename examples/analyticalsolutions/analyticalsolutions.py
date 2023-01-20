@@ -113,7 +113,6 @@ def green_2D_PSV_xw(x, w, rho=1, lambda_=2, mu=1, fn_IntFraunhofer=None, eps=1e-
     return green_xw
 
 #Green(r,w): space - frequency domain
-#Green(r,w): space - frequency domain
 def green_2D_PSV_half_S_xw(x, w, rho=2.719, lambda_=49.1, mu=26, fn_IntFraunhofer=None, eps=1e-8):
     """Green function of a 2D full, homogeneous space, for an in-plane load, in the frequency domain
     
@@ -215,7 +214,8 @@ def u_2D_PSV_half_S_rt(x, src, F_=(1,0), rho=2.719, lambda_=49.1, mu=26, dt=1, f
     w[0] = eps #cheat zero frequency to avoid NaN in the green function
     Gxw = green_2D_PSV_half_S_xw(x[:,:,np.newaxis], w[np.newaxis,np.newaxis,:], rho,lambda_, mu, fn_IntFraunhofer, eps) #out: [Nx, 2, 2, Nw]
     U_xw=np.tensordot(Gxw, F_, axes=(2,0)) #out: [Nx, 2, Nw]
-    return np.fft.irfft(U_xw * np.fft.rfft(src)[np.newaxis,np.newaxis,:], axis=-1) #output: [Nx, 2, Nt]
+    src_w = np.fft.rfft(src)
+    return np.fft.irfft(U_xw * src_w[np.newaxis,np.newaxis,:], axis=-1) #output: [Nx, 2, Nt]
 
 
 def _test():
@@ -240,7 +240,7 @@ def _test():
     rho, lambda_, mu = 1, 2, 1
     #
     F_0 = np.array([0,1])
-    signals_at_points_exact = u_2D_PSV_half_S_rt(x, np.roll(src_t(dt*np.arange(num_steps)), -2), F_0,rho,lambda_, mu, dt, None)
+    signals_at_points_exact = u_2D_PSV_half_S_rt(x, src_t(dt*np.arange(num_steps)), F_0,rho,lambda_, mu, dt, None)
     #
     fig, ax = plt.subplots(1,1)
     t = dt*np.arange(num_steps)
@@ -248,6 +248,13 @@ def _test():
     for i in range(len(signals_at_points_exact)):
         ax.plot(t, signals_at_points_exact[i,0,:], c='C'+str(i), ls='--') #exact
     ax.set_xlabel('Time')
+    
+    fig, ax = plt.subplots(2,1)
+    f = np.fft.rfftfreq(t.size)/dt
+    ax[0].plot( t, src_t(dt*np.arange(num_steps)), c='k' )
+    ax[1].plot( f, np.abs(np.fft.rfft(src_t(t))), c='k' )
+    ax[1].plot( f, np.abs(np.fft.rfft(signals_at_points_exact[0,0,:])) )
+    
     plt.show()
 
 if __name__ == "__main__" :

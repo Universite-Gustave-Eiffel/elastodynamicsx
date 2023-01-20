@@ -43,7 +43,7 @@ class TimeStepper:
         for s_ in allSchemes:
           if scheme.lower() in s_.labels: return s_(*args, **kwargs)
         #
-        print('unknown scheme')
+        raise TypeError('unknown scheme: '+scheme)
         
     def CFL(function_space, c_max, dt):
         """

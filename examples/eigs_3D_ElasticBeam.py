@@ -12,7 +12,7 @@ from mpi4py import MPI
 from petsc4py import PETSc
 import numpy as np
 
-from elastodynamicsx.pde import BoundaryCondition, IsotropicElasticMaterial
+from elastodynamicsx.pde import BoundaryCondition, Material
 from elastodynamicsx.solvers import ElasticResonanceSolver
 from elastodynamicsx.utils import make_facet_tags
 
@@ -62,7 +62,7 @@ rho     = fem.Constant(domain, PETSc.ScalarType(rho))
 lambda_ = fem.Constant(domain, PETSc.ScalarType(lambda_))
 mu      = fem.Constant(domain, PETSc.ScalarType(mu))
 
-material = IsotropicElasticMaterial(V, rho, lambda_, mu)
+material = Material.build(V, 'isotropic', rho, lambda_, mu)
 #
 # -----------------------------------------------------
 

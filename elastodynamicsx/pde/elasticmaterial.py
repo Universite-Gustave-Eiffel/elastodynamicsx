@@ -29,6 +29,8 @@ class ScalarLinearMaterial(ElasticMaterial):
     A scalar linear material (e.g. 2D-SH or fluid)
     """
     
+    labels = ['scalar', '2d-sh']
+    
     def __init__(self, functionspace_tags_marker, rho, mu, **kwargs):
         self._mu = mu
         sigma = lambda u: self._mu*epsilon_scalar(u)
@@ -50,6 +52,8 @@ class IsotropicElasticMaterial(ElasticMaterial):
     """
     An isotropic linear elastic material
     """
+
+    labels = ['isotropic']
     
     def __init__(self, functionspace_tags_marker, rho, lambda_, mu, **kwargs):
         self._lambda = lambda_

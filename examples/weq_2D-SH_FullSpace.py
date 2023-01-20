@@ -11,7 +11,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import BoundaryCondition, PDE, BodyForce, ScalarLinearMaterial
+from elastodynamicsx.pde import BoundaryCondition, PDE, BodyForce, Material
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import CustomScalarPlotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
@@ -42,7 +42,7 @@ rho     = fem.Constant(domain, PETSc.ScalarType(1))
 mu      = fem.Constant(domain, PETSc.ScalarType(1))
 #lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
 
-mat   = ScalarLinearMaterial(V, rho, mu)
+mat   = Material.build(V, 'scalar', rho, mu)
 materials = [mat]
 #
 # -----------------------------------------------------
@@ -90,7 +90,7 @@ def F_body_function(t): return lambda x: F_0 * src_t(t) * src_x(x) #source(x) at
 
 ### Body force 'F_body'
 F_body = fem.Function(V) #body force
-gaussianBF = BodyForce(V, None, None, F_body)
+gaussianBF = BodyForce(V, F_body)
 
 bodyforces = [gaussianBF]
 # -----------------------------------------------------

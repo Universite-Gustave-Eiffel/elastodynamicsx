@@ -1,3 +1,4 @@
+from dolfinx import fem
 import ufl
 
 class PDE():
@@ -50,12 +51,14 @@ class BodyForce():
     Representation of the rhs term (the 'F' term) of a pde such as defined in the PDE class. An instance represents a single source.
     """
     
-    def __init__(self, function_space, cell_tags, marker, value):
+    def __init__(self, functionspace_tags_marker, value):
         self._value = value
-        if cell_tags is None or marker is None:
-            self._dx = ufl.Measure("dx", domain=function_space.mesh, subdomain_data=cell_tags)(marker)
+        if type(functionspace_tags_marker) == fem.FunctionSpace:
+            function_space, cell_tags, marker = functionspace_tags_marker, None, None
         else:
-            self._dx = ufl.dx
+            function_space, cell_tags, marker = functionspace_tags_marker
+
+        self._dx = ufl.Measure("dx", domain=function_space.mesh, subdomain_data=cell_tags)(marker) #also valid if cell_tags or marker are None
     
     @property
     def L(self):
