@@ -1,0 +1,14 @@
+FROM dolfinx/lab:stable
+LABEL maintainer="Pierric Mora <pierric.mora@univ-eiffel.fr>"
+LABEL description=" elastodynamics with Fenicsx/dolfinx "
+
+WORKDIR /tmp
+COPY . /tmp/
+COPY ./examples /root/examples/
+
+# Install elastodynamicsx and optional dependencies
+RUN pip3 install . &&\
+    pip3 install tqdm &&\
+    rm -rf /tmp/*
+
+WORKDIR /root

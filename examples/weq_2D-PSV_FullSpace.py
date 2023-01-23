@@ -30,7 +30,6 @@ boundaries = [(1, lambda x: np.isclose(x[0], 0     )),\
               (4, lambda x: np.isclose(x[1], height))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-V_scalar = fem.FunctionSpace(domain, ("CG", 2))
 V = fem.VectorFunctionSpace(domain, ("CG", 2))
 #
 # -----------------------------------------------------

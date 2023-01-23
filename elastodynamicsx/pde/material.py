@@ -1,6 +1,9 @@
 from dolfinx import fem
 import ufl
 
+from elastodynamicsx.plot  import get_3D_array_from_FEFunction
+from elastodynamicsx.utils import get_functionspace_tags_marker
+
 class Material():
     """
     Base class for a representation of a PDE of the kind:
@@ -42,10 +45,7 @@ class Material():
         self._sigma = sigma
         self._epsilon = kwargs.get('epsilon', epsilon_vector)
         
-        if type(functionspace_tags_marker) == fem.FunctionSpace:
-            function_space, cell_tags, marker = functionspace_tags_marker, None, None
-        else:
-            function_space, cell_tags, marker = functionspace_tags_marker
+        function_space, cell_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
 
         self._dx = ufl.Measure("dx", domain=function_space.mesh, subdomain_data=cell_tags)(marker) #also valid if cell_tags or marker are None
     

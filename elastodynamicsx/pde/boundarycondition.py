@@ -1,7 +1,9 @@
+import numpy as np
 from dolfinx import fem
 from petsc4py import PETSc
 import ufl
-import numpy as np
+
+from elastodynamicsx.utils import get_functionspace_tags_marker
 
 class BoundaryCondition():
     """
@@ -25,11 +27,8 @@ class BoundaryCondition():
     """
     def __init__(self, functionspace_tags_marker, type_, values=None):
         #
-        if type(functionspace_tags_marker) == fem.FunctionSpace:
-            function_space, facet_tags, marker = functionspace_tags_marker, None, None
-        else:
-            function_space, facet_tags, marker = functionspace_tags_marker
-        
+        function_space, facet_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
+
         type_ = type_.lower()
         nbcomps = function_space.element.num_sub_elements #number of components if vector space, 0 if scalar space
         

@@ -38,7 +38,7 @@ tag_top  = 1       #top boundary
 tags_lbr = (2,3,4) #left, bottom, right boundaries
 T_N  = fem.Constant(V.mesh, np.array([0, 0], dtype=PETSc.ScalarType)) #boundary load
 bc1  = BoundaryCondition((V, facet_tags, tag_top) , 'Neumann', T_N)
-bc2  = BoundaryCondition((V, facet_tags, tags_lbr), 'Dashpot', Z=(mat1.Z_N, mat1.Z_T)) #plane-wave absorbing conditions with P-wave & S-wave impedances of material no1
+bc2  = BoundaryCondition((V, facet_tags, tags_lbr), 'Dashpot', (mat1.Z_N, mat1.Z_T)) #plane-wave absorbing conditions with P-wave & S-wave impedances of material no1
 bcs  = [bc1, bc2]
 ```
 
@@ -85,6 +85,24 @@ eps.plot()
 #the end
 ```
 
+## Post process solutions
+Using the **solutions** package:
+  * **Eigenmodes solutions**, using the *ModalBasis* class
+```python
+#eps is a elastodynamicsx.solvers.ElasticResonanceSolver
+#eps.solve() has already been performed
+
+#get the solutions
+mbasis = eps.getModalBasis() #a elastodynamicsx.solutions.ModalBasis
+
+#access data
+eigenfreqs = mbasis.fn    #a np.array
+modeshape5 = mbasis.un[5] #a dolfinx.fem.Function
+
+#visualize
+mbasis.plot()
+```
+
 ## Dependencies
 ElastodynamiCSx requires FEnicsX / dolfinx -> see [instructions here](https://github.com/FEniCS/dolfinx#installation). Tested with v0.4.1 and v0.5.1.
 
@@ -109,76 +127,47 @@ python3 elastodynamicsx/examples/weq_2D-SH_FullSpace.py
 ```
 
 ### Option 2: Inside a Fenicsx Docker image
-Here we show how to build the docker image and propose two ways to use it. In each case the container is given the right to display graphics. The solution adopted to avoid MIT-SHM errors due to sharing host display :0 is to disable IPC namespacing with --ipc=host. It is given [here](https://github.com/jessfraz/dockerfiles/issues/359), although described as not totally satisfactory because of isolation loss. Other more advanced solutions are also given in there.
+The package provides two docker files, for use with shell commands (Dockerfile.shell) or with a Jupyter notebook (Dockerfile.lab). Here we show how to build the docker images and how to use them.
 
-1. Clone the repository and build a docker image called 'elastodynamicsx:latest':
+##### For use with a Jupyter notebook
+Clone the repository and build a docker image called 'elastolab:latest':
 ```bash
 git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
 
-#the image relies on dolfinx/dolfinx:stable (see Dockerfile)
-docker build -t elastodynamicsx:latest ./elastodynamicsx
+#the image relies on dolfinx/lab:stable (see Dockerfile.lab)
+docker build -t elastolab:latest -f Dockerfile.lab ./elastodynamicsx
 ```
-2. Create a single-use container from this image and allows it to display graphics:
+Run the image and shares the folder from which the command is executed:
 ```bash
-#create a folder meant to be shared with the docker container
-shareddir=docker_shared
-mkdir $shareddir
+docker run --rm --init -ti -v $(pwd):/root/shared -w /root/ -p 8888:8888 elastolab:latest
 
-#copy examples into that shared folder
-cp -r elastodynamicsx/examples $shareddir
-cd $shareddir
+#Copy the URL printed on screen beginning with http://127.0.0.1:8888/?token...
+#The examples are in /root/examples; the shared folder is in /root/shared
+```
 
+##### For use with shell commands
+For the shell case the container is given the right to display graphics. The solution adopted to avoid MIT-SHM errors due to sharing host display :0 is to disable IPC namespacing with --ipc=host. It is given [here](https://github.com/jessfraz/dockerfiles/issues/359), although described as not totally satisfactory because of isolation loss. Other more advanced solutions are also given in there.
+
+Clone the repository and build a docker image called 'elastodynamicsx:latest':
+```bash
+git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
+
+#the image relies on dolfinx/dolfinx:stable (see Dockerfile.shell)
+docker build -t elastodynamicsx:latest -f Dockerfile.shell ./elastodynamicsx
+```
+Run the image and shares the folder from which the command is executed:
+```bash
 #grant access to root to the graphical backend (the username inside the container will be 'root')
 #without this access matplotlib and pyvista won't display
 xhost + si:localuser:root
 
 #create a container that will self destroy on close
-docker run -it --rm --ipc=host --net=host --env="DISPLAY" -v $(pwd):/root/shared -w /root/shared --volume="$HOME/.Xauthority:/root/.Xauthority:rw" elastodynamicsx:latest bash
+docker run -it --rm --ipc=host --net=host --env="DISPLAY" -v $(pwd):/root/shared -w /root/ --volume="$HOME/.Xauthority:/root/.Xauthority:rw" elastodynamicsx:latest bash
 
 ###
 #at this point we are inside the container
-###
-
-#test
-python3 examples/weq_2D-SH_FullSpace.py
-```
-2. (alternative) Create a container called 'ElastoCSx' that will remain after close and can be accessed through several tabs simultaneously:
-```bash
-#create a folder meant to be shared with the docker container
-shareddir=docker_shared
-mkdir $shareddir
-
-#copy examples into that shared folder
-cp -r elastodynamicsx/examples $shareddir
-cd $shareddir
-
-#grant access to root to the graphical backend (the username inside the container will be 'root')
-#without this access matplotlib and pyvista won't display
-xhost + si:localuser:root
-
-#create a container that will remain after close
-docker run -it --name ElastoCSx --ipc=host --net=host --env="DISPLAY" -v $(pwd):/root/shared -w /root/shared --volume="$HOME/.Xauthority:/root/.Xauthority:rw" elastodynamicsx:latest bash
-
-###
-#at this point we are inside the 'ElastoCSx' container
-###
-
-#test
-python3 examples/weq_2D-SH_FullSpace.py
-```
-To re-use the 'ElastoCSx' container use the following:
-```bash
-#this needs to be re-executed once after a reboot
-xhost + si:localuser:root
-
-#start the container
-docker start ElastoCSx
-
-#enter the container; this line can be repeated in another tab or window
-docker exec -it ElastoCSx bash
-
-###
-#at this point we are inside the 'ElastoCSx' container
+#
+#The examples are in /root/examples; the shared folder is in /root/shared
 ###
 
 #test

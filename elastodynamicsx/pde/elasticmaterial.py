@@ -1,6 +1,7 @@
 import ufl
 
 from .material import Material, epsilon_scalar, epsilon_vector
+from elastodynamicsx.utils import get_functionspace_tags_marker
 
 class ElasticMaterial(Material):
     """
@@ -29,9 +30,12 @@ class ScalarLinearMaterial(ElasticMaterial):
     A scalar linear material (e.g. 2D-SH or fluid)
     """
     
-    labels = ['scalar', '2d-sh']
+    labels = ['scalar', '2d-sh', 'fluid']
     
     def __init__(self, functionspace_tags_marker, rho, mu, **kwargs):
+        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        assert function_space.element.num_sub_elements==0, 'ScalarLinearMaterial requires a scalar function space'
+        
         self._mu = mu
         sigma = lambda u: self._mu*epsilon_scalar(u)
         #
@@ -56,6 +60,9 @@ class IsotropicElasticMaterial(ElasticMaterial):
     labels = ['isotropic']
     
     def __init__(self, functionspace_tags_marker, rho, lambda_, mu, **kwargs):
+        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        assert function_space.element.num_sub_elements>0, 'IsotropicElasticMaterial requires a vector function space'
+        
         self._lambda = lambda_
         self._mu     = mu
         sigma = lambda u: self._lambda * ufl.nabla_div(u) * ufl.Identity(u.geometric_dimension()) + 2*self._mu*epsilon_vector(u)

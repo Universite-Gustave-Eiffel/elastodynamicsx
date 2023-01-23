@@ -1,6 +1,6 @@
 #TODO: documentation
 
-from dolfinx import fem, plot
+from dolfinx import fem
 from petsc4py import PETSc
 from slepc4py import SLEPc
 from mpi4py import MPI
@@ -9,7 +9,7 @@ import numpy as np
 import pyvista
 
 from elastodynamicsx.pde import BoundaryCondition
-from elastodynamicsx.plot import get_3D_array_from_FEFunction
+from elastodynamicsx.solutions import ModalBasis
 
 class ElasticResonanceSolver(SLEPc.EPS):
     """
@@ -20,13 +20,13 @@ class ElasticResonanceSolver(SLEPc.EPS):
         from dolfinx import mesh, fem
         from mpi4py import MPI
         from elastodynamicsx.solvers import ElasticResonanceSolver
-        from elastodynamicsx.pde import IsotropicElasticMaterial
+        from elastodynamicsx.pde import Material
         #
         domain = dolfinx.mesh.create_box(MPI.COMM_WORLD, [[0., 0., 0.], [1., 1., 1.]], [10, 10, 10])
         V = dolfinx.fem.VectorFunctionSpace(domain, ("CG", 1))
         #
         rho, lambda_, mu = 1, 2, 1
-        material = IsotropicElasticMaterial(V, rho, lambda_, mu)
+        material = Material.build(V, rho, lambda_, mu)
         eps = ElasticResonanceSolver(material.m, material.k, V, bcs=[], nev=6+6) #the first 6 resonances are rigid body motion
         eps.solve()
         eps.plot()
@@ -90,9 +90,13 @@ class ElasticResonanceSolver(SLEPc.EPS):
         nev = kwargs.get('nev', 10)
         self.setDimensions(nev=nev)
 
+    def getWn(self):
+        """Returns the eigen angular frequencies from the computed eigenvalues"""
+        return np.array([np.sqrt(abs(self.getEigenvalue(i).real)) for i in range(self._getNout())]) #abs because rigid body motions may lead to minus zero: -0.00000
+        
     def getEigenfrequencies(self):
         """Returns the eigenfrequencies from the computed eigenvalues"""
-        return np.array([np.sqrt(abs(self.getEigenvalue(i).real))/(2*np.pi) for i in range(self._getNout())]) #abs because rigid body motions may lead to minus zero: -0.00000
+        return self.getWn()/(2*np.pi)
 
     def getEigenmodes(self, which='all'):
         """
@@ -110,6 +114,9 @@ class ElasticResonanceSolver(SLEPc.EPS):
         for i, eigM in zip(indexes, eigenmodes):
             self.getEigenpair(i, eigM.vector) # Save eigenvector in eigM
         return eigenmodes
+    
+    def getModalBasis(self):
+        return ModalBasis(self.getWn(), self.getEigenmodes())
 
     def getErrors(self):
         """Returns the error estimate on the computed eigenvalues"""
@@ -121,31 +128,7 @@ class ElasticResonanceSolver(SLEPc.EPS):
         which: 'all', or an integer, or a list of integers, or a slice object
             -> the same as for getEigenmodes
         """
-        #inspired from https://docs.pyvista.org/examples/99-advanced/warp-by-vector-eigenmodes.html
-        indexes = _slice_array(np.arange(self._getNout()), which)
-        eigenmodes = self.getEigenmodes(which)
-        eigenfreqs = self.getEigenfrequencies()
-        #
-        topology, cell_types, geom = plot.create_vtk_mesh(self.function_space)
-        grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
-        for i, eigM in zip(indexes, eigenmodes):
-            grid['eigenmode_'+str(i)] = get_3D_array_from_FEFunction(eigM)
-        #
-        nbcols = int(np.ceil(np.sqrt(indexes.size)))
-        nbrows = int(np.ceil(indexes.size/nbcols))
-        shape  = kwargs.get('shape', (nbrows, nbcols))
-        factor = kwargs.get('factor', 1.)
-        plotter = pyvista.Plotter(shape=shape)
-        for i in range(shape[0]):
-            for j in range(shape[1]):
-                plotter.subplot(i,j)
-                current_index = i*shape[1] + j
-                if current_index >= indexes.size: break
-                vector = 'eigenmode_'+str(indexes[current_index])
-                plotter.add_text("mode "+str(indexes[current_index])+", freq. "+str(round(eigenfreqs[indexes[current_index]],2)), font_size=10)
-                if kwargs.get('wireframe', False): plotter.add_mesh(grid, style='wireframe', color='black')
-                plotter.add_mesh(grid.warp_by_vector(vector, factor=factor), scalars=vector)
-        plotter.show()
+        self.getModalBasis().plot(which, **kwargs)
     
     def printEigenvalues(self):
         """Prints the computed eigenvalues and error estimates"""

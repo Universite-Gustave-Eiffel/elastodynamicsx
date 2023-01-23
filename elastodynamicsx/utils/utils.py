@@ -1,7 +1,7 @@
 #
 
 import numpy as np
-from dolfinx import geometry, mesh
+from dolfinx import geometry, mesh, fem
 
 def find_points_and_cells_on_proc(points, domain):
     """
@@ -9,6 +9,7 @@ def find_points_and_cells_on_proc(points, domain):
     
     example of use:
     
+    import numpy as np
     from mpi4py import MPI
     from dolfinx.mesh import create_unit_square
     from dolfinx import fem
@@ -42,6 +43,7 @@ def make_tags(domain, locators, type_='boundaries'):
     
     example of use:
     
+    import numpy as np
     from mpi4py import MPI
     from dolfinx.mesh import create_unit_square
     #
@@ -74,4 +76,19 @@ def make_tags(domain, locators, type_='boundaries'):
     sorted_loc = np.argsort(loc_indices)
     loc_tags = mesh.meshtags(domain, fdim, loc_indices[sorted_loc], loc_markers[sorted_loc])
     return loc_tags
+
+def get_functionspace_tags_marker(functionspace_tags_marker):
+    """
+    example:
+    function_space, tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
+    
+    where functionspace_tags_marker can be:
+        functionspace_tags_marker = (function_space, facet_tags, marker)
+        functionspace_tags_marker = (function_space, cell_tags, marker)
+        functionspace_tags_marker = function_space #means tags=None and marker=None
+    """
+    if type(functionspace_tags_marker) == fem.FunctionSpace:
+        return functionspace_tags_marker, None, None
+    else:
+        return functionspace_tags_marker
 

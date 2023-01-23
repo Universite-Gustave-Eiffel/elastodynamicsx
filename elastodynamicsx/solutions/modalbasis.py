@@ -1,0 +1,80 @@
+import numpy as np
+import pyvista
+from dolfinx import plot
+
+from elastodynamicsx.plot import get_3D_array_from_FEFunction
+
+class ModalBasis():
+    """
+    Representation of a modal basis, consisting of a set of eigen angular frequencies and modeshapes.
+    
+    at the moment: is merely a storage + plotter class
+    in the future: should be able to perform calculations with source terms, such as modal participation factors, modal summations, ...
+    """
+    
+    def __init__(self, wn, un, **kwargs):
+        """
+        wn: eigen angular frequencies
+        un: eigen modeshapes
+        """
+        self._wn = wn
+        self._un = un
+
+    @property
+    def fn(self):
+        """The eigen frequencies"""
+        return self._wn/(2*np.pi)
+
+    @property
+    def wn(self):
+        """The eigen angular frequencies"""
+        return self._wn
+    
+    @property
+    def un(self):
+        """The eigen modeshapes"""
+        return self._un
+    
+    def plot(self, which='all', **kwargs):
+        """
+        Plots the desired modeshapes
+        which: 'all', or an integer, or a list of integers, or a slice object
+
+        examples:
+            plot()                #plots all computed eigenmodes
+            plot(3)               #plots mode number 4
+            plot([3,5])           #plots modes number 4 and 6
+            plot(slice(0,None,2)) #plots even modes
+        """
+        #inspired from https://docs.pyvista.org/examples/99-advanced/warp-by-vector-eigenmodes.html
+        indexes    = _slice_array(np.arange(len(self._wn)), which)
+        eigenmodes = _slice_array(self.un, which)
+        eigenfreqs = _slice_array(self.fn, which)
+        #
+        function_space = eigenmodes[0].function_space
+        topology, cell_types, geom = plot.create_vtk_mesh(function_space)
+        grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
+        for i, eigM in zip(indexes, eigenmodes):
+            grid['eigenmode_'+str(i)] = get_3D_array_from_FEFunction(eigM)
+        #
+        nbcols = int(np.ceil(np.sqrt(indexes.size)))
+        nbrows = int(np.ceil(indexes.size/nbcols))
+        shape  = kwargs.get('shape', (nbrows, nbcols))
+        factor = kwargs.get('factor', 1.)
+        plotter = pyvista.Plotter(shape=shape)
+        for i in range(shape[0]):
+            for j in range(shape[1]):
+                plotter.subplot(i,j)
+                current_index = i*shape[1] + j
+                if current_index >= indexes.size: break
+                vector = 'eigenmode_'+str(indexes[current_index])
+                plotter.add_text("mode "+str(indexes[current_index])+", freq. "+str(round(eigenfreqs[current_index],2)), font_size=10)
+                if kwargs.get('wireframe', False): plotter.add_mesh(grid, style='wireframe', color='black')
+                plotter.add_mesh(grid.warp_by_vector(vector, factor=factor), scalars=vector)
+        plotter.show()
+
+def _slice_array(a, which):
+    if which is 'all': which = slice(0,None,None)
+    if type(which) is int: which = slice(which, which+1, None)
+    return a[which]
+
