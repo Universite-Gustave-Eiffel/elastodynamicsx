@@ -5,6 +5,36 @@ import matplotlib.pyplot as plt
 from dolfinx import plot
 import pyvista
 
+### ------------------------------------------------------------------------- ###
+### --- preliminary: auto-configure pyvista backend for jupyter notebooks --- ###
+### ------------------------------------------------------------------------- ###
+
+def is_notebook() -> bool:
+    #https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook/24937408
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True   # Jupyter notebook or qtconsole
+        elif shell == 'TerminalInteractiveShell':
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False      # Probably standard Python interpreter
+
+if is_notebook():
+    #This "ipyvtklink" backend supports almost every pyvista feature. However, it is run on server, leading to great lags
+    #"pythreejs" or "ipygany" blow the kernel when update_scalar is called
+    #In the (near?) future consider using "panel" (no slider or update_scalar at the moment), or itkwidgets, which seems great and fastly growing
+    DEFAULT_JUPYTER_BACKEND = "ipyvtklink"
+    pyvista.set_jupyter_backend(DEFAULT_JUPYTER_BACKEND)
+    pyvista.start_xvfb() #required by ipyvtklink
+
+
+### ---------------------------------------- ###
+### --- define useful plotting functions --- ###
+### ---------------------------------------- ###
+
 def plot_mesh(mesh, cell_tags):
     """
     Adapted from: https://jsdokken.com/dolfinx-tutorial/chapter3/em.html
@@ -34,6 +64,11 @@ def plot_mesh(mesh, cell_tags):
         plotter.view_xy()
     #
     plotter.show()
+
+
+### -------------------------------------- ###
+### --- define useful plotting classes --- ###
+### -------------------------------------- ###
 
 class CustomScalarPlotter(pyvista.Plotter):
     
@@ -154,7 +189,10 @@ class CustomVectorPlotter(pyvista.Plotter):
             self.update_vectors(*updated_fields)
         self.add_slider_widget(updateTStep, [timesteps[0], timesteps[-1]], **kwargs_slider)
         
-        
+
+### ------------------------------------ ###
+### --- define useful util functions --- ###
+### ------------------------------------ ###
 
 def get_3D_array_from_FEFunction(u_):
     #u_ is a fem.Function

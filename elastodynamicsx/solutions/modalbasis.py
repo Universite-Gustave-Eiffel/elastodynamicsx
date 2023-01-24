@@ -1,8 +1,8 @@
 import numpy as np
-import pyvista
 from dolfinx import plot
+import pyvista
 
-from elastodynamicsx.plot import get_3D_array_from_FEFunction
+import elastodynamicsx.plot #ensures automatic configuration of pyvista for jupyter
 
 class ModalBasis():
     """
@@ -55,7 +55,7 @@ class ModalBasis():
         topology, cell_types, geom = plot.create_vtk_mesh(function_space)
         grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
         for i, eigM in zip(indexes, eigenmodes):
-            grid['eigenmode_'+str(i)] = get_3D_array_from_FEFunction(eigM)
+            grid['eigenmode_'+str(i)] = elastodynamicsx.plot.get_3D_array_from_FEFunction(eigM)
         #
         nbcols = int(np.ceil(np.sqrt(indexes.size)))
         nbrows = int(np.ceil(indexes.size/nbcols))
@@ -74,7 +74,7 @@ class ModalBasis():
         plotter.show()
 
 def _slice_array(a, which):
-    if which is 'all': which = slice(0,None,None)
+    if which == 'all'    : which = slice(0,None,None)
     if type(which) is int: which = slice(which, which+1, None)
     return a[which]
 

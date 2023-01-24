@@ -6,7 +6,7 @@ import ufl
 from mpi4py import MPI
 from petsc4py import PETSc
 import numpy as np
-try: from tqdm import tqdm
+try: from tqdm.auto import tqdm
 except ModuleNotFoundError: tqdm = lambda x: x
 
 from elastodynamicsx.plot import CustomScalarPlotter, CustomVectorPlotter

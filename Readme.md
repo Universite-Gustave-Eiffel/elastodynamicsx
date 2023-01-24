@@ -104,46 +104,49 @@ mbasis.plot()
 ```
 
 ## Dependencies
-ElastodynamiCSx requires FEnicsX / dolfinx -> see [instructions here](https://github.com/FEniCS/dolfinx#installation). Tested with v0.4.1 and v0.5.1.
+ElastodynamiCSx requires FEniCSx / DOLFINx -> see [instructions here](https://github.com/FEniCS/dolfinx#installation). Tested with v0.4.1 and v0.5.1.
 
-### Other required packages
+### Packages required for the examples
 numpy  
-scipy  
 matplotlib  
 pyvista  
+ipyvtklink (configured pyvista backend in jupyter lab)  
 
 ### Optional packages
-tqdm
+tqdm (progress bar for time-domain calculations)
 
 ## Installation
-### Option 1: With Fenicsx binaries installed
+### Option 1: With FEniCSx binaries installed
 Clone the repository and install the package:
 ```bash
 git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
-pip3 install ./elastodynamicsx/
+cd elastodynamicsx/
+pip3 install .
 
 #test
 python3 elastodynamicsx/examples/weq_2D-SH_FullSpace.py
 ```
 
-### Option 2: Inside a Fenicsx Docker image
+### Option 2: Inside a FEniCSx Docker image
 The package provides two docker files, for use with shell commands (Dockerfile.shell) or with a Jupyter notebook (Dockerfile.lab). Here we show how to build the docker images and how to use them.
 
 ##### For use with a Jupyter notebook
 Clone the repository and build a docker image called 'elastolab:latest':
 ```bash
 git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
+cd elastodynamicsx/
 
 #the image relies on dolfinx/lab:stable (see Dockerfile.lab)
-docker build -t elastolab:latest -f Dockerfile.lab ./elastodynamicsx
+docker build -t elastolab:latest -f Dockerfile.lab .
 ```
 Run the image and shares the folder from which the command is executed:
 ```bash
-docker run --rm --init -ti -v $(pwd):/root/shared -w /root/ -p 8888:8888 elastolab:latest
+docker run --rm -v $(pwd):/root/shared -p 8888:8888 elastolab:latest
 
 #Copy the URL printed on screen beginning with http://127.0.0.1:8888/?token...
 #The examples are in /root/examples; the shared folder is in /root/shared
 ```
+The backend that has been configured by default is the 'ipyvtklink' one. It has the advantage of being almost fully compatible with the examples. However, as the rendering is performed on the server, the display suffers great lag. Other options are described [here](https://docs.pyvista.org/user-guide/jupyter/index.html). For instance, when live-plotting a TimeStepper.run() call, only the first and last images will be seen -- in this case the Dockerfile.shell image should be preferred.
 
 ##### For use with shell commands
 For the shell case the container is given the right to display graphics. The solution adopted to avoid MIT-SHM errors due to sharing host display :0 is to disable IPC namespacing with --ipc=host. It is given [here](https://github.com/jessfraz/dockerfiles/issues/359), although described as not totally satisfactory because of isolation loss. Other more advanced solutions are also given in there.
@@ -151,9 +154,10 @@ For the shell case the container is given the right to display graphics. The sol
 Clone the repository and build a docker image called 'elastodynamicsx:latest':
 ```bash
 git clone https://github.com/Universite-Gustave-Eiffel/elastodynamicsx.git
+cd elastodynamicsx/
 
 #the image relies on dolfinx/dolfinx:stable (see Dockerfile.shell)
-docker build -t elastodynamicsx:latest -f Dockerfile.shell ./elastodynamicsx
+docker build -t elastodynamicsx:latest -f Dockerfile.shell .
 ```
 Run the image and shares the folder from which the command is executed:
 ```bash
@@ -162,7 +166,7 @@ Run the image and shares the folder from which the command is executed:
 xhost + si:localuser:root
 
 #create a container that will self destroy on close
-docker run -it --rm --ipc=host --net=host --env="DISPLAY" -v $(pwd):/root/shared -w /root/ --volume="$HOME/.Xauthority:/root/.Xauthority:rw" elastodynamicsx:latest bash
+docker run -it --rm --ipc=host --net=host --env="DISPLAY" -v $(pwd):/root/shared --volume="$HOME/.Xauthority:/root/.Xauthority:rw" elastodynamicsx:latest bash
 
 ###
 #at this point we are inside the container
@@ -193,7 +197,7 @@ Part of the code is largely inspired from:
   * [The FEniCSx tutorial](https://jorgensd.github.io/dolfinx-tutorial/)
 
 Other useful references:
-  * Fenicsx:
+  * FEniCSx:
     * [FEniCSx electromagnetic demos](https://mikics.github.io/)
     * [NewFrac FEniCSx Training](https://newfrac.gitlab.io/newfrac-fenicsx-training/index.html)
     * [multiphenicsx](https://github.com/multiphenics/multiphenicsx)
@@ -201,6 +205,6 @@ Other useful references:
   * legacy Fenics:
     * [The COmputational MEchanics Toolbox - COMET](https://comet-fenics.readthedocs.io/en/latest/)
     * [The FEniCS solid tutorial](https://fenics-solid-tutorial.readthedocs.io/en/latest/)
-    * [Fenics tutorial, by Jan Blechta and Jaroslav Hron](https://www2.karlin.mff.cuni.cz/~hron/fenics-tutorial/index.html)
+    * [FEniCS tutorial, by Jan Blechta and Jaroslav Hron](https://www2.karlin.mff.cuni.cz/~hron/fenics-tutorial/index.html)
 
 

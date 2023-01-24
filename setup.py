@@ -13,7 +13,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     #url='https://gitlab.com/geoendgroup/ElastodynamiCSx/ElastodynamiCSx',
     license='MIT License',
-    description='elastodynamics with Fenicsx/dolfinx',
+    description='elastodynamics with FEniCSx/DOLFINx',
     long_description=long_description,
     long_description_content_type="text/markdown",
     scripts=[],
@@ -27,9 +27,8 @@ setuptools.setup(
         ],
     install_requires=[
         # === "official" packages
-        'numpy', 'scipy',
+        'numpy', 
         'matplotlib', 'pyvista',
         #'dolfinx >= 0.4.1', ufl
-        'mpi4py', 'petsc4py',
         ],
     python_requires='>=3')

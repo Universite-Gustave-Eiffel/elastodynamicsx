@@ -3,10 +3,8 @@
 from dolfinx import fem
 from petsc4py import PETSc
 from slepc4py import SLEPc
-from mpi4py import MPI
 import ufl
 import numpy as np
-import pyvista
 
 from elastodynamicsx.pde import BoundaryCondition
 from elastodynamicsx.solutions import ModalBasis
@@ -145,7 +143,7 @@ class ElasticResonanceSolver(SLEPc.EPS):
         return nout
 
 def _slice_array(a, which):
-    if which is 'all': which = slice(0,None,None)
+    if which == 'all'    : which = slice(0,None,None)
     if type(which) is int: which = slice(which, which+1, None)
     return a[which]
 

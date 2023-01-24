@@ -15,7 +15,7 @@ from elastodynamicsx.pde import BoundaryCondition, PDE, BodyForce, Material
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import CustomVectorPlotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
-from elastodynamicsx.examples.analyticalsolutions import u_2D_PSV_rt, int_Fraunhofer_2D
+from analyticalsolutions import u_2D_PSV_rt, int_Fraunhofer_2D
 
 # -----------------------------------------------------
 #                     FE domain
@@ -183,7 +183,8 @@ if storeAllSteps: #plotter with a slider to browse through all time steps
     def update_fields_function(i):
         return (all_u[i].x.array, all_u_n_exact[:,:,i].flatten(), all_u[i].x.array-all_u_n_exact[:,:,i].flatten())
     
-    plotter = CustomVectorPlotter(tStepper.u, tStepper.u, tStepper.u, labels=('FE', 'Exact', 'Diff.'), clim=clim)
+    #initializes with empty fem.Function(V) to have different valid pointers
+    plotter = CustomVectorPlotter(fem.Function(V), fem.Function(V), fem.Function(V), labels=('FE', 'Exact', 'Diff.'), clim=clim)
     plotter.add_time_browser(update_fields_function, t)
     plotter.show()
 #
