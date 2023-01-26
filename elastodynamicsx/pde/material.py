@@ -7,8 +7,11 @@ from elastodynamicsx.utils import get_functionspace_tags_marker
 class Material():
     """
     Base class for a representation of a PDE of the kind:
+    
         M*a + C*v + K(u) = 0
-    i.e. the lhs of a pde such as defined in the PDE class. An instance represents a single (possibly arbitrarily space-dependent) material.
+    
+    i.e. the lhs of a pde such as defined in the PDE class. An instance represents
+    a single (possibly arbitrarily space-dependent) material.
     """
     
     
@@ -20,14 +23,28 @@ class Material():
     
     def build(functionspace_tags_marker, type_, *args, **kwargs):
         """
-        Convenience static method that instanciates the required material
+        Convenience static method that instanciates the desired material
         
-        -- Input --
-        *args:    passed to the required material
-        **kwargs: passed to the required material
-           type_: available options are:
+        Args:
+            functionspace_tags_marker: Available possibilities are
+                (function_space, cell_tags, marker) #Meaning application of the
+                    material in the cells whose tag correspond to marker
+                function_space #In this case cell_tags=None and marker=None, meaning
+                    application of the material in the entire domain
+            type_: Available options are:
                      'scalar'
                      'isotropic'
+            args:   Passed to the required material
+            kwargs: Passed to the required material
+        
+        Returns:
+            An instance of the desired material
+        
+        Examples of use:
+            aluminum = Material.build( (function_space, cell_tags, 1), 'isotropic',
+                                        rho=2.8, lambda_=58, mu=26) #restricted to subdomain number 1
+            aluminum = Material.build( function_space, 'isotropic',
+                                       rho=2.8, lambda_=58, mu=26)  #entire domain
         """
         allMaterials = (ScalarLinearMaterial, IsotropicElasticMaterial)
         for Mat in allMaterials:

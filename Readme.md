@@ -146,7 +146,7 @@ docker run --rm -v $(pwd):/root/shared -p 8888:8888 elastolab:latest
 #Copy the URL printed on screen beginning with http://127.0.0.1:8888/?token...
 #The examples are in /root/examples; the shared folder is in /root/shared
 ```
-The backend that has been configured by default is the 'ipyvtklink' one. It has the advantage of being almost fully compatible with the examples. However, as the rendering is performed on the server, the display suffers great lag. Other options are described [here](https://docs.pyvista.org/user-guide/jupyter/index.html). For instance, when live-plotting a TimeStepper.run() call, only the first and last images will be seen -- in this case the Dockerfile.shell image should be preferred.
+The backend that has been configured by default is the 'ipyvtklink' one. It has the advantage of being almost fully compatible with the examples. However, as the rendering is performed on the server, the display suffers great lag. Other options are described [here](https://docs.pyvista.org/user-guide/jupyter/index.html). For instance, when live-plotting a TimeStepper.run() call, only the first and last images will be seen -- in this case the Dockerfile.shell image should be preferred. Note ongoing works are [being pursued](https://github.com/pyvista/pyvista/issues/3690) to have a unique pyvista-jupyter backend.
 
 ##### For use with shell commands
 For the shell case the container is given the right to display graphics. The solution adopted to avoid MIT-SHM errors due to sharing host display :0 is to disable IPC namespacing with --ipc=host. It is given [here](https://github.com/jessfraz/dockerfiles/issues/359), although described as not totally satisfactory because of isolation loss. Other more advanced solutions are also given in there.

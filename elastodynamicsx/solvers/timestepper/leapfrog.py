@@ -20,17 +20,21 @@ class LeapFrog(OneStepTimeStepper):
     
     def __init__(self, m_, c_, k_, L, dt, function_space, bcs=[], **kwargs):
         """
-        m_: function(u,v) that returns the ufl expression of the bilinear form with second derivative on time
-               -> usually: m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
-        c_: (optional, ignored if None) function(u,v) that returns the ufl expression of the bilinear form with a first derivative on time (damping form)
-               -> for Rayleigh damping: c_ = lambda u,v: eta_m * m_(u,v) + eta_k * k_(u,v)
-        k_: function(u,v) that returns the ufl expression of the bilinear form with no derivative on time
-               -> used to build the stiffness matrix
-               -> usually: k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
-        L:  linear form
-        dt: time step
-        function_space: the Finite Element functionnal space
-        bcs: the set of boundary conditions
+        Args:
+            m_: Function(u,v) that returns the ufl expression of the bilinear form
+                with second derivative on time
+                -> usually: m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
+            c_: (optional, ignored if None) Function(u,v) that returns the ufl expression
+                of the bilinear form with a first derivative on time (damping form)
+                -> for Rayleigh damping: c_ = lambda u,v: eta_m * m_(u,v) + eta_k * k_(u,v)
+            k_: Function(u,v) that returns the ufl expression of the bilinear form
+                with no derivative on time
+                -> used to build the stiffness matrix
+                -> usually: k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
+            L:  Linear form
+            dt: Time step
+            function_space: The Finite Element functionnal space
+            bcs: The set of boundary conditions
         """
         dt_  = fem.Constant(function_space.mesh, PETSc.ScalarType(dt))
         #

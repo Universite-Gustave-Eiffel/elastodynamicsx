@@ -9,21 +9,52 @@ class BoundaryCondition():
     """
     Representation of a variety of boundary conditions
     
-    # Shortcuts
-    Free     : bc = BoundaryCondition((V, facet_tags, 1), 'Free' )             <- imposes sigma(u).n=0 on boundary n°1
-    Clamp    : bc = BoundaryCondition((V, facet_tags, (1,2)), 'Clamp')         <- imposes u=0 on boundaries n°1 and 2
-    Clamp    : bc = BoundaryCondition( V, 'Clamp')                             <- apply BC to all boundaries when facet_tags and marker are not specified or set to None
+    Examples of use:
+        #####       #####
+        # Free or Clamp #
+        #####       #####
+        
+        # Imposes sigma(u).n=0 on boundary n°1
+        bc = BoundaryCondition((V, facet_tags, 1), 'Free' )
+        
+        # Imposes u=0 on boundaries n°1 and 2
+        bc = BoundaryCondition((V, facet_tags, (1,2)), 'Clamp')
+        
+        # Apply BC to all boundaries when facet_tags and marker are not specified
+        # or set to None
+        bc = BoundaryCondition(V, 'Clamp')
 
-    # General
-    Dirichlet: bc = BoundaryCondition((V, facet_tags, 1), 'Dirichlet', u_D)    <- imposes u=u_D on boundary n°1
-    Neumann  : bc = BoundaryCondition((V, facet_tags, 1), 'Neumann'  , T_N)    <- imposes sigma(u).n=T_N on boundary n°1
-    Robin    : bc = BoundaryCondition((V, facet_tags, 1), 'Robin'    , (r, s)) <- imposes sigma(u).n=r*(u-s) on boundary n°1
+
+        ##### #####
+        # General #
+        ##### #####
+        
+        # Imposes u=u_D on boundary n°1
+        bc = BoundaryCondition((V, facet_tags, 1), 'Dirichlet', u_D)
+        
+        # Imposes sigma(u).n=T_N on boundary n°1
+        bc = BoundaryCondition((V, facet_tags, 1), 'Neumann', T_N)
+        
+        # Imposes sigma(u).n=r*(u-s) on boundary n°1
+        bc = BoundaryCondition((V, facet_tags, 1), 'Robin', (r, s))
     
-    # BCs involving the velocity
-    Dashpot  : bc = BoundaryCondition((V, facet_tags, 1), 'Dashpot', z)          <- (scalar) imposes sigma(u).n=z*v on boundary n°1, with v=du/dt. Usually z=rho*c
-    Dashpot  : bc = BoundaryCondition((V, facet_tags, 1), 'Dashpot', (z_N, z_T)) <- (vector) imposes sigma(u).n=z_N*v_N+z_T*v_T on boundary n°1, with v=du/dt, v_N=(v.n)n, v_T=v-v_N
     
-    Adapted from https://jsdokken.com/dolfinx-tutorial/chapter3/robin_neumann_dirichlet.html
+        #####                    #####
+        # BCs involving the velocity #
+        #####                    #####
+        
+        # (for a scalar function_space)
+        # Imposes sigma(u).n = z*v on boundary n°1, with v=du/dt. Usually z=rho*c
+        bc = BoundaryCondition((V, facet_tags, 1), 'Dashpot', z)
+        
+        # (for a vector function_space)
+        # Imposes sigma(u).n = z_N*v_N+z_T*v_T on boundary n°1,
+        # with v=du/dt, v_N=(v.n)n, v_T=v-v_N
+        # Usually z_N=rho*c_L and z_T=rho*c_S
+        bc = BoundaryCondition((V, facet_tags, 1), 'Dashpot', (z_N, z_T))
+    
+    Adapted from:
+        https://jsdokken.com/dolfinx-tutorial/chapter3/robin_neumann_dirichlet.html
     """
     def __init__(self, functionspace_tags_marker, type_, values=None):
         #
@@ -67,6 +98,7 @@ class BoundaryCondition():
 
     @property
     def bc(self):
+        """The boundary condition"""
         return self._bc
 
     @property

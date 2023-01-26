@@ -37,21 +37,24 @@ if is_notebook():
 
 def plot_mesh(mesh, cell_tags):
     """
-    Adapted from: https://jsdokken.com/dolfinx-tutorial/chapter3/em.html
+    Plot the mesh with colored subdomains
     
-    example of use:
+    Adapted from:
+        https://jsdokken.com/dolfinx-tutorial/chapter3/em.html
     
-    from mpi4py import MPI
-    from dolfinx.mesh import create_unit_square
-    from elastodynamicsx.utils import make_tags
-    #
-    domain = create_unit_square(MPI.COMM_WORLD, 10, 10)
+    Example of use:
+    
+        from mpi4py import MPI
+        from dolfinx.mesh import create_unit_square
+        from elastodynamicsx.utils import make_tags
+        #
+        domain = create_unit_square(MPI.COMM_WORLD, 10, 10)
 
-    Omegas = [(1, lambda x: x[1] <= 0.5),
-              (2, lambda x: x[1] >= 0.5)]
-    cell_tags = make_tags(domain, Omegas, 'domains')
+        Omegas = [(1, lambda x: x[1] <= 0.5),
+                  (2, lambda x: x[1] >= 0.5)]
+        cell_tags = make_tags(domain, Omegas, 'domains')
     
-    plot_mesh(domain, cell_tags)
+        plot_mesh(domain, cell_tags)
     """
     plotter = pyvista.Plotter()
     grid = pyvista.UnstructuredGrid(*plot.create_vtk_mesh(mesh, mesh.topology.dim))
@@ -195,6 +198,7 @@ class CustomVectorPlotter(pyvista.Plotter):
 ### ------------------------------------ ###
 
 def get_3D_array_from_FEFunction(u_):
+    """Not intended to be called by user"""
     #u_ is a fem.Function
     nbcomps = max(1, u_.function_space.element.num_sub_elements) #number of components
     nbpts   = u_.x.array.size // nbcomps
@@ -205,6 +209,7 @@ def get_3D_array_from_FEFunction(u_):
         return u_.x.array.reshape((nbpts, 3))
 
 def get_3D_array_from_nparray(u_, nbpts):
+    """Not intended to be called by user"""
     #u_ is a np.array
     nbcomps = u_.size//nbpts
     if nbcomps < 3:

@@ -13,7 +13,7 @@ class ElasticResonanceSolver(SLEPc.EPS):
     """
     Convenience class inhereted from SLEPc.EPS, with default parameters and convenience methods that are relevant for computing the resonances of an elastic component.
     
-    Minimalistic example (free resonances of an elastic cube):
+    Example of use (free resonances of an elastic cube):
         
         from dolfinx import mesh, fem
         from mpi4py import MPI
@@ -89,19 +89,21 @@ class ElasticResonanceSolver(SLEPc.EPS):
         self.setDimensions(nev=nev)
 
     def getWn(self):
-        """Returns the eigen angular frequencies from the computed eigenvalues"""
+        """The eigen angular frequencies from the computed eigenvalues"""
         return np.array([np.sqrt(abs(self.getEigenvalue(i).real)) for i in range(self._getNout())]) #abs because rigid body motions may lead to minus zero: -0.00000
         
     def getEigenfrequencies(self):
-        """Returns the eigenfrequencies from the computed eigenvalues"""
+        """The eigenfrequencies from the computed eigenvalues"""
         return self.getWn()/(2*np.pi)
 
     def getEigenmodes(self, which='all'):
         """
         Returns the desired modeshapes
-        which: 'all', or an integer, or a list of integers, or a slice object
         
-        examples:
+        Args:
+            which: 'all', or an integer, or a list of integers, or a slice object
+        
+        Examples of use:
             getEigenmodes()  #returns all computed eigenmodes
             getEigenmodes(3) #returns mode number 4
             getEigenmodes([3,5]) #returns modes number 4 and 6
@@ -123,8 +125,10 @@ class ElasticResonanceSolver(SLEPc.EPS):
     def plot(self, which='all', **kwargs):
         """
         Plots the desired modeshapes
-        which: 'all', or an integer, or a list of integers, or a slice object
-            -> the same as for getEigenmodes
+        
+        Args:
+            which: 'all', or an integer, or a list of integers, or a slice object
+                -> the same as for getEigenmodes
         """
         self.getModalBasis().plot(which, **kwargs)
     
@@ -143,6 +147,7 @@ class ElasticResonanceSolver(SLEPc.EPS):
         return nout
 
 def _slice_array(a, which):
+    """Not intended to be called by user"""
     if which == 'all'    : which = slice(0,None,None)
     if type(which) is int: which = slice(which, which+1, None)
     return a[which]

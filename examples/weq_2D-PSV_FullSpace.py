@@ -114,7 +114,7 @@ c_S = np.sqrt(mu.value/rho.value) #S-wave velocity
 lbda0 = c_S/f0
 print('Number of points per wavelength at central frequency: ', round(lbda0/hx, 2))
 print('Number of time steps per period at central frequency: ', round(T0/dt, 2))
-print('CFL condition: Courant number = ', round(TimeStepper.CFL(V, ufl.sqrt((lambda_+2*mu)/rho), dt), 2))
+print('CFL condition: Courant number = ', round(TimeStepper.CFL(V.mesh, ufl.sqrt((lambda_+2*mu)/rho), dt), 2))
 ###
 
 

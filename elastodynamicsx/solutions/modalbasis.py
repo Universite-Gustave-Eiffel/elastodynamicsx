@@ -14,8 +14,9 @@ class ModalBasis():
     
     def __init__(self, wn, un, **kwargs):
         """
-        wn: eigen angular frequencies
-        un: eigen modeshapes
+        Args:
+            wn: eigen angular frequencies
+            un: eigen modeshapes
         """
         self._wn = wn
         self._un = un
@@ -38,9 +39,15 @@ class ModalBasis():
     def plot(self, which='all', **kwargs):
         """
         Plots the desired modeshapes
-        which: 'all', or an integer, or a list of integers, or a slice object
+        
+        Args:
+            which: 'all', or an integer, or a list of integers, or a slice object
+            kwargs:
+                shape: (default: attempts a square mosaic) shape of the pyvista.Plotter
+                factor: (default=1) Scale factor for the deformation
+                wireframe: (default=False) Plot the wireframe of the undeformed mesh
 
-        examples:
+        Examples of use:
             plot()                #plots all computed eigenmodes
             plot(3)               #plots mode number 4
             plot([3,5])           #plots modes number 4 and 6
@@ -74,6 +81,7 @@ class ModalBasis():
         plotter.show()
 
 def _slice_array(a, which):
+    """Not intended to be used externally"""
     if which == 'all'    : which = slice(0,None,None)
     if type(which) is int: which = slice(which, which+1, None)
     return a[which]

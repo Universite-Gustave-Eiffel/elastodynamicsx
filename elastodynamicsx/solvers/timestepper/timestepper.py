@@ -27,16 +27,16 @@ class TimeStepper:
         """
         Convenience static method that instanciates the required time-stepping scheme
         
-        -- Input --
-        *args: (passed to the required scheme)
-        **kwargs: the required parameter is 'scheme'. The other **kwargs are passed to the scheme
-           scheme: available options are:
-                     'leapfrog'
-                     'midpoint'
-                     'linear-acceleration-method'
-                     'newmark'
-                     'hht-alpha'
-                     'generalized-alpha'
+        Args:
+            args: (passed to the required scheme)
+            kwargs: The required parameter is 'scheme'. The other **kwargs are passed to the scheme
+                scheme: Available options are:
+                    'leapfrog'
+                    'midpoint'
+                    'linear-acceleration-method'
+                    'newmark'
+                    'hht-alpha'
+                    'generalized-alpha'
         """
         scheme = kwargs.pop('scheme', 'unknown')
         allSchemes = (LeapFrog, MidPoint, LinearAccelerationMethod, NewmarkBeta, HilberHughesTaylor, GalphaNewmarkBeta)
@@ -45,17 +45,23 @@ class TimeStepper:
         #
         raise TypeError('unknown scheme: '+scheme)
         
-    def CFL(function_space, c_max, dt):
+    def CFL(domain, c_max, dt):
         """
         Courant-Friedrichs-Lewy number: CFL = c_max*dt/h, with h the cell diameter
 
         see: https://en.wikipedia.org/wiki/Courant%E2%80%93Friedrichs%E2%80%93Lewy_condition
         """
-        V = function_space
-        if V.num_sub_spaces >0: V = V.sub(0)
-        v = ufl.TestFunction(V)
-        return V.mesh.comm.allreduce( np.amax(fem.assemble_vector(fem.form(v*dt*c_max/ufl.CellDiameter(V)/ufl.CellVolume(V)*ufl.dx)).array) , op=MPI.MAX)
-
+        V = fem.FunctionSpace(domain, ("DG", 0))
+        cfl = fem.Function(V)
+        
+        if type(V.element.interpolation_points) == np.ndarray:
+            pts = V.element.interpolation_points   #DOLFINx.__version__ < 0.5
+        else:
+            pts = V.element.interpolation_points() #DOLFINx.__version__ >=0.5
+        
+        h = ufl.MinCellEdgeLength(V.mesh) #or rather ufl.CellDiameter?
+        cfl.interpolate(fem.Expression(dt*c_max/h, pts))
+        return V.mesh.comm.allreduce( np.amax(cfl.x.array) , op=MPI.MAX)
 
 
     ### --------------------------
@@ -64,10 +70,15 @@ class TimeStepper:
     
     def __init__(self, m_, c_, k_, L, dt, function_space, bcs=[], **kwargs):
         """
-        **kwargs:
-            live_plotter = (i, **live_plotter_kwargs):
-                if i>0: initializes a plotter that will display the result every 'i' step. Ex: i=0 means no display, i=10 means a refresh every 10 step.
-                **kwargs: to be passed to pyvista.add_mesh
+        Args:
+            m_: Function of u,v that returns the mass form
+            c_: Function of u,v that returns the damping form
+            k_: Function of u,v that returns the stiffness form
+            L : Function of v   that returns the linear form
+            dt: Time step
+            function_space: The function space
+            bcs: List of instances of the class BoundaryCondition
+            kwargs:
         """
         #
         self._t   = 0
@@ -110,8 +121,10 @@ class TimeStepper:
 
     def Energy_damping(self):
         domain = self.u.function_space.mesh
-        if self._c_function is None: return 0
-        else:                        return self.dt*domain.comm.allreduce( fem.assemble_scalar(fem.form( self._c_function(self.v, self.v) )) , op=MPI.SUM)
+        if self._c_function is None:
+            return 0
+        else:
+            return self.dt*domain.comm.allreduce( fem.assemble_scalar(fem.form( self._c_function(self.v, self.v) )) , op=MPI.SUM)
 
     def Energy_kinetic(self):
         domain = self.u.function_space.mesh
@@ -122,19 +135,20 @@ class TimeStepper:
         """
         Apply initial conditions
         
-        u0: u at t0
-        v0: du/dt at t0
-        t0: start time (default: 0)
+        Args:
+            u0: u at t0
+            v0: du/dt at t0
+            t0: start time (default: 0)
         
-        u0 and v0 can be:
-            - function -> interpolated at nodes
-                       -> e.g. u0 = lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType)
-            - scalar (int, float, complex, PETSc.ScalarType)
-                       -> e.g. u0 = 0
-            - array (list, tuple, np.ndarray) or fem.function.Constant
-                       -> e.g. u0 = [0,0,0]
-            - fem.function.Function
-                       -> e.g. u0 = fem.Function(V)
+            u0 and v0 can be:
+                - function -> interpolated at nodes
+                    -> e.g. u0 = lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType)
+                - scalar (int, float, complex, PETSc.ScalarType)
+                    -> e.g. u0 = 0
+                - array (list, tuple, np.ndarray) or fem.function.Constant
+                    -> e.g. u0 = [0,0,0]
+                - fem.function.Function
+                    -> e.g. u0 = fem.Function(V)
         """
         self._t = t0
         for selfVal, val in ((self._u0, u0), (self._v0, v0)):
@@ -186,10 +200,10 @@ class TimeStepper:
         """
         Enable and configure the plotter to display the current result within the run() loop
         
-        live_plotter_step: step for refreshing the plot.
-            >=0 means no live plot, 1 means refresh at each step, 10 means refresh each 10 steps, ...
-        
-        **kwargs: optional parameters to be passed to CustomScalarPlotter / CustomVectorPlotter
+        Args:
+            live_plotter_step: Step for refreshing the plot.
+                >=0 means no live plot, 1 means refresh at each step, 10 means refresh each 10 steps, ...
+            kwargs: Passed to CustomScalarPlotter / CustomVectorPlotter
         """
         ###
         self.live_plotter_step = live_plotter_step
@@ -241,16 +255,22 @@ class OneStepTimeStepper(TimeStepper):
         """
         Run the loop on time steps
         
-        -- Input --
-        num_steps: number of time steps to integrate
-        **kwargs: important optional parameters are 'callfirsts' and 'callbacks'
-           callfirsts: (default=[]) list of functions to be called at the beginning of each iteration (before solving). For instance: update a source term.
-                       Each callfirst if of the form: cf = lambda t, timestepper: do_something; where t is the time at which to evaluate the sources and timestepper is the timestepper being run
-           callbacks:  (detault=[]) similar to callfirsts, but the callbacks are called at the end of each iteration (after solving). For instance: store/save, plot, print, ...
-                       Each callback if of the form: cb = lambda i, timestepper: do_something; where i is the iteration index and timestepper is the timestepper being run
-           -- other optional parameters --
-           live_plotter: (default=None) setting live_plotter={...} will forward these parameters to 'set_live_plotter' (see documentation)
-           verbose     : (default=0) verbosity level. >9 means an info msg before each step
+        Args:
+            num_steps: number of time steps to integrate
+            kwargs: important optional parameters are 'callfirsts' and 'callbacks'
+                callfirsts: (default=[]) list of functions to be called at the beginning
+                    of each iteration (before solving). For instance: update a source term.
+                    Each callfirst if of the form: cf = lambda t, timestepper: do_something
+                    where t is the time at which to evaluate the sources and
+                    timestepper is the timestepper being run
+                callbacks:  (detault=[]) similar to callfirsts, but the callbacks are called
+                    at the end of each iteration (after solving). For instance: store/save, plot, print, ...
+                    Each callback if of the form: cb = lambda i, timestepper: do_something
+                    where i is the iteration index and timestepper is the timestepper being run
+               -- other optional parameters --
+               live_plotter: (default=None) Setting live_plotter={...} will forward
+                   these parameters to 'set_live_plotter' (see documentation)
+               verbose     : (default=0) Verbosity level. >9 means an info msg before each step
         """
         ###
         verbose = kwargs.get('verbose', 0)

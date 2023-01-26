@@ -3,7 +3,9 @@ Eigenmodes
 
 Free resonances of an aluminum cube, compared against litterature data
 
-Data from: Ogi, H., Sato, K., Asada, T., & Hirao, M. (2002). Complete mode identification for resonance ultrasound spectroscopy. The Journal of the Acoustical Society of America, 112(6), 2553-2557.
+Data from: Ogi, H., Sato, K., Asada, T., & Hirao, M. (2002). Complete mode
+identification for resonance ultrasound spectroscopy. The Journal of the
+Acoustical Society of America, 112(6), 2553-2557.
 """
 
 from dolfinx import mesh, fem
@@ -66,7 +68,9 @@ eps.plot(slice(6,6+9), wireframe=True, factor=30) #avoids the first 6 rigid body
 # -----------------------------------------------------
 #            Compare with litterature values
 # -----------------------------------------------------
-# Data from: Ogi, H., Sato, K., Asada, T., & Hirao, M. (2002). Complete mode identification for resonance ultrasound spectroscopy. The Journal of the Acoustical Society of America, 112(6), 2553-2557.
+# Data from: Ogi, H., Sato, K., Asada, T., & Hirao, M. (2002). Complete mode
+# identification for resonance ultrasound spectroscopy. The Journal of the
+# Acoustical Society of America, 112(6), 2553-2557.
 
 freqs_OgiEtAl_exp  = np.array([116.716, 143.783, 158.081, 166.5  , 169.523, 177.846, 183.875, 186.047,
                                190.341, 197.386, 201.133, 207.386, 209.836, 214.753, 223.548, 231.266,

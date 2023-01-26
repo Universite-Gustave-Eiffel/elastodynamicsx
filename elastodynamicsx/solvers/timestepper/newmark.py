@@ -8,10 +8,16 @@ from elastodynamicsx.pde import BoundaryCondition
 
 class GalphaNewmarkBeta(OneStepTimeStepper):
     """
-    Implementation of the 'g-a-newmark' (Generalized-alpha Newmark) time-stepping scheme, for beta>0. The special case beta=0 is implemented in the LeapFrog class.
-    Ref: J. Chung and G. M. Hulbert, "A time integration algorithm for structural dynamics with improved numerical dissipation: The generalized-α method," J. Appl. Mech. 60(2), 371–375 (1993).
+    Implementation of the 'g-a-newmark' (Generalized-alpha Newmark) time-stepping scheme,
+    for beta>0. The special case beta=0 is implemented in the LeapFrog class.
     
-    Implementation adapted from: https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html
+    Reference:
+        J. Chung and G. M. Hulbert, "A time integration algorithm for structural
+        dynamics with improved numerical dissipation: The generalized-α method,"
+        J. Appl. Mech. 60(2), 371–375 (1993).
+    
+    Adapted from:
+        https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html
 
     implicit/explicit? implicit
     accuracy: first or second order, depending on parameters
@@ -21,24 +27,36 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
     
     def __init__(self, m_, c_, k_, L, dt, function_space, bcs=[], **kwargs):
         """
-        m_: function(u,v) that returns the ufl expression of the bilinear form with second derivative on time
-               -> usually: m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
-        c_: (optional, ignored if None) function(u,v) that returns the ufl expression of the bilinear form with a first derivative on time (damping form)
-               -> for Rayleigh damping: c_ = lambda u,v: eta_m * m_(u,v) + eta_k * k_(u,v)
-        k_: function(u,v) that returns the ufl expression of the bilinear form with no derivative on time
-               -> used to build the stiffness matrix
-               -> usually: k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
-        L:  linear form
-        dt: time step
-        function_space: the Finite Element functionnal space
-        bcs: the set of boundary conditions
+        Args:
+            m_: Function(u,v) that returns the ufl expression of the bilinear form
+                with second derivative on time
+                -> usually: m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
+            c_: (optional, ignored if None) Function(u,v) that returns the ufl expression
+                of the bilinear form with a first derivative on time (damping form)
+                -> for Rayleigh damping: c_ = lambda u,v: eta_m * m_(u,v) + eta_k * k_(u,v)
+            k_: Function(u,v) that returns the ufl expression of the bilinear form
+                with no derivative on time
+                -> used to build the stiffness matrix
+                -> usually: k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
+            L:  Linear form
+            dt: Time step
+            function_space: The Finite Element functionnal space
+            bcs: The set of boundary conditions
         
-        **kwargs: The four parameters ('alpha_m', 'alpha_m', 'gamma', 'beta') can be set manually, although the preferred way is by setting the desired spectral radius 'rho_inf'.
-            rho_inf: (default = 0.75) spectral radius in the high frequency limit. bounds: (1/2,1)
-            alpha_m: (default = (2*rho_inf-1)/(rho_inf+1)); unconditionnal stability if -1 <= alpha_m <= alpha_f <= 0.5
-            alpha_f: (default = rho_inf/(rho_inf+1));       unconditionnal stability if -1 <= alpha_m <= alpha_f <= 0.5
-            gamma:   (default = 1/2 - alpha_m + alpha_f);   default value ensures second-order accuracy; other values give first-order accuracy
-            beta:    (default = 1/4*(gamma+1/2)**2);        unconditionnal stability if beta >= 0.25 + 0.5*(alpha_f-alpha_m)
+            kwargs: The four parameters ('alpha_m', 'alpha_m', 'gamma', 'beta')
+                    can be set manually, although the preferred way is by setting
+                    the desired spectral radius 'rho_inf'.
+                rho_inf: (default = 0.75)
+                    spectral radius in the high frequency limit. bounds: (1/2,1)
+                alpha_m: (default = (2*rho_inf-1)/(rho_inf+1))
+                    unconditionnal stability if -1 <= alpha_m <= alpha_f <= 0.5
+                alpha_f: (default = rho_inf/(rho_inf+1))
+                    unconditionnal stability if -1 <= alpha_m <= alpha_f <= 0.5
+                gamma:   (default = 1/2 - alpha_m + alpha_f)
+                    default value ensures second-order accuracy
+                    other values give first-order accuracy
+                beta:    (default = 1/4*(gamma+1/2)**2)
+                    unconditionnal stability if beta >= 0.25 + 0.5*(alpha_f-alpha_m)
         """
         rho_inf = kwargs.get('rho_inf', 0.75)
         alpha_m = (2*rho_inf-1)/(rho_inf+1)
@@ -136,7 +154,11 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
 class HilberHughesTaylor(GalphaNewmarkBeta):
     """
     Implementation of the 'hilber-hughes-taylor' or 'alpha-newmark' time-stepping scheme.
-    Ref: H. M. Hilber, T. J. R. Hughes, and R. L. Taylor, "Improved Numerical Dissipation for Time Integration Algorithms in Structural Dynamics", Earthquake Engineering and Structural Dynamics, vol. 5, pp. 283–292, 1977.
+    
+    Reference:
+        H. M. Hilber, T. J. R. Hughes, and R. L. Taylor,
+        "Improved Numerical Dissipation for Time Integration Algorithms in Structural Dynamics",
+        Earthquake Engineering and Structural Dynamics, vol. 5, pp. 283–292, 1977.
 
     implicit/explicit? implicit
     accuracy: first or second order, depending on parameters
@@ -146,10 +168,11 @@ class HilberHughesTaylor(GalphaNewmarkBeta):
     
     labels = ['hilber-hughes-taylor', 'hht', 'hht-alpha']
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs): #TODO: finir documentation et support rho_inf
         """
-        **kwargs:
-           alpha: (default: 0.05); set to e.g. sqrt(2) for moderate dissipation
+        Args:
+            kwargs:
+                alpha: (default: 0.05); set to e.g. sqrt(2) for moderate dissipation
            
         **kwargs: The three parameters ('alpha', 'gamma', 'beta') can be set manually, although the preferred way is by setting the desired spectral radius 'rho_inf'.
             rho_inf: (default = 0.9) spectral radius in the high frequency limit. bounds: (1/2,1)
@@ -162,10 +185,15 @@ class HilberHughesTaylor(GalphaNewmarkBeta):
         kwargs['alpha_f'] = alpha
         super().__init__(*args, **kwargs)
 
+
+
 class NewmarkBeta(GalphaNewmarkBeta):
     """
-    Implementation of the 'newmark' or 'newmark-beta' time-stepping scheme, for beta>0. The special case beta=0 is implemented in the LeapFrog class.
-    see: https://en.wikipedia.org/wiki/Newmark-beta_method
+    Implementation of the 'newmark' or 'newmark-beta' time-stepping scheme, for beta>0.
+    The special case beta=0 is implemented in the LeapFrog class.
+    
+    See:
+        https://en.wikipedia.org/wiki/Newmark-beta_method
 
     implicit/explicit? implicit
     accuracy: first-order unless gamma=1/2 (second-order)
@@ -178,11 +206,16 @@ class NewmarkBeta(GalphaNewmarkBeta):
         kwargs['alpha_f'] = 0
         super().__init__(*args, **kwargs)
 
+
+
 class MidPoint(NewmarkBeta):
     """
     Implementation of the 'midpoint' time-stepping scheme, or Average Acceleration Method.
-    Midpoint is a special case of Newmark-beta methods with beta=1/4 and gamma=1/2 and is unconditionally stable.
-    see: https://en.wikipedia.org/wiki/Midpoint_method
+    Midpoint is a special case of Newmark-beta methods with beta=1/4 and gamma=1/2
+    and is unconditionally stable.
+    
+    See:
+        https://en.wikipedia.org/wiki/Midpoint_method
 
     implicit/explicit? implicit
     accuracy: second-order
@@ -195,10 +228,13 @@ class MidPoint(NewmarkBeta):
         kwargs['beta']  = 1/4
         super().__init__(*args, **kwargs)
 
+
+
 class LinearAccelerationMethod(NewmarkBeta):
     """
     Implementation 'linear-acceleration-method' time-stepping scheme.
-    It is a special case of Newmark-beta methods with beta=1/6 and gamma=1/2 and is unconditionally stable.
+    It is a special case of Newmark-beta methods with beta=1/6 and gamma=1/2
+    and is unconditionally stable.
 
     implicit/explicit? implicit
     accuracy: second-order
