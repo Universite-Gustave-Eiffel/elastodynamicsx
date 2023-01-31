@@ -11,7 +11,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import BoundaryCondition, PDE, BodyForce, Material
+from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import CustomVectorPlotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
@@ -20,8 +20,10 @@ from analyticalsolutions import u_2D_PSV_rt, int_Fraunhofer_2D
 # -----------------------------------------------------
 #                     FE domain
 # -----------------------------------------------------
+degElement = 4
+
 length, height = 10, 10
-Nx, Ny = 100, 100
+Nx, Ny = 100//degElement, 100//degElement
 extent = [[0., 0.], [length, height]]
 domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny])
 boundaries = [(1, lambda x: np.isclose(x[0], 0     )),\
@@ -30,7 +32,7 @@ boundaries = [(1, lambda x: np.isclose(x[0], 0     )),\
               (4, lambda x: np.isclose(x[1], height))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-V = fem.VectorFunctionSpace(domain, ("CG", 2))
+V = fem.VectorFunctionSpace(domain, ("CG", degElement))
 #
 # -----------------------------------------------------
 
@@ -42,7 +44,7 @@ rho     = fem.Constant(domain, PETSc.ScalarType(1))
 mu      = fem.Constant(domain, PETSc.ScalarType(1))
 lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
 
-mat   = Material.build(V, 'isotropic', rho, lambda_, mu)
+mat   = material(V, 'isotropic', rho, lambda_, mu)
 materials = [mat]
 #
 # -----------------------------------------------------
@@ -101,7 +103,7 @@ bodyforces = [gaussianBF]
 # -----------------------------------------------------
 tstart = 0 # Start time
 tmax   = 4*d0 # Final time
-num_steps = 1000
+num_steps = 1200
 dt = (tmax-tstart) / num_steps # time step size
 #
 # -----------------------------------------------------

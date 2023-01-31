@@ -11,7 +11,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import BoundaryCondition, PDE, BodyForce, Material
+from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import CustomScalarPlotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
@@ -20,17 +20,19 @@ from analyticalsolutions import u_2D_SH_rt, int_Fraunhofer_2D
 # -----------------------------------------------------
 #                     FE domain
 # -----------------------------------------------------
+degElement = 4
+
 length, height = 10, 10
-Nx, Ny = 100, 100
+Nx, Ny = 100//degElement, 100//degElement
 extent = [[0., 0.], [length, height]]
-domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny])
+domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny], mesh.CellType.triangle)
 boundaries = [(1, lambda x: np.isclose(x[0], 0     )),\
               (2, lambda x: np.isclose(x[0], length)),\
               (3, lambda x: np.isclose(x[1], 0     )),\
               (4, lambda x: np.isclose(x[1], height))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-V = fem.FunctionSpace(domain, ("CG", 2))
+V  = fem.FunctionSpace(domain, ("DG", degElement))
 #
 # -----------------------------------------------------
 
@@ -42,7 +44,7 @@ rho     = fem.Constant(domain, PETSc.ScalarType(1))
 mu      = fem.Constant(domain, PETSc.ScalarType(1))
 #lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
 
-mat   = Material.build(V, 'scalar', rho, mu)
+mat   = material(V, 'scalar', rho, mu)
 materials = [mat]
 #
 # -----------------------------------------------------

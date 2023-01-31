@@ -22,12 +22,12 @@ Using the **pde** package:
 #V is a dolfinx.fem.function_space
 #cell_tags is a dolfinx.mesh.MeshTags object
 
-from elastodynamicsx.pde import Material, BodyForce, PDE, BoundaryCondition
+from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 
 tag_mat1 = 1 #suppose tag_mat1 refers to cells associated with material no 1
 tag_mat2 = 2 #same for material no 2
-mat1 = Material.build((V, cell_tags, tag_mat1), 'isotropic', rho=1, lambda_=2, mu=1)
-mat2 = Material.build((V, cell_tags, tag_mat2), 'isotropic', rho=2, lambda_=4, mu=2)
+mat1 = material((V, cell_tags, tag_mat1), 'isotropic', rho=1, lambda_=2, mu=1)
+mat2 = material((V, cell_tags, tag_mat2), 'isotropic', rho=2, lambda_=4, mu=2)
 
 f_body = fem.Constant(V.mesh, np.array([0, 0], dtype=PETSc.ScalarType)) #body load
 f1     = BodyForce(V, f_body) #not specifying cell_tags and a specific tag means the entire domain

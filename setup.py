@@ -13,7 +13,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     #url='https://gitlab.com/geoendgroup/ElastodynamiCSx/ElastodynamiCSx',
     license='MIT License',
-    description='elastodynamics with FEniCSx/DOLFINx',
+    description='Elastodynamics with FEniCSx/DOLFINx',
     long_description=long_description,
     long_description_content_type="text/markdown",
     scripts=[],

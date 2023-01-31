@@ -13,7 +13,7 @@ from mpi4py import MPI
 from petsc4py import PETSc
 import numpy as np
 
-from elastodynamicsx.pde import Material
+from elastodynamicsx.pde import material
 from elastodynamicsx.solvers import ElasticResonanceSolver
 
 # -----------------------------------------------------
@@ -41,7 +41,7 @@ rho     = fem.Constant(domain, PETSc.ScalarType(rho))
 lambda_ = fem.Constant(domain, PETSc.ScalarType(lambda_))
 mu      = fem.Constant(domain, PETSc.ScalarType(mu))
 
-material = Material.build(V, 'isotropic', rho, lambda_, mu)
+material = material(V, 'isotropic', rho, lambda_, mu)
 #
 # -----------------------------------------------------
 

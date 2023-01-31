@@ -193,6 +193,26 @@ class CustomVectorPlotter(pyvista.Plotter):
         self.add_slider_widget(updateTStep, [timesteps[0], timesteps[-1]], **kwargs_slider)
         
 
+
+def spy_petscMatrix(Z, *args, **kwargs):
+    """
+    matplotlib.pyplot.spy with Z being a petsc4py.PETSc.Mat object
+    
+    Args:
+        Z:      The array to be plotted, of type petsc4py.PETSc.Mat
+        args:   Passed to matplotlib.pyplot.spy (see doc)
+        kwargs: Passed to matplotlib.pyplot.spy (see doc)
+    
+    Returns:
+        See doc of matplotlib.pyplot.spy
+    """
+    import scipy.sparse
+    kwargs['markersize'] = kwargs.get('markersize', 1)
+    #[::-1] because:
+    ### ai, aj, av    = Z.getValuesCSR()
+    ### Z_scipysparse = scipy.sparse.csr_matrix((av, aj, ai))
+    return plt.spy(scipy.sparse.csr_matrix(Z.getValuesCSR()[::-1]), *args, **kwargs)
+
 ### ------------------------------------ ###
 ### --- define useful util functions --- ###
 ### ------------------------------------ ###

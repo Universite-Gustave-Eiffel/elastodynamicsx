@@ -1,4 +1,4 @@
-#TODO: documentation
+#TODO: optimize SLEPc default options
 
 from dolfinx import fem
 from petsc4py import PETSc
@@ -11,21 +11,23 @@ from elastodynamicsx.solutions import ModalBasis
 
 class ElasticResonanceSolver(SLEPc.EPS):
     """
-    Convenience class inhereted from SLEPc.EPS, with default parameters and convenience methods that are relevant for computing the resonances of an elastic component.
+    Convenience class inhereted from SLEPc.EPS, with default parameters
+    and convenience methods that are relevant for computing the resonances
+    of an elastic component.
     
     Example of use (free resonances of an elastic cube):
         
         from dolfinx import mesh, fem
         from mpi4py import MPI
         from elastodynamicsx.solvers import ElasticResonanceSolver
-        from elastodynamicsx.pde import Material
+        from elastodynamicsx.pde import material
         #
-        domain = dolfinx.mesh.create_box(MPI.COMM_WORLD, [[0., 0., 0.], [1., 1., 1.]], [10, 10, 10])
-        V = dolfinx.fem.VectorFunctionSpace(domain, ("CG", 1))
+        domain = mesh.create_box(MPI.COMM_WORLD, [[0,0,0], [1,1,1]], [10,10,10])
+        V      = dolfinx.fem.VectorFunctionSpace(domain, ("CG", 1))
         #
         rho, lambda_, mu = 1, 2, 1
-        material = Material.build(V, rho, lambda_, mu)
-        eps = ElasticResonanceSolver(material.m, material.k, V, bcs=[], nev=6+6) #the first 6 resonances are rigid body motion
+        mat = material(V, rho, lambda_, mu)
+        eps = ElasticResonanceSolver(mat.m, mat.k, V, bcs=[], nev=6+6) #the first 6 resonances are rigid body motion
         eps.solve()
         eps.plot()
         freqs = eps.getEigenfrequencies()
@@ -57,7 +59,6 @@ class ElasticResonanceSolver(SLEPc.EPS):
         dirichletbcs = [bc for bc in bcs if issubclass(type(bc), fem.DirichletBCMetaClass)]
         supportedbcs = [bc for bc in bcs if type(bc) == BoundaryCondition]
         for bc in supportedbcs:
-            assert(bc.type in ('dirichlet', 'neumann', 'robin'), "unsupported boundary condition {0:s}".format(bc.type))
             if   bc.type == 'dirichlet':
                 dirichletbcs.append(bc.bc)
             elif bc.type == 'neumann':
@@ -65,6 +66,8 @@ class ElasticResonanceSolver(SLEPc.EPS):
             elif bc.type == 'robin':
                 F_bc    = bc.bc(u,v)
                 k_form += ufl.lhs(F_bc)
+            else:
+                raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
         
         ### assemble mass M and stifness K matrices
         M = fem.petsc.assemble_matrix(fem.form(m_form), bcs=dirichletbcs)

@@ -92,7 +92,7 @@ class BoundaryCondition():
                 self._bc = lambda u_t,v: values * ufl.inner(u_t, v)* ds #Bilinear form, to be applied on du/dt
             else: #vector function space
                 n = ufl.FacetNormal(function_space)
-                self._bc = lambda u_t,v: ((values[0]-values[1])*ufl.inner(u_t, n)*ufl.inner(n, v) + values[1]*ufl.inner(u_t, v))* ds #Bilinear form, to be applied on du/dt
+                self._bc = lambda u_t,v: ((values[0]-values[1])*ufl.dot(u_t, n)*ufl.inner(v, n) + values[1]*ufl.inner(u_t, v))* ds #Bilinear form, to be applied on du/dt
         else:
             raise TypeError("Unknown boundary condition: {0:s}".format(type_))
 

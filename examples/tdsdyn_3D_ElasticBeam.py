@@ -13,7 +13,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import BoundaryCondition, PDE, BodyForce, Material, Damping
+from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE, Damping
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
 
@@ -66,7 +66,7 @@ mu      = fem.Constant(domain, PETSc.ScalarType(mu))
 eta_m = fem.Constant(domain, PETSc.ScalarType(0.01))
 eta_k = fem.Constant(domain, PETSc.ScalarType(0.01))
 
-material = Material.build(V, 'isotropic', rho, lambda_, mu, damping=Damping.build('Rayleigh', eta_m, eta_k))
+material = material(V, 'isotropic', rho, lambda_, mu, damping=Damping.build('Rayleigh', eta_m, eta_k))
 #
 # -----------------------------------------------------
 
