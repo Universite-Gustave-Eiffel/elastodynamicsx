@@ -127,7 +127,7 @@ print('CFL condition: Courant number = ', round(TimeStepper.CFL(V.mesh, ufl.sqrt
 pde = PDE(materials=materials, bodyforces=bodyforces)
 
 #  Time integration
-tStepper = TimeStepper.build(pde.m, pde.c, pde.k, pde.L, dt, V, bcs=bcs, scheme='leapfrog')
+tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
 tStepper.initial_condition(u0=0, v0=0, t0=tstart)
 #
 # -----------------------------------------------------

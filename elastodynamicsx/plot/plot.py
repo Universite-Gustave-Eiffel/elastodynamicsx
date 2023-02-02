@@ -35,12 +35,22 @@ if is_notebook():
 ### --- define useful plotting functions --- ###
 ### ---------------------------------------- ###
 
-def plot_mesh(mesh, cell_tags):
+def plot_mesh(mesh, cell_tags=None, **kwargs):
     """
     Plot the mesh with colored subdomains
     
     Adapted from:
         https://jsdokken.com/dolfinx-tutorial/chapter3/em.html
+    
+    Args:
+        mesh: a dolfinx mesh
+        cell_tags: (optional) a dolfinx MeshTag instance
+        kwargs:
+            show: (default=True) shows the plotter if set to True,
+                otherwise the plotter is returned
+    
+    Returns:
+        The pyvista.Plotter if show==False, else returns None
     
     Example of use:
     
@@ -59,14 +69,18 @@ def plot_mesh(mesh, cell_tags):
     plotter = pyvista.Plotter()
     grid = pyvista.UnstructuredGrid(*plot.create_vtk_mesh(mesh, mesh.topology.dim))
     num_local_cells = mesh.topology.index_map(mesh.topology.dim).size_local
-    grid.cell_data["Marker"] = cell_tags.values[cell_tags.indices<num_local_cells]
-    grid.set_active_scalars("Marker")
+    if not cell_tags is None:
+        grid.cell_data["Marker"] = cell_tags.values[cell_tags.indices<num_local_cells]
+        grid.set_active_scalars("Marker")
     actor = plotter.add_mesh(grid, show_edges=True)
     #
     if mesh.topology.dim<3:
         plotter.view_xy()
     #
-    plotter.show()
+    if kwargs.get('show'):
+        plotter.show()
+    else:
+        return plotter
 
 
 ### -------------------------------------- ###
@@ -78,11 +92,23 @@ class CustomScalarPlotter(pyvista.Plotter):
     def __init__(self, *all_scalars, **kwargs):
         self.grids=[]
         dims = []
+        
+        self._trans = lambda x:x
+        cmplx = kwargs.pop('complex', 'real')
+        if   cmplx.lower() == 'real':
+            self._trans = np.real
+        elif cmplx.lower() == 'imag':
+            self._trans = np.imag
+        elif cmplx.lower() == 'abs':
+            self._trans = np.abs
+        elif cmplx.lower() == 'angle':
+            self._trans = np.angle
+        
         for u_ in all_scalars:
             if u_ is None: break
             topology, cell_types, geom = plot.create_vtk_mesh(u_.function_space)
             grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
-            grid.point_data["u"] = u_.x.array
+            grid.point_data["u"] = self._trans(u_.x.array)
             self.grids.append(grid)
             dims.append(u_.function_space.mesh.topology.dim)
         
@@ -93,9 +119,21 @@ class CustomScalarPlotter(pyvista.Plotter):
             defaultShape = '1|'+str(len(self.grids)-1)
         shape = kwargs.pop('shape', defaultShape)
         super().__init__(shape=shape)
-
+        
+        show_edges = kwargs.pop('show_edges', 'first')
+        if   show_edges == False:
+            show_edges = 'none'
+        elif show_edges == True:
+            show_edges = 'all'
+        
+        if   show_edges == 'none':
+            show_edges = [False for i in range(len(self.grids))]
+        elif show_edges == 'all':
+            show_edges = [True  for i in range(len(self.grids))]
+        elif show_edges == 'first':
+            show_edges = [i==0  for i in range(len(self.grids))]
+        
         labels = kwargs.pop('labels', ['' for i in range(len(self.grids))])
-        show_edges = kwargs.pop('show_edges', True)
         cmap = kwargs.pop('cmap', plt.cm.get_cmap("viridis", 25))
         sargs = dict(title_font_size=25, label_font_size=20, fmt="%.2e", color="black", position_x=0.1, position_y=0.8, width=0.8, height=0.1)
         for i,(grid,dim) in enumerate(zip(self.grids, dims)):
@@ -109,8 +147,9 @@ class CustomScalarPlotter(pyvista.Plotter):
         if len(self.grids)>1: self.subplot(0) #resets the focus to first subplot
 
     def update_scalars(self, *all_scalars, **kwargs):
+        """Calls pyvista.Plotter.update_scalars for all subplots"""
         for i, (grid, u_) in enumerate(zip(self.grids, all_scalars)):
-            super().update_scalars(u_, mesh=grid, render=False)
+            super().update_scalars(self._trans(u_), mesh=grid, render=False)
         if kwargs.get('render', True):
             self.render()
 
@@ -131,6 +170,17 @@ class CustomVectorPlotter(pyvista.Plotter):
         ###
         self.grids=[]
         
+        self._trans = lambda x:x
+        cmplx = kwargs.pop('complex', 'real')
+        if   cmplx.lower() == 'real':
+            self._trans = np.real
+        elif cmplx.lower() == 'imag':
+            self._trans = np.imag
+        elif cmplx.lower() == 'abs':
+            self._trans = np.abs
+        elif cmplx.lower() == 'angle':
+            self._trans = np.angle
+        
         if 'warp_factor' in kwargs:
             self.warp_factor = kwargs.pop('warp_factor')
         elif 'clim' in kwargs and np.amax(np.abs(kwargs['clim']))>0:
@@ -143,7 +193,7 @@ class CustomVectorPlotter(pyvista.Plotter):
             topology, cell_types, geom = plot.create_vtk_mesh(u_.function_space)
             grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
             u3D   = get_3D_array_from_FEFunction(u_)
-            grid["u"] = u3D
+            grid["u"] = self._trans(u3D)
             grid.point_data["u_nrm"] = np.linalg.norm(u3D, axis=1)
             self.grids.append(grid)
         
@@ -155,9 +205,21 @@ class CustomVectorPlotter(pyvista.Plotter):
             defaultShape = '1|'+str(len(self.grids)-1)
         shape = kwargs.pop('shape', defaultShape)
         super().__init__(shape=shape)
+        
+        show_edges = kwargs.pop('show_edges', 'first')
+        if   show_edges == False:
+            show_edges = 'none'
+        elif show_edges == True:
+            show_edges = 'all'
+        
+        if   show_edges == 'none':
+            show_edges = [False for i in range(len(self.grids))]
+        elif show_edges == 'all':
+            show_edges = [True  for i in range(len(self.grids))]
+        elif show_edges == 'first':
+            show_edges = [i==0  for i in range(len(self.grids))]
 
         labels = kwargs.pop('labels', ['' for i in range(len(self.grids))])
-        show_edges = kwargs.pop('show_edges', True)
         cmap = kwargs.pop('cmap', plt.cm.get_cmap("viridis", 25))
         sargs = dict(title_font_size=25, label_font_size=20, fmt="%.2e", color="black", position_x=0.1, position_y=0.8, width=0.8, height=0.1)
         for i,grid in enumerate(self.grids):
@@ -173,10 +235,11 @@ class CustomVectorPlotter(pyvista.Plotter):
         if len(self.grids)>1: self.subplot(0) #resets the focus to first subplot
 
     def update_vectors(self, *all_vectors, render=True):
+        """Calls pyvista.Plotter.update_coordinates and .update_scalars for all subplots"""
         for i, (grid, u_) in enumerate(zip(self.grids, all_vectors)):
             nbpts = grid.number_of_points
             u3D   = get_3D_array_from_nparray(u_, nbpts)
-            grid["u"] = u3D
+            grid["u"] = self._trans(u3D)
             #
             super().update_coordinates(grid.warp_by_vector("u", factor=self.warp_factor).points, mesh=grid.warped, render=False)
             super().update_scalars(np.linalg.norm(u3D, axis=1), mesh=grid.warped, render=False)

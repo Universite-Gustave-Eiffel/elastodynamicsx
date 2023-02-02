@@ -50,7 +50,7 @@ material = material(V, 'isotropic', rho, lambda_, mu)
 #                       Solve
 # -----------------------------------------------------
 ### Initialize the solver
-eps = ElasticResonanceSolver(material.m, material.k, V, bcs=[], nev=20)
+eps = ElasticResonanceSolver(V, material.m, material.c, material.k, bcs=[], nev=20)
 
 ### Run the big calculation!
 eps.solve()

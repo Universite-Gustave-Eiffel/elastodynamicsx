@@ -7,14 +7,14 @@ Time domain:
 Normal modes:
     from elastodynamicsx.solvers import ElasticResonanceSolver
 
-... in the future
 Frequency domain:
-    from elastodynamicsx.solvers import ...
+    from elastodynamicsx.solvers import FrequencyDomainSolver
 
+... in the future
 Guided waves:
     from elastodynamicsx.solvers import ...
 """
 
 from .timestepper import *
 from .eigensolver import *
-
+from .frequencydomain import *

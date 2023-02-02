@@ -27,25 +27,29 @@ class ElasticResonanceSolver(SLEPc.EPS):
         #
         rho, lambda_, mu = 1, 2, 1
         mat = material(V, rho, lambda_, mu)
-        eps = ElasticResonanceSolver(mat.m, mat.k, V, bcs=[], nev=6+6) #the first 6 resonances are rigid body motion
+        eps = ElasticResonanceSolver(V, mat.m, mat.c, mat.k, bcs=[], nev=6+6) #the first 6 resonances are rigid body motion
         eps.solve()
         eps.plot()
         freqs = eps.getEigenfrequencies()
         print('First resonance frequencies:', freqs)
     """
 
-    def __init__(self, m_, k_, function_space, bcs=[], **kwargs):
+    def __init__(self, function_space, m_, c_, k_, bcs=[], **kwargs):
         """
+        function_space: the Finite Element functionnal space
         m_: function(u,v) that returns the ufl expression of the bilinear form with second derivative on time
                -> usually: m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
+        c_: NOT IMPLEMENTED : MUST BE None
         k_: function(u,v) that returns the ufl expression of the bilinear form with no derivative on time
                -> used to build the stiffness matrix
                -> usually: k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
-        function_space: the Finite Element functionnal space
         bcs: the set of boundary conditions
         """
         #
         super().__init__()
+        
+        if not(c_ is None): #TODO
+            raise NotImplementedError
         
         self.function_space = function_space
         

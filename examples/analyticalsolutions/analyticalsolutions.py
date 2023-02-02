@@ -79,8 +79,8 @@ def green_2D_PSV_xw(x, w, rho=1, lambda_=2, mu=1, fn_IntFraunhofer=None, eps=1e-
     """Green function of a 2D full, homogeneous space, for an in-plane load, in the frequency domain
     
     -- Input --
-       x: shape=(nbx, 3) coordinates of reception relative to the source
-       w: shape=(nbw,) angular frequency
+       x: shape=(nbx, 3) or (nbx, 3, np.newaxis),        coordinates of reception relative to the source
+       w: shape=(nbw,) or (np.newaxis, np.newaxis, nbw), angular frequency
        rho: density
        lambda_: lame's modulus
        mu : shear modulus
@@ -92,6 +92,15 @@ def green_2D_PSV_xw(x, w, rho=1, lambda_=2, mu=1, fn_IntFraunhofer=None, eps=1e-
     """
     #nb : x.shape = [N, 3, newaxis]
     #nb : w.shape = [,, M]
+    x = np.asarray(x)
+    w = np.asarray(w)
+    if len(x.shape) == 2:
+        x = x[:,:,np.newaxis]
+    if len(w.shape) == 1:
+        w = w[np.newaxis,np.newaxis,:]
+    assert len(x.shape)==3, "Wrong format for x; expected 2D or 3D array"
+    assert len(w.shape)==3, "Wrong format for w; expected scalar or 1D or 3D array"
+    
     N, M = x.shape[0], w.size
     green_xw = np.zeros((N,2,2,M), dtype=np.complex128)
     c_P = np.sqrt((lambda_+2*mu)/rho)#P-wave velocity   
@@ -114,11 +123,11 @@ def green_2D_PSV_xw(x, w, rho=1, lambda_=2, mu=1, fn_IntFraunhofer=None, eps=1e-
 
 #Green(r,w): space - frequency domain
 def green_2D_PSV_half_S_xw(x, w, rho=2.719, lambda_=49.1, mu=26, fn_IntFraunhofer=None, eps=1e-8):
-    """Green function of a 2D full, homogeneous space, for an in-plane load, in the frequency domain
+    """Green function of a 2D half, homogeneous space, for an in-plane load, in the frequency domain
     
     -- Input --
-       x: shape=(nbx, 3) coordinates of reception relative to the source
-       w: shape=(nbw,) angular frequency
+       x: shape=(nbx, 3) or (nbx, 3, np.newaxis),        coordinates of reception relative to the source
+       w: shape=(nbw,) or (np.newaxis, np.newaxis, nbw), angular frequency
        rho: density
        lambda_: lame's modulus
        mu : shear modulus
@@ -130,6 +139,15 @@ def green_2D_PSV_half_S_xw(x, w, rho=2.719, lambda_=49.1, mu=26, fn_IntFraunhofe
     """
     #nb : x.shape = [N, 3, newaxis]
     #nb : w.shape = [,, M]
+    x = np.asarray(x)
+    w = np.asarray(w)
+    if len(x.shape) == 2:
+        x = x[:,:,np.newaxis]
+    if len(w.shape) == 1:
+        w = w[np.newaxis,np.newaxis,:]
+    assert len(x.shape)==3, "Wrong format for x; expected 2D or 3D array"
+    assert len(w.shape)==3, "Wrong format for w; expected scalar or 1D or 3D array"
+    
     N, M = x.shape[0], w.size
     green_xw = np.zeros((N,2,2,M), dtype=np.complex128)
     ups=lambda_/(2*(lambda_+mu))
@@ -164,8 +182,29 @@ def green_2D_PSV_half_S_xw(x, w, rho=2.719, lambda_=49.1, mu=26, fn_IntFraunhofe
     green_xw[:,1,1,:] *= 0
     return green_xw
 
-# U(r,t): space - time domain after convolution with a source
-def u_2D_PSV_rt(x, src, F_=(1,0), rho=2.719, lambda_=49.1, mu=26, dt=1, fn_IntFraunhofer=None, eps=1e-8):
+# U(r,t): space - frequency domain after product with a source vector
+def u_2D_PSV_xw(x, w, F_=(1,0), rho=1, lambda_=2, mu=1, fn_IntFraunhofer=None, eps=1e-8):
+    """Displacement response to an in-plane line load of a 2D full, homogeneous space, in the frequency domain
+    
+    -- Input --
+       x: shape=(nbx, 3) or (nbx, 3, np.newaxis),        coordinates of reception relative to the source
+       w: shape=(nbw,) or (np.newaxis, np.newaxis, nbw), angular frequency
+       F_: F_=(F_1, F_2) force vector
+       rho: density
+       lambda_: lame's modulus
+       mu : shear modulus
+       
+       eps: small number to avoid NaN at r=0 or w=0
+
+    -- Output --
+       shape=(nbx,2,2,nbw)
+    """
+    Gxw = green_2D_PSV_xw(x[:,:,np.newaxis], w[np.newaxis,np.newaxis,:], rho,lambda_, mu, fn_IntFraunhofer, eps) #out: [Nx, 2, 2, Nw]
+    U_xw=np.tensordot(Gxw, F_, axes=(2,0)) #out: [Nx, 2, Nw]
+    return U_xw
+
+# U(x,t): space - time domain after convolution with a source
+def u_2D_PSV_xt(x, src, F_=(1,0), rho=2.719, lambda_=49.1, mu=26, dt=1, fn_IntFraunhofer=None, eps=1e-8):
     """Displacement response to an in-plane line load with a given time-dependency, of a full, homogeneous space, in the time domain
     
     -- Input --

@@ -68,15 +68,15 @@ class TimeStepper:
     ### ------- non-static -------
     ### --------------------------
     
-    def __init__(self, m_, c_, k_, L, dt, function_space, bcs=[], **kwargs):
+    def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], **kwargs):
         """
         Args:
+            function_space: The function space
             m_: Function of u,v that returns the mass form
             c_: Function of u,v that returns the damping form
             k_: Function of u,v that returns the stiffness form
             L : Function of v   that returns the linear form
             dt: Time step
-            function_space: The function space
             bcs: List of instances of the class BoundaryCondition
             kwargs:
         """
@@ -225,11 +225,11 @@ class OneStepTimeStepper(TimeStepper):
     Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).
     """
     
-    def __init__(self, m_, c_, k_, L, dt, function_space, bcs=[], **kwargs):
+    def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], **kwargs):
         #
         self._i0 = 0
         self._intermediate_dt = 0
-        super().__init__(m_, c_, k_, L, dt, function_space, bcs, **kwargs)
+        super().__init__(function_space, m_, c_, k_, L, dt, bcs, **kwargs)
 
     def _prepareNextIteration(self): print('Supercharge me')
     def _initialStep(self, callfirsts, callbacks, verbose=0):

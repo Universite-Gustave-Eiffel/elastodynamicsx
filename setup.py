@@ -9,9 +9,9 @@ setuptools.setup(
     name='ElastodynamiCSx',
     author="Pierric Mora",
     author_email="pierric.mora@univ-eiffel.fr",
-    version="0.12",
+    version="0.13",
     packages=setuptools.find_packages(),
-    #url='https://gitlab.com/geoendgroup/ElastodynamiCSx/ElastodynamiCSx',
+    url='https://github.com/Universite-Gustave-Eiffel/elastodynamicsx',
     license='MIT License',
     description='Elastodynamics with FEniCSx/DOLFINx',
     long_description=long_description,
@@ -23,12 +23,12 @@ setuptools.setup(
         "Programming Language :: Python :: 3 :: Only",
         "Operating System :: Linux",
         "Operating System :: MacOS",
-        "Operating System :: Microsoft :: Windows",
         ],
     install_requires=[
         # === "official" packages
         'numpy', 
-        'matplotlib', 'pyvista',
+        'matplotlib',
+        'pyvista',
         #'dolfinx >= 0.4.1', ufl
         ],
     python_requires='>=3')

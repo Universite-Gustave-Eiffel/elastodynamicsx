@@ -36,7 +36,7 @@ pde  = PDE(materials=[mat1, mat2], bodyforces=[f1]) #m, c, k, L forms: pde.m, pd
 
 tag_top  = 1       #top boundary
 tags_lbr = (2,3,4) #left, bottom, right boundaries
-T_N  = fem.Constant(V.mesh, np.array([0, 0], dtype=PETSc.ScalarType)) #boundary load
+T_N  = fem.Constant(V.mesh, PETSc.ScalarType([0,1])) #boundary load
 bc1  = BoundaryCondition((V, facet_tags, tag_top) , 'Neumann', T_N)
 bc2  = BoundaryCondition((V, facet_tags, tags_lbr), 'Dashpot', (mat1.Z_N, mat1.Z_T)) #plane-wave absorbing conditions with P-wave & S-wave impedances of material no1
 bcs  = [bc1, bc2]
@@ -54,16 +54,38 @@ from elastodynamicsx.solvers import TimeStepper
 dt, num_steps = 0.01, 100 #t=[0..1)
 
 #Initialize the time stepper
-tStepper = TimeStepper.build(pde.m, pde.c, pde.k, pde.L, dt, V, bcs=bcs, scheme='leapfrog')
+tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
 tStepper.initial_condition(u0=[0,0], v0=[0,0], t0=0)
 
 #Define a function that will update the source term at each time step
 def update_T_N_function(t, timeStepper):
-    forceVector = np.array([0,1], dtype=PETSc.ScalarType)
+    forceVector = PETSc.ScalarType([0,1])
     T_N.value   = np.sin(t)*forceVector
 
 #Loop on time, and live-plot the result
 tStepper.run(num_steps-1, callfirsts=[update_T_N_function], callbacks=[], live_plotter={'live_plotter_step':1, 'clim':[-1,1]})
+
+#the end
+```
+
+  * **Frequency domain problems**, using the *FrequencyDomainSolver* class
+```python
+#Frequency domain
+from elastodynamicsx.solvers import FrequencyDomainSolver
+
+assert np.issubdtype(PETSc.ScalarType, np.complexfloating), \
+       "Should only be executed with DOLFINx complex mode"
+
+#Initialize the solver
+fdsolver = FrequencyDomainSolver(V, pde.m, pde.c, pde.k, pde.L, bcs=bcs)
+
+#Solve
+u = fdsolver.solve(omega=1.0)
+
+#Plot
+from elastodynamicsx.plot import CustomVectorPlotter
+p = CustomVectorPlotter(u, complex='real')
+p.show()
 
 #the end
 ```
@@ -76,7 +98,7 @@ from elastodynamicsx.solvers import ElasticResonanceSolver
 nev = 9 #number of modes to compute
 
 #Initialize the solver
-eps = ElasticResonanceSolver(pde.m, pde.k, V, bcs=[], nev=nev)
+eps = ElasticResonanceSolver(V, pde.m, pde.c, pde.k, bcs=[], nev=nev)
 eps.solve()
 
 eigenfreqs = eps.getEigenfrequencies()
@@ -183,6 +205,8 @@ Several examples are provided in the **examples** subfolder:
   * Wave equation, time domain:
     * (2D) homogeneous space, anti-plane line load (SH waves): *weq_2D-SH_FullSpace.py*
     * (2D) homogeneous space, in-plane line load (P-SV waves): *weq_2D-PSV_FullSpace.py*
+  * Wave equation, frequency domain (Helmoltz equation):
+    * (2D) homogeneous space, anti-plane line load (SH waves): *freq_2D-SH_FullSpace.py*
   * Structural dynamics, time domain:
     * (3D) forced vibration of an elastic beam clamped at one end, with Rayleigh damping - adapted from [COMET](https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html): *tdsdyn_3D_ElasticBeam.py*
   * Eigenmodes:

@@ -107,7 +107,7 @@ kwargsTScheme = dict(scheme='g-a-newmark', alpha_m=alpha_m, alpha_f=alpha_f)
 pde = PDE(materials=[material], bodyforces=[])
 
 #  Time integration
-tStepper = TimeStepper.build(pde.m, pde.c, pde.k, pde.L, dt, V, bcs=bcs, **kwargsTScheme)
+tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, **kwargsTScheme)
 tStepper.initial_condition(u0=[0,0,0], v0=[0,0,0], t0=0)
 #tStepper.solver.view()
 #

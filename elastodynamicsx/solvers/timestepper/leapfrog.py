@@ -18,9 +18,10 @@ class LeapFrog(OneStepTimeStepper):
     
     labels = ['leapfrog', 'central-difference']
     
-    def __init__(self, m_, c_, k_, L, dt, function_space, bcs=[], **kwargs):
+    def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], **kwargs):
         """
         Args:
+            function_space: The Finite Element functionnal space
             m_: Function(u,v) that returns the ufl expression of the bilinear form
                 with second derivative on time
                 -> usually: m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
@@ -33,7 +34,6 @@ class LeapFrog(OneStepTimeStepper):
                 -> usually: k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
             L:  Linear form
             dt: Time step
-            function_space: The Finite Element functionnal space
             bcs: The set of boundary conditions
         """
         dt_  = fem.Constant(function_space.mesh, PETSc.ScalarType(dt))
@@ -91,7 +91,7 @@ class LeapFrog(OneStepTimeStepper):
         self.bilinear_form = fem.form(self._a)
         self.linear_form   = fem.form(self._L)
         #
-        super().__init__(m_, c_, k_, L, dt, function_space, dirichletbcs, **kwargs)
+        super().__init__(function_space, m_, c_, k_, L, dt, dirichletbcs, **kwargs)
         self._i0 = 1 #because solving the initial value problem a0=M_inv.(F(t0)-K(u0)-C.v0) also yields u1=u(t0+dt)
     
     def _prepareNextIteration(self):

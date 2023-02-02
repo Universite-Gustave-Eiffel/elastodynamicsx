@@ -15,7 +15,7 @@ from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import CustomVectorPlotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
-from analyticalsolutions import u_2D_PSV_rt, int_Fraunhofer_2D
+from analyticalsolutions import u_2D_PSV_xt, int_Fraunhofer_2D
 
 # -----------------------------------------------------
 #                     FE domain
@@ -126,7 +126,7 @@ print('CFL condition: Courant number = ', round(TimeStepper.CFL(V.mesh, ufl.sqrt
 pde = PDE(materials=materials, bodyforces=bodyforces)
 
 #  Time integration
-tStepper = TimeStepper.build(pde.m, pde.c, pde.k, pde.L, dt, V, bcs=bcs, scheme='leapfrog')
+tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
 tStepper.initial_condition(u0=[0,0], v0=[0,0], t0=tstart)
 #
 # -----------------------------------------------------
@@ -180,7 +180,7 @@ if storeAllSteps: #plotter with a slider to browse through all time steps
     ### -> Exact solution, Full field
     x = tStepper.u.function_space.tabulate_dof_coordinates()
     t = dt*np.arange(num_steps)
-    all_u_n_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], src_t(t), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
+    all_u_n_exact = u_2D_PSV_xt(x - X0_src[np.newaxis,:], src_t(t), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
     
     def update_fields_function(i):
         return (all_u[i].x.array, all_u_n_exact[:,:,i].flatten(), all_u[i].x.array-all_u_n_exact[:,:,i].flatten())
@@ -200,7 +200,7 @@ if len(points_output_on_proc)>0:
     ### -> Exact solution, At few points
     x = points_output_on_proc
     t = dt*np.arange(num_steps)
-    signals_at_points_exact = u_2D_PSV_rt(x - X0_src[np.newaxis,:], src_t(t), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
+    signals_at_points_exact = u_2D_PSV_xt(x - X0_src[np.newaxis,:], src_t(t), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
     #
     fig, ax = plt.subplots(1,1)
     ax.set_title('Signals at few points')

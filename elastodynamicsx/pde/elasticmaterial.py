@@ -23,11 +23,12 @@ class ElasticMaterial(Material):
         self._damping   = kwargs.pop('damping', NoDamping())
         if (type(self._damping) == RayleighDamping) and (self._damping.host_material is None):
             self._damping.link_material(self)
-        
-        super().__init__(functionspace_tags_marker, rho, sigma, is_linear=True, **kwargs)
     
+        super().__init__(functionspace_tags_marker, rho, sigma, is_linear=True, **kwargs)
+
+
     @property
-    def k(self):
+    def k(self): #TODO: extremely slow because of 'if'! change strategy
         """Stiffness form function"""
         e = self._function_space.ufl_element()
         if e.is_cellwise_constant() == True:

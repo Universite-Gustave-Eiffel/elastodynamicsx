@@ -25,9 +25,10 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
     
     labels = ['g-a-newmark', 'generalized-alpha']
     
-    def __init__(self, m_, c_, k_, L, dt, function_space, bcs=[], **kwargs):
+    def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], **kwargs):
         """
         Args:
+            function_space: The Finite Element functionnal space
             m_: Function(u,v) that returns the ufl expression of the bilinear form
                 with second derivative on time
                 -> usually: m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
@@ -40,7 +41,6 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
                 -> usually: k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
             L:  Linear form
             dt: Time step
-            function_space: The Finite Element functionnal space
             bcs: The set of boundary conditions
         
             kwargs: The four parameters ('alpha_m', 'alpha_m', 'gamma', 'beta')
@@ -135,7 +135,7 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
         self.bilinear_form = fem.form(self._a)
         self.linear_form   = fem.form(self._L)
         #
-        super().__init__(m_, c_, k_, L, dt, function_space, dirichletbcs, **kwargs)
+        super().__init__(function_space, m_, c_, k_, L, dt, dirichletbcs, **kwargs)
 
     @property
     def a(self): return self._a_n
