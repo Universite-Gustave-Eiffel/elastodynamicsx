@@ -47,6 +47,8 @@ class FrequencyDomainSolver:
         u        = fdsolver.solve()
     """
     
+    default_petsc_options = {"ksp_type": "preonly", "pc_type": "lu"}
+    
     def __init__(self, function_space, m_, c_, k_, L, bcs=[], **kwargs):
         """
         Args:
@@ -59,6 +61,10 @@ class FrequencyDomainSolver:
             kwargs:
                 omega: (optional) a delfinx.fem.Constant to be pointed to.
                     By default creates its own instance. To get it: self.omega_dolfinx
+                petsc_options: Options that are passed to the linear
+                algebra backend PETSc. For available choices for the
+                'petsc_options' kwarg, see the `PETSc documentation
+                <https://petsc4py.readthedocs.io/en/stable/manual/ksp/>`_.
         """
         #
         w = kwargs.get('omega', 1)
@@ -98,6 +104,7 @@ class FrequencyDomainSolver:
 
         self._bcs = dirichletbcs
         self._problem = None
+        self._petsc_options = kwargs.get('petsc_options', FrequencyDomainSolver.default_petsc_options)
         
     
     
@@ -119,7 +126,7 @@ class FrequencyDomainSolver:
         
         w = self._w
         a = -w*w*self._m + 1J*w*self._c + self._k
-        self._problem = fem.petsc.LinearProblem(a, self._L, bcs=self._bcs)
+        self._problem = fem.petsc.LinearProblem(a, self._L, bcs=self._bcs, petsc_options=self._petsc_options)
         return self._problem.solve()
     
     def _solve_multiple_omega(self, omega, callbacks=[]):

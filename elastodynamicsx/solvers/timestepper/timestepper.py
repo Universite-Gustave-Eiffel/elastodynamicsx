@@ -22,6 +22,9 @@ class TimeStepper:
 
     labels = ['supercharge me']
     petsc_options_t0 = {"ksp_type": "preonly", "pc_type": "lu"} #PETSc options to solve a0 = M_inv.(F(t0) - C.v0 - K(u0))
+    petsc_options_explicit_scheme = petsc_options_t0
+    petsc_options_implicit_scheme_linear = {"ksp_type": "preonly", "pc_type": "lu"}
+    #petsc_options_implicit_scheme_nonlinear = #TODO
     
     def build(*args, **kwargs):
         """
@@ -45,14 +48,16 @@ class TimeStepper:
         #
         raise TypeError('unknown scheme: '+scheme)
         
-    def CFL(domain, c_max, dt):
+    def Courant_number(domain, c_max, dt):
         """
-        Courant-Friedrichs-Lewy number: CFL = c_max*dt/h, with h the cell diameter
+        The Courant number: C = c_max*dt/h, with h the cell diameter
+        
+        Related to the Courant-Friedrichs-Lewy (CFL) condition.
 
         see: https://en.wikipedia.org/wiki/Courant%E2%80%93Friedrichs%E2%80%93Lewy_condition
         """
         V = fem.FunctionSpace(domain, ("DG", 0))
-        cfl = fem.Function(V)
+        c_number = fem.Function(V)
         
         if type(V.element.interpolation_points) == np.ndarray:
             pts = V.element.interpolation_points   #DOLFINx.__version__ < 0.5
@@ -60,15 +65,15 @@ class TimeStepper:
             pts = V.element.interpolation_points() #DOLFINx.__version__ >=0.5
         
         h = ufl.MinCellEdgeLength(V.mesh) #or rather ufl.CellDiameter?
-        cfl.interpolate(fem.Expression(dt*c_max/h, pts))
-        return V.mesh.comm.allreduce( np.amax(cfl.x.array) , op=MPI.MAX)
+        c_number.interpolate(fem.Expression(dt*c_max/h, pts))
+        return V.mesh.comm.allreduce( np.amax(c_number.x.array) , op=MPI.MAX)
 
 
     ### --------------------------
     ### ------- non-static -------
     ### --------------------------
     
-    def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], **kwargs):
+    def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], explicit=False, **kwargs):
         """
         Args:
             function_space: The function space
@@ -79,6 +84,10 @@ class TimeStepper:
             dt: Time step
             bcs: List of instances of the class BoundaryCondition
             kwargs:
+                petsc_options: Options that are passed to the linear
+                algebra backend PETSc. For available choices for the
+                'petsc_options' kwarg, see the `PETSc documentation
+                <https://petsc4py.readthedocs.io/en/stable/manual/ksp/>`_.
         """
         #
         self._t   = 0
@@ -92,6 +101,8 @@ class TimeStepper:
         self._callbacks  = []
         self.live_plotter = None
         self.live_plotter_step = 0
+        #
+        self._explicit = explicit
         ###
         #note: any inherited class must define the following attributes:
         #        self._u_n, self._v_n, self._a_n,
@@ -100,9 +111,22 @@ class TimeStepper:
         #        self._m0_form, self._L0_form
         ###
         #
-        self._compile()
-        self._init_solver()
+        if self.explicit:
+            default_petsc_options = TimeStepper.petsc_options_explicit_scheme
+        else:
+            default_petsc_options = TimeStepper.petsc_options_implicit_scheme_linear
+        petsc_options = kwargs.get('petsc_options', default_petsc_options)
+        self._init_solver(petsc_options)
         
+    @property
+    def A(self): return self._A
+    
+    @property
+    def b(self): return self._b
+    
+    @property
+    def explicit(self): return self._explicit
+    
     @property
     def t(self): return self._t
     
@@ -176,23 +200,42 @@ class TimeStepper:
         if self.live_plotter_step > 0 and i % self.live_plotter_step == 0:
             self.live_plotter.update_vectors(tStepper.u.x.array)
             time.sleep(0.01)
-
-    def _compile(self):
-        ###
+    
+    def _init_solver(self, petsc_options={}):
+        # see https://github.com/FEniCS/dolfinx/blob/main/python/dolfinx/fem/petsc.py
+        # see also https://jsdokken.com/dolfinx-tutorial/chapter2/diffusion_code.html
+        ###   ###   ###   ###
         # Declare left-hand-side matrix 'A' and right-hand-side vector 'b'
         #    build 'A' once for all
         #    declare 'b' (to be updated in the time loop)
-        self.A = fem.petsc.assemble_matrix(self.bilinear_form, bcs=self._bcs)
-        self.A.assemble()
-        self.b = fem.petsc.create_vector(self.linear_form)
-    
-    def _init_solver(self):
-        ###
+        self._A = fem.petsc.assemble_matrix(self.bilinear_form, bcs=self._bcs)
+        self._A.assemble()
+        self._b = fem.petsc.create_vector(self.linear_form)
+        
         # Solver
         self.solver = PETSc.KSP().create(self.u.function_space.mesh.comm)
-        self.solver.setOperators(self.A)
-        self.solver.setType(PETSc.KSP.Type.PREONLY)
-        self.solver.getPC().setType(PETSc.PC.Type.LU)
+        self.solver.setOperators(self._A)
+        #self.solver.setType(PETSc.KSP.Type.PREONLY)
+        #self.solver.getPC().setType(PETSc.PC.Type.LU)
+        
+        # Give PETSc solver options a unique prefix
+        problem_prefix = f"dolfinx_solve_{id(self)}"
+        self.solver.setOptionsPrefix(problem_prefix)
+        
+        # Set PETSc options
+        opts = PETSc.Options()
+        opts.prefixPush(problem_prefix)
+        for k, v in petsc_options.items():
+            opts[k] = v
+        opts.prefixPop()
+        self.solver.setFromOptions()
+        
+        # Set matrix and vector PETSc options
+        self._A.setOptionsPrefix(problem_prefix)
+        self._A.setFromOptions()
+        self._b.setOptionsPrefix(problem_prefix)
+        self._b.setFromOptions()
+        
     
     def run(self, num_steps, **kwargs): print('Supercharge me')
 
@@ -225,11 +268,11 @@ class OneStepTimeStepper(TimeStepper):
     Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).
     """
     
-    def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], **kwargs):
+    def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], explicit=False, **kwargs):
         #
         self._i0 = 0
         self._intermediate_dt = 0
-        super().__init__(function_space, m_, c_, k_, L, dt, bcs, **kwargs)
+        super().__init__(function_space, m_, c_, k_, L, dt, bcs, explicit, **kwargs)
 
     def _prepareNextIteration(self): print('Supercharge me')
     def _initialStep(self, callfirsts, callbacks, verbose=0):
@@ -295,19 +338,19 @@ class OneStepTimeStepper(TimeStepper):
 
             # Update the right hand side reusing the initial vector
             if verbose >= 10: PETSc.Sys.Print('Update the right hand side reusing the initial vector...')
-            with self.b.localForm() as loc_b:
+            with self._b.localForm() as loc_b:
                 loc_b.set(0)
-            fem.petsc.assemble_vector(self.b, self.linear_form)
+            fem.petsc.assemble_vector(self._b, self.linear_form)
             
             # Apply Dirichlet boundary condition to the vector // even without Dirichlet BC this is important for parallel computing
             if verbose >= 10: PETSc.Sys.Print('Applying BCs and ghostUpdate...')
-            fem.petsc.apply_lifting(self.b, [self.bilinear_form], [self._bcs])
-            self.b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)
-            fem.petsc.set_bc(self.b, self._bcs)
+            fem.petsc.apply_lifting(self._b, [self.bilinear_form], [self._bcs])
+            self._b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)
+            fem.petsc.set_bc(self._b, self._bcs)
 
             # Solve linear problem
             if verbose >= 10: PETSc.Sys.Print('Solving...')
-            self.solver.solve(self.b, self._u_n.vector)
+            self.solver.solve(self._b, self._u_n.vector)
             self._u_n.x.scatter_forward()
             
             #

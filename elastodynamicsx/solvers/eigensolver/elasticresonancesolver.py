@@ -9,7 +9,12 @@ import numpy as np
 from elastodynamicsx.pde import BoundaryCondition
 from elastodynamicsx.solutions import ModalBasis
 
-class ElasticResonanceSolver(SLEPc.EPS):
+#see https://slepc.upv.es/documentation/
+#    https://slepc.upv.es/documentation/current/docs/manualpages/EPS/index.html
+#    https://slepc.upv.es/documentation/current/docs/manualpages/PEP/index.html
+#    https://slepc4py.readthedocs.io/en/stable/
+
+class ElasticResonanceSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue problem
     """
     Convenience class inhereted from SLEPc.EPS, with default parameters
     and convenience methods that are relevant for computing the resonances

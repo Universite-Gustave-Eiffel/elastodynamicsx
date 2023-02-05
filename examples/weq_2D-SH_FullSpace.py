@@ -117,7 +117,7 @@ lbda0 = c_SH/f0
 
 print('Number of points per wavelength at central frequency: ', round(lbda0/hx, 2))
 print('Number of time steps per period at central frequency: ', round(T0/dt, 2))
-print('CFL condition: Courant number = ', round(TimeStepper.CFL(V.mesh, ufl.sqrt(mu/rho), dt), 2))
+print('CFL condition: Courant number = ', round(TimeStepper.Courant_number(V.mesh, ufl.sqrt(mu/rho), dt), 2))
 ###
 
 

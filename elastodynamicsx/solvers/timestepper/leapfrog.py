@@ -91,7 +91,7 @@ class LeapFrog(OneStepTimeStepper):
         self.bilinear_form = fem.form(self._a)
         self.linear_form   = fem.form(self._L)
         #
-        super().__init__(function_space, m_, c_, k_, L, dt, dirichletbcs, **kwargs)
+        super().__init__(function_space, m_, c_, k_, L, dt, dirichletbcs, explicit=True, **kwargs)
         self._i0 = 1 #because solving the initial value problem a0=M_inv.(F(t0)-K(u0)-C.v0) also yields u1=u(t0+dt)
     
     def _prepareNextIteration(self):

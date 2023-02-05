@@ -207,6 +207,7 @@ Several examples are provided in the **examples** subfolder:
     * (2D) homogeneous space, in-plane line load (P-SV waves): *weq_2D-PSV_FullSpace.py*
   * Wave equation, frequency domain (Helmoltz equation):
     * (2D) homogeneous space, anti-plane line load (SH waves): *freq_2D-SH_FullSpace.py*
+    * (2D) homogeneous space, in-plane line load (P-SV waves): *freq_2D-PSV_FullSpace.py*
   * Structural dynamics, time domain:
     * (3D) forced vibration of an elastic beam clamped at one end, with Rayleigh damping - adapted from [COMET](https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html): *tdsdyn_3D_ElasticBeam.py*
   * Eigenmodes:

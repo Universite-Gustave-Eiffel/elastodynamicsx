@@ -135,7 +135,7 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
         self.bilinear_form = fem.form(self._a)
         self.linear_form   = fem.form(self._L)
         #
-        super().__init__(function_space, m_, c_, k_, L, dt, dirichletbcs, **kwargs)
+        super().__init__(function_space, m_, c_, k_, L, dt, dirichletbcs, explicit=False, **kwargs)
 
     @property
     def a(self): return self._a_n

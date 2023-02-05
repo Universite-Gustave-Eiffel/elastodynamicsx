@@ -139,7 +139,7 @@ class CustomScalarPlotter(pyvista.Plotter):
         for i,(grid,dim) in enumerate(zip(self.grids, dims)):
             if len(self.grids)>1: self.subplot(i)
             self.add_text(labels[i])
-            self.add_mesh(grid, scalars='u', show_edges=((i==0) and show_edges), lighting=False, scalar_bar_args=sargs, cmap=cmap, **kwargs)
+            self.add_mesh(grid, scalars='u', show_edges=show_edges[i], lighting=False, scalar_bar_args=sargs, cmap=cmap, **kwargs)
             if dim<3:
                 self.view_xy()
                 self.camera.zoom(1.3)
@@ -227,7 +227,7 @@ class CustomVectorPlotter(pyvista.Plotter):
             self.add_text(labels[i])
             warped = grid.warp_by_vector("u", factor=self.warp_factor)
             grid.warped = warped
-            self.add_mesh(warped, scalars="u_nrm", show_edges=((i==0) and show_edges), lighting=False, scalar_bar_args=sargs, cmap=cmap, **kwargs)
+            self.add_mesh(warped, scalars="u_nrm", show_edges=show_edges[i], lighting=False, scalar_bar_args=sargs, cmap=cmap, **kwargs)
             if nbcomps<3:
                 self.view_xy()
                 self.camera.zoom(1.3)

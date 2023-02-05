@@ -199,6 +199,14 @@ def u_2D_PSV_xw(x, w, F_=(1,0), rho=1, lambda_=2, mu=1, fn_IntFraunhofer=None, e
     -- Output --
        shape=(nbx,2,2,nbw)
     """
+    if hasattr(w, '__iter__'):
+        w = np.asarray(w)
+    else:
+        w = np.array([w])
+    if hasattr(x, '__iter__'):
+        x = np.asarray(x)
+    else:
+        x = np.array([x])
     Gxw = green_2D_PSV_xw(x[:,:,np.newaxis], w[np.newaxis,np.newaxis,:], rho,lambda_, mu, fn_IntFraunhofer, eps) #out: [Nx, 2, 2, Nw]
     U_xw=np.tensordot(Gxw, F_, axes=(2,0)) #out: [Nx, 2, Nw]
     return U_xw
