@@ -11,9 +11,9 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
+from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE2
 from elastodynamicsx.solvers import FrequencyDomainSolver
-from elastodynamicsx.plot import CustomVectorPlotter
+from elastodynamicsx.plot import CustomVectorPlotter, live_plotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
 from analyticalsolutions import u_2D_PSV_xw, int_Fraunhofer_2D
 
@@ -79,7 +79,7 @@ bodyforces = [bf]
 # -----------------------------------------------------
 #                        PDE
 # -----------------------------------------------------
-pde = PDE(materials=materials, bodyforces=bodyforces)
+pde = PDE2(V, materials=materials, bodyforces=bodyforces, bcs=bcs)
 #
 # -----------------------------------------------------
 
@@ -87,54 +87,71 @@ pde = PDE(materials=materials, bodyforces=bodyforces)
 # -----------------------------------------------------
 #                  Initialize solver
 # -----------------------------------------------------
-fdsolver = FrequencyDomainSolver(V, pde.m, pde.c, pde.k, pde.L, bcs=bcs)
+fdsolver = FrequencyDomainSolver(V.mesh.comm, pde.M(), pde.C(), pde.K(), pde.init_b(), b_update_function=pde.update_b_frequencydomain)
 #
 # -----------------------------------------------------
 
 
 # -----------------------------------------------------
-#                       Solve
+#          Ex 1: Solve for a single frequency
 # -----------------------------------------------------
+#solve
 omega = 1.0
-u = fdsolver.solve(omega=omega)
-#
-# -----------------------------------------------------
+u = fem.Function(V, name='solution')
+fdsolver.solve(omega=omega, out=u.vector)
 
-
-# -----------------------------------------------------
-#                    Post process
-# -----------------------------------------------------
-### -> Extract field at few points
-pts = np.linspace(0, length/2, endpoint=False)[1:]
-points_output = X0[:,np.newaxis] + np.array([pts, np.zeros_like(pts), np.zeros_like(pts)])
-points_output_on_proc, cells_output_on_proc = find_points_and_cells_on_proc(points_output, domain)
-
-u_at_pts = u.eval(points_output_on_proc, cells_output_on_proc)
-#
-# -----------------------------------------------------
-
-
-# -----------------------------------------------------
-#                        Plot
-# -----------------------------------------------------
+#plot
 p = CustomVectorPlotter(u, complex='real')
 p.show()
+#
+# -----------------------------------------------------
 
+
+# -----------------------------------------------------
+#          Ex 2: Solve for several frequencies
+# -----------------------------------------------------
+#prepare post processing
+### -> Extract field at few points
+from scipy.spatial.transform import Rotation as R
+theta = np.radians(35)
+pts = np.linspace(0, length/2, endpoint=False)[1:]
+points_output = X0[:,np.newaxis] + R.from_rotvec([0,0,theta]).as_matrix() @ np.array([pts, np.zeros_like(pts), np.zeros_like(pts)])
+points_output_on_proc, cells_output_on_proc = find_points_and_cells_on_proc(points_output, domain)
+u_at_pts = []
+
+#callback function: post process solution
+cbck_eval_at_points = lambda i, solver: u_at_pts.append(u.eval(points_output_on_proc, cells_output_on_proc))
+
+#live plotting
+p = live_plotter(u, clim=0.25*np.linalg.norm(mu.value*F0.value)*np.array([0, 1]))
+if len(points_output_on_proc)>0:
+    p.add_points(points_output_on_proc) #adds points to live_plotter
+
+#solve
+omegas = np.linspace(0.5, 3, num=5)
+u = fem.Function(V, name='solution')
+fdsolver.solve(omega=omegas, out=u.vector, callbacks=[cbck_eval_at_points], live_plotter=p)
+
+#plot
 if len(points_output_on_proc)>0:
     ### -> Exact solution, At few points
     x = points_output_on_proc
     fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0) #accounts for the size of the source in the analytical formula
-    u_at_pts_anal = u_2D_PSV_xw(x-X0[np.newaxis,:], omega, F0.value, rho.value, lambda_.value, mu.value, fn_kdomain_finite_size)
+    u_at_pts_anal = u_2D_PSV_xw(x-X0[np.newaxis,:], omegas, F0.value, rho.value, lambda_.value, mu.value, fn_kdomain_finite_size)
     
     #
     fn = np.real
     
-    fig, ax = plt.subplots(1,1)
-    ax.set_title('u at few points')
-    ax.plot(x[:,0]-X0[0], fn(u_at_pts[:,0]), ls='-' , label='FEM')
-    ax.plot(x[:,0]-X0[1], fn(u_at_pts_anal[:,0,0]), ls='--', label='analytical')
-    ax.set_xlabel('Distance to source')
-    ax.legend()
+    icomp = 0
+    fig, ax = plt.subplots(len(omegas),1)
+    fig.suptitle(r'u at few points, $\theta$='+str(int(round(np.degrees(theta),0)))+r'$^{\circ}$')
+    r = np.linalg.norm(x - X0[np.newaxis,:], axis=1)
+    for i in range(len(omegas)):
+        ax[i].text(0.15,0.95, r'$\omega$='+str(round(omegas[i],2)), ha='left', va='top', transform=ax[i].transAxes)
+        ax[i].plot(r, fn(u_at_pts[i][:,icomp]), ls='-' , label='FEM')
+        ax[i].plot(r, fn(u_at_pts_anal[:,icomp,i]), ls='--', label='analytical')
+    ax[0].legend()
+    ax[-1].set_xlabel('Distance to source')
     plt.show()
 #
 # -----------------------------------------------------

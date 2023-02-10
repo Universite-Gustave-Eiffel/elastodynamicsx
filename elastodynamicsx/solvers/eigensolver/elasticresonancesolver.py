@@ -100,11 +100,11 @@ class ElasticResonanceSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue pr
         nev = kwargs.get('nev', 10)
         self.setDimensions(nev=nev)
 
-    def getWn(self):
+    def getWn(self) -> np.ndarray:
         """The eigen angular frequencies from the computed eigenvalues"""
         return np.array([np.sqrt(abs(self.getEigenvalue(i).real)) for i in range(self._getNout())]) #abs because rigid body motions may lead to minus zero: -0.00000
         
-    def getEigenfrequencies(self):
+    def getEigenfrequencies(self) -> np.ndarray:
         """The eigenfrequencies from the computed eigenvalues"""
         return self.getWn()/(2*np.pi)
 
@@ -127,14 +127,14 @@ class ElasticResonanceSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue pr
             self.getEigenpair(i, eigM.vector) # Save eigenvector in eigM
         return eigenmodes
     
-    def getModalBasis(self):
+    def getModalBasis(self) -> 'elastodynamicsx.solutions.ModalBasis':
         return ModalBasis(self.getWn(), self.getEigenmodes())
 
-    def getErrors(self):
+    def getErrors(self) -> np.ndarray:
         """Returns the error estimate on the computed eigenvalues"""
         return np.array([self.computeError(i, SLEPc.EPS.ErrorType.RELATIVE) for i in range(self._getNout())]) # Compute error for i-th eigenvalue
     
-    def plot(self, which='all', **kwargs):
+    def plot(self, which='all', **kwargs) -> None:
         """
         Plots the desired modeshapes
         
@@ -144,7 +144,7 @@ class ElasticResonanceSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue pr
         """
         self.getModalBasis().plot(which, **kwargs)
     
-    def printEigenvalues(self):
+    def printEigenvalues(self) -> None:
         """Prints the computed eigenvalues and error estimates"""
         v = [self.getEigenvalue(i) for i in range(self._getNout())]
         e = self.getErrors()
@@ -157,6 +157,97 @@ class ElasticResonanceSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue pr
         nev, _, _ = self.getDimensions()
         nout = min(nev, nconv)
         return nout
+
+
+
+
+class ElasticResonanceSolver2(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue problem
+    """
+    TEST
+    """
+
+    def __init__(self, comm:'_MPI.Comm', M:PETSc.Mat, C:PETSc.Mat, K:PETSc.Mat, **kwargs):
+        #
+        super().__init__()
+        
+        if not(C is None): #TODO
+            raise NotImplementedError
+        
+        #
+        self.create(comm)
+        self.setOperators(K, M)
+        self.setProblemType(SLEPc.EPS.ProblemType.GHEP) #GHEP = Generalized Hermitian Eigenvalue Problem
+        #self.setTolerances(tol=1e-9)
+        self.setType(SLEPc.EPS.Type.KRYLOVSCHUR) #note that Krylov-Schur is the default solver
+
+        ### Spectral transform
+        st = self.getST()
+        st.setType(SLEPc.ST.Type.SINVERT) #SINVERT = Shift and invert. By default, Slepc computes the largest eigenvalue, while we are interested in the smallest ones
+        st.setShift( 1e-8 ) #can be set to a different value if the focus is set on another part of the spectrum
+
+        ### Number of eigenvalues to be computed
+        nev = kwargs.get('nev', 10)
+        self.setDimensions(nev=nev)
+
+    def getWn(self) -> np.ndarray:
+        """The eigen angular frequencies from the computed eigenvalues"""
+        return np.array([np.sqrt(abs(self.getEigenvalue(i).real)) for i in range(self._getNout())]) #abs because rigid body motions may lead to minus zero: -0.00000
+        
+    def getEigenfrequencies(self) -> np.ndarray:
+        """The eigenfrequencies from the computed eigenvalues"""
+        return self.getWn()/(2*np.pi)
+
+    def getEigenmodes(self, which='all'):
+        """
+        Returns the desired modeshapes
+        
+        Args:
+            which: 'all', or an integer, or a list of integers, or a slice object
+        
+        Examples of use:
+            getEigenmodes()  #returns all computed eigenmodes
+            getEigenmodes(3) #returns mode number 4
+            getEigenmodes([3,5]) #returns modes number 4 and 6
+            getEigenmodes(slice(0,None,2)) #returns even modes
+        """
+        indexes = _slice_array(np.arange(self._getNout()), which)
+        eigenmodes = [ fem.Function(self.function_space) for i in range(np.size(indexes)) ]
+        for i, eigM in zip(indexes, eigenmodes):
+            self.getEigenpair(i, eigM.vector) # Save eigenvector in eigM
+        return eigenmodes
+    
+    def getModalBasis(self) -> 'elastodynamicsx.solutions.ModalBasis':
+        return ModalBasis(self.getWn(), self.getEigenmodes())
+
+    def getErrors(self) -> np.ndarray:
+        """Returns the error estimate on the computed eigenvalues"""
+        return np.array([self.computeError(i, SLEPc.EPS.ErrorType.RELATIVE) for i in range(self._getNout())]) # Compute error for i-th eigenvalue
+    
+    def plot(self, which='all', **kwargs) -> None:
+        """
+        Plots the desired modeshapes
+        
+        Args:
+            which: 'all', or an integer, or a list of integers, or a slice object
+                -> the same as for getEigenmodes
+        """
+        self.getModalBasis().plot(which, **kwargs)
+    
+    def printEigenvalues(self) -> None:
+        """Prints the computed eigenvalues and error estimates"""
+        v = [self.getEigenvalue(i) for i in range(self._getNout())]
+        e = self.getErrors()
+        PETSc.Sys.Print("       eigenvalue \t\t\t error ")
+        for cv, ce in zip(v, e): PETSc.Sys.Print(cv, '\t', ce)
+
+    def _getNout(self):
+        """Returns the number of eigenpairs that can be returned. Usually equal to 'nev'."""
+        nconv = self.getConverged()
+        nev, _, _ = self.getDimensions()
+        nout = min(nev, nconv)
+        return nout
+
+
 
 def _slice_array(a, which):
     """Not intended to be called by user"""

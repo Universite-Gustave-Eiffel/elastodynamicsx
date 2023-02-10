@@ -9,7 +9,7 @@ setuptools.setup(
     name='ElastodynamiCSx',
     author="Pierric Mora",
     author_email="pierric.mora@univ-eiffel.fr",
-    version="0.13",
+    version="0.14",
     packages=setuptools.find_packages(),
     url='https://github.com/Universite-Gustave-Eiffel/elastodynamicsx',
     license='MIT License',

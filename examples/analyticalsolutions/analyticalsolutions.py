@@ -40,6 +40,19 @@ def green_2D_SH_rw(r, w, rho=1, mu=1, fn_IntFraunhofer=None):
               fn_IntFraunhofer = lambda k: 2*jv(1,k*a)/(k*a) #for a normalized circ(r/a) source, i.e. a uniform source of radius 'a'
               fn_IntFraunhofer = lambda k: np.exp(-1/2*(k*sigma)**2) #for a normalized gaussian source of standard deviation 'sigma'
     """
+    if hasattr(w, '__iter__'):
+        w = np.asarray(w)
+    else:
+        w = np.array([w])
+    if len(w.shape) == 1:
+        w = w[np.newaxis,:]
+    if hasattr(r, '__iter__'):
+        r = np.asarray(r)
+    else:
+        r = np.array([r])
+    if len(r.shape) == 1:
+        r = r[:,np.newaxis]
+        
     if fn_IntFraunhofer is None:
         fn_IntFraunhofer = fn_IntFraunhofer_delta
     k = w*np.sqrt(rho/mu)
@@ -182,7 +195,7 @@ def green_2D_PSV_half_S_xw(x, w, rho=2.719, lambda_=49.1, mu=26, fn_IntFraunhofe
     green_xw[:,1,1,:] *= 0
     return green_xw
 
-# U(r,t): space - frequency domain after product with a source vector
+# U(x,w): space - frequency domain after product with a source vector
 def u_2D_PSV_xw(x, w, F_=(1,0), rho=1, lambda_=2, mu=1, fn_IntFraunhofer=None, eps=1e-8):
     """Displacement response to an in-plane line load of a 2D full, homogeneous space, in the frequency domain
     
@@ -197,7 +210,7 @@ def u_2D_PSV_xw(x, w, F_=(1,0), rho=1, lambda_=2, mu=1, fn_IntFraunhofer=None, e
        eps: small number to avoid NaN at r=0 or w=0
 
     -- Output --
-       shape=(nbx,2,2,nbw)
+       shape=(nbx,2,nbw)
     """
     if hasattr(w, '__iter__'):
         w = np.asarray(w)

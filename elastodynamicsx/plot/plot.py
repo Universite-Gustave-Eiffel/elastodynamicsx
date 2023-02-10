@@ -4,10 +4,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dolfinx import plot
 import pyvista
+import time
 
 ### ------------------------------------------------------------------------- ###
 ### --- preliminary: auto-configure pyvista backend for jupyter notebooks --- ###
 ### ------------------------------------------------------------------------- ###
+
+pyvista.global_theme.background = 'white'
 
 def is_notebook() -> bool:
     #https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook/24937408
@@ -83,14 +86,28 @@ def plot_mesh(mesh, cell_tags=None, **kwargs):
         return plotter
 
 
+def live_plotter(u:'fem.Function', refresh_step:int=1, **kwargs) -> pyvista.Plotter:
+    #test whether u is scalar or vector and returns the appropriate plotter
+    nbcomps = u.function_space.element.num_sub_elements #number of components if vector space, 0 if scalar space
+    
+    if nbcomps == 0:
+        return CustomScalarPlotter(u, refresh_step=refresh_step, **kwargs)
+    else:
+        return CustomVectorPlotter(u, refresh_step=refresh_step, **kwargs)
+
+
 ### -------------------------------------- ###
 ### --- define useful plotting classes --- ###
 ### -------------------------------------- ###
 
 class CustomScalarPlotter(pyvista.Plotter):
+
+    default_cmap = plt.cm.get_cmap("RdBu_r", 25)
     
     def __init__(self, *all_scalars, **kwargs):
         self.grids=[]
+        self._refresh_step = kwargs.pop('refresh_step', 1)
+        self._tsleep = kwargs.pop('sleep', 0.01)
         dims = []
         
         self._trans = lambda x:x
@@ -134,15 +151,15 @@ class CustomScalarPlotter(pyvista.Plotter):
             show_edges = [i==0  for i in range(len(self.grids))]
         
         labels = kwargs.pop('labels', ['' for i in range(len(self.grids))])
-        cmap = kwargs.pop('cmap', plt.cm.get_cmap("viridis", 25))
-        sargs = dict(title_font_size=25, label_font_size=20, fmt="%.2e", color="black", position_x=0.1, position_y=0.8, width=0.8, height=0.1)
+        cmap = kwargs.pop('cmap', CustomScalarPlotter.default_cmap)
+        sargs = dict(color="black", position_y=0.0)
         for i,(grid,dim) in enumerate(zip(self.grids, dims)):
             if len(self.grids)>1: self.subplot(i)
             self.add_text(labels[i])
-            self.add_mesh(grid, scalars='u', show_edges=show_edges[i], lighting=False, scalar_bar_args=sargs, cmap=cmap, **kwargs)
+            self.add_mesh(grid, scalars='u', show_edges=show_edges[i], lighting=False, cmap=cmap, scalar_bar_args=sargs, **kwargs)
             if dim<3:
                 self.view_xy()
-                self.camera.zoom(1.3)
+                self.camera.zoom(1.2)
 
         if len(self.grids)>1: self.subplot(0) #resets the focus to first subplot
 
@@ -152,6 +169,11 @@ class CustomScalarPlotter(pyvista.Plotter):
             super().update_scalars(self._trans(u_), mesh=grid, render=False)
         if kwargs.get('render', True):
             self.render()
+
+    def live_plotter_update_function(self, i, vec:'PETSc.Vec'):
+        if self._refresh_step > 0 and i % self._refresh_step == 0:
+            self.update_scalars(vec.getArray())
+            time.sleep(self._tsleep)
 
     def add_time_browser(self, update_fields_function, timesteps, **kwargs_slider):
         self._time_browser_cbck  = update_fields_function
@@ -165,10 +187,14 @@ class CustomScalarPlotter(pyvista.Plotter):
 
 
 class CustomVectorPlotter(pyvista.Plotter):
+
+    default_cmap = plt.cm.get_cmap("viridis", 25)
     
     def __init__(self, *all_vectors, **kwargs):
         ###
         self.grids=[]
+        self._refresh_step = kwargs.pop('refresh_step', 1)
+        self._tsleep = kwargs.pop('sleep', 0.01)
         
         self._trans = lambda x:x
         cmplx = kwargs.pop('complex', 'real')
@@ -220,8 +246,8 @@ class CustomVectorPlotter(pyvista.Plotter):
             show_edges = [i==0  for i in range(len(self.grids))]
 
         labels = kwargs.pop('labels', ['' for i in range(len(self.grids))])
-        cmap = kwargs.pop('cmap', plt.cm.get_cmap("viridis", 25))
-        sargs = dict(title_font_size=25, label_font_size=20, fmt="%.2e", color="black", position_x=0.1, position_y=0.8, width=0.8, height=0.1)
+        cmap = kwargs.pop('cmap', CustomVectorPlotter.default_cmap)
+        sargs = dict(color="black", position_y=0.0)
         for i,grid in enumerate(self.grids):
             if len(self.grids)>1: self.subplot(i)
             self.add_text(labels[i])
@@ -230,7 +256,7 @@ class CustomVectorPlotter(pyvista.Plotter):
             self.add_mesh(warped, scalars="u_nrm", show_edges=show_edges[i], lighting=False, scalar_bar_args=sargs, cmap=cmap, **kwargs)
             if nbcomps<3:
                 self.view_xy()
-                self.camera.zoom(1.3)
+                self.camera.zoom(1.2)
 
         if len(self.grids)>1: self.subplot(0) #resets the focus to first subplot
 
@@ -245,6 +271,11 @@ class CustomVectorPlotter(pyvista.Plotter):
             super().update_scalars(np.linalg.norm(u3D, axis=1), mesh=grid.warped, render=False)
         if render:
             self.render()
+
+    def live_plotter_update_function(self, i, vec:'PETSc.Vec'):
+        if self._refresh_step > 0 and i % self._refresh_step == 0:
+            self.update_vectors(vec.getArray())
+            time.sleep(self._tsleep)
 
     def add_time_browser(self, update_fields_function, timesteps, **kwargs_slider):
         self._time_browser_cbck  = update_fields_function

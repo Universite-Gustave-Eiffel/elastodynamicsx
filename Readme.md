@@ -1,9 +1,9 @@
 # ElastodynamiCSx 
 ElastodynamiCSx is dedicated to the numerical modeling of wave propagation in solids using the [FEniCSx](https://fenicsproject.org/) Finite Elements library. It deals with the following PDE:
 
-$$\mathbf{M}\mathbf{a} + \mathbf{C}\mathbf{v} + \mathbf{K}(\mathbf{u}) = \mathbf{F},$$
+$$\mathbf{M}\mathbf{a} + \mathbf{C}\mathbf{v} + \mathbf{K}(\mathbf{u}) = \mathbf{b},$$
 
-where $\mathbf{u}$, $\mathbf{v}=\partial_t \mathbf{u}$, $\mathbf{a}=\partial_t^2\mathbf{u}$ are the displacement, velocity and acceleration fields, $\mathbf{M}$, $\mathbf{C}$ and $\mathbf{K}$ are the mass, damping and stiffness forms, and $\mathbf{F}$ is an applied force. $\mathbf{K}$ may be a non-linear function of $\mathbf{u}$.
+where $\mathbf{u}$, $\mathbf{v}=\partial_t \mathbf{u}$, $\mathbf{a}=\partial_t^2\mathbf{u}$ are the displacement, velocity and acceleration fields, $\mathbf{M}$, $\mathbf{C}$ and $\mathbf{K}$ are the mass, damping and stiffness forms, and $\mathbf{b}$ is an applied force. $\mathbf{K}$ may be a non-linear function of $\mathbf{u}$.
 
 The module provides high level classes to build and solve common problems in a few lines code.
 
@@ -76,11 +76,22 @@ from elastodynamicsx.solvers import FrequencyDomainSolver
 assert np.issubdtype(PETSc.ScalarType, np.complexfloating), \
        "Should only be executed with DOLFINx complex mode"
 
+#MPI communicator
+comm = V.mesh.comm
+
+#(PETSc) Mass, damping, stiffness matrices
+M, C, K = pde.M(), pde.C(), pde.K()
+
+#(PETSc) load vector
+b = pde.b()
+b_update_fn = pde.update_b_frequencydomain
+
 #Initialize the solver
-fdsolver = FrequencyDomainSolver(V, pde.m, pde.c, pde.k, pde.L, bcs=bcs)
+fdsolver = FrequencyDomainSolver(comm, M, C, K, b, b_update_function=b_update_fn)
 
 #Solve
-u = fdsolver.solve(omega=1.0)
+u = fem.Function(V, name='solution')
+fdsolver.solve(omega=1.0, out=u.vector)
 
 #Plot
 from elastodynamicsx.plot import CustomVectorPlotter
@@ -126,7 +137,7 @@ mbasis.plot()
 ```
 
 ## Dependencies
-ElastodynamiCSx requires FEniCSx / DOLFINx -> see [instructions here](https://github.com/FEniCS/dolfinx#installation). Tested with v0.4.1 and v0.5.1.
+ElastodynamiCSx requires FEniCSx / DOLFINx -> see [instructions here](https://github.com/FEniCS/dolfinx#installation). Tested with v0.4.1, v0.5.1, v0.5.2, v0.6.0.
 
 ### Packages required for the examples
 numpy  

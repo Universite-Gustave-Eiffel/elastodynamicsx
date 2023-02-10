@@ -1,11 +1,8 @@
-#TODO: optimize PETSc default options
-
-from dolfinx import fem
 from petsc4py import PETSc
-import ufl
-import numpy as np
+try: from tqdm.auto import tqdm
+except ModuleNotFoundError: tqdm = lambda x: x
 
-from elastodynamicsx.pde import BoundaryCondition
+
 
 class FrequencyDomainSolver:
     """
@@ -17,7 +14,7 @@ class FrequencyDomainSolver:
         import ufl
         from mpi4py import MPI
         from elastodynamicsx.solvers import FrequencyDomainSolver
-        from elastodynamicsx.pde import material, BoundaryCondition
+        from elastodynamicsx.pde import material, BoundaryCondition, PDE
 
         #domain
         length, height = 10, 10
@@ -41,108 +38,148 @@ class FrequencyDomainSolver:
         gaussianBF = F0 * ufl.exp(-((x[0]-x0)**2+(x[1]-y0)**2)/2/R0**2) / (2*3.141596*R0**2)
         bf         = BodyForce(V, gaussianBF)
         
+        #PDE
+        pde = PDE(V, materials=[mat], bodyforces=[bf], bcs=bcs)
+        
         #solve
+        fdsolver = FrequencyDomainSolver(V.mesh.comm, pde.M(), pde.C(), pde.K(), pde.b())
         omega    = 1.0
-        fdsolver = FrequencyDomainSolver(V, mat.m, mat.c, mat.k, bf.L, bcs=bcs, omega=omega)
-        u        = fdsolver.solve()
+        u        = fem.Function(V, name='solution')
+        fdsolver.solve(omega=omega, out=u.vector)
     """
     
-    default_petsc_options = {"ksp_type": "preonly", "pc_type": "lu"}
-    
-    def __init__(self, function_space, m_, c_, k_, L, bcs=[], **kwargs):
+    default_petsc_options = {"ksp_type": "preonly", "pc_type": "lu"} #"pc_factor_mat_solver_type": "mumps"
+
+    def __init__(self, comm:'_MPI.Comm', M:PETSc.Mat, C:PETSc.Mat, K:PETSc.Mat, b:PETSc.Vec, b_update_function:'function'=None, **kwargs):
         """
         Args:
-            function_space: The function space
-            m_:  Function of u,v that returns the mass form
-            c_:  Function of u,v that returns the damping form
-            k_:  Function of u,v that returns the stiffness form
-            L :  Function of v   that returns the linear form
-            bcs: List of instances of the class BoundaryCondition
+            comm: The MPI communicator
+            M: The mass matrix
+            C: The damping matrix
+            K: The stiffness matrix
+            b: The load vector
+            b_update_function: A function that updates the load vector (in-place)
+                The function must take b,omega as parameters.
+                e.g.: b_update_function = lambda b,omega: b[:]=omega
+                If set to None, the call is ignored.
             kwargs:
-                omega: (optional) a delfinx.fem.Constant to be pointed to.
-                    By default creates its own instance. To get it: self.omega_dolfinx
                 petsc_options: Options that are passed to the linear
                 algebra backend PETSc. For available choices for the
                 'petsc_options' kwarg, see the `PETSc documentation
                 <https://petsc4py.readthedocs.io/en/stable/manual/ksp/>`_.
         """
-        #
-        w = kwargs.get('omega', 1)
-        if not isinstance(w, fem.Constant):
-            w = fem.Constant(function_space.mesh, PETSc.ScalarType(w))
-        self._w   = w
+        self._M = M
+        self._C = C
+        self._K = K
+        self._b = b
+        self._b_update_function = b_update_function
         
-        #self._m_function = m_
-        #self._c_function = c_
-        #self._k_function = k_
+        #### ####
+        # Initialize the PETSc solver
+        petsc_options = kwargs.get('petsc_options', FrequencyDomainSolver.default_petsc_options)
+        self.solver = PETSc.KSP().create(comm)
+        #self.solver.setOperators(self._A) #do it at solve
         
-        #
-        u, v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
+        # Give PETSc solver options a unique prefix
+        problem_prefix = f"dolfinx_solve_{id(self)}"
+        self.solver.setOptionsPrefix(problem_prefix)
         
-        #linear and bilinear forms
-        self._m = m_(u,v)
-        self._c = c_(u, v) if not(c_ is None) else 0
-        self._k = k_(u,v)
-        self._L = L(v)     if not(L is None) else 0*ufl.conj(v)
-        
-        #boundary conditions
-        dirichletbcs = [bc for bc in bcs if issubclass(type(bc), fem.DirichletBCMetaClass)]
-        supportedbcs = [bc for bc in bcs if type(bc) == BoundaryCondition]
-        for bc in supportedbcs:
-            if   bc.type == 'dirichlet':
-                dirichletbcs.append(bc.bc)
-            elif bc.type == 'neumann':
-                self._L += bc(v)
-            elif bc.type == 'robin':
-                F_bc = bc.bc(u,v)
-                self._k += ufl.lhs(F_bc)
-                self._L += ufl.rhs(F_bc)
-            elif bc.type == 'dashpot':
-                self._c += bc.bc(u,v)
-            else:
-                raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
+        # Set PETSc options
+        opts = PETSc.Options()
+        opts.prefixPush(problem_prefix)
+        for k, v in petsc_options.items():
+            opts[k] = v
+        opts.prefixPop()
+        self.solver.setFromOptions()
+        #### ####
 
-        self._bcs = dirichletbcs
-        self._problem = None
-        self._petsc_options = kwargs.get('petsc_options', FrequencyDomainSolver.default_petsc_options)
-        
-    
-    
-    def solve(self, omega=None): #TODO: solve loop for omega=[w1, w2, ...] -> optimize by pre-building M,C,K matrices -> A=-w*w*M + i*w*C + K
+
+    def solve(self, omega, out:PETSc.Vec=None, callbacks:list=[], **kwargs) -> PETSc.Vec:
         """
-        Assemble and solve the linear problem
+        Solve the linear problem
         
         Args:
-            omega: If given, update the value of the angular frequency
+            omega: The angular frequency (scalar or array)
+            out: The solution (displacement field) to the last solve. If
+                None a new PETSc.Vec is created
+            callbacks: If omega is an array, list of callback functions
+                to be called after each solve (e.g. plot, store solution, ...).
+            kwargs:
+                live_plotter: a plotter object that can refresh through
+                a live_plotter.live_plotter_update_function(i, out) function
         
         Returns:
-            u: The solution (displacement field)
+            out
         """
-        return self._solve_single_omega(omega)
+        if out is None:
+            out = self._b.copy()
+        if hasattr(omega, '__iter__'):
+            return self._solve_multiple_omegas(omega, out, callbacks, **kwargs)
+        else:
+            return self._solve_single_omega(omega, out)
 
-    def _solve_single_omega(self, omega=None):
-        if not omega is None:
-            self._w.value = omega
+
+    def _solve_single_omega(self, omega, out:PETSc.Vec) -> PETSc.Vec:
+        #update load vector at angular frequency 'omega'
+        if not(self._b_update_function is None):
+            self._b_update_function(self._b, omega)
+            #self._b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE) #assume this has already been done
         
-        w = self._w
+        #update PDE matrix
+        w = omega
+        A = -w*w*self._M + 1J*w*self._C + self._K
+        self.solver.setOperators(A)
+
+        #solve
+        self.solver.solve(self._b, out)
+        
+        #update the ghosts in the solution
+        out.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
+        return out
+    
+    
+    def _solve_multiple_omegas(self, omegas, out:PETSc.Vec, callbacks:list=[], **kwargs) -> PETSc.Vec:
+        #loop on values in omegas -> _solve_single_omega
+        
+        live_plotter = kwargs.get('live_plotter', None)
+        if not(live_plotter is None):
+            callbacks.append(live_plotter.live_plotter_update_function)
+            live_plotter.show(interactive_update=True)
+            
+        for i in tqdm(range(len(omegas))):
+            self._solve_single_omega(omegas[i], out)
+            for callback in callbacks:
+                callback(i, out) #<- store solution, plot, print, ...
+        return out
+
+    
+    @property
+    def M(self) -> PETSc.Mat:
+        """The mass matrix"""
+        return self._M
+    
+    @property
+    def C(self) -> PETSc.Mat:
+        """The damping matrix"""
+        return self._C
+    
+    @property
+    def K(self) -> PETSc.Mat:
+        """The stiffness matrix"""
+        return self._K
+
+    @property
+    def b(self) -> PETSc.Vec:
+        """The load vector"""
+
+
+
+
+
+    def __OLD__solve_single_omega(self, omega): #TODO: remove
+        w = omega
         a = -w*w*self._m + 1J*w*self._c + self._k
         self._problem = fem.petsc.LinearProblem(a, self._L, bcs=self._bcs, petsc_options=self._petsc_options)
         return self._problem.solve()
     
-    def _solve_multiple_omega(self, omega, callbacks=[]):
-        raise NotImplementedError
-    
-    @property
-    def omega(self):
-        """The angular frequency"""
-        return self._w.value
-    
-    @property
-    def omega_dolfinx(self):
-        return self._w
-    
-    @property
-    def problem(self):
-        """The fem.petsc.LinearProblem instance that has been previously solved"""
-        return self._problem
 
