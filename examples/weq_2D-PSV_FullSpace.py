@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 from elastodynamicsx.solvers import TimeStepper
-from elastodynamicsx.plot import CustomVectorPlotter
+from elastodynamicsx.plot import plotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
 from analyticalsolutions import u_2D_PSV_xt, int_Fraunhofer_2D
 
@@ -74,7 +74,6 @@ R0_src = 0.1 #radius
 ### Gaussian function
 nrm   = 1/(2*np.pi*R0_src**2) #normalize to int[src_x(x) dx]=1
 src_x = lambda x: nrm * np.exp(-1/2*(np.linalg.norm(x-X0_src[:,np.newaxis], axis=0)/R0_src)**2, dtype=PETSc.ScalarType) #source(x)
-fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src) #accounts for the size of the source in the analytical formula
 #
 ### -> Time function
 #
@@ -123,7 +122,7 @@ print('CFL condition: Courant number = ', round(TimeStepper.Courant_number(V.mes
 # -----------------------------------------------------
 #                        PDE
 # -----------------------------------------------------
-pde = PDE(materials=materials, bodyforces=bodyforces)
+pde = PDE(V, materials=materials, bodyforces=bodyforces, bcs=bcs)
 
 #  Time integration
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
@@ -162,12 +161,12 @@ def cbck_storeAtPoints(i, tStepper):
 ### enable live plotting
 clim = 0.1*np.amax(F_0)*np.array([0, 1])
 kwplot = { 'clim':clim, 'warp_factor':0.5/np.amax(clim) }
-tStepper.set_live_plotter(live_plotter_step=10, **kwplot) #0 to disable
+p = plotter(tStepper.u, refresh_step=10, **kwplot) #0 to disable
 if len(points_output_on_proc)>0:
-    tStepper.live_plotter.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
+    p.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
 
 ### Run the big time loop!
-tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFullField, cbck_storeAtPoints])
+tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFullField, cbck_storeAtPoints], live_plotter=p)
 ### End of big calc.
 #
 # -----------------------------------------------------
@@ -177,6 +176,8 @@ tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_store
 #     Interactive view of all time steps if stored
 # -----------------------------------------------------
 if storeAllSteps: #plotter with a slider to browse through all time steps
+    fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src) #accounts for the size of the source in the analytical formula
+    
     ### -> Exact solution, Full field
     x = tStepper.u.function_space.tabulate_dof_coordinates()
     t = dt*np.arange(num_steps)
@@ -186,9 +187,9 @@ if storeAllSteps: #plotter with a slider to browse through all time steps
         return (all_u[i].x.array, all_u_n_exact[:,:,i].flatten(), all_u[i].x.array-all_u_n_exact[:,:,i].flatten())
     
     #initializes with empty fem.Function(V) to have different valid pointers
-    plotter = CustomVectorPlotter(fem.Function(V), fem.Function(V), fem.Function(V), labels=('FE', 'Exact', 'Diff.'), clim=clim)
-    plotter.add_time_browser(update_fields_function, t)
-    plotter.show()
+    p = plotter(fem.Function(V), fem.Function(V), fem.Function(V), labels=('FE', 'Exact', 'Diff.'), clim=clim)
+    p.add_time_browser(update_fields_function, t)
+    p.show()
 #
 # -----------------------------------------------------
 
@@ -197,6 +198,8 @@ if storeAllSteps: #plotter with a slider to browse through all time steps
 #              Plot signals at few points
 # -----------------------------------------------------
 if len(points_output_on_proc)>0:
+    fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src) #accounts for the size of the source in the analytical formula
+    
     ### -> Exact solution, At few points
     x = points_output_on_proc
     t = dt*np.arange(num_steps)

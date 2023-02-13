@@ -11,6 +11,7 @@ import time
 ### ------------------------------------------------------------------------- ###
 
 pyvista.global_theme.background = 'white'
+pyvista.global_theme.font.color = 'grey'
 
 def is_notebook() -> bool:
     #https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook/24937408
@@ -87,13 +88,18 @@ def plot_mesh(mesh, cell_tags=None, **kwargs):
 
 
 def live_plotter(u:'fem.Function', refresh_step:int=1, **kwargs) -> pyvista.Plotter:
+    kwargs['refresh_step'] = refresh_step
+    return plotter(u, **kwargs)
+
+def plotter(*all_u, **kwargs):
+    u1 = all_u[0]
     #test whether u is scalar or vector and returns the appropriate plotter
-    nbcomps = u.function_space.element.num_sub_elements #number of components if vector space, 0 if scalar space
+    nbcomps = u1.function_space.element.num_sub_elements #number of components if vector space, 0 if scalar space
     
     if nbcomps == 0:
-        return CustomScalarPlotter(u, refresh_step=refresh_step, **kwargs)
+        return CustomScalarPlotter(*all_u, **kwargs)
     else:
-        return CustomVectorPlotter(u, refresh_step=refresh_step, **kwargs)
+        return CustomVectorPlotter(*all_u, **kwargs)
 
 
 ### -------------------------------------- ###
@@ -171,6 +177,13 @@ class CustomScalarPlotter(pyvista.Plotter):
             self.render()
 
     def live_plotter_update_function(self, i, vec:'PETSc.Vec'):
+        if not("PETSc.Vec" in str(type(vec))):
+            if "fem.function.Function" in str(type(vec)):
+                vec = vec.vector
+            else:
+                try: vec = vec.u.vector #assume vec is a TimeStepper instance
+                except:
+                    raise TypeError
         if self._refresh_step > 0 and i % self._refresh_step == 0:
             self.update_scalars(vec.getArray())
             time.sleep(self._tsleep)
@@ -273,6 +286,13 @@ class CustomVectorPlotter(pyvista.Plotter):
             self.render()
 
     def live_plotter_update_function(self, i, vec:'PETSc.Vec'):
+        if not("PETSc.Vec" in str(type(vec))):
+            if "fem.function.Function" in str(type(vec)):
+                vec = vec.vector
+            else:
+                try: vec = vec.u.vector #assume vec is a TimeStepper instance
+                except:
+                    raise TypeError
         if self._refresh_step > 0 and i % self._refresh_step == 0:
             self.update_vectors(vec.getArray())
             time.sleep(self._tsleep)

@@ -1,6 +1,5 @@
 #TODO : Euler 1, RK4
 
-import time
 from dolfinx import fem
 import ufl
 from mpi4py import MPI
@@ -8,8 +7,6 @@ from petsc4py import PETSc
 import numpy as np
 try: from tqdm.auto import tqdm
 except ModuleNotFoundError: tqdm = lambda x: x
-
-from elastodynamicsx.plot import CustomScalarPlotter, CustomVectorPlotter
 
 class TimeStepper:
     """
@@ -69,6 +66,7 @@ class TimeStepper:
         return V.mesh.comm.allreduce( np.amax(c_number.x.array) , op=MPI.MAX)
 
 
+
     ### --------------------------
     ### ------- non-static -------
     ### --------------------------
@@ -97,15 +95,10 @@ class TimeStepper:
         self._c_function = c_
         self._k_function = k_
         #
-        self._callfirsts = []
-        self._callbacks  = []
-        self.live_plotter = None
-        self.live_plotter_step = 0
-        #
         self._explicit = explicit
         ###
         #note: any inherited class must define the following attributes:
-        #        self._u_n, self._v_n, self._a_n,
+        #        self._u_n
         #        self.linear_form, self.bilinear_form,
         #        self._u0, self._v0, self._a0
         #        self._m0_form, self._L0_form
@@ -140,19 +133,19 @@ class TimeStepper:
     def v(self): return self._v_n
     
     def Energy_elastic(self):
-        domain = self.u.function_space.mesh
-        return domain.comm.allreduce( fem.assemble_scalar(fem.form( 1/2* self._k_function(self.u, self.u) )) , op=MPI.SUM)
+        comm = self.u.function_space.mesh.comm
+        return comm.allreduce( fem.assemble_scalar(fem.form( 1/2* self._k_function(self.u, self.u) )) , op=MPI.SUM)
 
     def Energy_damping(self):
-        domain = self.u.function_space.mesh
+        comm = self.u.function_space.mesh.comm
         if self._c_function is None:
             return 0
         else:
-            return self.dt*domain.comm.allreduce( fem.assemble_scalar(fem.form( self._c_function(self.v, self.v) )) , op=MPI.SUM)
+            return self.dt*comm.allreduce( fem.assemble_scalar(fem.form( self._c_function(self.v, self.v) )) , op=MPI.SUM)
 
     def Energy_kinetic(self):
-        domain = self.u.function_space.mesh
-        return domain.comm.allreduce( fem.assemble_scalar(fem.form( 1/2* self._m_function(self.v, self.v) )) , op=MPI.SUM)
+        comm = self.u.function_space.mesh.comm
+        return comm.allreduce( fem.assemble_scalar(fem.form( 1/2* self._m_function(self.v, self.v) )) , op=MPI.SUM)
     
     def initial_condition(self, u0, v0, t0=0):
         ###
@@ -189,18 +182,7 @@ class TimeStepper:
             else:
                 raise TypeError("Unknown type of initial value "+str(type(val)))
 
-    def _cbck_livePlot_scalar(self, i, tStepper):
-        # Viewing while calculating: Update plotter
-        if self.live_plotter_step > 0 and i % self.live_plotter_step == 0:
-            self.live_plotter.update_scalars(tStepper.u.x.array)
-            time.sleep(0.01)
 
-    def _cbck_livePlot_vector(self, i, tStepper):
-        # Viewing while calculating: Update plotter
-        if self.live_plotter_step > 0 and i % self.live_plotter_step == 0:
-            self.live_plotter.update_vectors(tStepper.u.x.array)
-            time.sleep(0.01)
-    
     def _init_solver(self, petsc_options={}):
         # see https://github.com/FEniCS/dolfinx/blob/main/python/dolfinx/fem/petsc.py
         # see also https://jsdokken.com/dolfinx-tutorial/chapter2/diffusion_code.html
@@ -215,8 +197,6 @@ class TimeStepper:
         # Solver
         self.solver = PETSc.KSP().create(self.u.function_space.mesh.comm)
         self.solver.setOperators(self._A)
-        #self.solver.setType(PETSc.KSP.Type.PREONLY)
-        #self.solver.getPC().setType(PETSc.PC.Type.LU)
         
         # Give PETSc solver options a unique prefix
         problem_prefix = f"dolfinx_solve_{id(self)}"
@@ -238,27 +218,6 @@ class TimeStepper:
         
     
     def run(self, num_steps, **kwargs): print('Supercharge me')
-
-    def set_live_plotter(self, live_plotter_step=1, **kwargs):
-        """
-        Enable and configure the plotter to display the current result within the run() loop
-        
-        Args:
-            live_plotter_step: Step for refreshing the plot.
-                >=0 means no live plot, 1 means refresh at each step, 10 means refresh each 10 steps, ...
-            kwargs: Passed to CustomScalarPlotter / CustomVectorPlotter
-        """
-        ###
-        self.live_plotter_step = live_plotter_step
-        #        
-        if self.live_plotter_step > 0:
-            dim = self.u.function_space.element.num_sub_elements #0 for scalar FunctionSpace, 2 for 2D VectorFunctionSpace
-            if dim == 0: #scalar
-                self.live_plotter = CustomScalarPlotter(self.u, **kwargs)
-                self._callbacks.append(self._cbck_livePlot_scalar)
-            else: #vector
-                self.live_plotter = CustomVectorPlotter(self.u, **kwargs)
-                self._callbacks.append(self._cbck_livePlot_vector)
 
 
 
@@ -311,30 +270,33 @@ class OneStepTimeStepper(TimeStepper):
                     Each callback if of the form: cb = lambda i, timestepper: do_something
                     where i is the iteration index and timestepper is the timestepper being run
                -- other optional parameters --
-               live_plotter: (default=None) Setting live_plotter={...} will forward
-                   these parameters to 'set_live_plotter' (see documentation)
-               verbose     : (default=0) Verbosity level. >9 means an info msg before each step
+                live_plotter: a plotter object that can refresh through
+                a live_plotter.live_plotter_update_function(i, out) function
+               verbose: (default=0) Verbosity level. >9 means an info msg before each step
         """
         ###
         verbose = kwargs.get('verbose', 0)
         
-        if not kwargs.get('live_plotter', None) is None:
-            if verbose >= 10: PETSc.Sys.Print('Initializing live plotter...')
-            self.set_live_plotter(**kwargs.get('live_plotter'))
+        callfirsts = kwargs.get('callfirsts', [lambda t, tStepper: 1])
+        callbacks  = kwargs.get('callbacks',  [lambda i, tStepper: 1])
         
-        callfirsts = kwargs.get('callfirsts', [lambda t, tStepper: 1]) + self._callfirsts
-        callbacks  = kwargs.get('callbacks',  [lambda i, tStepper: 1]) + self._callbacks
-        
-        if self.live_plotter_step > 0:
-            self.live_plotter.show(interactive_update=True)
-        
+        live_plt = kwargs.get('live_plotter', None)
+        if not(live_plt is None):
+            if type(live_plt)==dict:
+                from elastodynamicsx.plot import live_plotter
+                live_plt = live_plotter(self.u, live_plt.pop('refresh_step', 1), **live_plt)
+            callbacks.append(live_plt.live_plotter_update_function)
+            live_plt.show(interactive_update=True)
+
+
         self._initialStep(callfirsts, callbacks, verbose=verbose)
         
         for i in tqdm(range(self._i0, num_steps)):
             self._t += self.dt
             
             if verbose >= 10: PETSc.Sys.Print('Callfirsts...')
-            for callfirst in callfirsts: callfirst(self.t - self.dt*self._intermediate_dt, self) #<- update stuff #F_body.interpolate(F_body_function(t))
+            for callfirst in callfirsts:
+                callfirst(self.t - self.dt*self._intermediate_dt, self) #<- update stuff #F_body.interpolate(F_body_function(t))
 
             # Update the right hand side reusing the initial vector
             if verbose >= 10: PETSc.Sys.Print('Update the right hand side reusing the initial vector...')
@@ -358,7 +320,8 @@ class OneStepTimeStepper(TimeStepper):
             self._prepareNextIteration()
             
             if verbose >= 10: PETSc.Sys.Print('Callbacks...')
-            for callback in callbacks: callback(i, self) #<- store solution, plot, print, ...
+            for callback in callbacks:
+                callback(i, self) #<- store solution, plot, print, ...
 
 # -----------------------------------------------------
 # Import subclasses -- must be done at the end to avoid loop imports

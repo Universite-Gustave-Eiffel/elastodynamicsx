@@ -1,9 +1,12 @@
 from petsc4py import PETSc
+import numpy as np
 from dolfinx import fem
 import ufl
 
 from elastodynamicsx.utils import get_functionspace_tags_marker
 from . import BoundaryCondition
+
+
 
 class PDE():
     """
@@ -13,16 +16,66 @@ class PDE():
     
     as an assembly of materials and forces defined over different subdomains
     """
-    
-    def __init__(self, materials=[], bodyforces=[]):
+    def __init__(self, function_space, materials=[], bodyforces=[], bcs=[]):
+
+        self._function_space = function_space
         self.materials = materials
         self.bodyforces= bodyforces
+        self.bcs = bcs
+        self._u, self._v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
+        
+        self._bcs_weak   = []
+        self._bcs_strong = []
+        for bc in bcs:
+            if issubclass(type(bc), fem.DirichletBCMetaClass):
+                self._bcs_strong.append(bc)
+            elif type(bc) == BoundaryCondition:
+                if issubclass(type(bc.bc), fem.DirichletBCMetaClass):
+                    self._bcs_strong.append(bc.bc)
+                else:
+                    self._bcs_weak.append(bc)
+            else:
+                raise TypeError("Unsupported boundary condition"+str(type(bc)))
+        
+        self._omega_ufl = fem.Constant(function_space, PETSc.ScalarType(0))
+        self._compile_M_C_K_b()
     
-    def add_material(self, material):
-        self.materials.append(material)
     
-    def add_bodyforce(self, bodyforce):
-        self.bodyforces.append(bodyforce)
+    def _compile_M_C_K_b(self):
+        u, v = self._u, self._v
+        zero = fem.Constant(self._function_space, PETSc.ScalarType(0.))
+        vzero = zero if v.ufl_function_space().num_sub_spaces==0 else fem.Constant(self._function_space, PETSc.ScalarType([0.]*len(v)))
+        
+        #interior
+        m = self.m(u,v)
+        c = self.c(u,v) if not(self.c is None) else zero*ufl.inner(u,v)*ufl.dx
+        k = self.k(u,v)
+        L = self.L(v)   if not(self.L is None) else ufl.inner(vzero,v)*ufl.dx #zero*ufl.conj(v)*ufl.dx
+        
+        #boundaries
+        for bc in self._bcs_weak:
+            if bc.type == 'neumann':
+                L += bc.bc(v)
+            elif bc.type == 'robin':
+                F_bc = bc.bc(u,v)
+                k += ufl.lhs(F_bc)
+                L += ufl.rhs(F_bc)
+            elif bc.type == 'dashpot':
+                c += bc.bc(u,v)
+            else:
+                raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
+        
+        self._m_form = fem.form(m)
+        self._c_form = fem.form(c)
+        self._k_form = fem.form(k)
+        self._b_form = fem.form(L)
+
+        #Executes the following only if using complex numbers
+        if np.issubdtype(PETSc.ScalarType, np.complexfloating):
+            ##Mat_lhs = -w*w*_M_ + 1J*w*_C_ + _K_
+            w = self._omega_ufl
+            self._a_form = fem.form(-w*w*m + 1J*w*c + k)
+    
 
     @property
     def m(self) -> 'function':
@@ -51,65 +104,6 @@ class PDE():
         else:
             return lambda v: sum([f.L(v) for f in self.bodyforces])
 
-
-
-class PDE2(PDE):
-    def __init__(self, function_space, materials=[], bodyforces=[], bcs=[]):
-        super().__init__(materials, bodyforces)
-        
-        self._function_space = function_space
-        self._u, self._v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
-        
-        self._bcs_weak   = []
-        self._bcs_strong = []
-        for bc in bcs:
-            if issubclass(type(bc), fem.DirichletBCMetaClass):
-                self._bcs_strong.append(bc)
-            elif type(bc) == BoundaryCondition:
-                if issubclass(type(bc.bc), fem.DirichletBCMetaClass):
-                    self._bcs_strong.append(bc.bc)
-                else:
-                    self._bcs_weak.append(bc)
-            else:
-                raise TypeError("Unsupported boundary condition"+str(type(bc)))
-        
-        self._omega_ufl = fem.Constant(function_space, PETSc.ScalarType(0))
-        self._compile_M_C_K_L()
-    
-    
-    def _compile_M_C_K_L(self):
-        u, v = self._u, self._v
-        zero = fem.Constant(self._function_space, PETSc.ScalarType(0.))
-        
-        #interior
-        m = self.m(u,v)
-        c = self.c(u,v) if not(self.c is None) else zero*ufl.inner(u,v)*ufl.dx
-        k = self.k(u,v)
-        L = self.L(v)   if not(self.L is None) else zero*ufl.conj(v)*ufl.dx
-        
-        #boundaries
-        for bc in self._bcs_weak:
-            if bc.type == 'neumann':
-                L += bc(v)
-            elif bc.type == 'robin':
-                F_bc = bc.bc(u,v)
-                k += ufl.lhs(F_bc)
-                L += ufl.rhs(F_bc)
-            elif bc.type == 'dashpot':
-                c += bc.bc(u,v)
-            else:
-                raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
-        
-        self._m_form = fem.form(m)
-        self._c_form = fem.form(c)
-        self._k_form = fem.form(k)
-        self._b_form = fem.form(L)
-
-        ##Mat_lhs = -w*w*_M_ + 1J*w*_C_ + _K_
-        w = self._omega_ufl
-        self._a_form = fem.form(-w*w*m + 1J*w*c + k)
-    
-    
     @property
     def m_form(self):
         """Compiled mass bilinear form"""
@@ -138,7 +132,6 @@ class PDE2(PDE):
 
     def C(self) -> PETSc.Mat:
         """Damping matrix"""
-        #return 0*self.M()
         C = fem.petsc.assemble_matrix(self._c_form, bcs=self._bcs_strong)
         C.assemble()
         return C

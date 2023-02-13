@@ -4,6 +4,7 @@ import pyvista
 
 import elastodynamicsx.plot #ensures automatic configuration of pyvista for jupyter
 
+
 class ModalBasis():
     """
     Representation of a modal basis, consisting of a set of eigen angular frequencies and modeshapes.
@@ -36,7 +37,7 @@ class ModalBasis():
         """The eigen modeshapes"""
         return self._un
     
-    def plot(self, which='all', **kwargs):
+    def plot(self, function_space, which='all', **kwargs):
         """
         Plots the desired modeshapes
         
@@ -58,11 +59,11 @@ class ModalBasis():
         eigenmodes = _slice_array(self.un, which)
         eigenfreqs = _slice_array(self.fn, which)
         #
-        function_space = eigenmodes[0].function_space
         topology, cell_types, geom = plot.create_vtk_mesh(function_space)
         grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
         for i, eigM in zip(indexes, eigenmodes):
-            grid['eigenmode_'+str(i)] = elastodynamicsx.plot.get_3D_array_from_FEFunction(eigM)
+            nbpts = grid.number_of_points
+            grid['eigenmode_'+str(i)] = elastodynamicsx.plot.get_3D_array_from_nparray(np.array(eigM), nbpts)
         #
         nbcols = int(np.ceil(np.sqrt(indexes.size)))
         nbrows = int(np.ceil(indexes.size/nbcols))
@@ -79,7 +80,8 @@ class ModalBasis():
                 if kwargs.get('wireframe', False): plotter.add_mesh(grid, style='wireframe', color='black')
                 plotter.add_mesh(grid.warp_by_vector(vector, factor=factor), scalars=vector)
         plotter.show()
-
+        
+        
 def _slice_array(a, which):
     """Not intended to be used externally"""
     if which == 'all'    : which = slice(0,None,None)

@@ -104,7 +104,7 @@ kwargsTScheme = dict(scheme='g-a-newmark', alpha_m=alpha_m, alpha_f=alpha_f)
 # -----------------------------------------------------
 #                        PDE
 # -----------------------------------------------------
-pde = PDE(materials=[material], bodyforces=[])
+pde = PDE(V, materials=[material], bodyforces=[], bcs=bcs)
 
 #  Time integration
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, **kwargsTScheme)
@@ -151,7 +151,7 @@ def cbck_energies(i, tStepper):
 clim = 0.4 * L_*B_*H_/(E*B_*H_**3/12) * np.amax(F_0)*np.array([0, 1])
 
 ### Run the big time loop!
-tStepper.run(Nsteps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints, cbck_energies], live_plotter={'live_plotter_step':1, 'clim':clim})
+tStepper.run(Nsteps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints, cbck_energies], live_plotter={'refresh_step':1, 'clim':clim})
 ### End of big calc.
 #
 # -----------------------------------------------------

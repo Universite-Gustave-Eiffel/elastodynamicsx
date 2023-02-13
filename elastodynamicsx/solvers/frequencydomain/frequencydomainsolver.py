@@ -127,7 +127,7 @@ class FrequencyDomainSolver:
         
         #update PDE matrix
         w = omega
-        A = -w*w*self._M + 1J*w*self._C + self._K
+        A = PETSc.ScalarType(-w*w)*self._M + PETSc.ScalarType(1J*w)*self._C + self._K
         self.solver.setOperators(A)
 
         #solve
@@ -141,10 +141,13 @@ class FrequencyDomainSolver:
     def _solve_multiple_omegas(self, omegas, out:PETSc.Vec, callbacks:list=[], **kwargs) -> PETSc.Vec:
         #loop on values in omegas -> _solve_single_omega
         
-        live_plotter = kwargs.get('live_plotter', None)
-        if not(live_plotter is None):
-            callbacks.append(live_plotter.live_plotter_update_function)
-            live_plotter.show(interactive_update=True)
+        live_plt = kwargs.get('live_plotter', None)
+        if not(live_plt is None):
+            if type(live_plt)==dict:
+                from elastodynamicsx.plot import live_plotter
+                live_plt = live_plotter(self.u, live_plt.pop('refresh_step', 1), **live_plt)
+            callbacks.append(live_plt.live_plotter_update_function)
+            live_plt.show(interactive_update=True)
             
         for i in tqdm(range(len(omegas))):
             self._solve_single_omega(omegas[i], out)

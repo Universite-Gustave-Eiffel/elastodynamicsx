@@ -12,7 +12,7 @@ from mpi4py import MPI
 from petsc4py import PETSc
 import numpy as np
 
-from elastodynamicsx.pde import material, BoundaryCondition
+from elastodynamicsx.pde import material, BoundaryCondition, PDE
 from elastodynamicsx.solvers import ElasticResonanceSolver
 from elastodynamicsx.utils import make_facet_tags
 
@@ -70,8 +70,11 @@ material = material(V, 'isotropic', rho, lambda_, mu)
 # -----------------------------------------------------
 #                       Solve
 # -----------------------------------------------------
+### PDE
+pde = PDE(V, materials=[material], bodyforces=[], bcs=bcs)
+
 ### Initialize the solver
-eps = ElasticResonanceSolver(V, material.m, material.c, material.k, bcs=bcs, nev=6)
+eps = ElasticResonanceSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=6)
 
 ### Run the big calculation!
 eps.solve()
@@ -81,7 +84,7 @@ eps.solve()
 #eps.printEigenvalues()
 eigenfreqs = eps.getEigenfrequencies()
 #eigenmodes = eps.getEigenmodes()
-eps.plot(wireframe=True, factor=50)
+eps.plot(V, wireframe=True, factor=50)
 
 verbose = False
 if verbose:

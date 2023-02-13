@@ -13,7 +13,7 @@ from mpi4py import MPI
 from petsc4py import PETSc
 import numpy as np
 
-from elastodynamicsx.pde import material
+from elastodynamicsx.pde import material, PDE
 from elastodynamicsx.solvers import ElasticResonanceSolver
 
 # -----------------------------------------------------
@@ -21,7 +21,7 @@ from elastodynamicsx.solvers import ElasticResonanceSolver
 # -----------------------------------------------------
 L1, L2, L3 = 11.92, 10.93, 9.86 #millimeters
 
-Nx = Ny = Nz = 8
+Nx = Ny = Nz = 6
 
 extent = [[0., 0., 0.], [L1, L2, L3]]
 domain = mesh.create_box(MPI.COMM_WORLD, extent, [Nx, Ny, Nz])
@@ -49,8 +49,11 @@ material = material(V, 'isotropic', rho, lambda_, mu)
 # -----------------------------------------------------
 #                       Solve
 # -----------------------------------------------------
+### PDE
+pde = PDE(V, materials=[material])
+
 ### Initialize the solver
-eps = ElasticResonanceSolver(V, material.m, material.c, material.k, bcs=[], nev=20)
+eps = ElasticResonanceSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=20)
 
 ### Run the big calculation!
 eps.solve()
@@ -60,7 +63,7 @@ eps.solve()
 #eps.printEigenvalues()
 eigenfreqs = eps.getEigenfrequencies()
 #eigenmodes = eps.getEigenmodes()
-eps.plot(slice(6,6+9), wireframe=True, factor=30) #avoids the first 6 rigid body modes
+eps.plot(V, slice(6,6+9), wireframe=True, factor=30) #avoids the first 6 rigid body modes
 #
 # -----------------------------------------------------
 

@@ -24,22 +24,28 @@ Using the **pde** package:
 
 from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 
+#MATERIALS
 tag_mat1 = 1 #suppose tag_mat1 refers to cells associated with material no 1
 tag_mat2 = 2 #same for material no 2
 mat1 = material((V, cell_tags, tag_mat1), 'isotropic', rho=1, lambda_=2, mu=1)
 mat2 = material((V, cell_tags, tag_mat2), 'isotropic', rho=2, lambda_=4, mu=2)
 
+#BODY LOADS
 f_body = fem.Constant(V.mesh, np.array([0, 0], dtype=PETSc.ScalarType)) #body load
 f1     = BodyForce(V, f_body) #not specifying cell_tags and a specific tag means the entire domain
 
-pde  = PDE(materials=[mat1, mat2], bodyforces=[f1]) #m, c, k, L forms: pde.m, pde.c, pde.k, pde.L
-
+#BOUNDARY CONDITIONS
 tag_top  = 1       #top boundary
 tags_lbr = (2,3,4) #left, bottom, right boundaries
 T_N  = fem.Constant(V.mesh, PETSc.ScalarType([0,1])) #boundary load
 bc1  = BoundaryCondition((V, facet_tags, tag_top) , 'Neumann', T_N)
 bc2  = BoundaryCondition((V, facet_tags, tags_lbr), 'Dashpot', (mat1.Z_N, mat1.Z_T)) #plane-wave absorbing conditions with P-wave & S-wave impedances of material no1
 bcs  = [bc1, bc2]
+
+#PDE
+pde  = PDE(V, materials=[mat1, mat2], bodyforces=[f1], bcs=bcs)
+#m, c, k, L form functions: pde.m, pde.c, pde.k, pde.L
+#compiled M, C, K matrices: pde.M(), pde.C(), pde.K()
 ```
 
 ## Solve problems
@@ -84,18 +90,18 @@ M, C, K = pde.M(), pde.C(), pde.K()
 
 #(PETSc) load vector
 b = pde.b()
-b_update_fn = pde.update_b_frequencydomain
+b_update_function = pde.update_b_frequencydomain
 
 #Initialize the solver
-fdsolver = FrequencyDomainSolver(comm, M, C, K, b, b_update_function=b_update_fn)
+fdsolver = FrequencyDomainSolver(comm, M, C, K, b, b_update_function=b_update_function)
 
 #Solve
 u = fem.Function(V, name='solution')
 fdsolver.solve(omega=1.0, out=u.vector)
 
 #Plot
-from elastodynamicsx.plot import CustomVectorPlotter
-p = CustomVectorPlotter(u, complex='real')
+from elastodynamicsx.plot import plotter
+p = plotter(u, complex='real')
 p.show()
 
 #the end
@@ -106,14 +112,20 @@ p.show()
 #Normal modes
 from elastodynamicsx.solvers import ElasticResonanceSolver
 
+#MPI communicator
+comm = V.mesh.comm
+
+#(PETSc) Mass, damping, stiffness matrices
+M, K = pde.M(), pde.K()
+
 nev = 9 #number of modes to compute
 
 #Initialize the solver
-eps = ElasticResonanceSolver(V, pde.m, pde.c, pde.k, bcs=[], nev=nev)
+eps = ElasticResonanceSolver(comm, M, None, K, nev=nev)
 eps.solve()
 
 eigenfreqs = eps.getEigenfrequencies()
-eps.plot()
+eps.plot(V) #V is a dolfinx.fem.function_space
 
 #the end
 ```
@@ -133,7 +145,7 @@ eigenfreqs = mbasis.fn    #a np.array
 modeshape5 = mbasis.un[5] #a dolfinx.fem.Function
 
 #visualize
-mbasis.plot()
+mbasis.plot(V) #V is a dolfinx.fem.function_space
 ```
 
 ## Dependencies

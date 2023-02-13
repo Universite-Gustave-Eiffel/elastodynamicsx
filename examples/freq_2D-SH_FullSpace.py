@@ -11,7 +11,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE2
+from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 from elastodynamicsx.solvers import FrequencyDomainSolver
 from elastodynamicsx.plot import CustomScalarPlotter, live_plotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
@@ -77,7 +77,7 @@ bodyforces = [bf]
 # -----------------------------------------------------
 #                        PDE
 # -----------------------------------------------------
-pde = PDE2(V, materials=materials, bodyforces=bodyforces, bcs=bcs)
+pde = PDE(V, materials=materials, bodyforces=bodyforces, bcs=bcs)
 #
 # -----------------------------------------------------
 
