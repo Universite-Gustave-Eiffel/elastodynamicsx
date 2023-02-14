@@ -19,29 +19,43 @@ class ElasticMaterial(Material):
             kwargs:
                 damping: (default=NoDamping()) An instance of a subclass of Damping
         """
+        self._sigma = sigma
+        self._epsilon = kwargs.get('epsilon', epsilon_vector)
         self._DGvariant = kwargs.pop('DGvariant', 'SIPG')
         self._damping   = kwargs.pop('damping', NoDamping())
         if (type(self._damping) == RayleighDamping) and (self._damping.host_material is None):
             self._damping.link_material(self)
+
+        super().__init__(functionspace_tags_marker, rho, is_linear=True, **kwargs)
+        
+        e = self._function_space.ufl_element()
+        if e.is_cellwise_constant() == True:
+            self._k = self.k_CG
+        else:
+            self._k = self.k_DG_SIPG
+
+
+    def sigma(self, u):
+        """Stress function: sigma(u)"""
+        return self._sigma(u)
     
-        super().__init__(functionspace_tags_marker, rho, sigma, is_linear=True, **kwargs)
+    def sigma_n(self, u, n):
+        """Stress in the 'n' direction: (sigma(u), n)"""
+        return ufl.dot(self._sigma(u), n)
 
 
     @property
     def k(self): #TODO: extremely slow because of 'if'! change strategy
         """Stiffness form function"""
-        e = self._function_space.ufl_element()
-        if e.is_cellwise_constant() == True:
-            return self.k_CG
-        else:
-            return self.k_DG(self._DGvariant)
+        return self._k
 
     @property
     def k_CG(self):
         """Stiffness form function for a Continuous Galerkin formulation"""
         return lambda u,v: ufl.inner(self._sigma(u), self._epsilon(v)) * self._dx
     
-    def DG_IPG_regularization_parameter(self):
+    def DG_SIPG_regularization_parameter(self):
+        """Regularization parameter for the Symmetric Interior Penalty Galerkin methods (SIPG)"""
         degree = self._function_space.ufl_element().degree()
         gamma  = fem.Constant(self._function_space.mesh, PETSc.ScalarType(degree*(degree+1) + 1)) #+1 otherwise blows with elements of degree 1
         P_mod  = self.P_modulus
@@ -49,32 +63,68 @@ class ElasticMaterial(Material):
         return R_
     
     def k_DG(self, variant):
+        if   variant.upper() == 'SIPG':
+            return self.k_DG_SIPG
+        elif variant.upper() == 'NIPG':
+            return self.k_DG_NIPG
+        elif variant.upper() == 'IIPG':
+            return self.k_DG_IIPG
+        else:
+            raise TypeError('Unknown DG variant ' + variant)
+        
+    @property
+    def k_DG_SIPG(self):
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
         h = ufl.MinCellEdgeLength(V) #works!
         h_avg  = (h('+') + h('-'))/2.0
-        R_ = self.DG_IPG_regularization_parameter()
+        R_ = self.DG_SIPG_regularization_parameter()
         dS = self._dS
         sig_n = self.sigma_n
+
+        k_int_facets = lambda u,v: \
+                       -           inner(avg(sig_n(u,n)), jump(v)        ) * dS \
+                       -           inner(jump(u)        , avg(sig_n(v,n))) * dS \
+                       + R_/h_avg* inner(jump(u)        , jump(v)        ) * dS
+
+        return lambda u,v: self.k_CG(u,v) + k_int_facets(u,v)
         
-        if   variant.upper() == 'SIPG':
-            k_int_facets = lambda u,v: \
-                           -           inner(avg(sig_n(u,n)), jump(v)        ) * dS \
-                           -           inner(jump(u)        , avg(sig_n(v,n))) * dS \
-                           + R_/h_avg* inner(jump(u)        , jump(v)        ) * dS
-        elif variant.upper() == 'NIPG':
-            k_int_facets = lambda u,v: \
-                           -           inner(avg(sig_n(u,n)), jump(v)        ) * dS \
-                           +           inner(jump(u)        , avg(sig_n(v,n))) * dS \
-                           + R_/h_avg* inner(jump(u)        , jump(v)        ) * dS
-        elif variant.upper() == 'IIPG':
-            k_int_facets = lambda u,v: \
-                           -           inner(avg(sig_n(u,n)), jump(v)) * dS \
-                           + R_/h_avg* inner(jump(u)        , jump(v)) * dS
-        else:
-            raise TypeError('Unknown DG variant ' + variant)
+    @property
+    def k_DG_NIPG(self):
+        """WARNING: instable for elasticity"""
+        inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
+        V = self._function_space
+        n = ufl.FacetNormal(V)
+        h = ufl.MinCellEdgeLength(V) #works!
+        h_avg  = (h('+') + h('-'))/2.0
+        R_ = self.DG_SIPG_regularization_parameter()
+        dS = self._dS
+        sig_n = self.sigma_n
+
+        k_int_facets = lambda u,v: \
+                       -           inner(avg(sig_n(u,n)), jump(v)        ) * dS \
+                       +           inner(jump(u)        , avg(sig_n(v,n))) * dS \
+                       + R_/h_avg* inner(jump(u)        , jump(v)        ) * dS
+
+        return lambda u,v: self.k_CG(u,v) + k_int_facets(u,v)
         
+    @property
+    def k_DG_IIPG(self):
+        """WARNING: instable for elasticity"""
+        inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
+        V = self._function_space
+        n = ufl.FacetNormal(V)
+        h = ufl.MinCellEdgeLength(V) #works!
+        h_avg  = (h('+') + h('-'))/2.0
+        R_ = self.DG_SIPG_regularization_parameter()
+        dS = self._dS
+        sig_n = self.sigma_n
+
+        k_int_facets = lambda u,v: \
+                       -           inner(avg(sig_n(u,n)), jump(v)        ) * dS \
+                       + R_/h_avg* inner(jump(u)        , jump(v)        ) * dS
+
         return lambda u,v: self.k_CG(u,v) + k_int_facets(u,v)
 
     @property
@@ -129,36 +179,59 @@ class ScalarLinearMaterial(ElasticMaterial):
     def P_modulus(self):
         return self.mu
 
-    def k_DG(self, variant):
+    @property
+    def k_DG_SIPG(self):
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
         h = ufl.MinCellEdgeLength(V) #works!
         h_avg  = (h('+') + h('-'))/2.0
-        R_ = self.DG_IPG_regularization_parameter()
+        R_ = self.DG_SIPG_regularization_parameter()
         dS = self._dS
         sigma = self.sigma
         
-        if   variant.upper() == 'SIPG':
-            k_int_facets = lambda u,v: \
-                           -           inner(avg(sigma(u)), jump(v,n)    ) * dS \
-                           -           inner(jump(u,n)    , avg(sigma(v))) * dS \
-                           + R_/h_avg* inner(jump(u)      , jump(v)      ) * dS
-        elif variant.upper() == 'NIPG':
-            k_int_facets = lambda u,v: \
-                           -           inner(avg(sigma(u)), jump(v,n)    ) * dS \
-                           +           inner(jump(u,n)    , avg(sigma(v))) * dS \
-                           + R_/h_avg* inner(jump(u)      , jump(v)      ) * dS
-        elif variant.upper() == 'IIPG':
-            k_int_facets = lambda u,v: \
-                           -           inner(avg(sigma(u)), jump(v,n)) * dS \
-                           + R_/h_avg* inner(jump(u)      , jump(v)  ) * dS
-        else:
-            raise TypeError('Unknown DG variant ' + variant)
-        
+        k_int_facets = lambda u,v: \
+                       -           inner(avg(sigma(u)), jump(v,n)    ) * dS \
+                       -           inner(jump(u,n)    , avg(sigma(v))) * dS \
+                       + R_/h_avg* inner(jump(u)      , jump(v)      ) * dS
+
         return lambda u,v: self.k_CG(u,v) + k_int_facets(u,v)
 
+    @property
+    def k_DG_NIPG(self):
+        inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
+        V = self._function_space
+        n = ufl.FacetNormal(V)
+        h = ufl.MinCellEdgeLength(V) #works!
+        h_avg  = (h('+') + h('-'))/2.0
+        R_ = self.DG_SIPG_regularization_parameter()
+        dS = self._dS
+        sigma = self.sigma
+        
+        k_int_facets = lambda u,v: \
+                       -           inner(avg(sigma(u)), jump(v,n)    ) * dS \
+                       +           inner(jump(u,n)    , avg(sigma(v))) * dS \
+                       + R_/h_avg* inner(jump(u)      , jump(v)      ) * dS
 
+        return lambda u,v: self.k_CG(u,v) + k_int_facets(u,v)
+
+    @property
+    def k_DG_IIPG(self):
+        inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
+        V = self._function_space
+        n = ufl.FacetNormal(V)
+        h = ufl.MinCellEdgeLength(V) #works!
+        h_avg  = (h('+') + h('-'))/2.0
+        R_ = self.DG_SIPG_regularization_parameter()
+        dS = self._dS
+        sigma = self.sigma
+        
+        k_int_facets = lambda u,v: \
+                       -           inner(avg(sigma(u)), jump(v,n)    ) * dS \
+                       + R_/h_avg* inner(jump(u)      , jump(v)      ) * dS
+
+        return lambda u,v: self.k_CG(u,v) + k_int_facets(u,v)
+        
 
 class IsotropicElasticMaterial(ElasticMaterial):
     """
@@ -197,17 +270,17 @@ class IsotropicElasticMaterial(ElasticMaterial):
 
     @property
     def P_modulus(self):
-        return self.lambda_ + 2*self.mu
+        return self._lambda + 2*self._mu
 
     @property
     def Z_N(self):
         """P-wave mechanical impedance: rho*c_L"""
-        return ufl.sqrt(self.rho*(self.lambda_ + 2*self.mu))
+        return ufl.sqrt(self.rho*(self._lambda + 2*self._mu))
 
     @property
     def Z_T(self):
         """S-wave mechanical impedance: rho*c_S"""
-        return ufl.sqrt(self.rho*self.mu)
+        return ufl.sqrt(self.rho*self._mu)
 
 
 

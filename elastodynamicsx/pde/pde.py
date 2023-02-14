@@ -38,7 +38,12 @@ class PDE():
                 raise TypeError("Unsupported boundary condition"+str(type(bc)))
         
         self._omega_ufl = fem.Constant(function_space, PETSc.ScalarType(0))
-        self._compile_M_C_K_b()
+        
+        if self.is_linear:
+            print('linear PDE')
+            self._compile_M_C_K_b()
+        else:
+            print('non-linear PDE')
     
     
     def _compile_M_C_K_b(self):
@@ -76,6 +81,9 @@ class PDE():
             w = self._omega_ufl
             self._a_form = fem.form(-w*w*m + 1J*w*c + k)
     
+    @property
+    def is_linear(self):
+        return not(sum([not(mat.is_linear) for mat in self.materials]))
 
     @property
     def m(self) -> 'function':

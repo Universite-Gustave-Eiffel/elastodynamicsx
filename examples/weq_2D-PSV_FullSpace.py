@@ -85,7 +85,7 @@ src_t = lambda t: np.sin(2*np.pi*f0 * t) * np.sin(np.pi*t/d0)**2 * (t<d0) * (t>0
 
 ### -> Space-Time function
 #
-F_0 = np.array([1,0], dtype=PETSc.ScalarType) #amplitude of the source
+F_0 = 1e-3*np.array([1,0], dtype=PETSc.ScalarType) #amplitude of the source
 #
 def F_body_function(t): return lambda x: F_0[:,np.newaxis] * src_t(t) * src_x(x)[np.newaxis,:] #source(x) at a given time
 

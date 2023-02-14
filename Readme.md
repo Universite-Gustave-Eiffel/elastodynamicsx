@@ -69,7 +69,7 @@ def update_T_N_function(t, timeStepper):
     T_N.value   = np.sin(t)*forceVector
 
 #Loop on time, and live-plot the result
-tStepper.run(num_steps-1, callfirsts=[update_T_N_function], callbacks=[], live_plotter={'live_plotter_step':1, 'clim':[-1,1]})
+tStepper.run(num_steps-1, callfirsts=[update_T_N_function], callbacks=[], live_plotter={'refresh_step':1, 'clim':[-1,1]})
 
 #the end
 ```

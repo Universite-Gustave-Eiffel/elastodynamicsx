@@ -30,7 +30,8 @@ def material(functionspace_tags_marker, type_, *args, **kwargs):
         aluminum = material( function_space, 'isotropic',
                              rho=2.8, lambda_=58, mu=26)  #entire domain
     """
-    allMaterials = (ScalarLinearMaterial, IsotropicElasticMaterial)
+    allMaterials = (ScalarLinearMaterial, IsotropicElasticMaterial, \
+                    DummyIsotropicElasticMaterial, Murnaghan, StVenantKirchhoff)
     for Mat in allMaterials:
         if type_.lower() in Mat.labels:
             return Mat(functionspace_tags_marker, *args, **kwargs)
@@ -67,7 +68,7 @@ class Material():
     ### ------- non-static -------
     ### --------------------------
     
-    def __init__(self, functionspace_tags_marker, rho, sigma, is_linear, **kwargs):
+    def __init__(self, functionspace_tags_marker, rho, is_linear, **kwargs):
         """
         Args:
             functionspace_tags_marker: Available possibilities are
@@ -76,14 +77,12 @@ class Material():
                 function_space #In this case cell_tags=None and marker=None, meaning
                     application of the material in the entire domain
             rho:   Density
-            sigma: Stress function
             is_linear: True for linear, False for hyperelastic
             kwargs:
                 epsilon: (default=epsilon_vector) Deformation function
         """
         self._rho = rho
-        self._sigma = sigma
-        self._epsilon = kwargs.get('epsilon', epsilon_vector)
+        self._is_linear = is_linear
         
         function_space, cell_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
 
@@ -118,14 +117,6 @@ class Material():
         """Density"""
         return self._rho
 
-    def sigma(self, u):
-        """Stress function: sigma(u)"""
-        return self._sigma(u)
-    
-    def sigma_n(self, u, n):
-        """Stress in the 'n' direction: (sigma(u), n)"""
-        return ufl.dot(self._sigma(u), n)
-
 #
 def epsilon_vector(u): return ufl.sym(ufl.grad(u))
 def epsilon_scalar(u): return ufl.nabla_grad(u)
@@ -134,4 +125,5 @@ def epsilon_scalar(u): return ufl.nabla_grad(u)
 # Import subclasses -- must be done at the end to avoid loop imports
 # -----------------------------------------------------
 from .elasticmaterial import ScalarLinearMaterial, IsotropicElasticMaterial
+from .hyperelasticmaterial import DummyIsotropicElasticMaterial, Murnaghan, StVenantKirchhoff
 

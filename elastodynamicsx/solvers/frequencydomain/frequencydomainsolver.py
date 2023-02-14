@@ -78,7 +78,7 @@ class FrequencyDomainSolver:
         # Initialize the PETSc solver
         petsc_options = kwargs.get('petsc_options', FrequencyDomainSolver.default_petsc_options)
         self.solver = PETSc.KSP().create(comm)
-        #self.solver.setOperators(self._A) #do it at solve
+        #self.solver.setOperators(M.copy()) #do it at solve
         
         # Give PETSc solver options a unique prefix
         problem_prefix = f"dolfinx_solve_{id(self)}"
@@ -112,7 +112,7 @@ class FrequencyDomainSolver:
             out
         """
         if out is None:
-            out = self._b.copy()
+            out = self._M.createVecRight()
         if hasattr(omega, '__iter__'):
             return self._solve_multiple_omegas(omega, out, callbacks, **kwargs)
         else:

@@ -103,13 +103,7 @@ class TimeStepper:
         #        self._u0, self._v0, self._a0
         #        self._m0_form, self._L0_form
         ###
-        #
-        if self.explicit:
-            default_petsc_options = TimeStepper.petsc_options_explicit_scheme
-        else:
-            default_petsc_options = TimeStepper.petsc_options_implicit_scheme_linear
-        petsc_options = kwargs.get('petsc_options', default_petsc_options)
-        self._init_solver(petsc_options)
+        
         
     @property
     def A(self): return self._A
@@ -181,6 +175,30 @@ class TimeStepper:
                 selfVal.x.array[:] = val.x.array
             else:
                 raise TypeError("Unknown type of initial value "+str(type(val)))
+        
+    
+    def run(self, num_steps, **kwargs): print('Supercharge me')
+
+
+
+
+class OneStepTimeStepper(TimeStepper):
+    """
+    Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).
+    """
+    
+    def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], explicit=False, **kwargs):
+        #
+        self._i0 = 0
+        self._intermediate_dt = 0 #non zero for generalized-alpha
+        super().__init__(function_space, m_, c_, k_, L, dt, bcs, explicit, **kwargs)
+        #
+        if self.explicit:
+            default_petsc_options = TimeStepper.petsc_options_explicit_scheme
+        else:
+            default_petsc_options = TimeStepper.petsc_options_implicit_scheme_linear
+        petsc_options = kwargs.get('petsc_options', default_petsc_options)
+        self._init_solver(petsc_options)
 
 
     def _init_solver(self, petsc_options={}):
@@ -215,23 +233,7 @@ class TimeStepper:
         self._A.setFromOptions()
         self._b.setOptionsPrefix(problem_prefix)
         self._b.setFromOptions()
-        
-    
-    def run(self, num_steps, **kwargs): print('Supercharge me')
 
-
-
-
-class OneStepTimeStepper(TimeStepper):
-    """
-    Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).
-    """
-    
-    def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], explicit=False, **kwargs):
-        #
-        self._i0 = 0
-        self._intermediate_dt = 0
-        super().__init__(function_space, m_, c_, k_, L, dt, bcs, explicit, **kwargs)
 
     def _prepareNextIteration(self): print('Supercharge me')
     def _initialStep(self, callfirsts, callbacks, verbose=0):
