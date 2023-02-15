@@ -108,11 +108,12 @@ class ElasticResonanceSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue pr
         """Returns the error estimate on the computed eigenvalues"""
         return np.array([self.computeError(i, SLEPc.EPS.ErrorType.RELATIVE) for i in range(self._getNout())]) # Compute error for i-th eigenvalue
     
-    def plot(self, function_space, which='all', **kwargs) -> None:
+    def plot(self, function_space:'dolfinx.fem.function_space', which='all', **kwargs) -> None:
         """
         Plots the desired modeshapes
         
         Args:
+            function_space: The underlying function space
             which: 'all', or an integer, or a list of integers, or a slice object
                 -> the same as for getEigenmodes
         """

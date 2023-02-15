@@ -37,11 +37,12 @@ class ModalBasis():
         """The eigen modeshapes"""
         return self._un
     
-    def plot(self, function_space, which='all', **kwargs):
+    def plot(self, function_space:'dolfinx.fem.function_space', which='all', **kwargs):
         """
         Plots the desired modeshapes
         
         Args:
+            function_space: The underlying function space
             which: 'all', or an integer, or a list of integers, or a slice object
             kwargs:
                 shape: (default: attempts a square mosaic) shape of the pyvista.Plotter
@@ -49,10 +50,10 @@ class ModalBasis():
                 wireframe: (default=False) Plot the wireframe of the undeformed mesh
 
         Examples of use:
-            plot()                #plots all computed eigenmodes
-            plot(3)               #plots mode number 4
-            plot([3,5])           #plots modes number 4 and 6
-            plot(slice(0,None,2)) #plots even modes
+            plot(V)                  #plots all computed eigenmodes
+            plot(V, 3)               #plots mode number 4
+            plot(V, [3,5])           #plots modes number 4 and 6
+            plot(V, slice(0,None,2)) #plots even modes
         """
         #inspired from https://docs.pyvista.org/examples/99-advanced/warp-by-vector-eigenmodes.html
         indexes    = _slice_array(np.arange(len(self._wn)), which)

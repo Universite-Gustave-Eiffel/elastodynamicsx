@@ -1,7 +1,5 @@
-from dolfinx import fem
 import ufl
 
-from elastodynamicsx.plot  import get_3D_array_from_FEFunction
 from elastodynamicsx.utils import get_functionspace_tags_marker
 
 
@@ -30,9 +28,7 @@ def material(functionspace_tags_marker, type_, *args, **kwargs):
         aluminum = material( function_space, 'isotropic',
                              rho=2.8, lambda_=58, mu=26)  #entire domain
     """
-    allMaterials = (ScalarLinearMaterial, IsotropicElasticMaterial, \
-                    DummyIsotropicElasticMaterial, Murnaghan, StVenantKirchhoff)
-    for Mat in allMaterials:
+    for Mat in all_materials:
         if type_.lower() in Mat.labels:
             return Mat(functionspace_tags_marker, *args, **kwargs)
     #
@@ -79,7 +75,7 @@ class Material():
             rho:   Density
             is_linear: True for linear, False for hyperelastic
             kwargs:
-                epsilon: (default=epsilon_vector) Deformation function
+                
         """
         self._rho = rho
         self._is_linear = is_linear
@@ -89,27 +85,48 @@ class Material():
         self._dx = ufl.Measure("dx", domain=function_space.mesh, subdomain_data=cell_tags)(marker) #also valid if cell_tags or marker are None
         self._dS = ufl.Measure("dS", domain=function_space.mesh, subdomain_data=cell_tags)(marker)
         self._function_space = function_space
-        #e = self._function_space.ufl_element()
-        #degree = e.degree()
-        #e.is_cellwise_constant() == False for DG
+                
+        e = self._function_space.ufl_element()
+        if e.is_cellwise_constant() == True:
+            self._k = self.k_CG
+        else:
+            self._k = self.k_DG
+        #WARNING: self.k is convenient, but slow because of this if branch
+        #If possible prefer using directly self.k_CG or self.k_DG
+            
     
     @property
-    def is_linear(self):
+    def is_linear(self) -> bool:
         return self._is_linear
     
     @property
-    def m(self):
+    def m(self) -> 'function':
         """(bilinear) mass form function"""
         return lambda u,v: self._rho* ufl.inner(u, v) * self._dx
     
     @property
-    def c(self):
+    def c(self) -> 'function':
         """(bilinear) damping form function"""
         return None
-    
+
     @property
-    def k(self):
-        """stiffness form function"""
+    def k(self) -> 'function': #WARNING: 30% slower because of 'if'!
+        """Stiffness form function"""
+        return self._k
+
+    @property
+    def k_CG(self) -> 'function':
+        """Stiffness form function for a Continuous Galerkin formulation"""
+        print("supercharge me")
+        
+    @property
+    def k_DG(self) -> 'function':
+        """Stiffness form function for a Disontinuous Galerkin formulation"""
+        print("supercharge me")
+
+    @property
+    def DG_numerical_flux(self) -> 'function':
+        """Numerical flux for a Disontinuous Galerkin formulation"""
         print("supercharge me")
 
     @property
@@ -117,13 +134,14 @@ class Material():
         """Density"""
         return self._rho
 
-#
-def epsilon_vector(u): return ufl.sym(ufl.grad(u))
-def epsilon_scalar(u): return ufl.nabla_grad(u)
 
 # -----------------------------------------------------
 # Import subclasses -- must be done at the end to avoid loop imports
 # -----------------------------------------------------
 from .elasticmaterial import ScalarLinearMaterial, IsotropicElasticMaterial
-from .hyperelasticmaterial import DummyIsotropicElasticMaterial, Murnaghan, StVenantKirchhoff
+from .hyperelasticmaterial import DummyIsotropicElasticMaterial, Murnaghan, StVenantKirchhoff, MooneyRivlinIncompressible, MooneyRivlinCompressible
+
+all_linear_materials = [ScalarLinearMaterial, IsotropicElasticMaterial]
+all_nonlinear_materials = [DummyIsotropicElasticMaterial, Murnaghan, StVenantKirchhoff, MooneyRivlinIncompressible, MooneyRivlinCompressible]
+all_materials = all_linear_materials + all_nonlinear_materials
 

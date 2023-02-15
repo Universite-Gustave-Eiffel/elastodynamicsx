@@ -55,7 +55,7 @@ class PDE():
         m = self.m(u,v)
         c = self.c(u,v) if not(self.c is None) else zero*ufl.inner(u,v)*ufl.dx
         k = self.k(u,v)
-        L = self.L(v)   if not(self.L is None) else ufl.inner(vzero,v)*ufl.dx #zero*ufl.conj(v)*ufl.dx
+        L = self.L(v)   if not(self.L is None) else ufl.inner(vzero,v)*ufl.dx
         
         #boundaries
         for bc in self._bcs_weak:
@@ -85,6 +85,12 @@ class PDE():
     def is_linear(self):
         return not(sum([not(mat.is_linear) for mat in self.materials]))
 
+
+
+### ### ### ### ### ### ### ### ### ### ###
+### Linear and bilinear form functions  ###
+### ### ### ### ### ### ### ### ### ### ###
+
     @property
     def m(self) -> 'function':
         """(bilinear) Mass form function"""
@@ -103,6 +109,21 @@ class PDE():
     def k(self) -> 'function':
         """(bilinear) Stiffness form function"""
         return lambda u,v: sum([mat.k(u,v) for mat in self.materials])
+
+    @property
+    def k_CG(self) -> 'function':
+        """(bilinear) Stiffness form function (Continuous Galerkin)"""
+        return lambda u,v: sum([mat.k_CG(u,v) for mat in self.materials])
+        
+    @property
+    def k_DG(self) -> 'function':
+        """(bilinear) Stiffness form function (Discontinuous Galerkin)"""
+        return lambda u,v: sum([mat.k_DG(u,v) for mat in self.materials])
+    
+    @property
+    def DG_numerical_flux(self) -> 'function':
+        """(bilinear) Numerical flux form function (Disontinuous Galerkin)"""
+        return lambda u,v: sum([mat.DG_numerical_flux(u,v) for mat in self.materials])
     
     @property
     def L(self) -> 'function':
@@ -111,6 +132,12 @@ class PDE():
             return None
         else:
             return lambda v: sum([f.L(v) for f in self.bodyforces])
+
+
+
+### ### ### ### ### ### ### ###
+### Compiled dolfinx forms  ###
+### ### ### ### ### ### ### ###
 
     @property
     def m_form(self):
@@ -131,6 +158,12 @@ class PDE():
     def b_form(self):
         """Compiled linear form"""
         return self._b_form
+
+
+
+### ### ### ### ### ### ### ### ###
+### PETSc matrices and vectors  ###
+### ### ### ### ### ### ### ### ###
     
     def M(self) -> PETSc.Mat:
         """Mass matrix"""
@@ -160,6 +193,12 @@ class PDE():
         """Declares a zero vector compatible with the linear form"""
         return fem.petsc.create_vector(self.b_form)
         
+
+
+### ### ### ### ###  ###
+### Update functions ###
+### ### ### ### ###  ###
+
     def update_b_frequencydomain(self, b:PETSc.Vec, omega:float) -> None:
         """Updates the b vector (in-place) for a given angular frequency omega"""
         #set to 0

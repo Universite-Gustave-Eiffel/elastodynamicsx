@@ -1,8 +1,6 @@
-from dolfinx import fem
-from petsc4py import PETSc
 import ufl
 
-from .material import Material#, epsilon_scalar, epsilon_vector
+from .material import Material
 from elastodynamicsx.utils import get_functionspace_tags_marker
 
 #https://bazaar.launchpad.net/~cbc-core/cbc.solve/main/view/head:/cbc/twist/material_model_base.py
@@ -28,19 +26,25 @@ class HyperelasticMaterial(Material):
         super().__init__(functionspace_tags_marker, rho, is_linear=False, **kwargs)
 
 
-    @property
-    def k(self):
-        """Stiffness form function"""
-        return self.k_CG
+    def P(self, u):
+        """First Piola-Kirchhoff stress"""
+        print("supercharge me")
 
     @property
     def k_CG(self):
         """Stiffness form function for a Continuous Galerkin formulation"""
         return lambda u,v: ufl.inner(self.P(u), ufl.grad(v)) * self._dx
+    
+    @property
+    def k_DG(self) -> 'function':
+        """Stiffness form function for a Discontinuous Galerkin formulation"""
+        raise NotImplementedError
+    
+    @property
+    def DG_numerical_flux(self) -> 'function':
+        """Numerical flux for a Disontinuous Galerkin formulation"""
+        raise NotImplementedError
 
-    def P(self, u):
-        """First Piola-Kirchhoff stress"""
-        print("supercharge me")
         
 
 class Murnaghan(HyperelasticMaterial):
@@ -161,7 +165,7 @@ class StVenantKirchhoff(HyperelasticMaterial):
     see: https://en.wikipedia.org/wiki/Hyperelastic_material
     """
 
-    labels = ['stvenantkirchhoff', 'saintvenantkirchhoff']
+    labels = ['stvenant-kirchhoff', 'saintvenant-kirchhoff']
     
     def __init__(self, functionspace_tags_marker, rho, lambda_, mu, **kwargs):
         """
@@ -210,6 +214,128 @@ class StVenantKirchhoff(HyperelasticMaterial):
         """(WARNING: infinitesimal strain asymptotics) S-wave mechanical impedance: rho*c_S"""
         return ufl.sqrt(self.rho*self._mu)
 
+
+class MooneyRivlinIncompressible(HyperelasticMaterial):
+    """
+    Mooney-Rivlin model for an incompressible solid
+    see: https://en.wikipedia.org/wiki/Mooney%E2%80%93Rivlin_solid
+    """
+
+    labels = ['mooney-rivlin-incomp']
+    
+    def __init__(self, functionspace_tags_marker, rho, C1, C2, **kwargs):
+        """
+        Args:
+            functionspace_tags_marker: See Material
+            rho: Density
+            C1: first parameter
+            C2: second parameter
+            kwargs: Passed to HyperelasticMaterial
+        """
+
+        self._C1 = C1
+        self._C2 = C2
+
+        #
+        super().__init__(functionspace_tags_marker, rho, **kwargs)
+
+    def P(self, u):
+        """First Piola-Kirchhoff stress"""
+        # Spatial dimension
+        d = len(u)
+        assert d==3, 'The MooneyRivlinIncompressible class is only defined for 3D'
+
+        # Identity tensor
+        I = ufl.variable(ufl.Identity(d))
+
+        # Deformation gradient
+        F = ufl.variable(I + ufl.grad(u))
+
+        # Right Cauchy-Green tensor
+        C = ufl.variable(F.T * F)
+
+        # Invariants
+        I1 = ufl.tr(C)
+        I2 = 0.5*(ufl.tr(C)**2 - ufl.tr(C*C))
+        #I3 = ufl.det(C)
+        
+        # Strain-energy function
+        W = self._C1*(I1 - 3) + self._C2*(I2 - 3)
+        
+        return ufl.diff(W, F)
+
+    @property
+    def C1(self):
+        return self._C1
+
+    @property
+    def C2(self):
+        return self._C2
+
+
+class MooneyRivlinCompressible(HyperelasticMaterial):
+    """
+    Mooney-Rivlin model for a compressible solid
+    see: https://en.wikipedia.org/wiki/Mooney%E2%80%93Rivlin_solid
+    """
+
+    labels = ['mooney-rivlin-comp']
+    
+    def __init__(self, functionspace_tags_marker, rho, C10, C01, D1, **kwargs):
+        """
+        Args:
+            functionspace_tags_marker: See Material
+            rho: Density
+            C10: first parameter
+            C01: second parameter
+            D1 : third parameter
+            kwargs: Passed to HyperelasticMaterial
+        """
+
+        self._C10 = C10
+        self._C01 = C01
+        self._D1  = D1
+
+        #
+        super().__init__(functionspace_tags_marker, rho, **kwargs)
+
+    def P(self, u):
+        """First Piola-Kirchhoff stress"""
+        # Spatial dimension
+        d = len(u)
+        #assert d==3, 'The MooneyRivlinIncompressible class is only defined for 3D'
+
+        # Identity tensor
+        I = ufl.variable(ufl.Identity(d))
+
+        # Deformation gradient
+        F = ufl.variable(I + ufl.grad(u))
+        
+        # Jacobian
+        J = ufl.variable(ufl.det(F))
+
+        # Right Cauchy-Green tensor
+        C = ufl.variable(F.T * F)
+        
+        # Isochoric C
+        Cb = ufl.variable(J**(-2.0/3.0)*C)
+
+        # Invariants
+        I1bar = ufl.tr(Cb)
+        I2bar = 0.5*(ufl.tr(Cb)**2 - ufl.tr(Cb*Cb)) 
+        
+        # Strain-energy function
+        W = self._C10*(I1bar - 3) + self._C01*(I2bar - 3) + 1/self._D1*(J-1)*(J-1)
+        
+        return ufl.diff(W, F)
+
+    @property
+    def C1(self):
+        return self._C1
+
+    @property
+    def C2(self):
+        return self._C2
 
 # Finite-strain kinematics
 # see: https://bazaar.launchpad.net/~cbc-core/cbc.solve/main/view/head:/cbc/twist/kinematics.py

@@ -2,7 +2,8 @@ from dolfinx import fem
 from petsc4py import PETSc
 import ufl
 
-from .material import Material, epsilon_scalar, epsilon_vector
+from .material   import Material
+from .kinematics import epsilon_scalar, epsilon_vector
 from elastodynamicsx.utils import get_functionspace_tags_marker
 
 class ElasticMaterial(Material):
@@ -20,19 +21,12 @@ class ElasticMaterial(Material):
                 damping: (default=NoDamping()) An instance of a subclass of Damping
         """
         self._sigma = sigma
-        self._epsilon = kwargs.get('epsilon', epsilon_vector)
         self._DGvariant = kwargs.pop('DGvariant', 'SIPG')
         self._damping   = kwargs.pop('damping', NoDamping())
         if (type(self._damping) == RayleighDamping) and (self._damping.host_material is None):
             self._damping.link_material(self)
 
         super().__init__(functionspace_tags_marker, rho, is_linear=True, **kwargs)
-        
-        e = self._function_space.ufl_element()
-        if e.is_cellwise_constant() == True:
-            self._k = self.k_CG
-        else:
-            self._k = self.k_DG_SIPG
 
 
     def sigma(self, u):
@@ -45,35 +39,40 @@ class ElasticMaterial(Material):
 
 
     @property
-    def k(self): #TODO: extremely slow because of 'if'! change strategy
-        """Stiffness form function"""
-        return self._k
+    def k_CG(self) -> 'function':
+        """Stiffness form function for a Continuous Galerkin formulation"""
+        return lambda u,v: ufl.inner(self._sigma(u), epsilon_vector(v)) * self._dx
+    
+    @property
+    def k_DG(self) -> 'function':
+        """Stiffness form function for a Discontinuous Galerkin formulation"""
+        return lambda u,v: self.k_CG(u,v) + self.DG_numerical_flux(u,v)
+        
+    def select_DG_numerical_flux(self, variant='SIPG') -> 'function':
+        if   variant.upper() == 'SIPG':
+            return self.DG_numerical_flux_SIPG
+        elif variant.upper() == 'NIPG':
+            return self.DG_numerical_flux_NIPG
+        elif variant.upper() == 'IIPG':
+            return self.DG_numerical_flux_IIPG
+        else:
+            raise TypeError('Unknown DG variant ' + variant)
 
     @property
-    def k_CG(self):
-        """Stiffness form function for a Continuous Galerkin formulation"""
-        return lambda u,v: ufl.inner(self._sigma(u), self._epsilon(v)) * self._dx
+    def DG_numerical_flux(self) -> 'function':
+        """Numerical flux for a Disontinuous Galerkin formulation"""
+        return self.DG_numerical_flux_SIPG
     
-    def DG_SIPG_regularization_parameter(self):
+    def DG_SIPG_regularization_parameter(self) -> 'dolfinx.fem.Constant':
         """Regularization parameter for the Symmetric Interior Penalty Galerkin methods (SIPG)"""
         degree = self._function_space.ufl_element().degree()
         gamma  = fem.Constant(self._function_space.mesh, PETSc.ScalarType(degree*(degree+1) + 1)) #+1 otherwise blows with elements of degree 1
         P_mod  = self.P_modulus
         R_     = gamma*P_mod
         return R_
-    
-    def k_DG(self, variant):
-        if   variant.upper() == 'SIPG':
-            return self.k_DG_SIPG
-        elif variant.upper() == 'NIPG':
-            return self.k_DG_NIPG
-        elif variant.upper() == 'IIPG':
-            return self.k_DG_IIPG
-        else:
-            raise TypeError('Unknown DG variant ' + variant)
         
     @property
-    def k_DG_SIPG(self):
+    def DG_numerical_flux_SIPG(self) -> 'function':
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -88,10 +87,10 @@ class ElasticMaterial(Material):
                        -           inner(jump(u)        , avg(sig_n(v,n))) * dS \
                        + R_/h_avg* inner(jump(u)        , jump(v)        ) * dS
 
-        return lambda u,v: self.k_CG(u,v) + k_int_facets(u,v)
+        return k_int_facets
         
     @property
-    def k_DG_NIPG(self):
+    def DG_numerical_flux_NIPG(self) -> 'function':
         """WARNING: instable for elasticity"""
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
@@ -107,10 +106,10 @@ class ElasticMaterial(Material):
                        +           inner(jump(u)        , avg(sig_n(v,n))) * dS \
                        + R_/h_avg* inner(jump(u)        , jump(v)        ) * dS
 
-        return lambda u,v: self.k_CG(u,v) + k_int_facets(u,v)
+        return k_int_facets
         
     @property
-    def k_DG_IIPG(self):
+    def DG_numerical_flux_IIPG(self) -> 'function':
         """WARNING: instable for elasticity"""
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
@@ -125,10 +124,10 @@ class ElasticMaterial(Material):
                        -           inner(avg(sig_n(u,n)), jump(v)        ) * dS \
                        + R_/h_avg* inner(jump(u)        , jump(v)        ) * dS
 
-        return lambda u,v: self.k_CG(u,v) + k_int_facets(u,v)
+        return k_int_facets
 
     @property
-    def c(self):
+    def c(self) -> 'function':
         """Damping form function"""
         return self._damping.c
 
@@ -163,8 +162,13 @@ class ScalarLinearMaterial(ElasticMaterial):
         self._mu = mu
         sigma = lambda u: self._mu*epsilon_scalar(u)
         #
-        super().__init__(functionspace_tags_marker, rho, sigma, epsilon=epsilon_scalar, **kwargs)
+        super().__init__(functionspace_tags_marker, rho, sigma, **kwargs)
 
+    @property
+    def k_CG(self) -> 'function':
+        """Stiffness form function for a Continuous Galerkin formulation"""
+        return lambda u,v: ufl.inner(self._sigma(u), epsilon_scalar(v)) * self._dx
+        
     @property
     def mu(self):
         """The shear modulus"""
@@ -180,7 +184,7 @@ class ScalarLinearMaterial(ElasticMaterial):
         return self.mu
 
     @property
-    def k_DG_SIPG(self):
+    def DG_numerical_flux_SIPG(self) -> 'function':
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -195,10 +199,10 @@ class ScalarLinearMaterial(ElasticMaterial):
                        -           inner(jump(u,n)    , avg(sigma(v))) * dS \
                        + R_/h_avg* inner(jump(u)      , jump(v)      ) * dS
 
-        return lambda u,v: self.k_CG(u,v) + k_int_facets(u,v)
+        return k_int_facets
 
     @property
-    def k_DG_NIPG(self):
+    def DG_numerical_flux_NIPG(self) -> 'function':
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -213,10 +217,10 @@ class ScalarLinearMaterial(ElasticMaterial):
                        +           inner(jump(u,n)    , avg(sigma(v))) * dS \
                        + R_/h_avg* inner(jump(u)      , jump(v)      ) * dS
 
-        return lambda u,v: self.k_CG(u,v) + k_int_facets(u,v)
+        return k_int_facets
 
     @property
-    def k_DG_IIPG(self):
+    def DG_numerical_flux_IIPG(self) -> 'function':
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -230,8 +234,9 @@ class ScalarLinearMaterial(ElasticMaterial):
                        -           inner(avg(sigma(u)), jump(v,n)    ) * dS \
                        + R_/h_avg* inner(jump(u)      , jump(v)      ) * dS
 
-        return lambda u,v: self.k_CG(u,v) + k_int_facets(u,v)
+        return k_int_facets
         
+
 
 class IsotropicElasticMaterial(ElasticMaterial):
     """
@@ -256,7 +261,7 @@ class IsotropicElasticMaterial(ElasticMaterial):
         self._mu     = mu
         sigma = lambda u: self._lambda * ufl.nabla_div(u) * ufl.Identity(len(u)) + 2*self._mu*epsilon_vector(u)
         #
-        super().__init__(functionspace_tags_marker, rho, sigma, epsilon=epsilon_vector, **kwargs)
+        super().__init__(functionspace_tags_marker, rho, sigma, **kwargs)
         
     @property
     def lambda_(self):

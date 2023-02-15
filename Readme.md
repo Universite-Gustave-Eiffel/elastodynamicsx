@@ -3,7 +3,7 @@ ElastodynamiCSx is dedicated to the numerical modeling of wave propagation in so
 
 $$\mathbf{M}\mathbf{a} + \mathbf{C}\mathbf{v} + \mathbf{K}(\mathbf{u}) = \mathbf{b},$$
 
-where $\mathbf{u}$, $\mathbf{v}=\partial_t \mathbf{u}$, $\mathbf{a}=\partial_t^2\mathbf{u}$ are the displacement, velocity and acceleration fields, $\mathbf{M}$, $\mathbf{C}$ and $\mathbf{K}$ are the mass, damping and stiffness forms, and $\mathbf{b}$ is an applied force. $\mathbf{K}$ may be a non-linear function of $\mathbf{u}$.
+where $\mathbf{u}$, $\mathbf{v}=\partial_t \mathbf{u}$, $\mathbf{a}=\partial_t^2\mathbf{u}$ are the displacement, velocity and acceleration fields, $\mathbf{M}$, $\mathbf{C}$ and $\mathbf{K}$ are the mass, damping and stiffness forms, and $\mathbf{b}$ is an applied force. For time domain problems $\mathbf{K}$ may be a non-linear function of $\mathbf{u}$.
 
 The module provides high level classes to build and solve common problems in a few lines code.
 
@@ -12,7 +12,8 @@ Using the **pde** package:
   * Common **material laws**, using the *Material* class
     * linear: *scalar*, *isotropic* elasticity
       * damping laws: *Rayleigh* damping
-    * hyperelastic: in the near future...
+    * hyperelastic: *Saint Venant-Kirchhoff*, *Murnaghan*
+    * perfectly matched layers (PML): in the near future...
   * Define **body forces**, using the *BodyForce* class
   * **Assemble** several materials and body forces, using the *PDE* class
   * Common **boundary conditions**, using the *BoundaryCondition* class
@@ -51,8 +52,10 @@ pde  = PDE(V, materials=[mat1, mat2], bodyforces=[f1], bcs=bcs)
 ## Solve problems
 Using the **solvers** package:
   * **Time-domain problems**, using the *TimeStepper* class
-    * Explicit schemes: *leap frog*
-    * Implicit schemes: *Newmark-beta*, *midpoint*, *linear acceleration*, *HHT-alpha*, *generalized-alpha*
+    * Explicit schemes (linear & non-linear):  
+       *leap frog*
+    * Implicit schemes (linear):  
+       *Newmark-beta*, *midpoint*, *linear acceleration*, *HHT-alpha*, *generalized-alpha*
 ```python
 #Time integration
 from elastodynamicsx.solvers import TimeStepper
@@ -125,10 +128,12 @@ eps = ElasticResonanceSolver(comm, M, None, K, nev=nev)
 eps.solve()
 
 eigenfreqs = eps.getEigenfrequencies()
-eps.plot(V) #V is a dolfinx.fem.function_space
+eps.plot(function_space=V) #V is a dolfinx.fem.function_space
 
 #the end
 ```
+
+  * **Guided waves problems**, in the near future...
 
 ## Post process solutions
 Using the **solutions** package:
@@ -142,10 +147,10 @@ mbasis = eps.getModalBasis() #a elastodynamicsx.solutions.ModalBasis
 
 #access data
 eigenfreqs = mbasis.fn    #a np.array
-modeshape5 = mbasis.un[5] #a dolfinx.fem.Function
+modeshape5 = mbasis.un[5] #a PETSc.Vec vector
 
 #visualize
-mbasis.plot(V) #V is a dolfinx.fem.function_space
+mbasis.plot(function_space=V) #V is a dolfinx.fem.function_space
 ```
 
 ## Dependencies
@@ -254,5 +259,6 @@ Other useful references:
     * [The COmputational MEchanics Toolbox - COMET](https://comet-fenics.readthedocs.io/en/latest/)
     * [The FEniCS solid tutorial](https://fenics-solid-tutorial.readthedocs.io/en/latest/)
     * [FEniCS tutorial, by Jan Blechta and Jaroslav Hron](https://www2.karlin.mff.cuni.cz/~hron/fenics-tutorial/index.html)
+    * [CBC.Solve](https://code.launchpad.net/cbc.solve)
 
 
