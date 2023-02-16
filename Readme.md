@@ -110,10 +110,10 @@ p.show()
 #the end
 ```
 
-  * **Eigenmodes problems**, using the *ElasticResonanceSolver* class
+  * **Eigenmodes problems**, using the *EigenmodesSolver* class
 ```python
 #Normal modes
-from elastodynamicsx.solvers import ElasticResonanceSolver
+from elastodynamicsx.solvers import EigenmodesSolver
 
 #MPI communicator
 comm = V.mesh.comm
@@ -124,7 +124,7 @@ M, K = pde.M(), pde.K()
 nev = 9 #number of modes to compute
 
 #Initialize the solver
-eps = ElasticResonanceSolver(comm, M, None, K, nev=nev)
+eps = EigenmodesSolver(comm, M, None, K, nev=nev)
 eps.solve()
 
 eigenfreqs = eps.getEigenfrequencies()
@@ -139,7 +139,7 @@ eps.plot(function_space=V) #V is a dolfinx.fem.function_space
 Using the **solutions** package:
   * **Eigenmodes solutions**, using the *ModalBasis* class
 ```python
-#eps is a elastodynamicsx.solvers.ElasticResonanceSolver
+#eps is a elastodynamicsx.solvers.EigenmodesSolver
 #eps.solve() has already been performed
 
 #get the solutions
@@ -163,7 +163,7 @@ pyvista
 ipyvtklink (configured pyvista backend in jupyter lab)  
 
 ### Optional packages
-tqdm (progress bar for time-domain calculations)
+tqdm (progress bar for loops)
 
 ## Installation
 ### Option 1: With FEniCSx binaries installed

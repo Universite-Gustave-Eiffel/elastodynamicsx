@@ -67,6 +67,7 @@ class ElasticMaterial(Material):
         """Regularization parameter for the Symmetric Interior Penalty Galerkin methods (SIPG)"""
         degree = self._function_space.ufl_element().degree()
         gamma  = fem.Constant(self._function_space.mesh, PETSc.ScalarType(degree*(degree+1) + 1)) #+1 otherwise blows with elements of degree 1
+        #gamma  = fem.Constant(self._function_space.mesh, PETSc.ScalarType(160)) #+1 otherwise blows with elements of degree 1
         P_mod  = self.P_modulus
         R_     = gamma*P_mod
         return R_

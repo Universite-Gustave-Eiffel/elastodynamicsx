@@ -13,7 +13,7 @@ from petsc4py import PETSc
 import numpy as np
 
 from elastodynamicsx.pde import material, BoundaryCondition, PDE
-from elastodynamicsx.solvers import ElasticResonanceSolver
+from elastodynamicsx.solvers import EigenmodesSolver
 from elastodynamicsx.utils import make_facet_tags
 
 # -----------------------------------------------------
@@ -74,7 +74,7 @@ material = material(V, 'isotropic', rho, lambda_, mu)
 pde = PDE(V, materials=[material], bodyforces=[], bcs=bcs)
 
 ### Initialize the solver
-eps = ElasticResonanceSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=6)
+eps = EigenmodesSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=6)
 
 ### Run the big calculation!
 eps.solve()

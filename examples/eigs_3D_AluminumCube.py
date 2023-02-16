@@ -14,7 +14,7 @@ from petsc4py import PETSc
 import numpy as np
 
 from elastodynamicsx.pde import material, PDE
-from elastodynamicsx.solvers import ElasticResonanceSolver
+from elastodynamicsx.solvers import EigenmodesSolver
 
 # -----------------------------------------------------
 #                     FE domain
@@ -53,7 +53,7 @@ material = material(V, 'isotropic', rho, lambda_, mu)
 pde = PDE(V, materials=[material])
 
 ### Initialize the solver
-eps = ElasticResonanceSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=20)
+eps = EigenmodesSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=20)
 
 ### Run the big calculation!
 eps.solve()

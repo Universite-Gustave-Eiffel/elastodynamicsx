@@ -1,2 +1,2 @@
-from .elasticresonancesolver import *
+from .eigenmodessolver import *
 

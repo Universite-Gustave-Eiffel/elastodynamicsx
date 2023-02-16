@@ -14,7 +14,7 @@ from elastodynamicsx.solutions import ModalBasis
 #    https://slepc4py.readthedocs.io/en/stable/
 
 
-class ElasticResonanceSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue problem
+class EigenmodesSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue problem
     """
     Convenience class inhereted from SLEPc.EPS, with default parameters
     and convenience methods that are relevant for computing the resonances
@@ -24,7 +24,7 @@ class ElasticResonanceSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue pr
         
         from dolfinx import mesh, fem
         from mpi4py import MPI
-        from elastodynamicsx.solvers import ElasticResonanceSolver
+        from elastodynamicsx.solvers import EigenmodesSolver
         from elastodynamicsx.pde import material, PDE
         #
         domain = mesh.create_box(MPI.COMM_WORLD, [[0,0,0], [1,1,1]], [10,10,10])
@@ -33,7 +33,7 @@ class ElasticResonanceSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue pr
         rho, lambda_, mu = 1, 2, 1
         mat = material(V, rho, lambda_, mu)
         pde = PDE(V, materials=[mat])
-        eps = ElasticResonanceSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=6+6) #the first 6 resonances are rigid body motion
+        eps = EigenmodesSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=6+6) #the first 6 resonances are rigid body motion
         eps.solve()
         eps.plot(V)
         freqs = eps.getEigenfrequencies()

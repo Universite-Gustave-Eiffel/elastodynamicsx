@@ -70,28 +70,28 @@ def plot_mesh(mesh, cell_tags=None, **kwargs):
     
         plot_mesh(domain, cell_tags)
     """
-    plotter = pyvista.Plotter()
+    p = pyvista.Plotter()
     grid = pyvista.UnstructuredGrid(*plot.create_vtk_mesh(mesh, mesh.topology.dim))
     num_local_cells = mesh.topology.index_map(mesh.topology.dim).size_local
     if not cell_tags is None:
         grid.cell_data["Marker"] = cell_tags.values[cell_tags.indices<num_local_cells]
         grid.set_active_scalars("Marker")
-    actor = plotter.add_mesh(grid, show_edges=True)
+    actor = p.add_mesh(grid, show_edges=True)
     #
     if mesh.topology.dim<3:
-        plotter.view_xy()
+        p.view_xy()
     #
     if kwargs.get('show'):
-        plotter.show()
+        p.show()
     else:
-        return plotter
+        return p
 
 
 def live_plotter(u:'fem.Function', refresh_step:int=1, **kwargs) -> pyvista.Plotter:
     kwargs['refresh_step'] = refresh_step
     return plotter(u, **kwargs)
 
-def plotter(*all_u, **kwargs):
+def plotter(*all_u, **kwargs) -> pyvista.Plotter:
     u1 = all_u[0]
     #test whether u is scalar or vector and returns the appropriate plotter
     nbcomps = u1.function_space.element.num_sub_elements #number of components if vector space, 0 if scalar space
@@ -176,7 +176,7 @@ class CustomScalarPlotter(pyvista.Plotter):
         if kwargs.get('render', True):
             self.render()
 
-    def live_plotter_update_function(self, i, vec:'PETSc.Vec'):
+    def live_plotter_update_function(self, i:int, vec:'PETSc.Vec') -> None:
         if not("PETSc.Vec" in str(type(vec))):
             if "fem.function.Function" in str(type(vec)):
                 vec = vec.vector
@@ -188,7 +188,7 @@ class CustomScalarPlotter(pyvista.Plotter):
             self.update_scalars(vec.getArray())
             time.sleep(self._tsleep)
 
-    def add_time_browser(self, update_fields_function, timesteps, **kwargs_slider):
+    def add_time_browser(self, update_fields_function:'function', timesteps:np.ndarray, **kwargs_slider):
         self._time_browser_cbck  = update_fields_function
         self._time_browser_times = timesteps
         def updateTStep(value):
@@ -285,7 +285,7 @@ class CustomVectorPlotter(pyvista.Plotter):
         if render:
             self.render()
 
-    def live_plotter_update_function(self, i, vec:'PETSc.Vec'):
+    def live_plotter_update_function(self, i:int, vec:'PETSc.Vec') -> None:
         if not("PETSc.Vec" in str(type(vec))):
             if "fem.function.Function" in str(type(vec)):
                 vec = vec.vector
@@ -297,7 +297,7 @@ class CustomVectorPlotter(pyvista.Plotter):
             self.update_vectors(vec.getArray())
             time.sleep(self._tsleep)
 
-    def add_time_browser(self, update_fields_function, timesteps, **kwargs_slider):
+    def add_time_browser(self, update_fields_function:'function', timesteps:np.ndarray, **kwargs_slider):
         self._time_browser_cbck  = update_fields_function
         self._time_browser_times = timesteps
         def updateTStep(value):
@@ -308,7 +308,7 @@ class CustomVectorPlotter(pyvista.Plotter):
         
 
 
-def spy_petscMatrix(Z, *args, **kwargs):
+def spy_petscMatrix(Z:'PETSc.Mat', *args, **kwargs) -> 'matplotlib.pyplot.spy':
     """
     matplotlib.pyplot.spy with Z being a petsc4py.PETSc.Mat object
     
