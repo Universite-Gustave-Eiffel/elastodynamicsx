@@ -87,12 +87,12 @@ class Material():
         self._function_space = function_space
                 
         e = self._function_space.ufl_element()
-        if e.is_cellwise_constant() == True:
-            self._k = self.k_CG
-        else:
+        if e.discontinuous == True: #True for discontinuous Galerkin
+            print('Material: Using discontinuous elements -> DG formulation')
             self._k = self.k_DG
-        #WARNING: self.k is convenient, but slow because of this if branch
-        #If possible prefer using directly self.k_CG or self.k_DG
+        else:
+            print('Material: Using continuous elements -> CG formulation')
+            self._k = self.k_CG
             
     
     @property
@@ -110,7 +110,7 @@ class Material():
         return None
 
     @property
-    def k(self) -> 'function': #WARNING: 30% slower because of 'if'!
+    def k(self) -> 'function':
         """Stiffness form function"""
         return self._k
 
@@ -141,7 +141,7 @@ class Material():
 from .elasticmaterial import ScalarLinearMaterial, IsotropicElasticMaterial
 from .hyperelasticmaterial import DummyIsotropicElasticMaterial, Murnaghan, StVenantKirchhoff, MooneyRivlinIncompressible, MooneyRivlinCompressible
 
-all_linear_materials = [ScalarLinearMaterial, IsotropicElasticMaterial]
+all_linear_materials    = [ScalarLinearMaterial, IsotropicElasticMaterial]
 all_nonlinear_materials = [DummyIsotropicElasticMaterial, Murnaghan, StVenantKirchhoff, MooneyRivlinIncompressible, MooneyRivlinCompressible]
-all_materials = all_linear_materials + all_nonlinear_materials
+all_materials           = all_linear_materials + all_nonlinear_materials
 

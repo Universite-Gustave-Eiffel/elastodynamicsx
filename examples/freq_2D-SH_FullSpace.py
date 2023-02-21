@@ -13,12 +13,12 @@ import matplotlib.pyplot as plt
 
 from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 from elastodynamicsx.solvers import FrequencyDomainSolver
-from elastodynamicsx.plot import CustomScalarPlotter, live_plotter
+from elastodynamicsx.plot import plotter, live_plotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
 from analyticalsolutions import green_2D_SH_rw, int_Fraunhofer_2D
 
 assert np.issubdtype(PETSc.ScalarType, np.complexfloating), "Demo should only be executed with DOLFINx complex mode"
-    
+
 # -----------------------------------------------------
 #                     FE domain
 # -----------------------------------------------------
@@ -28,10 +28,13 @@ length, height = 10, 10
 Nx, Ny = 100//degElement, 100//degElement
 extent = [[0., 0.], [length, height]]
 domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny], mesh.CellType.triangle)
-boundaries = [(1, lambda x: np.isclose(x[0], 0     )),\
-              (2, lambda x: np.isclose(x[0], length)),\
-              (3, lambda x: np.isclose(x[1], 0     )),\
-              (4, lambda x: np.isclose(x[1], height))]
+
+tag_left, tag_top, tag_right, tag_bottom = 1, 2, 3, 4
+all_tags = (tag_left, tag_top, tag_right, tag_bottom)
+boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
+              (tag_right , lambda x: np.isclose(x[0], length)),\
+              (tag_bottom, lambda x: np.isclose(x[1], 0     )),\
+              (tag_top   , lambda x: np.isclose(x[1], height))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
 V  = fem.FunctionSpace(domain, ("CG", degElement))
@@ -54,7 +57,7 @@ materials = [mat]
 #                 Boundary conditions
 # -----------------------------------------------------
 Z   = mat.Z #mechanical impedance
-bc  = BoundaryCondition((V, facet_tags, (1,2,3,4)), 'Dashpot', Z)
+bc  = BoundaryCondition((V, facet_tags, all_tags), 'Dashpot', Z)
 bcs = [bc]
 #
 # -----------------------------------------------------
@@ -99,10 +102,10 @@ u = fem.Function(V, name='solution')
 fdsolver.solve(omega=omega, out=u.vector)
 
 #plot
-p = CustomScalarPlotter(u, complex='real')
+p = plotter(u, complex='real')
 p.show()
 #
-# -----------------------------------------------------
+# ------------------ end of Ex 1 ----------------------
 
 
 # -----------------------------------------------------
@@ -153,5 +156,5 @@ if len(points_output_on_proc)>0:
     ax[-1].set_xlabel('Distance to source')
     plt.show()
 #
-# -----------------------------------------------------
+# ------------------ end of Ex 2 ----------------------
 

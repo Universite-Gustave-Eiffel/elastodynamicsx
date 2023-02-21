@@ -9,16 +9,22 @@ The module provides high level classes to build and solve common problems in a f
 
 ## Build problems
 Using the **pde** package:
-  * Common **material laws**, using the *Material* class
-    * linear: *scalar*, *isotropic* elasticity
+  * Common **material laws**, using the *material* builder
+    * linear:
+      * *scalar*, *isotropic* elasticity
       * damping laws: *Rayleigh* damping
-    * hyperelastic: *Saint Venant-Kirchhoff*, *Murnaghan*
+    * hyperelastic:
+      * *Saint Venant-Kirchhoff*, *Murnaghan*
     * perfectly matched layers (PML): in the near future...
   * Define **body forces**, using the *BodyForce* class
-  * **Assemble** several materials and body forces, using the *PDE* class
   * Common **boundary conditions**, using the *BoundaryCondition* class
-    * BCs involving $\mathbf{u}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
-    * BCs involving $\mathbf{v}$ and $\boldsymbol{\sigma} . \mathbf{n}$: *Dashpot*
+    * BCs involving $\mathbf{u}$ and $\boldsymbol{\sigma} . \mathbf{n}$:
+      * *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
+    * BCs involving $\mathbf{v}$ and $\boldsymbol{\sigma} . \mathbf{n}$:
+      * *Dashpot*
+    * Multi-point constraint BCs:
+      * *Periodic*
+  * **Assemble** several materials and body forces, using the *PDE* class
 ```python
 #V is a dolfinx.fem.function_space
 #cell_tags is a dolfinx.mesh.MeshTags object
@@ -156,6 +162,8 @@ mbasis.plot(function_space=V) #V is a dolfinx.fem.function_space
 ## Dependencies
 ElastodynamiCSx requires FEniCSx / DOLFINx -> see [instructions here](https://github.com/FEniCS/dolfinx#installation). Tested with v0.4.1, v0.5.1, v0.5.2, v0.6.0.
 
+It also depends on [DOLFINx-MPC](https://github.com/jorgensd/dolfinx_mpc), although this dependence is optional (periodic BCs).
+
 ### Packages required for the examples
 numpy  
 matplotlib  
@@ -233,6 +241,7 @@ Several examples are provided in the **examples** subfolder:
   * Wave equation, time domain:
     * (2D) homogeneous space, anti-plane line load (SH waves): *weq_2D-SH_FullSpace.py*
     * (2D) homogeneous space, in-plane line load (P-SV waves): *weq_2D-PSV_FullSpace.py*
+    * (1D-like, nonlinear) harmonic generation for a P-wave in a Murnaghan material: *weqnl_q1D-PSV_Murnaghan_Pwave.py*
   * Wave equation, frequency domain (Helmoltz equation):
     * (2D) homogeneous space, anti-plane line load (SH waves): *freq_2D-SH_FullSpace.py*
     * (2D) homogeneous space, in-plane line load (P-SV waves): *freq_2D-PSV_FullSpace.py*

@@ -26,13 +26,16 @@ length, height = 10, 10
 Nx, Ny = 100//degElement, 100//degElement
 extent = [[0., 0.], [length, height]]
 domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny], mesh.CellType.triangle)
-boundaries = [(1, lambda x: np.isclose(x[0], 0     )),\
-              (2, lambda x: np.isclose(x[0], length)),\
-              (3, lambda x: np.isclose(x[1], 0     )),\
-              (4, lambda x: np.isclose(x[1], height))]
+
+tag_left, tag_top, tag_right, tag_bottom = 1, 2, 3, 4
+all_tags = (tag_left, tag_top, tag_right, tag_bottom)
+boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
+              (tag_right , lambda x: np.isclose(x[0], length)),\
+              (tag_bottom, lambda x: np.isclose(x[1], 0     )),\
+              (tag_top   , lambda x: np.isclose(x[1], height))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-V  = fem.FunctionSpace(domain, ("CG", degElement))
+V  = fem.FunctionSpace(domain, ("DG", degElement))
 #
 # -----------------------------------------------------
 
@@ -54,10 +57,10 @@ materials = [mat]
 #                 Boundary conditions
 # -----------------------------------------------------
 Z = mat.Z #mechanical impedance
-bc_l = BoundaryCondition((V, facet_tags, 1), 'Dashpot', Z)
-bc_r = BoundaryCondition((V, facet_tags, 2), 'Dashpot', Z)
-bc_b = BoundaryCondition((V, facet_tags, 3), 'Dashpot', Z)
-bc_t = BoundaryCondition((V, facet_tags, 4), 'Dashpot', Z)
+bc_l = BoundaryCondition((V, facet_tags, tag_left  ), 'Dashpot', Z)
+bc_r = BoundaryCondition((V, facet_tags, tag_right ), 'Dashpot', Z)
+bc_b = BoundaryCondition((V, facet_tags, tag_bottom), 'Dashpot', Z)
+bc_t = BoundaryCondition((V, facet_tags, tag_top   ), 'Dashpot', Z)
 bcs = [bc_l, bc_r, bc_b, bc_t]
 #
 # -----------------------------------------------------

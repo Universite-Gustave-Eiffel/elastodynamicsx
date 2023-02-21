@@ -39,6 +39,24 @@ class BoundaryCondition():
         bc = BoundaryCondition((V, facet_tags, 1), 'Robin', (r, s))
     
     
+        #####  #####
+        # Periodic #
+        #####  #####
+        
+        # Given:   x(2) = x(1) - P
+        # Imposes: u(2) = u(1)
+        # Where: x(i) are the coordinates on boundaries n°1,2
+        #        P is a constant (translation) vector from slave to master
+        #        u(i) is the field on boundaries n°1,2
+        # Note that boundary n°2 is slave
+        #
+        Px, Py, Pz = length, 0, 0 #for x-periodic, and tag=left
+        Px, Py, Pz = 0, height, 0 #for y-periodic, and tag=bottom
+        Px, Py, Pz = 0, 0, depth  #for z-periodic, and tag=back
+        P  = [Px,Py,Pz]
+        bc = BoundaryCondition((V, facet_tags, 2), 'Periodic', P)
+        
+    
         #####                    #####
         # BCs involving the velocity #
         #####                    #####
@@ -83,16 +101,41 @@ class BoundaryCondition():
             facets = facet_tags.indices[ facet_tags.values == marker ]
             dofs   = fem.locate_dofs_topological(function_space, fdim, facets)
             self._bc = fem.dirichletbc(values, dofs, function_space) #fem.dirichletbc
+            
         elif type_ == "neumann":
             self._bc = lambda v  : ufl.inner(values, v) * ds #Linear form
+            
         elif type_ == "robin":
             self._bc = lambda u,v: values[0] * ufl.inner(u-values[1], v)* ds #Bilinear form
+            
         elif type_ == 'dashpot':
             if nbcomps == 0: #scalar function space
                 self._bc = lambda u_t,v: values * ufl.inner(u_t, v)* ds #Bilinear form, to be applied on du/dt
             else: #vector function space
                 n = ufl.FacetNormal(function_space)
                 self._bc = lambda u_t,v: ((values[0]-values[1])*ufl.dot(u_t, n)*ufl.inner(n, v) + values[1]*ufl.inner(u_t, v))* ds #Bilinear form, to be applied on du/dt
+                
+        elif type_ == 'periodic-do-not-use': #TODO: try to calculate P from two given boundary markers
+            assert len(marker)==2, "Periodic BC requires two facet tags"
+            fdim   = function_space.mesh.topology.dim - 1
+            marker_master, marker_slave = marker
+            #facets_master = facet_tags.find(marker_master) #not available on dolfinx v0.4.1
+            facets_master = facet_tags.indices[ facet_tags.values == marker_master ]
+            facets_slave  = facet_tags.indices[ facet_tags.values == marker_slave ]
+            dofs_master   = fem.locate_dofs_topological(function_space, fdim, facets_master)
+            dofs_slave    = fem.locate_dofs_topological(function_space, fdim, facets_slave)
+            x = function_space.tabulate_dof_coordinates()
+            xm, xs = x[dofs_master], x[dofs_slave]
+            slave_to_master_map = None
+            raise NotImplementedError
+
+        elif type_ == 'periodic':
+            assert type(marker)==int, "Periodic BC requires a single facet tag"
+            P = np.asarray(values)
+            def slave_to_master_map(x):
+                return x + P[:,np.newaxis]
+            self._bc = (facet_tags, marker, slave_to_master_map)
+            
         else:
             raise TypeError("Unknown boundary condition: {0:s}".format(type_))
 

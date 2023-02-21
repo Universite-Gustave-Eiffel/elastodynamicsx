@@ -27,12 +27,14 @@ Nz = int(H_/L_*Nx)+1
 
 extent = [[0., 0., 0.], [L_, B_, H_]]
 domain = mesh.create_box(MPI.COMM_WORLD, extent, [Nx, Ny, Nz])
-boundaries = [(1, lambda x: np.isclose(x[0], 0 )),\
-              (2, lambda x: np.isclose(x[0], L_)),\
-              (3, lambda x: np.isclose(x[1], 0 )),\
-              (4, lambda x: np.isclose(x[1], B_)),\
-              (5, lambda x: np.isclose(x[2], 0 )),\
-              (6, lambda x: np.isclose(x[2], H_))]
+
+tag_left, tag_top, tag_right, tag_bottom, tag_back, tag_front = 1, 2, 3, 4, 5, 6
+boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0 )),\
+              (tag_right , lambda x: np.isclose(x[0], L_)),\
+              (tag_bottom, lambda x: np.isclose(x[1], 0 )),\
+              (tag_top   , lambda x: np.isclose(x[1], B_)),\
+              (tag_back  , lambda x: np.isclose(x[2], 0 )),\
+              (tag_front , lambda x: np.isclose(x[2], H_))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
 V = fem.VectorFunctionSpace(domain, ("CG", 2))
@@ -43,7 +45,7 @@ V = fem.VectorFunctionSpace(domain, ("CG", 2))
 # -----------------------------------------------------
 #                 Boundary condition
 # -----------------------------------------------------
-bc_l = BoundaryCondition((V, facet_tags, 1), 'Clamp')
+bc_l = BoundaryCondition((V, facet_tags, tag_left), 'Clamp')
 bcs  = [bc_l]
 #
 # -----------------------------------------------------

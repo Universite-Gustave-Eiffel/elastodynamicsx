@@ -1,7 +1,8 @@
 """
 Wave equation (time-domain)
 
-Propagation of P and SV elastic waves in a 2D, homogeneous isotropic solid, and comparison with an analytical solution
+Propagation of a P wave in a 1D nonlinear (Murnaghan) elastic medium
+The 1D medium is implemented as a 2D medium + periodic BCs
 """
 
 from dolfinx import mesh, fem
@@ -15,21 +16,23 @@ from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import plotter
 from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
-from analyticalsolutions import u_2D_PSV_xt, int_Fraunhofer_2D
 
 # -----------------------------------------------------
 #                     FE domain
 # -----------------------------------------------------
 degElement = 4
 
-length, height = 10, 10
-Nx, Ny = 100//degElement, 100//degElement
+length, height = 20, 2
+Nx, Ny = 200//degElement, 20//degElement
 extent = [[0., 0.], [length, height]]
 domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny])
-boundaries = [(1, lambda x: np.isclose(x[0], 0     )),\
-              (2, lambda x: np.isclose(x[0], length)),\
-              (3, lambda x: np.isclose(x[1], 0     )),\
-              (4, lambda x: np.isclose(x[1], height))]
+
+tag_left, tag_top, tag_right, tag_bottom = 1, 2, 3, 4
+all_tags = (tag_left, tag_top, tag_right, tag_bottom)
+boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
+              (tag_right , lambda x: np.isclose(x[0], length)),\
+              (tag_bottom, lambda x: np.isclose(x[1], 0     )),\
+              (tag_top   , lambda x: np.isclose(x[1], height))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
 V = fem.VectorFunctionSpace(domain, ("CG", degElement))
@@ -53,28 +56,20 @@ materials = [mat]
 # -----------------------------------------------------
 #                 Boundary conditions
 # -----------------------------------------------------
+T_N      = fem.Constant(domain, PETSc.ScalarType([0,0])) #normal traction (Neumann boundary condition)
 Z_N, Z_T = mat.Z_N, mat.Z_T #P and S mechanical impedances
-bc_l = BoundaryCondition((V, facet_tags, 1), 'Dashpot', (Z_N, Z_T))
-bc_r = BoundaryCondition((V, facet_tags, 2), 'Dashpot', (Z_N, Z_T))
-bc_b = BoundaryCondition((V, facet_tags, 3), 'Dashpot', (Z_N, Z_T))
-bc_t = BoundaryCondition((V, facet_tags, 4), 'Dashpot', (Z_N, Z_T))
-bcs = [bc_l, bc_r, bc_b, bc_t]
+bc_l = BoundaryCondition((V, facet_tags, tag_left  ), 'Neumann', T_N)
+bc_r = BoundaryCondition((V, facet_tags, tag_right ), 'Dashpot', (Z_N, Z_T))
+#bc_b = BoundaryCondition((V, facet_tags, tag_bottom), 'Periodic', [0, height, 0])
+bc_b = BoundaryCondition((V, facet_tags, tag_bottom), 'Free')
+bcs = [bc_l, bc_r, bc_b]
 #
 # -----------------------------------------------------
 
 
 # -----------------------------------------------------
-#                    Source term
+#               (boundary) Source term
 # -----------------------------------------------------
-### -> Space function
-#
-X0_src = np.array([length/2,height/2,0]) #center
-R0_src = 0.1 #radius
-#
-### Gaussian function
-nrm   = 1/(2*np.pi*R0_src**2) #normalize to int[src_x(x) dx]=1
-src_x = lambda x: nrm * np.exp(-1/2*(np.linalg.norm(x-X0_src[:,np.newaxis], axis=0)/R0_src)**2, dtype=PETSc.ScalarType) #source(x)
-#
 ### -> Time function
 #
 f0 = 1 #central frequency of the source
@@ -85,15 +80,11 @@ src_t = lambda t: np.sin(2*np.pi*f0 * t) * np.sin(np.pi*t/d0)**2 * (t<d0) * (t>0
 
 ### -> Space-Time function
 #
-F_0 = np.array([1,0], dtype=PETSc.ScalarType) #amplitude of the source
+p0  = PETSc.ScalarType(1.)         #max amplitude
+F_0 = p0 * PETSc.ScalarType([1,0]) #source orientation
 #
-def F_body_function(t): return lambda x: F_0[:,np.newaxis] * src_t(t) * src_x(x)[np.newaxis,:] #source(x) at a given time
-
-### Body force 'F_body'
-F_body = fem.Function(V) #body force
-gaussianBF = BodyForce(V, F_body)
-
-bodyforces = [gaussianBF]
+T_N_function = lambda t: src_t(t) * F_0
+#
 # -----------------------------------------------------
 
 
@@ -122,7 +113,7 @@ print('CFL condition: Courant number = ', round(TimeStepper.Courant_number(V.mes
 # -----------------------------------------------------
 #                        PDE
 # -----------------------------------------------------
-pde = PDE(V, materials=materials, bodyforces=bodyforces, bcs=bcs)
+pde = PDE(V, materials=materials, bodyforces=[], bcs=bcs)
 
 #  Time integration
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
@@ -134,12 +125,8 @@ tStepper.initial_condition(u0=[0,0], v0=[0,0], t0=tstart)
 # -----------------------------------------------------
 #                    define outputs
 # -----------------------------------------------------
-### -> Store all time steps ? -> YES if debug & learning // NO if big calc.
-storeAllSteps = False
-all_u = [fem.Function(V) for i in range(num_steps)] if storeAllSteps else None #all steps are stored here
-#
 ### -> Extract signals at few points
-points_output = X0_src[:,np.newaxis] + np.array([[1, 1, 0], [2, 2, 0], [3, 3, 0]]).T
+points_output = np.array([0,height/2,0])[:,np.newaxis] + np.array([[1, 0, 0], [2, 0, 0], [3, 0, 0]]).T #shape = (3, nbpts)
 points_output_on_proc, cells_output_on_proc = find_points_and_cells_on_proc(points_output, domain)
 signals_at_points = np.zeros((points_output.shape[1], domain.topology.dim, num_steps)) #<- output stored here
 #
@@ -151,10 +138,8 @@ signals_at_points = np.zeros((points_output.shape[1], domain.topology.dim, num_s
 # -----------------------------------------------------
 ### define callfirsts and callbacks
 def cfst_updateSources(t, tStepper):
-    F_body.interpolate(F_body_function(t))
+    T_N.value = T_N_function(t)
 
-def cbck_storeFullField(i, tStepper):
-    if storeAllSteps: all_u[i+1].x.array[:] = tStepper.u.x.array
 def cbck_storeAtPoints(i, tStepper):
     if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = tStepper.u.eval(points_output_on_proc, cells_output_on_proc)
 
@@ -166,30 +151,8 @@ if len(points_output_on_proc)>0:
     p.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
 
 ### Run the big time loop!
-tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFullField, cbck_storeAtPoints], live_plotter=p)
+tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints], live_plotter=p)
 ### End of big calc.
-#
-# -----------------------------------------------------
-
-
-# -----------------------------------------------------
-#     Interactive view of all time steps if stored
-# -----------------------------------------------------
-if storeAllSteps: #plotter with a slider to browse through all time steps
-    fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src) #accounts for the size of the source in the analytical formula
-    
-    ### -> Exact solution, Full field
-    x = tStepper.u.function_space.tabulate_dof_coordinates()
-    t = dt*np.arange(num_steps)
-    all_u_n_exact = u_2D_PSV_xt(x - X0_src[np.newaxis,:], src_t(t), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
-    
-    def update_fields_function(i):
-        return (all_u[i].x.array, all_u_n_exact[:,:,i].flatten(), all_u[i].x.array-all_u_n_exact[:,:,i].flatten())
-    
-    #initializes with empty fem.Function(V) to have different valid pointers
-    p = plotter(fem.Function(V), fem.Function(V), fem.Function(V), labels=('FE', 'Exact', 'Diff.'), clim=clim)
-    p.add_time_browser(update_fields_function, t)
-    p.show()
 #
 # -----------------------------------------------------
 
@@ -198,18 +161,12 @@ if storeAllSteps: #plotter with a slider to browse through all time steps
 #              Plot signals at few points
 # -----------------------------------------------------
 if len(points_output_on_proc)>0:
-    fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src) #accounts for the size of the source in the analytical formula
-    
-    ### -> Exact solution, At few points
-    x = points_output_on_proc
     t = dt*np.arange(num_steps)
-    signals_at_points_exact = u_2D_PSV_xt(x - X0_src[np.newaxis,:], src_t(t), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
-    #
     fig, ax = plt.subplots(1,1)
     ax.set_title('Signals at few points')
     for i in range(len(signals_at_points)):
         ax.plot(t, signals_at_points[i,0,:],       c='C'+str(i), ls='-') #FEM
-        ax.plot(t, signals_at_points_exact[i,0,:], c='C'+str(i), ls='--') #exact
+        #ax.plot(t, signals_at_points_exact[i,0,:], c='C'+str(i), ls='--') #exact
     ax.set_xlabel('Time')
     plt.show()
 #

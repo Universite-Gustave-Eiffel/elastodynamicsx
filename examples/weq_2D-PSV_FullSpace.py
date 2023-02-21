@@ -26,10 +26,13 @@ length, height = 10, 10
 Nx, Ny = 100//degElement, 100//degElement
 extent = [[0., 0.], [length, height]]
 domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny])
-boundaries = [(1, lambda x: np.isclose(x[0], 0     )),\
-              (2, lambda x: np.isclose(x[0], length)),\
-              (3, lambda x: np.isclose(x[1], 0     )),\
-              (4, lambda x: np.isclose(x[1], height))]
+
+tag_left, tag_top, tag_right, tag_bottom = 1, 2, 3, 4
+all_tags = (tag_left, tag_top, tag_right, tag_bottom)
+boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
+              (tag_right , lambda x: np.isclose(x[0], length)),\
+              (tag_bottom, lambda x: np.isclose(x[1], 0     )),\
+              (tag_top   , lambda x: np.isclose(x[1], height))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
 V = fem.VectorFunctionSpace(domain, ("CG", degElement))
@@ -54,10 +57,10 @@ materials = [mat]
 #                 Boundary conditions
 # -----------------------------------------------------
 Z_N, Z_T = mat.Z_N, mat.Z_T #P and S mechanical impedances
-bc_l = BoundaryCondition((V, facet_tags, 1), 'Dashpot', (Z_N, Z_T))
-bc_r = BoundaryCondition((V, facet_tags, 2), 'Dashpot', (Z_N, Z_T))
-bc_b = BoundaryCondition((V, facet_tags, 3), 'Dashpot', (Z_N, Z_T))
-bc_t = BoundaryCondition((V, facet_tags, 4), 'Dashpot', (Z_N, Z_T))
+bc_l = BoundaryCondition((V, facet_tags, tag_left  ), 'Dashpot', (Z_N, Z_T))
+bc_r = BoundaryCondition((V, facet_tags, tag_right ), 'Dashpot', (Z_N, Z_T))
+bc_b = BoundaryCondition((V, facet_tags, tag_bottom), 'Dashpot', (Z_N, Z_T))
+bc_t = BoundaryCondition((V, facet_tags, tag_top   ), 'Dashpot', (Z_N, Z_T))
 bcs = [bc_l, bc_r, bc_b, bc_t]
 #
 # -----------------------------------------------------
@@ -85,7 +88,7 @@ src_t = lambda t: np.sin(2*np.pi*f0 * t) * np.sin(np.pi*t/d0)**2 * (t<d0) * (t>0
 
 ### -> Space-Time function
 #
-F_0 = np.array([1,0], dtype=PETSc.ScalarType) #amplitude of the source
+F_0 = PETSc.ScalarType([1,0]) #amplitude of the source
 #
 def F_body_function(t): return lambda x: F_0[:,np.newaxis] * src_t(t) * src_x(x)[np.newaxis,:] #source(x) at a given time
 
@@ -134,10 +137,6 @@ tStepper.initial_condition(u0=[0,0], v0=[0,0], t0=tstart)
 # -----------------------------------------------------
 #                    define outputs
 # -----------------------------------------------------
-### -> Store all time steps ? -> YES if debug & learning // NO if big calc.
-storeAllSteps = False
-all_u = [fem.Function(V) for i in range(num_steps)] if storeAllSteps else None #all steps are stored here
-#
 ### -> Extract signals at few points
 points_output = X0_src[:,np.newaxis] + np.array([[1, 1, 0], [2, 2, 0], [3, 3, 0]]).T
 points_output_on_proc, cells_output_on_proc = find_points_and_cells_on_proc(points_output, domain)
@@ -153,8 +152,6 @@ signals_at_points = np.zeros((points_output.shape[1], domain.topology.dim, num_s
 def cfst_updateSources(t, tStepper):
     F_body.interpolate(F_body_function(t))
 
-def cbck_storeFullField(i, tStepper):
-    if storeAllSteps: all_u[i+1].x.array[:] = tStepper.u.x.array
 def cbck_storeAtPoints(i, tStepper):
     if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = tStepper.u.eval(points_output_on_proc, cells_output_on_proc)
 
@@ -166,30 +163,8 @@ if len(points_output_on_proc)>0:
     p.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
 
 ### Run the big time loop!
-tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFullField, cbck_storeAtPoints], live_plotter=p)
+tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints], live_plotter=p)
 ### End of big calc.
-#
-# -----------------------------------------------------
-
-
-# -----------------------------------------------------
-#     Interactive view of all time steps if stored
-# -----------------------------------------------------
-if storeAllSteps: #plotter with a slider to browse through all time steps
-    fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src) #accounts for the size of the source in the analytical formula
-    
-    ### -> Exact solution, Full field
-    x = tStepper.u.function_space.tabulate_dof_coordinates()
-    t = dt*np.arange(num_steps)
-    all_u_n_exact = u_2D_PSV_xt(x - X0_src[np.newaxis,:], src_t(t), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
-    
-    def update_fields_function(i):
-        return (all_u[i].x.array, all_u_n_exact[:,:,i].flatten(), all_u[i].x.array-all_u_n_exact[:,:,i].flatten())
-    
-    #initializes with empty fem.Function(V) to have different valid pointers
-    p = plotter(fem.Function(V), fem.Function(V), fem.Function(V), labels=('FE', 'Exact', 'Diff.'), clim=clim)
-    p.add_time_browser(update_fields_function, t)
-    p.show()
 #
 # -----------------------------------------------------
 
