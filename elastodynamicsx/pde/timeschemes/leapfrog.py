@@ -2,11 +2,13 @@ from dolfinx import fem
 from petsc4py import PETSc
 import ufl
 
-from .timestepper import TimeStepper, OneStepTimeStepper
+from . import FEniCSxTimeScheme
+from elastodynamicsx.solvers import TimeStepper, OneStepTimeStepper
 from elastodynamicsx.pde import BoundaryCondition
 
 
-class LeapFrog(OneStepTimeStepper):
+
+class LeapFrog(FEniCSxTimeScheme):
     """
     Implementation of the 'leapfrog' time-stepping scheme, or Explicit central difference scheme.
     Leapfrog is a special case of Newmark-beta methods with beta=0 and gamma=0.5
@@ -17,6 +19,12 @@ class LeapFrog(OneStepTimeStepper):
     """
     
     labels = ['leapfrog', 'central-difference']
+    
+    def build_timestepper(*args, **kwargs) -> 'TimeStepper':
+        tscheme = LeapFrog(*args, **kwargs)
+        comm = tscheme.u.function_space.mesh.comm
+        return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
+    
     
     def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], **kwargs):
         """
@@ -87,19 +95,23 @@ class LeapFrog(OneStepTimeStepper):
             else:
                 raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
         
-        #compile forms
-        self.bilinear_form = fem.form(self._a)
-        self.linear_form   = fem.form(self._L)
+        # compile forms
+        bilinear_form = fem.form(self._a)
+        linear_form   = fem.form(self._L)
         #
-        super().__init__(function_space, m_, c_, k_, L, dt, dirichletbcs, explicit=True, **kwargs)
-        self._i0 = 1 #because solving the initial value problem a0=M_inv.(F(t0)-K(u0)-C.v0) also yields u1=u(t0+dt)
+        super().__init__(dt, self._u_n, bilinear_form, linear_form, dirichletbcs, explicit=True, **kwargs)
+
     
-    def _prepareNextIteration(self):
+    @property
+    def u(self):
+        return self._u_n
+        
+    def prepareNextIteration(self):
         """Next-time-step function, to prepare next iteration -> Call it after solving"""
         self._u_nm2.x.array[:] = self._u_nm1.x.array
         self._u_nm1.x.array[:] = self._u_n.x.array
         
-    def _initialStep(self, callfirsts, callbacks, verbose=0): #TODO: faux. corriger.
+    def initialStep(self, t0, callfirsts:list=[], callbacks:list=[], verbose=0) -> None: #TODO: faux. corriger.
         """Specific to the initial value step"""
         
         ### -------------------------------------------------
@@ -108,7 +120,8 @@ class LeapFrog(OneStepTimeStepper):
         #
         if verbose >= 10: PETSc.Sys.Print('Solving the initial value step')
         if verbose >= 10: PETSc.Sys.Print('Callfirsts...')
-        for callfirst in callfirsts: callfirst(self.t - 0*self._intermediate_dt, self) #<- update stuff #F_body.interpolate(F_body_function(t))
+        for callfirst in callfirsts:
+            callfirst(t0, self) #<- update stuff #F_body.interpolate(F_body_function(t))
         
         problem = fem.petsc.LinearProblem(self._m0_form, self._L0_form, bcs=self._bcs, u=self._a0, petsc_options=TimeStepper.petsc_options_t0)
         problem.solve() #known: u0, v0. Solve for a0. u1 requires to solve a new system (loop)
@@ -118,23 +131,8 @@ class LeapFrog(OneStepTimeStepper):
         #at this point: self._u_n = u1, self._u_nm1 = u0, self._u_nm2 = u-1
         
         if verbose >= 10: PETSc.Sys.Print('Initial value problem solved, entering loop')
-        for callback in callbacks: callback(0, self) #<- store solution, plot, print, ...
+        for callback in callbacks:
+            callback(0, self._u_n.vector) #<- store solution, plot, print, ...
         #
         ### -------------------------------------------------
-
-    @property
-    def u_nm1(self):
-        return self._u_nm1
-
-    @property
-    def v(self): #warning: this is v(t-dt)
-        v_ = fem.Function(self.u.function_space)
-        v_.x.array[:] = 0.5/self.dt*(self._u_n.x.array - self._u_nm2.x.array)
-        return v_
-
-    @property
-    def a(self): #warning: this is a(t-dt)
-        a_ = fem.Function(self.u.function_space)
-        a_.x.array[:] = 1/self.dt**2 *(self._u_n.x.array - 2*self._u_nm1.x.array + self._u_nm2.x.array)
-        return a_
 

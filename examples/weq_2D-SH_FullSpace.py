@@ -131,6 +131,7 @@ pde = PDE(V, materials=materials, bodyforces=bodyforces, bcs=bcs)
 #  Time integration
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
 tStepper.initial_condition(u0=0, v0=0, t0=tstart)
+u_res = tStepper.timescheme.u # The solution
 #
 # -----------------------------------------------------
 
@@ -157,14 +158,14 @@ signals_at_points = np.zeros((len(points_output_on_proc), 1, num_steps)) #<- out
 def cfst_updateSources(t, tStepper):
     F_body.interpolate(F_body_function(t))
 
-def cbck_storeFullField(i, tStepper):
-    if storeAllSteps: all_u[i+1].x.array[:] = tStepper.u.x.array
-def cbck_storeAtPoints(i, tStepper):
-    if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = tStepper.u.eval(points_output_on_proc, cells_output_on_proc)
+def cbck_storeFullField(i, out):
+    if storeAllSteps: all_u[i+1].x.array[:] = u_res.x.array
+def cbck_storeAtPoints(i, out):
+    if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = u_res.eval(points_output_on_proc, cells_output_on_proc)
 
 ### enable live plotting
 clim = 0.1*F_0*np.array([-1, 1])
-p = plotter(tStepper.u, refresh_step=10, **{'clim':clim}) #0 to disable
+p = plotter(u_res, refresh_step=10, **{'clim':clim}) #0 to disable
 if len(points_output_on_proc)>0:
     p.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
 
@@ -182,7 +183,7 @@ if storeAllSteps: #plotter with a slider to browse through all time steps
     fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src) #accounts for the size of the source in the analytical formula
     
     ### -> Exact solution, Full field
-    x = tStepper.u.function_space.tabulate_dof_coordinates()
+    x = u_res.function_space.tabulate_dof_coordinates()
     r = np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)
     t = dt*np.arange(num_steps)
     all_u_n_exact = u_2D_SH_rt(r, src_t(t), rho.value, mu.value, dt, fn_kdomain_finite_size)

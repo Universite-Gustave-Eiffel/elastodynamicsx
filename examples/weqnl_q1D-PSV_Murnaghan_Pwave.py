@@ -118,6 +118,7 @@ pde = PDE(V, materials=materials, bodyforces=[], bcs=bcs)
 #  Time integration
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
 tStepper.initial_condition(u0=[0,0], v0=[0,0], t0=tstart)
+u_res = tStepper.timescheme.u # The solution
 #
 # -----------------------------------------------------
 
@@ -140,13 +141,13 @@ signals_at_points = np.zeros((points_output.shape[1], domain.topology.dim, num_s
 def cfst_updateSources(t, tStepper):
     T_N.value = T_N_function(t)
 
-def cbck_storeAtPoints(i, tStepper):
-    if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = tStepper.u.eval(points_output_on_proc, cells_output_on_proc)
+def cbck_storeAtPoints(i, out):
+    if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = u_res.eval(points_output_on_proc, cells_output_on_proc)
 
 ### enable live plotting
 clim = 0.1*np.amax(F_0)*np.array([0, 1])
 kwplot = { 'clim':clim, 'warp_factor':0.5/np.amax(clim) }
-p = plotter(tStepper.u, refresh_step=10, **kwplot) #0 to disable
+p = plotter(u_res, refresh_step=10, **kwplot) #0 to disable
 if len(points_output_on_proc)>0:
     p.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
 

@@ -10,20 +10,20 @@ The module provides high level classes to build and solve common problems in a f
 ## Build problems
 Using the **pde** package:
   * Common **material laws**, using the *material* builder
-    * linear:
-      * *scalar*, *isotropic* elasticity
+    * linear:  
+      *scalar*, *isotropic* elasticity
       * damping laws: *Rayleigh* damping
-    * hyperelastic:
-      * *Saint Venant-Kirchhoff*, *Murnaghan*
+    * hyperelastic:  
+      *Saint Venant-Kirchhoff*, *Murnaghan*
     * perfectly matched layers (PML): in the near future...
   * Define **body forces**, using the *BodyForce* class
   * Common **boundary conditions**, using the *BoundaryCondition* class
-    * BCs involving $\mathbf{u}$ and $\boldsymbol{\sigma} . \mathbf{n}$:
-      * *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
-    * BCs involving $\mathbf{v}$ and $\boldsymbol{\sigma} . \mathbf{n}$:
-      * *Dashpot*
-    * Multi-point constraint BCs:
-      * *Periodic*
+    * BCs involving $\mathbf{u}$ and $\boldsymbol{\sigma} . \mathbf{n}$:  
+      *Free*, *Clamp*, *Dirichlet*, *Neumann*, *Robin*
+    * BCs involving $\mathbf{v}$ and $\boldsymbol{\sigma} . \mathbf{n}$:  
+      *Dashpot*
+    * Multi-point constraint BCs:  
+      *Periodic*
   * **Assemble** several materials and body forces, using the *PDE* class
 ```python
 #V is a dolfinx.fem.function_space
@@ -131,10 +131,13 @@ nev = 9 #number of modes to compute
 
 #Initialize the solver
 eps = EigenmodesSolver(comm, M, None, K, nev=nev)
+
+#Solve
 eps.solve()
 
-eigenfreqs = eps.getEigenfrequencies()
-eps.plot(function_space=V) #V is a dolfinx.fem.function_space
+#Plot
+eigenfreqs = eps.getEigenfrequencies() #a np.ndarray
+eps.plot(function_space=V)             #V is a dolfinx.fem.function_space
 
 #the end
 ```
@@ -152,7 +155,7 @@ Using the **solutions** package:
 mbasis = eps.getModalBasis() #a elastodynamicsx.solutions.ModalBasis
 
 #access data
-eigenfreqs = mbasis.fn    #a np.array
+eigenfreqs = mbasis.fn    #a np.ndarray
 modeshape5 = mbasis.un[5] #a PETSc.Vec vector
 
 #visualize

@@ -2,11 +2,13 @@ from dolfinx import fem
 from petsc4py import PETSc
 import ufl
 
-from .timestepper import OneStepTimeStepper
+from . import FEniCSxTimeScheme
+from elastodynamicsx.solvers import TimeStepper, NonlinearTimeStepper, OneStepTimeStepper
 from elastodynamicsx.pde import BoundaryCondition
 
 
-class GalphaNewmarkBeta(OneStepTimeStepper):
+
+class GalphaNewmarkBeta(FEniCSxTimeScheme):
     """
     Implementation of the 'g-a-newmark' (Generalized-alpha Newmark) time-stepping scheme,
     for beta>0. The special case beta=0 is implemented in the LeapFrog class.
@@ -24,6 +26,14 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
     """
     
     labels = ['g-a-newmark', 'generalized-alpha']
+    
+    def build_timestepper(*args, **kwargs) -> 'TimeStepper':
+        tscheme = GalphaNewmarkBeta(*args, **kwargs)
+        comm = tscheme.u.function_space.mesh.comm
+        if kwargs.pop('linear', True):
+            return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
+        else:
+            return NonlinearTimeStepper(comm, tscheme, **kwargs)
     
     def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], **kwargs):
         """
@@ -67,7 +77,7 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
         beta    = kwargs.get('beta', 1/4*(gamma+1/2)**2)
         
         self.alpha_m, self.alpha_f, self.gamma, self.beta = alpha_m, alpha_f, gamma, beta
-        self._intermediate_dt = self.alpha_f
+        #self.intermediate_dt = self.alpha_f
         
         const = lambda c: fem.Constant(function_space.mesh, PETSc.ScalarType(c))
         c1, c2, c3 = const(dt*gamma*(1-alpha_f)/beta), const(dt**2*(1 - (gamma-alpha_f)/beta)), const(dt**3*(1-alpha_f)*(1-gamma/2/beta))
@@ -132,15 +142,21 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
                 raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
         
         #compile forms
-        self.bilinear_form = fem.form(self._a)
-        self.linear_form   = fem.form(self._L)
+        bilinear_form = fem.form(self._a)
+        linear_form   = fem.form(self._L)
         #
-        super().__init__(function_space, m_, c_, k_, L, dt, dirichletbcs, explicit=False, **kwargs)
+        super().__init__(dt, self._u_n, bilinear_form, linear_form, dirichletbcs, explicit=False, intermediate_dt=self.alpha_f, **kwargs)
 
+    @property
+    def u(self): return self._u_n
+    
+    @property
+    def v(self): return self._v_n
+    
     @property
     def a(self): return self._a_n
     
-    def _prepareNextIteration(self):
+    def prepareNextIteration(self):
         """Next-time-step function, to prepare next iteration -> Call it after solving"""
         dt = self.dt
         #
@@ -149,6 +165,25 @@ class GalphaNewmarkBeta(OneStepTimeStepper):
         self._a_n.x.array[:]   = self._a_garb.x.array
         self._u_nm1.x.array[:] = self._u_n.x.array
 
+    def initialStep(self, t0, callfirsts:list=[], callbacks:list=[], verbose=0) -> None:
+        """Specific to the initial value step"""
+        
+        ### -------------------------------------------------
+        #   --- first step: given u0 and v0, solve for a0 ---
+        ### -------------------------------------------------
+        #
+        if verbose >= 10: PETSc.Sys.Print('Solving the initial value step')
+        if verbose >= 10: PETSc.Sys.Print('Callfirsts...')
+        for callfirst in callfirsts:
+            callfirst(t0, self) #<- update stuff
+        
+        problem = fem.petsc.LinearProblem(self._m0_form, self._L0_form, bcs=self._bcs, u=self._a0, petsc_options=TimeStepper.petsc_options_t0)
+        problem.solve() #known: u0, v0. Solve for a0. u1 requires to solve a new system (loop)
+        
+        if verbose >= 10: PETSc.Sys.Print('Initial value problem solved, entering loop')
+        #no callback because u1 is not solved yet
+        #
+        ### -------------------------------------------------
 
 
 class HilberHughesTaylor(GalphaNewmarkBeta):
@@ -167,6 +202,14 @@ class HilberHughesTaylor(GalphaNewmarkBeta):
     """
     
     labels = ['hilber-hughes-taylor', 'hht', 'hht-alpha']
+    
+    def build_timestepper(*args, **kwargs) -> 'TimeStepper':
+        tscheme = HilberHughesTaylor2(*args, **kwargs)
+        comm = tscheme.u.function_space.mesh.comm
+        if kwargs.pop('linear', True):
+            return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
+        else:
+            return NonlinearTimeStepper(comm, tscheme, **kwargs)
     
     def __init__(self, *args, **kwargs): #TODO: finir documentation et support rho_inf
         """
@@ -201,6 +244,14 @@ class NewmarkBeta(GalphaNewmarkBeta):
     
     labels = ['newmark', 'newmark-beta']
     
+    def build_timestepper(*args, **kwargs) -> 'TimeStepper':
+        tscheme = NewmarkBeta2(*args, **kwargs)
+        comm = tscheme.u.function_space.mesh.comm
+        if kwargs.pop('linear', True):
+            return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
+        else:
+            return NonlinearTimeStepper(comm, tscheme, **kwargs)
+    
     def __init__(self, *args, **kwargs):
         kwargs['alpha_m'] = 0
         kwargs['alpha_f'] = 0
@@ -223,6 +274,14 @@ class MidPoint(NewmarkBeta):
     
     labels = ['midpoint', 'average-acceleration-method', 'aam']
     
+    def build_timestepper(*args, **kwargs) -> 'TimeStepper':
+        tscheme = MidPoint2(*args, **kwargs)
+        comm = tscheme.u.function_space.mesh.comm
+        if kwargs.pop('linear', True):
+            return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
+        else:
+            return NonlinearTimeStepper(comm, tscheme, **kwargs)
+    
     def __init__(self, *args, **kwargs):
         kwargs['gamma'] = 1/2
         kwargs['beta']  = 1/4
@@ -241,6 +300,14 @@ class LinearAccelerationMethod(NewmarkBeta):
     """
     
     labels = ['linear-acceleration-method', 'lam']
+    
+    def build_timestepper(*args, **kwargs) -> 'TimeStepper':
+        tscheme = LinearAccelerationMethod2(*args, **kwargs)
+        comm = tscheme.u.function_space.mesh.comm
+        if kwargs.pop('linear', True):
+            return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
+        else:
+            return NonlinearTimeStepper(comm, tscheme, **kwargs)
     
     def __init__(self, *args, **kwargs):
         kwargs['gamma'] = 1/2

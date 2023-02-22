@@ -90,7 +90,7 @@ T_N_function = lambda t: src_t(t) * F_0
 # -----------------------------------------------------
 #           Time scheme: Temporal parameters
 # -----------------------------------------------------
-T       = 4
+T       = 4 #difference with original example: here t=[0,T-dt]
 Nsteps  = 50
 dt = T/Nsteps
 
@@ -126,6 +126,13 @@ signals_at_points = np.zeros((points_output.shape[1], domain.topology.dim, Nstep
 ### -> Energies
 energies = np.zeros((Nsteps, 4))
 E_damp   = 0
+
+u_n = tStepper.timescheme.u #The solution at time t_n
+v_n = tStepper.timescheme.v
+comm = domain.comm
+Energy_elastic = lambda *a: comm.allreduce( fem.assemble_scalar(fem.form( 1/2* pde.k(u_n, u_n) )) , op=MPI.SUM)
+Energy_kinetic = lambda *a: comm.allreduce( fem.assemble_scalar(fem.form( 1/2* pde.m(v_n, v_n) )) , op=MPI.SUM)
+Energy_damping = lambda *a: dt*comm.allreduce( fem.assemble_scalar(fem.form( pde.c(v_n, v_n) )) , op=MPI.SUM)
 #
 # -----------------------------------------------------
 
@@ -138,13 +145,13 @@ def cfst_updateSources(t, tStepper):
     T_N.value = T_N_function(t)
 
 def cbck_storeAtPoints(i, tStepper):
-    if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = tStepper.u.eval(points_output_on_proc, cells_output_on_proc)
+    if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = u_n.eval(points_output_on_proc, cells_output_on_proc)
 
 def cbck_energies(i, tStepper):
     global E_damp
-    E_elas = tStepper.Energy_elastic()
-    E_kin  = tStepper.Energy_kinetic()
-    E_damp+= tStepper.Energy_damping()
+    E_elas = Energy_elastic()
+    E_kin  = Energy_kinetic()
+    E_damp+= Energy_damping()
     E_tot  = E_elas + E_kin + E_damp
     energies[i+1,:] = np.array([E_elas, E_kin, E_damp, E_tot])
 

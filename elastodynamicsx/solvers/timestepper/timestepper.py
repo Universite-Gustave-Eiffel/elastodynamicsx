@@ -1,10 +1,6 @@
 #TODO : Euler 1, RK4
 
-from dolfinx import fem
-import ufl
-from mpi4py import MPI
 from petsc4py import PETSc
-import numpy as np
 try: from tqdm.auto import tqdm
 except ModuleNotFoundError: tqdm = lambda x: x
 
@@ -17,7 +13,6 @@ class TimeStepper:
     ### --------- static ---------
     ### --------------------------
 
-    labels = ['supercharge me']
     petsc_options_t0 = {"ksp_type": "preonly", "pc_type": "lu"} #PETSc options to solve a0 = M_inv.(F(t0) - C.v0 - K(u0))
     petsc_options_explicit_scheme = petsc_options_t0
     petsc_options_implicit_scheme_linear = {"ksp_type": "preonly", "pc_type": "lu"}
@@ -38,10 +33,13 @@ class TimeStepper:
                     'hht-alpha'
                     'generalized-alpha'
         """
+        from elastodynamicsx.pde import all_timeschemes
+        
         scheme = kwargs.pop('scheme', 'unknown')
-        allSchemes = (LeapFrog, MidPoint, LinearAccelerationMethod, NewmarkBeta, HilberHughesTaylor, GalphaNewmarkBeta)
+        allSchemes = all_timeschemes
         for s_ in allSchemes:
-          if scheme.lower() in s_.labels: return s_(*args, **kwargs)
+          if scheme.lower() in s_.labels:
+              return s_.build_timestepper(*args, **kwargs)
         #
         raise TypeError('unknown scheme: '+scheme)
         
@@ -53,6 +51,11 @@ class TimeStepper:
 
         see: https://en.wikipedia.org/wiki/Courant%E2%80%93Friedrichs%E2%80%93Lewy_condition
         """
+        from mpi4py import MPI
+        from dolfinx import fem
+        import ufl
+        import numpy as np #TODO: remove
+
         V = fem.FunctionSpace(domain, ("DG", 0))
         c_number = fem.Function(V)
         
@@ -71,75 +74,28 @@ class TimeStepper:
     ### ------- non-static -------
     ### --------------------------
     
-    def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], explicit=False, **kwargs):
+    def __init__(self, comm:'_MPI.Comm', timescheme:'TimeScheme', **kwargs):
         """
         Args:
-            function_space: The function space
-            m_: Function of u,v that returns the mass form
-            c_: Function of u,v that returns the damping form
-            k_: Function of u,v that returns the stiffness form
-            L : Function of v   that returns the linear form
-            dt: Time step
-            bcs: List of instances of the class BoundaryCondition
-            kwargs:
-                petsc_options: Options that are passed to the linear
-                algebra backend PETSc. For available choices for the
-                'petsc_options' kwarg, see the `PETSc documentation
-                <https://petsc4py.readthedocs.io/en/stable/manual/ksp/>`_.
+            comm: The MPI communicator
+            timescheme: Time scheme
         """
         #
-        self._t   = 0
-        self._dt  = dt
-        self._bcs = bcs
-        self._m_function = m_
-        self._c_function = c_
-        self._k_function = k_
-        #
-        self._explicit = explicit
-        ###
-        #note: any inherited class must define the following attributes:
-        #        self._u_n
-        #        self.linear_form, self.bilinear_form,
-        #        self._u0, self._v0, self._a0
-        #        self._m0_form, self._L0_form
-        ###
+        self._tscheme = timescheme
+        self._comm    = comm
+        self._t       = 0
+        self._dt      = self._tscheme.dt
+        self._out     = self._tscheme.out
         
         
     @property
-    def A(self): return self._A
-    
-    @property
-    def b(self): return self._b
-    
-    @property
-    def explicit(self): return self._explicit
+    def timescheme(self): return self._tscheme
     
     @property
     def t(self): return self._t
     
     @property
     def dt(self): return self._dt
-    
-    @property
-    def u(self): return self._u_n
-
-    @property
-    def v(self): return self._v_n
-    
-    def Energy_elastic(self):
-        comm = self.u.function_space.mesh.comm
-        return comm.allreduce( fem.assemble_scalar(fem.form( 1/2* self._k_function(self.u, self.u) )) , op=MPI.SUM)
-
-    def Energy_damping(self):
-        comm = self.u.function_space.mesh.comm
-        if self._c_function is None:
-            return 0
-        else:
-            return self.dt*comm.allreduce( fem.assemble_scalar(fem.form( self._c_function(self.v, self.v) )) , op=MPI.SUM)
-
-    def Energy_kinetic(self):
-        comm = self.u.function_space.mesh.comm
-        return comm.allreduce( fem.assemble_scalar(fem.form( 1/2* self._m_function(self.v, self.v) )) , op=MPI.SUM)
     
     def initial_condition(self, u0, v0, t0=0):
         ###
@@ -161,59 +117,56 @@ class TimeStepper:
                 - fem.function.Function
                     -> e.g. u0 = fem.Function(V)
         """
+        self._tscheme.initial_condition(u0, v0)
         self._t = t0
-        for selfVal, val in ((self._u0, u0), (self._v0, v0)):
-            if   type(val) == type(lambda x:x):
-                selfVal.interpolate(val)
-            elif issubclass(type(val), fem.function.Constant):
-                selfVal.x.array[:] = np.tile(val.value, np.size(selfVal.x.array)//np.size(val.value))
-            elif type(val) in (list, tuple, np.ndarray):
-                selfVal.x.array[:] = np.tile(val, np.size(selfVal.x.array)//np.size(val))
-            elif type(val) in (int, float, complex, PETSc.ScalarType):
-                selfVal.x.array[:] = val
-            elif issubclass(type(val), fem.function.Function):
-                selfVal.x.array[:] = val.x.array
-            else:
-                raise TypeError("Unknown type of initial value "+str(type(val)))
-        
     
-    def run(self, num_steps, **kwargs): print('Supercharge me')
+    def run(self, num_steps, **kwargs): #supercharge me
+        raise NotImplementedError
 
 
 
 
-class OneStepTimeStepper(TimeStepper):
-    """
-    Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).
-    """
-    
-    def __init__(self, function_space, m_, c_, k_, L, dt, bcs=[], explicit=False, **kwargs):
+class NonlinearTimeStepper(TimeStepper):
+    def __init__(self, comm:'_MPI.Comm', timescheme:'TimeScheme', **kwargs):
+        super().__init__(comm, timescheme, **kwargs)
+        raise NotImplementedError
+
+
+
+
+class LinearTimeStepper(TimeStepper):
+    def __init__(self, comm:'_MPI.Comm', timescheme:'TimeScheme', A:PETSc.Mat, b:PETSc.Vec, **kwargs):
+        super().__init__(comm, timescheme, **kwargs)
+        self._A = A # Time-independent operator
+        self._b = b # Time-dependent right-hand side
+        self._explicit = timescheme.explicit
         #
-        self._i0 = 0
-        self._intermediate_dt = 0 #non zero for generalized-alpha
-        super().__init__(function_space, m_, c_, k_, L, dt, bcs, explicit, **kwargs)
-        #
-        if self.explicit:
+        if self._explicit:
             default_petsc_options = TimeStepper.petsc_options_explicit_scheme
         else:
             default_petsc_options = TimeStepper.petsc_options_implicit_scheme_linear
         petsc_options = kwargs.get('petsc_options', default_petsc_options)
-        self._init_solver(petsc_options)
+        self._init_solver(comm, petsc_options)
 
+    @property
+    def A(self) -> PETSc.Mat:
+        return self._A
+    
+    @property
+    def b(self) -> PETSc.Vec:
+        return self._b
+    
+    @property
+    def explicit(self) -> bool:
+        return self._explicit
 
-    def _init_solver(self, petsc_options={}):
+    def _init_solver(self, comm:'_MPI.Comm', petsc_options={}):
         # see https://github.com/FEniCS/dolfinx/blob/main/python/dolfinx/fem/petsc.py
         # see also https://jsdokken.com/dolfinx-tutorial/chapter2/diffusion_code.html
         ###   ###   ###   ###
-        # Declare left-hand-side matrix 'A' and right-hand-side vector 'b'
-        #    build 'A' once for all
-        #    declare 'b' (to be updated in the time loop)
-        self._A = fem.petsc.assemble_matrix(self.bilinear_form, bcs=self._bcs)
-        self._A.assemble()
-        self._b = fem.petsc.create_vector(self.linear_form)
-        
+
         # Solver
-        self.solver = PETSc.KSP().create(self.u.function_space.mesh.comm)
+        self.solver = PETSc.KSP().create(comm)
         self.solver.setOperators(self._A)
         
         # Give PETSc solver options a unique prefix
@@ -235,25 +188,22 @@ class OneStepTimeStepper(TimeStepper):
         self._b.setFromOptions()
 
 
-    def _prepareNextIteration(self): print('Supercharge me')
-    def _initialStep(self, callfirsts, callbacks, verbose=0):
-        """Specific to the initial value step"""
+
+
+class OneStepTimeStepper(LinearTimeStepper):
+    """
+    Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).
+    """
+    
+    def __init__(self, comm:'_MPI.Comm', timescheme:'TimeScheme', A:PETSc.Mat, b:PETSc.Vec, **kwargs):
+        super().__init__(comm, timescheme, A, b, **kwargs)
+        self._b_update_function = timescheme.b_update_function
         
-        ### -------------------------------------------------
-        #   --- first step: given u0 and v0, solve for a0 ---
-        ### -------------------------------------------------
-        #
-        if verbose >= 10: PETSc.Sys.Print('Solving the initial value step')
-        if verbose >= 10: PETSc.Sys.Print('Callfirsts...')
-        for callfirst in callfirsts: callfirst(self.t - 0*self._intermediate_dt, self) #<- update stuff #F_body.interpolate(F_body_function(t))
-        
-        problem = fem.petsc.LinearProblem(self._m0_form, self._L0_form, bcs=self._bcs, u=self._a0, petsc_options=TimeStepper.petsc_options_t0)
-        problem.solve() #known: u0, v0. Solve for a0. u1 requires to solve a new system (loop)
-        
-        if verbose >= 10: PETSc.Sys.Print('Initial value problem solved, entering loop')
-        #no callback because u1 is not solved yet
-        #
-        ### -------------------------------------------------
+        # self._i0 = 1 for explicit schemes because solving the initial
+        # value problem a0=M_inv.(F(t0)-K(u0)-C.v0) also yields u1=u(t0+dt)
+        self._i0 = 1*self._explicit
+        self._intermediate_dt = timescheme.intermediate_dt #non zero for generalized-alpha
+
 
     def run(self, num_steps, **kwargs):
         """
@@ -269,8 +219,8 @@ class OneStepTimeStepper(TimeStepper):
                     timestepper is the timestepper being run
                 callbacks:  (detault=[]) similar to callfirsts, but the callbacks are called
                     at the end of each iteration (after solving). For instance: store/save, plot, print, ...
-                    Each callback if of the form: cb = lambda i, timestepper: do_something
-                    where i is the iteration index and timestepper is the timestepper being run
+                    Each callback if of the form: cb = lambda i, out: do_something
+                    where i is the iteration index and out is the PETSc.Vec vector just solved for
                -- other optional parameters --
                 live_plotter: a plotter object that can refresh through
                 a live_plotter.live_plotter_update_function(i, out) function
@@ -286,48 +236,43 @@ class OneStepTimeStepper(TimeStepper):
         if not(live_plt is None):
             if type(live_plt)==dict:
                 from elastodynamicsx.plot import live_plotter
-                live_plt = live_plotter(self.u, live_plt.pop('refresh_step', 1), **live_plt)
+                u_init = self._tscheme.out_fenicsx # assumes timescheme is of type FEniCSxTimeScheme
+                live_plt = live_plotter(u_init, live_plt.pop('refresh_step', 1), **live_plt)
             callbacks.append(live_plt.live_plotter_update_function)
             live_plt.show(interactive_update=True)
 
 
-        self._initialStep(callfirsts, callbacks, verbose=verbose)
+        t0 = self.t
+        self._tscheme.initialStep(t0, callfirsts, callbacks, verbose=verbose)
         
         for i in tqdm(range(self._i0, num_steps)):
             self._t += self.dt
+            t_calc = self.t - self.dt*self._intermediate_dt
             
             if verbose >= 10: PETSc.Sys.Print('Callfirsts...')
             for callfirst in callfirsts:
-                callfirst(self.t - self.dt*self._intermediate_dt, self) #<- update stuff #F_body.interpolate(F_body_function(t))
+                callfirst(t_calc, self) #<- update stuff (e.g. sources)
 
             # Update the right hand side reusing the initial vector
             if verbose >= 10: PETSc.Sys.Print('Update the right hand side reusing the initial vector...')
-            with self._b.localForm() as loc_b:
-                loc_b.set(0)
-            fem.petsc.assemble_vector(self._b, self.linear_form)
-            
-            # Apply Dirichlet boundary condition to the vector // even without Dirichlet BC this is important for parallel computing
-            if verbose >= 10: PETSc.Sys.Print('Applying BCs and ghostUpdate...')
-            fem.petsc.apply_lifting(self._b, [self.bilinear_form], [self._bcs])
-            self._b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)
-            fem.petsc.set_bc(self._b, self._bcs)
+            self._tscheme.b_update_function(self._b, t_calc)
+            #self._b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE) #assume this has already been done
 
             # Solve linear problem
             if verbose >= 10: PETSc.Sys.Print('Solving...')
-            self.solver.solve(self._b, self._u_n.vector)
-            self._u_n.x.scatter_forward()
+            self.solver.solve(self._b, self._out)
+            
+            #update the ghosts in the solution
+            self._out.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
             
             #
             if verbose >= 10: PETSc.Sys.Print('Time-stepping for next iteration...')
-            self._prepareNextIteration()
+            self._tscheme.prepareNextIteration()
             
             if verbose >= 10: PETSc.Sys.Print('Callbacks...')
             for callback in callbacks:
-                callback(i, self) #<- store solution, plot, print, ...
+                callback(i, self._out) #<- store solution, plot, print, ...
 
-# -----------------------------------------------------
-# Import subclasses -- must be done at the end to avoid loop imports
-# -----------------------------------------------------
-from .leapfrog import LeapFrog
-from .newmark  import GalphaNewmarkBeta, HilberHughesTaylor, NewmarkBeta, MidPoint, LinearAccelerationMethod
+
+
 
