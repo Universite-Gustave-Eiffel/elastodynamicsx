@@ -1,5 +1,9 @@
-from dolfinx import fem
 from petsc4py import PETSc
+from dolfinx import fem
+try:
+    import dolfinx_mpc
+except ImportError:
+    dolfinx_mpc = None
 import numpy as np
 
 
@@ -52,12 +56,23 @@ class TimeScheme():
 
 class FEniCSxTimeScheme(TimeScheme):
     """Abstract base class based on FEniCSx's form language"""
-    def __init__(self, dt, out:fem.Function, bilinear_form:'dolfinx.fem.forms.Form', linear_form:'dolfinx.fem.forms.Form', bcs=[], **kwargs):
+    def __init__(self, dt, out:fem.Function, \
+                 bilinear_form:'dolfinx.fem.forms.Form', \
+                 linear_form:'dolfinx.fem.forms.Form', \
+                 mpc:'dolfinx_mpc.MultiPointConstraint'=None, \
+                 bcs=[], \
+                 **kwargs):
         super().__init__(dt, out.vector, **kwargs)
         self._bilinear_form = bilinear_form
         self._linear_form   = linear_form
+        self._mpc           = mpc
         self._bcs           = bcs # dirichlet BCs only
         self._out_fenicsx   = out
+        #
+        if self._mpc is None:
+            self.b_update_function = self._b_update_function_WO_MPC
+        else:
+            self.b_update_function = self._b_update_function_WITH_MPC
 
     @property
     def out_fenicsx(self) -> fem.Function:
@@ -65,14 +80,25 @@ class FEniCSxTimeScheme(TimeScheme):
         return self._out_fenicsx
         
     def A(self) -> PETSc.Mat:
-        A = fem.petsc.assemble_matrix(self._bilinear_form, bcs=self._bcs)
+        """The time-independent matrix (bilinear form)"""
+        if self._mpc is None:
+            A = fem.petsc.assemble_matrix(self._bilinear_form, bcs=self._bcs)
+        else:
+            A = dolfinx_mpc.assemble_matrix(self._bilinear_form, self._mpc, bcs=self._bcs)
         A.assemble()
         return A
         
     def init_b(self) -> PETSc.Vec:
-        return fem.petsc.create_vector(self._linear_form)
+        """Declares a zero vector compatible with the linear form"""
+        if self._mpc is None:
+            return fem.petsc.create_vector(self._linear_form)
+        else:
+            return dolfinx_mpc.assemble_vector(self._linear_form, self._mpc)
 
-    def b_update_function(self, b:PETSc.Vec, t) -> None: #TODO: use t?
+
+    #def b_update_function(self, b:PETSc.Vec, t) -> None: #NOW SET TO EITHER METHOD BELOW IN __init__
+    
+    def _b_update_function_WO_MPC(self, b:PETSc.Vec, t) -> None: #TODO: use t?
         """Updates the b vector (in-place) for a given time t"""
         with b.localForm() as loc_b:
             loc_b.set(0)
@@ -88,6 +114,27 @@ class FEniCSxTimeScheme(TimeScheme):
         
         #apply BC value
         fem.petsc.set_bc(b, self._bcs)
+
+
+    def _b_update_function_WITH_MPC(self, b:PETSc.Vec, t) -> None: #TODO: use t?
+        """Updates the b vector (in-place) for a given time t"""
+        with b.localForm() as loc_b:
+            loc_b.set(0)
+        
+        #fill with values
+        #fem.petsc.assemble_vector(b, self._linear_form)
+        dolfinx_mpc.assemble_vector(self._linear_form, self._mpc, b)
+            
+        #BC modifyier 
+        #fem.petsc.apply_lifting(b, [self._bilinear_form], [self._bcs])
+        dolfinx_mpc.apply_lifting(b, [self._bilinear_form], [self._bcs], self._mpc)
+        
+        #ghost
+        b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)
+        
+        #apply BC value
+        fem.petsc.set_bc(b, self._bcs) #not modified by dolfinx_mpc
+
 
     def initial_condition(self, u0, v0) -> None:
         ###

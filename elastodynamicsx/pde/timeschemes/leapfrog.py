@@ -4,7 +4,7 @@ import ufl
 
 from . import FEniCSxTimeScheme
 from elastodynamicsx.solvers import TimeStepper, OneStepTimeStepper
-from elastodynamicsx.pde import BoundaryCondition
+from elastodynamicsx.pde import PDE, BoundaryCondition
 
 
 
@@ -74,12 +74,11 @@ class LeapFrog(FEniCSxTimeScheme):
             self._L0_form -= c_(self._v0, v)
         
         #boundary conditions
-        dirichletbcs = [bc for bc in bcs if issubclass(type(bc), fem.DirichletBCMetaClass)]
-        supportedbcs = [bc for bc in bcs if type(bc) == BoundaryCondition]
+        mpc          = PDE.build_mpc(function_space, bcs)
+        dirichletbcs = BoundaryCondition.get_dirichlet_BCs(bcs)
+        supportedbcs = BoundaryCondition.get_weak_BCs(bcs)
         for bc in supportedbcs:
-            if   bc.type == 'dirichlet':
-                dirichletbcs.append(bc.bc)
-            elif bc.type == 'neumann':
+            if   bc.type == 'neumann':
                 self._L += dt_*dt_*bc.bc(v)
                 self._L0_form += bc.bc(v)
             elif bc.type == 'robin':
@@ -99,7 +98,7 @@ class LeapFrog(FEniCSxTimeScheme):
         bilinear_form = fem.form(self._a)
         linear_form   = fem.form(self._L)
         #
-        super().__init__(dt, self._u_n, bilinear_form, linear_form, dirichletbcs, explicit=True, **kwargs)
+        super().__init__(dt, self._u_n, bilinear_form, linear_form, mpc, dirichletbcs, explicit=True, **kwargs)
 
     
     @property

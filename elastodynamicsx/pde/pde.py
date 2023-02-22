@@ -22,31 +22,42 @@ class PDE():
     
     as an assembly of materials and forces defined over different subdomains
     """
+    
+    
+    def build_mpc(function_space, bcs):
+        bcs_strong = BoundaryCondition.get_dirichlet_BCs(bcs)
+        bcs_mpc    = BoundaryCondition.get_mpc_BCs(bcs)
+        
+        if len(bcs_mpc)==0:
+            return None
+        
+        mpc = dolfinx_mpc.MultiPointConstraint(function_space)
+        
+        for bc in bcs_mpc:
+            if bc.type == 'periodic':
+                facet_tags, marker, slave_to_master_map = bc.bc
+                mpc.create_periodic_constraint_topological(function_space, facet_tags, marker, slave_to_master_map, bcs_strong)
+            else:
+                raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
+        
+        mpc.finalize()
+        return mpc
+    
+    
     def __init__(self, function_space, materials=[], bodyforces=[], bcs=[], **kwargs):
 
         self._function_space = function_space
         self.materials = materials
         self.bodyforces= bodyforces
         self.bcs = bcs
-        self.mpc = None
+        self._mpc = None
         self._u, self._v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
         
         # Sort boundary conditions
-        self._bcs_weak   = [] # custom weak BSs, instances of BoundaryCondition
-        self._bcs_strong = [] # dolfinx.fem.DirichletBCMetaClass
-        self._bcs_mpc    = [] # instances of BoundaryCondition used to add multi-point constraints
-        for bc in bcs:
-            if issubclass(type(bc), fem.DirichletBCMetaClass):
-                self._bcs_strong.append(bc)
-            elif type(bc) == BoundaryCondition:
-                if   issubclass(type(bc.bc), fem.DirichletBCMetaClass):
-                    self._bcs_strong.append(bc.bc)
-                elif bc.type == 'periodic':
-                    self._bcs_mpc.append(bc)
-                else:
-                    self._bcs_weak.append(bc)
-            else:
-                raise TypeError("Unsupported boundary condition"+str(type(bc)))
+        self._bcs_weak   = BoundaryCondition.get_weak_BCs(bcs)      # custom weak BSs, instances of BoundaryCondition
+        self._bcs_strong = BoundaryCondition.get_dirichlet_BCs(bcs) # dolfinx.fem.DirichletBCMetaClass
+        self._bcs_mpc    = BoundaryCondition.get_mpc_BCs(bcs)       # instances of BoundaryCondition used to add multi-point constraints
+        #new_list = filter(lambda v: v not in b, a)
         
         self._omega_ufl = fem.Constant(function_space, PETSc.ScalarType(0))
         
@@ -61,6 +72,9 @@ class PDE():
     def is_linear(self):
         return not(sum([not(mat.is_linear) for mat in self.materials]))
 
+    @property
+    def mpc(self):
+        return self._mpc
 
 
 ### ### ### ### ### ### ### ### ### ###
@@ -69,7 +83,7 @@ class PDE():
 
     def finalize(self) -> None:
         self._build_mpc()
-        if self.mpc is None:
+        if self._mpc is None:
             self.update_b_frequencydomain = self._update_b_frequencydomain_WO_MPC
         else:
             self.update_b_frequencydomain = self._update_b_frequencydomain_WITH_MPC
@@ -87,15 +101,7 @@ class PDE():
             return
         if len(self._bcs_mpc)==0: # if there is no need to use MPC. Note that MPC slows down the runs even if there is no constraint -> better avoid using it if not needed
             return
-            
-        self.mpc = dolfinx_mpc.MultiPointConstraint(self._function_space)
-        
-        for bc in self._bcs_mpc:
-            if bc.type == 'periodic':
-                facet_tags, marker, slave_to_master_map = bc.bc
-                self.mpc.create_periodic_constraint_topological(self._function_space, facet_tags, marker, slave_to_master_map, self._bcs_strong)
-        
-        self.mpc.finalize()
+        self._mpc = PDE.build_mpc(self._function_space, self._bcs_strong + self._bcs_mpc)
         
         
     def _compile_M_C_K_b(self) -> None:
@@ -216,28 +222,28 @@ class PDE():
     
     def M(self) -> PETSc.Mat:
         """Mass matrix"""
-        if self.mpc is None:
+        if self._mpc is None:
             M = fem.petsc.assemble_matrix(self._m_form, bcs=self._bcs_strong)
         else:
-            M = dolfinx_mpc.assemble_matrix(self._m_form, self.mpc, bcs=self._bcs_strong)
+            M = dolfinx_mpc.assemble_matrix(self._m_form, self._mpc, bcs=self._bcs_strong)
         M.assemble()
         return M
 
     def C(self) -> PETSc.Mat:
         """Damping matrix"""
-        if self.mpc is None:
+        if self._mpc is None:
             C = fem.petsc.assemble_matrix(self._c_form, bcs=self._bcs_strong)
         else:
-            C = dolfinx_mpc.assemble_matrix(self._c_form, self.mpc, bcs=self._bcs_strong)
+            C = dolfinx_mpc.assemble_matrix(self._c_form, self._mpc, bcs=self._bcs_strong)
         C.assemble()
         return C
         
     def K(self) -> PETSc.Mat:
         """Stiffness matrix"""
-        if self.mpc is None:
+        if self._mpc is None:
             K = fem.petsc.assemble_matrix(self._k_form, bcs=self._bcs_strong)
         else:
-            K = dolfinx_mpc.assemble_matrix(self._k_form, self.mpc, bcs=self._bcs_strong)
+            K = dolfinx_mpc.assemble_matrix(self._k_form, self._mpc, bcs=self._bcs_strong)
         K.assemble()
         return K
 
@@ -249,10 +255,10 @@ class PDE():
 
     def init_b(self) -> PETSc.Vec:
         """Declares a zero vector compatible with the linear form"""
-        if self.mpc is None:
+        if self._mpc is None:
             return fem.petsc.create_vector(self.b_form)
         else:
-            return dolfinx_mpc.assemble_vector(self.b_form, self.mpc)
+            return dolfinx_mpc.assemble_vector(self.b_form, self._mpc)
         
 
 
@@ -289,12 +295,12 @@ class PDE():
         
         #fill with values
         #fem.petsc.assemble_vector(b, self.b_form)
-        dolfinx_mpc.assemble_vector(self.b_form, self.mpc, b)
+        dolfinx_mpc.assemble_vector(self.b_form, self._mpc, b)
         
         #BC modifyier 
         self._omega_ufl.value=omega
         #fem.petsc.apply_lifting(b, [self._a_form], [self._bcs_strong])
-        dolfinx_mpc.apply_lifting(b, [self._a_form], [self._bcs_strong], self.mpc)
+        dolfinx_mpc.apply_lifting(b, [self._a_form], [self._bcs_strong], self._mpc)
         
         #ghost
         b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)

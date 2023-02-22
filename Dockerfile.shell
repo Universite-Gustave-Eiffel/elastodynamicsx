@@ -1,4 +1,4 @@
-FROM dolfinx/dolfinx:stable
+FROM dolfinx/dolfinx:latest
 LABEL maintainer="Pierric Mora <pierric.mora@univ-eiffel.fr>"
 LABEL description=" elastodynamics with Fenicsx/dolfinx "
 

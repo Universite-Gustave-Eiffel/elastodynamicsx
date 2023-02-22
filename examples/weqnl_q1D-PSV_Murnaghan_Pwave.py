@@ -60,8 +60,8 @@ T_N      = fem.Constant(domain, PETSc.ScalarType([0,0])) #normal traction (Neuma
 Z_N, Z_T = mat.Z_N, mat.Z_T #P and S mechanical impedances
 bc_l = BoundaryCondition((V, facet_tags, tag_left  ), 'Neumann', T_N)
 bc_r = BoundaryCondition((V, facet_tags, tag_right ), 'Dashpot', (Z_N, Z_T))
-#bc_b = BoundaryCondition((V, facet_tags, tag_bottom), 'Periodic', [0, height, 0])
-bc_b = BoundaryCondition((V, facet_tags, tag_bottom), 'Free')
+bc_b = BoundaryCondition((V, facet_tags, tag_bottom), 'Periodic', [0, height, 0]) #wrong. TODO: Robin BC
+#bc_b = BoundaryCondition((V, facet_tags, tag_bottom), 'Free') #here again: Robin BC. TODO
 bcs = [bc_l, bc_r, bc_b]
 #
 # -----------------------------------------------------

@@ -45,9 +45,9 @@ V  = fem.FunctionSpace(domain, ("CG", degElement))
 # -----------------------------------------------------
 #                 Material parameters
 # -----------------------------------------------------
-rho     = fem.Constant(domain, PETSc.ScalarType(1))
-mu      = fem.Constant(domain, PETSc.ScalarType(1))
-mat   = material(V, 'scalar', rho, mu)
+rho = fem.Constant(domain, PETSc.ScalarType(1))
+mu  = fem.Constant(domain, PETSc.ScalarType(1))
+mat = material(V, 'scalar', rho, mu)
 materials = [mat]
 #
 # -----------------------------------------------------

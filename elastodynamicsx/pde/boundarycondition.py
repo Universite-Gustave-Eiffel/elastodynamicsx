@@ -74,6 +74,35 @@ class BoundaryCondition():
     Adapted from:
         https://jsdokken.com/dolfinx-tutorial/chapter3/robin_neumann_dirichlet.html
     """
+    
+    
+    def get_dirichlet_BCs(bcs):
+        out = []
+        for bc in bcs:
+            if issubclass(type(bc), fem.DirichletBCMetaClass):
+                out.append(bc)
+            if type(bc) == BoundaryCondition and issubclass(type(bc.bc), fem.DirichletBCMetaClass):
+                out.append(bc.bc)
+        return out
+    
+    def get_mpc_BCs(bcs):
+        out = []
+        for bc in bcs:
+            if bc.type == 'periodic':
+                out.append(bc)
+        return out
+    
+    def get_weak_BCs(bcs):
+        out = []
+        for bc in bcs:
+            if type(bc) == BoundaryCondition:
+                test_mpc = bc.type == 'periodic'
+                test_d   = issubclass(type(bc.bc), fem.DirichletBCMetaClass)
+                if not(test_mpc or test_d):
+                    out.append(bc)
+        return out
+    
+    
     def __init__(self, functionspace_tags_marker, type_, values=None):
         #
         function_space, facet_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
