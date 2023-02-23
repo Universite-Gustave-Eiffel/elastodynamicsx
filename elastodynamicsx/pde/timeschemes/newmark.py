@@ -126,7 +126,7 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
                 self._L += dt_*dt_*bc.bc(v)
                 self._L0_form += bc.bc(v)
             elif bc.type == 'robin':
-                F_bc = dt_*dt_*bc.bc(u,v) #TODO: verifier
+                F_bc = dt_*dt_*bc.bc(u,v)
                 self._a += ufl.lhs(F_bc)
                 self._L += ufl.rhs(F_bc)
                 self._L0_form += bc.bc(self._u0, v)
@@ -203,7 +203,7 @@ class HilberHughesTaylor(GalphaNewmarkBeta):
     labels = ['hilber-hughes-taylor', 'hht', 'hht-alpha']
     
     def build_timestepper(*args, **kwargs) -> 'TimeStepper':
-        tscheme = HilberHughesTaylor2(*args, **kwargs)
+        tscheme = HilberHughesTaylor(*args, **kwargs)
         comm = tscheme.u.function_space.mesh.comm
         if kwargs.pop('linear', True):
             return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
@@ -244,7 +244,7 @@ class NewmarkBeta(GalphaNewmarkBeta):
     labels = ['newmark', 'newmark-beta']
     
     def build_timestepper(*args, **kwargs) -> 'TimeStepper':
-        tscheme = NewmarkBeta2(*args, **kwargs)
+        tscheme = NewmarkBeta(*args, **kwargs)
         comm = tscheme.u.function_space.mesh.comm
         if kwargs.pop('linear', True):
             return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
@@ -274,7 +274,7 @@ class MidPoint(NewmarkBeta):
     labels = ['midpoint', 'average-acceleration-method', 'aam']
     
     def build_timestepper(*args, **kwargs) -> 'TimeStepper':
-        tscheme = MidPoint2(*args, **kwargs)
+        tscheme = MidPoint(*args, **kwargs)
         comm = tscheme.u.function_space.mesh.comm
         if kwargs.pop('linear', True):
             return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
@@ -301,7 +301,7 @@ class LinearAccelerationMethod(NewmarkBeta):
     labels = ['linear-acceleration-method', 'lam']
     
     def build_timestepper(*args, **kwargs) -> 'TimeStepper':
-        tscheme = LinearAccelerationMethod2(*args, **kwargs)
+        tscheme = LinearAccelerationMethod(*args, **kwargs)
         comm = tscheme.u.function_space.mesh.comm
         if kwargs.pop('linear', True):
             return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)

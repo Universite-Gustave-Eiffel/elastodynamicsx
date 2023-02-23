@@ -135,14 +135,20 @@ class BoundaryCondition():
             self._bc = lambda v  : ufl.inner(values, v) * ds #Linear form
             
         elif type_ == "robin":
-            self._bc = lambda u,v: values[0] * ufl.inner(u-values[1], v)* ds #Bilinear form
+            r_, s_ = values
+            if nbcomps>0:
+                r_, s_ = ufl.as_matrix(r_), ufl.as_vector(s_)
+            self._bc = lambda u,v: ufl.inner(r_*(u-s_), v)* ds #Bilinear form
             
         elif type_ == 'dashpot':
             if nbcomps == 0: #scalar function space
                 self._bc = lambda u_t,v: values * ufl.inner(u_t, v)* ds #Bilinear form, to be applied on du/dt
             else: #vector function space
-                n = ufl.FacetNormal(function_space)
-                self._bc = lambda u_t,v: ((values[0]-values[1])*ufl.dot(u_t, n)*ufl.inner(n, v) + values[1]*ufl.inner(u_t, v))* ds #Bilinear form, to be applied on du/dt
+                if function_space.mesh.topology.dim == 1:
+                    self._bc = lambda u_t,v: ((values[0]-values[1])*ufl.inner(u_t[0], v[0]) + values[1]*ufl.inner(u_t, v))* ds #Bilinear form, to be applied on du/dt
+                else:
+                    n = ufl.FacetNormal(function_space)
+                    self._bc = lambda u_t,v: ((values[0]-values[1])*ufl.dot(u_t, n)*ufl.inner(n, v) + values[1]*ufl.inner(u_t, v))* ds #Bilinear form, to be applied on du/dt
                 
         elif type_ == 'periodic-do-not-use': #TODO: try to calculate P from two given boundary markers
             assert len(marker)==2, "Periodic BC requires two facet tags"

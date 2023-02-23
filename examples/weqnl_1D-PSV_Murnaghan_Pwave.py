@@ -22,20 +22,18 @@ from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
 # -----------------------------------------------------
 degElement = 4
 
-length, height = 20, 2
-Nx, Ny = 200//degElement, 20//degElement
-extent = [[0., 0.], [length, height]]
-domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny])
+length = 10
+Nx     = 100//degElement
+extent = [0., length]
+domain = mesh.create_interval(MPI.COMM_WORLD, Nx, extent)
 
-tag_left, tag_top, tag_right, tag_bottom = 1, 2, 3, 4
-all_tags = (tag_left, tag_top, tag_right, tag_bottom)
+tag_left, tag_right = 1, 2
+all_tags = (tag_left, tag_right)
 boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
-              (tag_right , lambda x: np.isclose(x[0], length)),\
-              (tag_bottom, lambda x: np.isclose(x[1], 0     )),\
-              (tag_top   , lambda x: np.isclose(x[1], height))]
+              (tag_right , lambda x: np.isclose(x[0], length))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-V = fem.VectorFunctionSpace(domain, ("CG", degElement))
+V = fem.VectorFunctionSpace(domain, ("CG", degElement), dim=2)
 #
 # -----------------------------------------------------
 
@@ -46,8 +44,12 @@ V = fem.VectorFunctionSpace(domain, ("CG", degElement))
 rho     = fem.Constant(domain, PETSc.ScalarType(1))
 mu      = fem.Constant(domain, PETSc.ScalarType(1))
 lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
+l_      = fem.Constant(domain, PETSc.ScalarType(1))
+m_      = fem.Constant(domain, PETSc.ScalarType(1))
+n_      = fem.Constant(domain, PETSc.ScalarType(1))
 
-mat   = material(V, 'isotropic', rho, lambda_, mu)
+mat = material(V, 'isotropic', rho, lambda_, mu)
+#mat = material(V, 'murnaghan', rho, lambda_, mu, l_, m_, n_)
 materials = [mat]
 #
 # -----------------------------------------------------
@@ -58,11 +60,9 @@ materials = [mat]
 # -----------------------------------------------------
 T_N      = fem.Constant(domain, PETSc.ScalarType([0,0])) #normal traction (Neumann boundary condition)
 Z_N, Z_T = mat.Z_N, mat.Z_T #P and S mechanical impedances
-bc_l = BoundaryCondition((V, facet_tags, tag_left  ), 'Neumann', T_N)
-bc_r = BoundaryCondition((V, facet_tags, tag_right ), 'Dashpot', (Z_N, Z_T))
-bc_b = BoundaryCondition((V, facet_tags, tag_bottom), 'Periodic', [0, height, 0]) #wrong. TODO: Robin BC
-#bc_b = BoundaryCondition((V, facet_tags, tag_bottom), 'Free') #here again: Robin BC. TODO
-bcs = [bc_l, bc_r, bc_b]
+bc_l  = BoundaryCondition((V, facet_tags, tag_left  ), 'Neumann', T_N)
+bc_rl = BoundaryCondition((V, facet_tags, (tag_left,tag_right) ), 'Dashpot', (Z_N, Z_T))
+bcs = [bc_l, bc_rl]
 #
 # -----------------------------------------------------
 
@@ -81,7 +81,7 @@ src_t = lambda t: np.sin(2*np.pi*f0 * t) * np.sin(np.pi*t/d0)**2 * (t<d0) * (t>0
 ### -> Space-Time function
 #
 p0  = PETSc.ScalarType(1.)         #max amplitude
-F_0 = p0 * PETSc.ScalarType([1,0]) #source orientation
+F_0 = p0 * PETSc.ScalarType([1,1]) #source orientation
 #
 T_N_function = lambda t: src_t(t) * F_0
 #
@@ -127,9 +127,9 @@ u_res = tStepper.timescheme.u # The solution
 #                    define outputs
 # -----------------------------------------------------
 ### -> Extract signals at few points
-points_output = np.array([0,height/2,0])[:,np.newaxis] + np.array([[1, 0, 0], [2, 0, 0], [3, 0, 0]]).T #shape = (3, nbpts)
+points_output = np.array([[1, 0, 0], [4, 0, 0], [7, 0, 0]]).T #shape = (3, nbpts)
 points_output_on_proc, cells_output_on_proc = find_points_and_cells_on_proc(points_output, domain)
-signals_at_points = np.zeros((points_output.shape[1], domain.topology.dim, num_steps)) #<- output stored here
+signals_at_points = np.zeros((points_output.shape[1], V.num_sub_spaces, num_steps)) #<- output stored here
 #
 # -----------------------------------------------------
 
@@ -162,13 +162,23 @@ tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_store
 #              Plot signals at few points
 # -----------------------------------------------------
 if len(points_output_on_proc)>0:
+    ### -> Exact solution, At few points
+    x = np.asarray(points_output_on_proc)
     t = dt*np.arange(num_steps)
-    fig, ax = plt.subplots(1,1)
-    ax.set_title('Signals at few points')
-    for i in range(len(signals_at_points)):
-        ax.plot(t, signals_at_points[i,0,:],       c='C'+str(i), ls='-') #FEM
-        #ax.plot(t, signals_at_points_exact[i,0,:], c='C'+str(i), ls='--') #exact
-    ax.set_xlabel('Time')
+    c11 = lambda_.value+2*mu.value
+    cL, cS = np.sqrt(c11/rho.value), np.sqrt(mu.value/rho.value)
+    resp_L = np.cumsum( src_t(t[np.newaxis,:]-x[:,0,np.newaxis]/cL) * F_0[0]/c11 , axis=1)*dt
+    resp_S = np.cumsum( src_t(t[np.newaxis,:]-x[:,0,np.newaxis]/cS) * F_0[1]/mu.value/2, axis=1)*dt
+    signals_at_points_exact = np.stack((resp_L, resp_S), axis=1)
+    #
+    fig, ax = plt.subplots(V.num_sub_spaces,1)
+    ax[0].set_title('Signals at few points')
+    for icomp, cax in enumerate(ax):
+        cax 
+        for i in range(len(signals_at_points)):
+            cax.plot(t, signals_at_points[i,icomp,:],       c='C'+str(i), ls='-') #FEM
+            cax.plot(t, signals_at_points_exact[i,icomp,:], c='C'+str(i), ls='--') #exact
+    ax[-1].set_xlabel('Time')
     plt.show()
 #
 # -----------------------------------------------------

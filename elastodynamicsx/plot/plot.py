@@ -78,7 +78,7 @@ def plot_mesh(mesh, cell_tags=None, **kwargs):
         grid.set_active_scalars("Marker")
     actor = p.add_mesh(grid, show_edges=True)
     #
-    if mesh.topology.dim<3:
+    if mesh.topology.dim==2:
         p.view_xy()
     #
     if kwargs.get('show'):
@@ -163,7 +163,7 @@ class CustomScalarPlotter(pyvista.Plotter):
             if len(self.grids)>1: self.subplot(i)
             self.add_text(labels[i])
             self.add_mesh(grid, scalars='u', show_edges=show_edges[i], lighting=False, cmap=cmap, scalar_bar_args=sargs, **kwargs)
-            if dim<3:
+            if dim==2:
                 self.view_xy()
                 self.camera.zoom(1.2)
 
@@ -208,6 +208,7 @@ class CustomVectorPlotter(pyvista.Plotter):
         self.grids=[]
         self._refresh_step = kwargs.pop('refresh_step', 1)
         self._tsleep = kwargs.pop('sleep', 0.01)
+        dims = []
         
         self._trans = lambda x:x
         cmplx = kwargs.pop('complex', 'real')
@@ -235,6 +236,7 @@ class CustomVectorPlotter(pyvista.Plotter):
             grid["u"] = self._trans(u3D)
             grid.point_data["u_nrm"] = np.linalg.norm(u3D, axis=1)
             self.grids.append(grid)
+            dims.append(u_.function_space.mesh.topology.dim)
         
         nbcomps = max(1, u_.function_space.element.num_sub_elements)
         if len(self.grids)==1:
@@ -267,7 +269,7 @@ class CustomVectorPlotter(pyvista.Plotter):
             warped = grid.warp_by_vector("u", factor=self.warp_factor)
             grid.warped = warped
             self.add_mesh(warped, scalars="u_nrm", show_edges=show_edges[i], lighting=False, scalar_bar_args=sargs, cmap=cmap, **kwargs)
-            if nbcomps<3:
+            if dims[i]==2:
                 self.view_xy()
                 self.camera.zoom(1.2)
 

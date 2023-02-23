@@ -82,7 +82,7 @@ class LeapFrog(FEniCSxTimeScheme):
                 self._L += dt_*dt_*bc.bc(v)
                 self._L0_form += bc.bc(v)
             elif bc.type == 'robin':
-                F_bc = dt_*dt_*bc.bc(u,v) #TODO: verifier
+                F_bc = dt_*dt_*bc.bc(u,v)
                 self._a += ufl.lhs(F_bc)
                 self._L += ufl.rhs(F_bc)
                 self._L0_form += bc.bc(self._u0, v)
