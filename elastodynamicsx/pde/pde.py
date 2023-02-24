@@ -27,6 +27,8 @@ class PDE():
     ### static  ###
     ### ### ### ###
     
+    #PDE.metadata #TODO!!!
+    
     def build_mpc(function_space, bcs):
         bcs_strong = BoundaryCondition.get_dirichlet_BCs(bcs)
         bcs_mpc    = BoundaryCondition.get_mpc_BCs(bcs)
