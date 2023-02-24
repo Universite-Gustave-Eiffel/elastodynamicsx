@@ -21,7 +21,17 @@ class HyperelasticMaterial(Material):
                 
         """
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
-        assert function_space.element.num_sub_elements>0, 'HyperelasticMaterial requires a vector function space'
+        nbcomps = function_space.element.num_sub_elements
+        assert nbcomps>0, 'HyperelasticMaterial requires a vector function space'
+        
+        dim = function_space.mesh.geometry.dim
+        if dim == 1: #1D
+            if nbcomps == 2:
+                self.Grad = lambda u: ufl.as_matrix([ [u[0].dx(0),0], [u[1].dx(0),0] ])
+            else:
+                self.Grad = lambda u: ufl.as_matrix([ [u[0].dx(0),0,0], [u[1].dx(0),0,0], [u[2].dx(0),0,0] ])
+        else:
+            self.Grad = lambda u: ufl.grad(u)
         
         super().__init__(functionspace_tags_marker, rho, is_linear=False, **kwargs)
 
@@ -33,7 +43,7 @@ class HyperelasticMaterial(Material):
     @property
     def k_CG(self):
         """Stiffness form function for a Continuous Galerkin formulation"""
-        return lambda u,v: ufl.inner(self.P(u), ufl.grad(v)) * self._dx
+        return lambda u,v: ufl.inner(self.P(u), self.Grad(v)) * self._dx
     
     @property
     def k_DG(self) -> 'function':
@@ -77,14 +87,14 @@ class Murnaghan(HyperelasticMaterial):
 
     def P(self, u):
         """First Piola-Kirchhoff stress"""
-        # Spatial dimension
+        # Number of components
         d = len(u)
 
         # Identity tensor
         I = ufl.variable(ufl.Identity(d))
 
         # Deformation gradient
-        F = ufl.variable(I + ufl.grad(u))
+        F = ufl.variable(I + self.Grad(u))
 
         # Right Cauchy-Green tensor
         C = ufl.variable(F.T * F)
@@ -140,7 +150,7 @@ class DummyIsotropicElasticMaterial(HyperelasticMaterial):
     def P(self, u):
         """Infinitesimal stress function; NOT the first Piola-Kirchhoff stress"""
         # Infinitesimal strain
-        e = ufl.variable(0.5*(ufl.grad(u) + ufl.grad(u).T))
+        e = ufl.variable(0.5*(ufl.grad(u) + ufl.grad(u).T)) #TODO: not valid for 1D
         
         # Strain-energy function
         W = self._lambda/2*(ufl.tr(e)**2) + self._mu*ufl.tr(e*e)
@@ -185,14 +195,14 @@ class StVenantKirchhoff(HyperelasticMaterial):
 
     def P(self, u):
         """First Piola-Kirchhoff stress"""
-        # Spatial dimension
+        # Number of components
         d = len(u)
 
         # Identity tensor
         I = ufl.variable(ufl.Identity(d))
 
         # Deformation gradient
-        F = ufl.variable(I + ufl.grad(u))
+        F = ufl.variable(I + self.Grad(u))
 
         # Right Cauchy-Green tensor
         C = ufl.variable(F.T * F)
@@ -241,7 +251,7 @@ class MooneyRivlinIncompressible(HyperelasticMaterial):
 
     def P(self, u):
         """First Piola-Kirchhoff stress"""
-        # Spatial dimension
+        # Number of components
         d = len(u)
         assert d==3, 'The MooneyRivlinIncompressible class is only defined for 3D'
 
@@ -249,7 +259,7 @@ class MooneyRivlinIncompressible(HyperelasticMaterial):
         I = ufl.variable(ufl.Identity(d))
 
         # Deformation gradient
-        F = ufl.variable(I + ufl.grad(u))
+        F = ufl.variable(I + self.Grad(u))
 
         # Right Cauchy-Green tensor
         C = ufl.variable(F.T * F)
@@ -301,7 +311,7 @@ class MooneyRivlinCompressible(HyperelasticMaterial):
 
     def P(self, u):
         """First Piola-Kirchhoff stress"""
-        # Spatial dimension
+        # Number of components
         d = len(u)
         #assert d==3, 'The MooneyRivlinIncompressible class is only defined for 3D'
 
@@ -309,7 +319,7 @@ class MooneyRivlinCompressible(HyperelasticMaterial):
         I = ufl.variable(ufl.Identity(d))
 
         # Deformation gradient
-        F = ufl.variable(I + ufl.grad(u))
+        F = ufl.variable(I + self.Grad(u))
         
         # Jacobian
         J = ufl.variable(ufl.det(F))
@@ -344,14 +354,14 @@ class MooneyRivlinCompressible(HyperelasticMaterial):
 
 # Lagrangian finite strain tensor, or Green-Lagrangian strain tensor
 def GreenLagrangeStrain(u):
-    # Spatial dimension
+    # Number of components
     d = len(u)
 
     # Identity tensor
     I = ufl.variable(ufl.Identity(d))
 
     # Deformation gradient
-    F = ufl.variable(I + ufl.grad(u))
+    F = ufl.variable(I + ufl.grad(u)) #self.Grad
 
     # Right Cauchy-Green tensor
     C = ufl.variable(F.T * F)

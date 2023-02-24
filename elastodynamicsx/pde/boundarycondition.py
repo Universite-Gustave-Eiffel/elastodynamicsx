@@ -75,6 +75,9 @@ class BoundaryCondition():
         https://jsdokken.com/dolfinx-tutorial/chapter3/robin_neumann_dirichlet.html
     """
     
+    ### ### ### ###
+    ### static  ###
+    ### ### ### ###
     
     def get_dirichlet_BCs(bcs):
         out = []
@@ -102,6 +105,11 @@ class BoundaryCondition():
                     out.append(bc)
         return out
     
+    
+    
+    ### ### ### ### ###
+    ### non-static  ###
+    ### ### ### ### ###
     
     def __init__(self, functionspace_tags_marker, type_, values=None):
         #

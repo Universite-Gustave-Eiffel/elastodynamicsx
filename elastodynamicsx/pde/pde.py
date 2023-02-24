@@ -23,6 +23,9 @@ class PDE():
     as an assembly of materials and forces defined over different subdomains
     """
     
+    ### ### ### ###
+    ### static  ###
+    ### ### ### ###
     
     def build_mpc(function_space, bcs):
         bcs_strong = BoundaryCondition.get_dirichlet_BCs(bcs)
@@ -43,6 +46,11 @@ class PDE():
         mpc.finalize()
         return mpc
     
+    
+
+    ### ### ### ### ###
+    ### non-static  ###
+    ### ### ### ### ###
     
     def __init__(self, function_space, materials=[], bodyforces=[], bcs=[], **kwargs):
 
