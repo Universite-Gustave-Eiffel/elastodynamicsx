@@ -1,6 +1,7 @@
 import ufl
 
 from elastodynamicsx.utils import get_functionspace_tags_marker
+from elastodynamicsx.pde import PDE
 
 
 def material(functionspace_tags_marker, type_, *args, **kwargs):
@@ -75,6 +76,8 @@ class Material():
             rho:   Density
             is_linear: True for linear, False for hyperelastic
             kwargs:
+                metadata: (default=None) The metadata used by the ufl measures (dx, dS)
+                    If set to None, uses the PDE.default_metadata
                 
         """
         self._rho = rho
@@ -82,8 +85,10 @@ class Material():
         
         function_space, cell_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
 
-        self._dx = ufl.Measure("dx", domain=function_space.mesh, subdomain_data=cell_tags)(marker) #also valid if cell_tags or marker are None
-        self._dS = ufl.Measure("dS", domain=function_space.mesh, subdomain_data=cell_tags)(marker)
+        domain = function_space.mesh
+        md     = kwargs.get('metadata', PDE.default_metadata)
+        self._dx = ufl.Measure("dx", domain=domain, subdomain_data=cell_tags, metadata=md)(marker) #also valid if cell_tags or marker are None
+        self._dS = ufl.Measure("dS", domain=domain, subdomain_data=cell_tags, metadata=md)(marker)
         self._function_space = function_space
                 
         e = self._function_space.ufl_element()

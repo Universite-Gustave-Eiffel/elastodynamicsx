@@ -241,14 +241,14 @@ python3 examples/weq_2D-SH_FullSpace.py
 
 ## Examples
 Several examples are provided in the **examples** subfolder:
-  * Wave equation, time domain:
+  * Wave equation, time domain; solved with **high order** (spectral) elements & **explicit** time scheme:
     * (2D) homogeneous space, anti-plane line load (SH waves): *weq_2D-SH_FullSpace.py*
     * (2D) homogeneous space, in-plane line load (P-SV waves): *weq_2D-PSV_FullSpace.py*
     * (1D-like, nonlinear) harmonic generation for a P-wave in a Murnaghan material: *weqnl_q1D-PSV_Murnaghan_Pwave.py*
   * Wave equation, frequency domain (Helmoltz equation):
     * (2D) homogeneous space, anti-plane line load (SH waves): *freq_2D-SH_FullSpace.py*
     * (2D) homogeneous space, in-plane line load (P-SV waves): *freq_2D-PSV_FullSpace.py*
-  * Structural dynamics, time domain:
+  * Structural dynamics, time domain; solved with low order elements & **implicit** time scheme:
     * (3D) forced vibration of an elastic beam clamped at one end, with Rayleigh damping - adapted from [COMET](https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html): *tdsdyn_3D_ElasticBeam.py*
   * Eigenmodes:
     * (3D) resonances of an elastic beam clamped at one end - adapted from [COMET](https://comet-fenics.readthedocs.io/en/latest/demo/modal_analysis_dynamics/cantilever_modal.html): *eigs_3D_ElasticBeam.py*

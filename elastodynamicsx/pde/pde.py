@@ -27,7 +27,15 @@ class PDE():
     ### static  ###
     ### ### ### ###
     
-    #PDE.metadata #TODO!!!
+    # The default metadata used by all measures (dx, ds, dS, ...) in the classes
+    # of the pde package: Material, BoundaryCondition, BodyForce
+    # Example: Spectral Element Method with GLL elements of degree 6
+    # >>> from elastodynamicsx.pde import PDE
+    # >>> from elastodynamicsx.utils import spectral_quadrature
+    # >>> specmd = spectral_quadrature("GLL", 6)
+    # >>> PDE.default_metadata = specmd
+    #
+    default_metadata = None
     
     def build_mpc(function_space, bcs):
         bcs_strong = BoundaryCondition.get_dirichlet_BCs(bcs)
@@ -122,9 +130,9 @@ class PDE():
         
         #interior
         m = self.m(u,v)
-        c = self.c(u,v) if not(self.c is None) else zero*ufl.inner(u,v)*ufl.dx
+        c = self.c(u,v) if not(self.c is None) else zero*ufl.inner(u,v)*ufl.dx(metadata = PDE.default_metadata)
         k = self.k(u,v)
-        L = self.L(v)   if not(self.L is None) else ufl.inner(vzero,v)*ufl.dx
+        L = self.L(v)   if not(self.L is None) else ufl.inner(vzero,v)*ufl.dx(metadata = PDE.default_metadata)
         
         #boundaries
         for bc in self._bcs_weak:
@@ -317,4 +325,5 @@ class PDE():
         
         #apply BC value
         fem.petsc.set_bc(b, self._bcs_strong) #not modified by dolfinx_mpc
-        
+
+

@@ -1,6 +1,7 @@
 import ufl
 
 from elastodynamicsx.utils import get_functionspace_tags_marker
+from elastodynamicsx.pde import PDE
 
 
 class BodyForce():
@@ -9,10 +10,11 @@ class BodyForce():
     in the PDE class. An instance represents a single source.
     """
     
-    def __init__(self, functionspace_tags_marker, value):
+    def __init__(self, functionspace_tags_marker, value, **kwargs):
         self._value = value
         function_space, cell_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
-        self._dx = ufl.Measure("dx", domain=function_space.mesh, subdomain_data=cell_tags)(marker)
+        md = kwargs.get('metadata', PDE.default_metadata)
+        self._dx = ufl.Measure("dx", domain=function_space.mesh, subdomain_data=cell_tags, metadata=md)(marker)
     
     @property
     def L(self):

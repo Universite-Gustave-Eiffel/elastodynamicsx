@@ -14,18 +14,22 @@ import matplotlib.pyplot as plt
 from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import plotter
-from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
+from elastodynamicsx.utils import spectral_element, spectral_quadrature, find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
 from analyticalsolutions import u_2D_PSV_xt, int_Fraunhofer_2D
 
 # -----------------------------------------------------
 #                     FE domain
 # -----------------------------------------------------
-degElement = 4
+# Set up a Spectral Element Method
+degElement, nameElement = 4, "GLL"
+cell_type = mesh.CellType.quadrilateral
+specFE               = spectral_element(nameElement, cell_type, degElement)
+PDE.default_metadata = spectral_quadrature(nameElement, degElement)
 
 length, height = 10, 10
 Nx, Ny = 100//degElement, 100//degElement
 extent = [[0., 0.], [length, height]]
-domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny])
+domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny], cell_type)
 
 tag_left, tag_top, tag_right, tag_bottom = 1, 2, 3, 4
 all_tags = (tag_left, tag_top, tag_right, tag_bottom)
@@ -35,7 +39,12 @@ boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
               (tag_top   , lambda x: np.isclose(x[1], height))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-V = fem.VectorFunctionSpace(domain, ("CG", degElement))
+#V = fem.VectorFunctionSpace(domain, specFE, dim=2) #currently does not work
+# workaround
+import basix.ufl_wrapper
+e        = specFE
+specFE_v = basix.ufl_wrapper.create_vector_element(e.family(), e.cell_type, e.degree(), e.lagrange_variant, e.dpc_variant, e.discontinuous, dim=2, gdim=domain.geometry.dim)
+V = fem.FunctionSpace(domain, specFE_v)
 #
 # -----------------------------------------------------
 
@@ -131,6 +140,12 @@ pde = PDE(V, materials=materials, bodyforces=bodyforces, bcs=bcs)
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
 tStepper.initial_condition(u0=[0,0], v0=[0,0], t0=tstart)
 u_res = tStepper.timescheme.u # The solution
+
+from elastodynamicsx.plot import spy_petscMatrix
+fig = plt.figure()
+fig.suptitle('Mass matrix')
+spy_petscMatrix(tStepper.A)
+plt.show()
 #
 # -----------------------------------------------------
 

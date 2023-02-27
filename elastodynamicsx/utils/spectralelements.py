@@ -51,17 +51,17 @@ def Legendre_element(cell_type, degree:int) -> basix.ufl_wrapper.BasixElement:
 ### Quadrature  ###
 ### ### ### ### ###
 
-_qd = {"2": 3, "3": 4, "4": 6, "5": 8, "6": 10, "7": 12, "8": 14, "9": 16, "10": 18}
-
 def GLL_quadrature(degree:int) -> dict:
-    return {"quadrature_rule": "GLL", "quadrature_degree": _qd[str(degree)]}
+    if degree==2:
+        return {"quadrature_rule": "GLL", "quadrature_degree": 3}
+    else:
+        return {"quadrature_rule": "GLL", "quadrature_degree": 2*(degree-1)}
 
 def GL_quadrature(degree:int) -> dict:
-    return {"quadrature_rule": "GL",  "quadrature_degree": _qd[str(degree)]}
+    return {"quadrature_rule": "GL",  "quadrature_degree": 2*degree} #2*degree+1 ?
 
-def Legendre_quadrature(degree:int) -> dict: #TODO
-    raise NotImplementedError
-    #return {"quadrature_degree": _qd[str(degree)]}
+def Legendre_quadrature(degree:int) -> dict:
+    return {"quadrature_rule": "GL",  "quadrature_degree": 2*degree}
 
 
 
@@ -90,34 +90,51 @@ def spectral_element(name:str, cell_type, degree:int) -> basix.ufl_wrapper.Basix
         specmd = spectral_quadrature("GLL", degree)
         V = fem.FunctionSpace( mesh.create_unit_square(MPI.COMM_WORLD, 10, 10, cell_type=mesh.CellType.quadrilateral), specFE )
         
-        # compile mass matrices using pure fenicsx code
+        #######
+        # Compile mass matrices using pure fenicsx code
         import ufl
         u, v = ufl.TrialFunction(V), ufl.TestFunction(V)
         
+        # here we do not specify quadrature information -> non-diagonal mass matrix
         a1_non_diag = fem.form(ufl.inner(u,v) * ufl.dx)
         M1_non_diag = fem.petsc.assemble_matrix(a1_non_diag)
         M1_non_diag.assemble()
         
+        # here we specify the quadrature metadata -> the matrix becomes diagonal
         a2_diag     = fem.form(ufl.inner(u,v) * ufl.dx(metadata=specmd))
         M2_diag     = fem.petsc.assemble_matrix(a2_diag)
         M2_diag.assemble()
         
-        # compile mass matrices using elastodynamicsx.pde classes
+        #######
+        # Compile mass matrices using elastodynamicsx.pde classes
         from elastodynamicsx.pde import PDE, material
         
+        # here we do not specify quadrature information -> non-diagonal mass matrix
         mat3          = material(V, 'scalar', 1, 1)
-        pde3_non_diag = PDE([mat3])
+        pde3_non_diag = PDE(V, [mat3])
         M3_non_diag   = pde3_non_diag.M()
         
-        PDE.metadata  = md # default metadata for all forms in the pde package (materials, BCs, ...)
-        mat4          = material(V, 'scalar', 1, 1)
-        pde4_diag     = PDE([mat4])
+        # elastodynamicsx offers two ways to specify the quadrature metadata
+        
+        # 1. by passing the metadata as kwargs to each material / boundary condition / bodyforce
+        
+        mat4          = material(V, 'scalar', 1, 1, metadata=specmd)
+        pde4_diag     = PDE(V, [mat4])
         M4_diag       = pde4_diag.M()
+        
+        # 2. by passing the metadata to the PDE.default_metadata, which is being used by
+        # all materials / boundary conditions / bodyforces at __init__ call
+        
+        PDE.default_metadata = specmd # default metadata for all forms in the pde package (materials, BCs, ...)
+        
+        mat5          = material(V, 'scalar', 1, 1)
+        pde5_diag     = PDE(V, [mat5])
+        M5_diag       = pde5_diag.M()
         
         # spy mass matrices
         from elastodynamicsx.plot import spy_petscMatrix
         import matplotlib.pyplot as plt
-        for i,M in enumerate([M1_non_diag, M2_diag, M3_non_diag, M4_diag]):
+        for i,M in enumerate([M1_non_diag, M2_diag, M3_non_diag, M4_diag, M5_diag]):
             fig = plt.figure()
             fig.suptitle('M'+str(i+1))
             spy_petscMatrix(M)

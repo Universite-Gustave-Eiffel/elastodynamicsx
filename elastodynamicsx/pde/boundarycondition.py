@@ -111,7 +111,8 @@ class BoundaryCondition():
     ### non-static  ###
     ### ### ### ### ###
     
-    def __init__(self, functionspace_tags_marker, type_, values=None):
+    def __init__(self, functionspace_tags_marker, type_, values=None, **kwargs):
+        from elastodynamicsx.pde import PDE
         #
         function_space, facet_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
 
@@ -130,7 +131,8 @@ class BoundaryCondition():
         
         self._type   = type_
         self._values = values
-        ds = ufl.Measure("ds", domain=function_space.mesh, subdomain_data=facet_tags)(marker) #also valid if facet_tags or marker are None
+        md = kwargs.get('metadata', PDE.default_metadata)
+        ds = ufl.Measure("ds", domain=function_space.mesh, subdomain_data=facet_tags, metadata=md)(marker) #also valid if facet_tags or marker are None
 
         if type_ == "dirichlet":
             fdim   = function_space.mesh.topology.dim - 1

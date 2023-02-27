@@ -15,12 +15,17 @@ import matplotlib.pyplot as plt
 from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import plotter
-from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags
+from elastodynamicsx.utils import spectral_element, spectral_quadrature, find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
 
 # -----------------------------------------------------
 #                     FE domain
 # -----------------------------------------------------
-degElement = 4
+# Set up a Spectral Element Method
+degElement, nameElement = 4, "GLL"
+cell_type = mesh.CellType.interval
+specFE               = spectral_element(nameElement, cell_type, degElement)
+PDE.default_metadata = spectral_quadrature(nameElement, degElement)
+
 
 length = 10
 Nx     = 100//degElement
@@ -33,7 +38,12 @@ boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
               (tag_right , lambda x: np.isclose(x[0], length))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-V = fem.VectorFunctionSpace(domain, ("CG", degElement), dim=2)
+#V = fem.VectorFunctionSpace(domain, specFE, dim=2) #currently does not work
+# workaround
+import basix.ufl_wrapper
+e        = specFE
+specFE_v = basix.ufl_wrapper.create_vector_element(e.family(), e.cell_type, e.degree(), e.lagrange_variant, e.dpc_variant, e.discontinuous, dim=2, gdim=domain.geometry.dim)
+V = fem.FunctionSpace(domain, specFE_v)
 #
 # -----------------------------------------------------
 
@@ -119,6 +129,12 @@ pde = PDE(V, materials=materials, bodyforces=[], bcs=bcs)
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
 tStepper.initial_condition(u0=[0,0], v0=[0,0], t0=tstart)
 u_res = tStepper.timescheme.u # The solution
+
+from elastodynamicsx.plot import spy_petscMatrix
+fig = plt.figure()
+fig.suptitle('Mass matrix')
+spy_petscMatrix(tStepper.A, precision=1e-6)
+plt.show()
 #
 # -----------------------------------------------------
 
