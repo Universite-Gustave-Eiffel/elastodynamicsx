@@ -65,23 +65,36 @@ class ElasticMaterial(Material):
     ### non-static  ###
     ### ### ### ### ###
     
-    def __init__(self, functionspace_tags_marker, rho, C_21, sigma, epsilon, **kwargs):
+    def __init__(self, functionspace_tags_marker, rho, C_21, **kwargs):
         """
         Args:
             functionspace_tags_marker: See Material
             rho: Density
             C_21: list of the 21 independent elastic constants
-            sigma: Stress function
-            epsilon: Strain function
             kwargs:
                 damping: (default=NoDamping()) An instance of a subclass of Damping
+                sigma: (optional) Stress function, matrix representation
+                epsilon: (optional) Strain function, matrix representation
         """
+        # Cij coefficients, in (6x6) or (3x3x3x3) representations
         self._C_21  = C_21
         self._Cij   = ufl.as_matrix( [[ElasticMaterial.Cij(C_21, i,j) for j in range(6)] for i in range(6)] )
         self._Cijkm = ufl.as_tensor( [[[[ElasticMaterial.Cijkm(C_21, i,j,k,m) for m in range(3)] for k in range(3)] for j in range(3)] for i in range(3)] )
+
+        # Sigma and epsilon, in matrix representation
+        self._sigma = kwargs.get('sigma', None)
+        self._epsilon = kwargs.get('epsilon', None)
+        if self._sigma is None:
+            raise NotImplementedError #TODO
+        if self._epsilon is None:
+            raise NotImplementedError #TODO
+
+        # L operators (waveguides): Lxy and Ls for 2D cross sections, Lx and Ls for 1D cross sections
+        #TODO: 1D
+        self._L_crosssection = lambda u: ufl.as_vector([u[0].dx(0), u[1].dx(1), 0, u[0].dx(1)+u[1].dx(0), u[2].dx(0), u[2].dx(1)])
+        self._L_onaxis       = lambda u: ufl.as_vector([0, 0, u[2], 0, u[0], u[1]])
+
         #
-        self._sigma = sigma
-        self._epsilon = epsilon
         self._DGvariant = kwargs.pop('DGvariant', 'SIPG')
         self._damping   = kwargs.pop('damping', NoDamping())
         if (type(self._damping) == RayleighDamping) and (self._damping.host_material is None):
@@ -91,7 +104,7 @@ class ElasticMaterial(Material):
 
 
     def sigma(self, u):
-        """Stress function: sigma(u)"""
+        """Stress function (matrix representation): sigma(u)"""
         return self._sigma(u)
     
     def sigma_n(self, u, n):
@@ -104,6 +117,19 @@ class ElasticMaterial(Material):
         v2 = ufl.as_vector(v2)
         i, j, k, m = ufl.indices(4)
         return ufl.as_matrix( self._Cijkm[i,j,k,m]*v1[i]*v2[m] , (j,k) )
+    
+    @property
+    def k1_CG(self) -> 'function':
+        return lambda u,v: ufl.inner(self._Cij*self._L_crosssection(u), self._L_crosssection(v)) * self._dx
+
+    @property
+    def k2_CG(self) -> 'function':
+        return lambda u,v: ( ufl.inner(self._Cij*self._L_onaxis(u), self._L_crosssection(v)) \
+                            -ufl.inner(self._L_crosssection(u), self._Cij*self._L_onaxis(v)) )* self._dx
+
+    @property
+    def k3_CG(self) -> 'function':
+        return lambda u,v: ufl.inner(self._Cij*self._L_onaxis(u), self._L_onaxis(v)) * self._dx
     
     @property
     def k_CG(self) -> 'function':
@@ -236,7 +262,7 @@ class ScalarLinearMaterial(ElasticMaterial):
         C_21[0] , C_21[6] , C_21[11] = C11, C22, C33
         C_21[1] , C_21[2] , C_21[7]  = C12, C13, C23
         #
-        super().__init__(functionspace_tags_marker, rho, C_21, sigma, epsilon_scalar, **kwargs)
+        super().__init__(functionspace_tags_marker, rho, C_21, sigma=sigma, epsilon=epsilon_scalar, **kwargs)
 
     @property
     def mu(self):
@@ -345,7 +371,7 @@ class IsotropicElasticMaterial(ElasticMaterial):
         C_21[1] , C_21[2] , C_21[7]  = C12, C13, C23
         C_21[15], C_21[18], C_21[20] = C44, C55, C66
         #
-        super().__init__(functionspace_tags_marker, rho, C_21, sigma, epsilon, **kwargs)
+        super().__init__(functionspace_tags_marker, rho, C_21, sigma=sigma, epsilon=epsilon, **kwargs)
 
     @property
     def lambda_(self):

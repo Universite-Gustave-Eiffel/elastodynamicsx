@@ -62,19 +62,36 @@ class PDE():
     ### non-static  ###
     ### ### ### ### ###
     
-    def __init__(self, function_space, materials=[], bodyforces=[], bcs=[], **kwargs):
+    def __init__(self, function_space:'dolfinx.fem.FunctionSpace', materials:list, **kwargs):
+        """
+        Args:
+            functions_space
+            materials: a list of pde.Material instances
+        kwargs:
+            bodyforces: (default=[]) a list of pde.BodyForce instances
+            bcs: (default=[]) a list of fem.DirichletBCMetaClass and/or pde.BoundaryCondition instances
+        """
 
         self._function_space = function_space
         self.materials = materials
-        self.bodyforces= bodyforces
-        self.bcs = bcs
-        self._mpc = None
+        self.bodyforces= kwargs.get('bodyforces', [])
+        self.bcs = kwargs.get('bcs', [])
         self._u, self._v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
         
+        # Declare stuff without building
+        self._mpc = None
+        self._m_form = None
+        self._c_form = None
+        self._k_form = None
+        self._b_form = None
+        self._k1_form = None
+        self._k2_form = None
+        self._k3_form = None
+        
         # Sort boundary conditions
-        self._bcs_weak   = BoundaryCondition.get_weak_BCs(bcs)      # custom weak BSs, instances of BoundaryCondition
-        self._bcs_strong = BoundaryCondition.get_dirichlet_BCs(bcs) # dolfinx.fem.DirichletBCMetaClass
-        self._bcs_mpc    = BoundaryCondition.get_mpc_BCs(bcs)       # instances of BoundaryCondition used to add multi-point constraints
+        self._bcs_weak   = BoundaryCondition.get_weak_BCs(self.bcs)      # custom weak BSs, instances of BoundaryCondition
+        self._bcs_strong = BoundaryCondition.get_dirichlet_BCs(self.bcs) # dolfinx.fem.DirichletBCMetaClass
+        self._bcs_mpc    = BoundaryCondition.get_mpc_BCs(self.bcs)       # instances of BoundaryCondition used to add multi-point constraints
         #new_list = filter(lambda v: v not in b, a)
         
         self._omega_ufl = fem.Constant(function_space, PETSc.ScalarType(0))
@@ -105,10 +122,9 @@ class PDE():
             self.update_b_frequencydomain = self._update_b_frequencydomain_WO_MPC
         else:
             self.update_b_frequencydomain = self._update_b_frequencydomain_WITH_MPC
-        
+
         if self.is_linear:
             print('linear PDE')
-            self._compile_M_C_K_b()
         else:
             print('non-linear PDE')
     
@@ -121,20 +137,24 @@ class PDE():
             return
         self._mpc = PDE.build_mpc(self._function_space, self._bcs_strong + self._bcs_mpc)
         
+    def _compile_M(self) -> None:
+        u, v = self._u, self._v
+        m = self.m(u,v)
+        self._m_form = fem.form(m)
         
-    def _compile_M_C_K_b(self) -> None:
-        """Required for frequency domain problems"""
+        
+    def _compile_C_K_b(self) -> None:
+        """Required for frequency domain or eigenvalue problems"""
         u, v = self._u, self._v
         zero = fem.Constant(self._function_space, PETSc.ScalarType(0.))
         vzero = zero if v.ufl_function_space().num_sub_spaces==0 else fem.Constant(self._function_space, PETSc.ScalarType([0.]*len(v)))
         
-        #interior
-        m = self.m(u,v)
+        # Interior
         c = self.c(u,v) if not(self.c is None) else zero*ufl.inner(u,v)*ufl.dx(metadata = PDE.default_metadata)
         k = self.k(u,v)
         L = self.L(v)   if not(self.L is None) else ufl.inner(vzero,v)*ufl.dx(metadata = PDE.default_metadata)
         
-        #boundaries
+        # Boundaries
         for bc in self._bcs_weak:
             if bc.type == 'neumann':
                 L += bc.bc(v)
@@ -147,17 +167,50 @@ class PDE():
             else:
                 raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
         
-        self._m_form = fem.form(m)
         self._c_form = fem.form(c)
         self._k_form = fem.form(k)
         self._b_form = fem.form(L)
 
-        #Executes the following only if using complex numbers
+        # Executes the following only if using complex numbers
         if np.issubdtype(PETSc.ScalarType, np.complexfloating):
             ##Mat_lhs = -w*w*_M_ + 1J*w*_C_ + _K_
+            m = self.m(u,v)
             w = self._omega_ufl
             self._a_form = fem.form(-w*w*m + 1J*w*c + k)
-    
+
+
+    def _compile_K1_K2_K3(self) -> None:
+        """Required for waveguide problems"""
+        u, v = self._u, self._v
+        
+        assert self._function_space.element.basix_element.discontinuous == False, 'K1, K2, K3 are not implemented for a DG formulation'
+
+        # Interior
+        k1 = self.k1(u,v)
+        k2 = self.k2(u,v)
+        k3 = self.k3(u,v)
+        
+        # Boundaries
+        for bc in self._bcs_weak:
+            if bc.type == 'neumann':
+                pass #ignores
+            elif bc.type == 'robin':
+                F_bc = bc.bc(u,v)
+                print('Robin BC: TODO')
+                raise NotImplementedError
+                #k += ufl.lhs(F_bc) #TODO
+                #L += ufl.rhs(F_bc) #ignores right hand side
+            elif bc.type == 'dashpot':
+                print('Dashpot BC: TODO')
+                raise NotImplementedError
+                #c += bc.bc(u,v)
+            else:
+                raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
+
+        self._k1_form = fem.form(k1)
+        self._k2_form = fem.form(k2)
+        self._k3_form = fem.form(k3)
+
 
 
 ### ### ### ### ### ### ### ### ### ### ###
@@ -183,6 +236,21 @@ class PDE():
         """(bilinear) Stiffness form function"""
         return lambda u,v: sum([mat.k(u,v) for mat in self.materials])
 
+    @property
+    def k1(self) -> 'function':
+        """(bilinear) k1 stiffness form function (waveguide problems)"""
+        return lambda u,v: sum([mat.k1_CG(u,v) for mat in self.materials])
+
+    @property
+    def k2(self) -> 'function':
+        """(bilinear) k2 stiffness form function (waveguide problems)"""
+        return lambda u,v: sum([mat.k2_CG(u,v) for mat in self.materials])
+
+    @property
+    def k3(self) -> 'function':
+        """(bilinear) k3 stiffness form function (waveguide problems)"""
+        return lambda u,v: sum([mat.k3_CG(u,v) for mat in self.materials])
+    
     @property
     def k_CG(self) -> 'function':
         """(bilinear) Stiffness form function (Continuous Galerkin)"""
@@ -240,6 +308,8 @@ class PDE():
     
     def M(self) -> PETSc.Mat:
         """Mass matrix"""
+        if self._m_form is None:
+            self._compile_M()
         if self._mpc is None:
             M = fem.petsc.assemble_matrix(self._m_form, bcs=self._bcs_strong)
         else:
@@ -249,6 +319,8 @@ class PDE():
 
     def C(self) -> PETSc.Mat:
         """Damping matrix"""
+        if self._c_form is None:
+            self._compile_C_K_b()
         if self._mpc is None:
             C = fem.petsc.assemble_matrix(self._c_form, bcs=self._bcs_strong)
         else:
@@ -258,6 +330,8 @@ class PDE():
         
     def K(self) -> PETSc.Mat:
         """Stiffness matrix"""
+        if self._k_form is None:
+            self._compile_C_K_b()
         if self._mpc is None:
             K = fem.petsc.assemble_matrix(self._k_form, bcs=self._bcs_strong)
         else:
@@ -273,11 +347,45 @@ class PDE():
 
     def init_b(self) -> PETSc.Vec:
         """Declares a zero vector compatible with the linear form"""
+        if self._b_form is None:
+            self._compile_C_K_b()
         if self._mpc is None:
-            return fem.petsc.create_vector(self.b_form)
+            return fem.petsc.create_vector(self._b_form)
         else:
-            return dolfinx_mpc.assemble_vector(self.b_form, self._mpc)
-        
+            return dolfinx_mpc.assemble_vector(self._b_form, self._mpc)
+
+    def K1(self) -> PETSc.Mat:
+        """K1 stiffness matrix (waveguide problems)"""
+        if self._k1_form is None:
+            self._compile_K1_K2_K3()
+        if self._mpc is None:
+            K1 = fem.petsc.assemble_matrix(self._k1_form, bcs=self._bcs_strong)
+        else:
+            K1 = dolfinx_mpc.assemble_matrix(self._k1_form, self._mpc, bcs=self._bcs_strong)
+        K1.assemble()
+        return K1
+
+    def K2(self) -> PETSc.Mat:
+        """K2 stiffness matrix (waveguide problems)"""
+        if self._k2_form is None:
+            self._compile_K1_K2_K3()
+        if self._mpc is None:
+            K2 = fem.petsc.assemble_matrix(self._k2_form, bcs=self._bcs_strong)
+        else:
+            K2 = dolfinx_mpc.assemble_matrix(self._k2_form, self._mpc, bcs=self._bcs_strong)
+        K2.assemble()
+        return K2
+
+    def K3(self) -> PETSc.Mat:
+        """K3 stiffness matrix (waveguide problems)"""
+        if self._k3_form is None:
+            self._compile_K1_K2_K3()
+        if self._mpc is None:
+            K3 = fem.petsc.assemble_matrix(self._k3_form, bcs=self._bcs_strong)
+        else:
+            K3 = dolfinx_mpc.assemble_matrix(self._k3_form, self._mpc, bcs=self._bcs_strong)
+        K3.assemble()
+        return K3
 
 
 ### ### ### ### ###  ###

@@ -90,8 +90,8 @@ class Material():
         self._dx = ufl.Measure("dx", domain=domain, subdomain_data=cell_tags, metadata=md)(marker) #also valid if cell_tags or marker are None
         self._dS = ufl.Measure("dS", domain=domain, subdomain_data=cell_tags, metadata=md)(marker)
         self._function_space = function_space
-                
-        e = self._function_space.ufl_element()
+        
+        e = function_space.element.basix_element
         if e.discontinuous == True: #True for discontinuous Galerkin
             print('Material: Using discontinuous elements -> DG formulation')
             self._k = self.k_DG

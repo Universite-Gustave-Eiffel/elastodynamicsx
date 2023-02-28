@@ -26,33 +26,34 @@ Using the **pde** package:
       *Periodic*
   * **Assemble** several materials and body forces, using the *PDE* class
 ```python
-#V is a dolfinx.fem.function_space
-#cell_tags is a dolfinx.mesh.MeshTags object
+# V is a dolfinx.fem.function_space
+# cell_tags is a dolfinx.mesh.MeshTags object
 
 from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 
-#MATERIALS
-tag_mat1 = 1 #suppose tag_mat1 refers to cells associated with material no 1
-tag_mat2 = 2 #same for material no 2
+# MATERIALS
+tag_mat1 = 1 # suppose tag_mat1 refers to cells associated with material no 1
+tag_mat2 = 2 # same for material no 2
 mat1 = material((V, cell_tags, tag_mat1), 'isotropic', rho=1, lambda_=2, mu=1)
 mat2 = material((V, cell_tags, tag_mat2), 'isotropic', rho=2, lambda_=4, mu=2)
 
-#BODY LOADS
-f_body = fem.Constant(V.mesh, np.array([0, 0], dtype=PETSc.ScalarType)) #body load
-f1     = BodyForce(V, f_body) #not specifying cell_tags and a specific tag means the entire domain
+# BODY LOADS
+f_body = fem.Constant(V.mesh, np.array([0, 0], dtype=PETSc.ScalarType)) # body load
+f1     = BodyForce(V, f_body) # not specifying cell_tags and a specific tag means the entire domain
 
-#BOUNDARY CONDITIONS
-tag_top  = 1       #top boundary
-tags_lbr = (2,3,4) #left, bottom, right boundaries
+# BOUNDARY CONDITIONS
+tag_top  = 1       # top boundary
+tags_lbr = (2,3,4) # left, bottom, right boundaries
 T_N  = fem.Constant(V.mesh, PETSc.ScalarType([0,1])) #boundary load
-bc1  = BoundaryCondition((V, facet_tags, tag_top) , 'Neumann', T_N)
-bc2  = BoundaryCondition((V, facet_tags, tags_lbr), 'Dashpot', (mat1.Z_N, mat1.Z_T)) #plane-wave absorbing conditions with P-wave & S-wave impedances of material no1
+bc1  = BoundaryCondition((V, facet_tags, tag_top) , 'Neumann', T_N) # prescribed traction
+bc2  = BoundaryCondition((V, facet_tags, tags_lbr), 'Dashpot', (mat1.Z_N, mat1.Z_T)) # plane-wave absorbing conditions with P-wave & S-wave impedances of material no1
 bcs  = [bc1, bc2]
 
-#PDE
+# PDE
 pde  = PDE(V, materials=[mat1, mat2], bodyforces=[f1], bcs=bcs)
-#m, c, k, L form functions: pde.m, pde.c, pde.k, pde.L
-#compiled M, C, K matrices: pde.M(), pde.C(), pde.K()
+# m, c, k, L form functions: pde.m, pde.c, pde.k, pde.L
+# eigs / freq. domain -> M, C, K matrices:    pde.M(),  pde.C(),  pde.K()
+# waveguides          -> K1, K2, K3 matrices: pde.K1(), pde.K2(), pde.K3()
 ```
 
 ## Solve problems
@@ -240,17 +241,20 @@ python3 examples/weq_2D-SH_FullSpace.py
 ```
 
 ## Examples
-Several examples are provided in the **examples** subfolder:
-  * Wave equation, time domain; solved with **high order** (spectral) elements & **explicit** time scheme:
+Several examples are provided in the *examples* subfolder:
+  * **Time domain**, wave equation; high order (spectral) elements & **explicit** time scheme:
     * (2D) homogeneous space, anti-plane line load (SH waves): *weq_2D-SH_FullSpace.py*
     * (2D) homogeneous space, in-plane line load (P-SV waves): *weq_2D-PSV_FullSpace.py*
-    * (1D-like, nonlinear) harmonic generation for a P-wave in a Murnaghan material: *weqnl_q1D-PSV_Murnaghan_Pwave.py*
-  * Wave equation, frequency domain (Helmoltz equation):
+    * (1D, nonlinear) harmonic generation by a P-wave in a Murnaghan material: *weqnl_q1D-PSV_Murnaghan_Pwave.py*
+
+  * **Time domain**, structural dynamics; low order elements & **implicit** time scheme:
+    * (3D) forced vibration of an elastic beam clamped at one end, with Rayleigh damping - adapted from [COMET](https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html): *tdsdyn_3D_ElasticBeam.py*
+    
+  * **Frequency domain**, wave equation (Helmoltz equation):
     * (2D) homogeneous space, anti-plane line load (SH waves): *freq_2D-SH_FullSpace.py*
     * (2D) homogeneous space, in-plane line load (P-SV waves): *freq_2D-PSV_FullSpace.py*
-  * Structural dynamics, time domain; solved with low order elements & **implicit** time scheme:
-    * (3D) forced vibration of an elastic beam clamped at one end, with Rayleigh damping - adapted from [COMET](https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html): *tdsdyn_3D_ElasticBeam.py*
-  * Eigenmodes:
+    
+  * **Eigenmodes**:
     * (3D) resonances of an elastic beam clamped at one end - adapted from [COMET](https://comet-fenics.readthedocs.io/en/latest/demo/modal_analysis_dynamics/cantilever_modal.html): *eigs_3D_ElasticBeam.py*
     * (3D) resonances of an aluminum cube: *eigs_3D_AluminumCube.py*
 
