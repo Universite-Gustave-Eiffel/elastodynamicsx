@@ -4,7 +4,7 @@ LABEL description=" elastodynamics with Fenicsx/dolfinx "
 
 WORKDIR /tmp
 COPY . /tmp/
-COPY ./examples /root/examples/
+COPY ./demo /root/demo/
 
 # Install elastodynamicsx and optional dependencies
 RUN pip3 install . &&\

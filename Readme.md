@@ -186,7 +186,7 @@ cd elastodynamicsx/
 pip3 install .
 
 #test
-python3 elastodynamicsx/examples/weq_2D-SH_FullSpace.py
+python3 elastodynamicsx/demo/weq_2D-SH_FullSpace.py
 ```
 
 ### Option 2: Inside a FEniCSx Docker image
@@ -206,7 +206,7 @@ Run the image and shares the folder from which the command is executed:
 docker run --rm -v $(pwd):/root/shared -p 8888:8888 elastolab:latest
 
 #Copy the URL printed on screen beginning with http://127.0.0.1:8888/?token...
-#The examples are in /root/examples; the shared folder is in /root/shared
+#The examples are in /root/demo; the shared folder is in /root/shared
 ```
 The backend that has been configured by default is the 'ipyvtklink' one. It has the advantage of being almost fully compatible with the examples. However, as the rendering is performed on the server, the display suffers great lag. Other options are described [here](https://docs.pyvista.org/user-guide/jupyter/index.html). For instance, when live-plotting a TimeStepper.run() call, only the first and last images will be seen -- in this case the Dockerfile.shell image should be preferred. Note ongoing works are [being pursued](https://github.com/pyvista/pyvista/issues/3690) to have a unique pyvista-jupyter backend.
 
@@ -233,15 +233,15 @@ docker run -it --rm --ipc=host --net=host --env="DISPLAY" -v $(pwd):/root/shared
 ###
 #at this point we are inside the container
 #
-#The examples are in /root/examples; the shared folder is in /root/shared
+#The examples are in /root/demo; the shared folder is in /root/shared
 ###
 
 #test
-python3 examples/weq_2D-SH_FullSpace.py
+python3 demo/weq_2D-SH_FullSpace.py
 ```
 
 ## Examples
-Several examples are provided in the *examples* subfolder:
+Several examples are provided in the *demo* subfolder:
   * **Time domain**, wave equation; high order (spectral) elements & **explicit** time scheme:
     * (2D) homogeneous space, anti-plane line load (SH waves): *weq_2D-SH_FullSpace.py*
     * (2D) homogeneous space, in-plane line load (P-SV waves): *weq_2D-PSV_FullSpace.py*
