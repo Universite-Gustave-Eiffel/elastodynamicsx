@@ -123,7 +123,7 @@ class Murnaghan(HyperelasticMaterial):
 
 
 
-class DummyIsotropicElasticMaterial(HyperelasticMaterial):
+class DummyIsotropicMaterial(HyperelasticMaterial):
     """
     A dummy implementation of an isotropic linear elastic material
     based on a HyperelasticMaterial

@@ -10,8 +10,8 @@ The module provides high level classes to build and solve common problems in a f
 ## Build problems
 Using the **pde** package:
   * Common **material laws**, using the *material* builder
-    * linear:  
-      *scalar*, *isotropic* elasticity
+    * linear elasticity:  
+      *scalar*, *isotropic*, *cubic*, *hexagonal*, *trigonal*, *tetragonal*, *orthotropic*, *monoclinic*, *triclinic*
       * damping laws: *Rayleigh* damping
     * hyperelastic:  
       *Saint Venant-Kirchhoff*, *Murnaghan*
@@ -257,6 +257,9 @@ Several examples are provided in the *examples* subfolder:
   * **Eigenmodes**:
     * (3D) resonances of an elastic beam clamped at one end - adapted from [COMET](https://comet-fenics.readthedocs.io/en/latest/demo/modal_analysis_dynamics/cantilever_modal.html): *eigs_3D_ElasticBeam.py*
     * (3D) resonances of an aluminum cube: *eigs_3D_AluminumCube.py*
+
+  * **Guided waves**:
+    * *comming soon*
 
 Reference for the analytical solutions:
   * Kausel, E. (2006). Fundamental solutions in elastodynamics: a compendium. Cambridge University Press.

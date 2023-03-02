@@ -1,15 +1,22 @@
+# Copyright (C) 2023 Pierric Mora
+#
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
+
 from dolfinx import fem
 from petsc4py import PETSc
 import ufl
 import numpy as np
 
 from .material   import Material
-from .kinematics import epsilon_scalar, epsilon_vector
+from .kinematics import get_epsilon_function, get_epsilonVoigt_function, get_L_operators
+from .damping    import NoDamping, RayleighDamping
 from elastodynamicsx.utils import get_functionspace_tags_marker
 
 class ElasticMaterial(Material):
     """
-    Base class for linear elastic materials
+    Base class for linear elastic materials, supporting full anisotropy
     """
     
     ### ### ### ###
@@ -73,27 +80,37 @@ class ElasticMaterial(Material):
             C_21: list of the 21 independent elastic constants
             kwargs:
                 damping: (default=NoDamping()) An instance of a subclass of Damping
-                sigma: (optional) Stress function, matrix representation
-                epsilon: (optional) Strain function, matrix representation
         """
+        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        dim     = function_space.mesh.geometry.dim # space dimension
+        nbcomps = function_space.num_sub_spaces    # number of components (0 for scalar)
+        
         # Cij coefficients, in (6x6) or (3x3x3x3) representations
         self._C_21  = C_21
-        self._Cij   = ufl.as_matrix( [[ElasticMaterial.Cij(C_21, i,j) for j in range(6)] for i in range(6)] )
-        self._Cijkm = ufl.as_tensor( [[[[ElasticMaterial.Cijkm(C_21, i,j,k,m) for m in range(3)] for k in range(3)] for j in range(3)] for i in range(3)] )
+        self._Cij_6x6       = ufl.as_matrix( [[ElasticMaterial.Cij(C_21, i,j) for j in range(6)] for i in range(6)] )
+        self._Cijkm_3x3x3x3 = ufl.as_tensor( [[[[ElasticMaterial.Cijkm(C_21, i,j,k,m) for m in range(3)] for k in range(3)] for j in range(3)] for i in range(3)] )
+        #TODO: rotate with Euler angles
 
-        # Sigma and epsilon, in matrix representation
-        self._sigma = kwargs.get('sigma', None)
-        self._epsilon = kwargs.get('epsilon', None)
-        if self._sigma is None:
-            raise NotImplementedError #TODO
-        if self._epsilon is None:
-            raise NotImplementedError #TODO
+        # Cij coefficients, in (3x3) or (2x2x2x2) representations if nbcomps == 2
+        if nbcomps == 2: #Cij -> 3x3 matrix; Cijkm -> 2x2x2x2 tensor
+            self._Cij   = ufl.as_matrix( [[self._Cij_6x6[i,j] for j in (0,1,3)] for i in (0,1,3)] )
+            self._Cijkm = ufl.as_tensor( [[[[self._Cijkm_3x3x3x3[i,j,k,m] for m in range(2)] for k in range(2)] for j in range(2)] for i in range(2)] )
+        else:
+            self._Cij   = self._Cij_6x6
+            self._Cijkm = self._Cijkm_3x3x3x3
+
+        ####
+        # Kinematics
+        # Strain operator, matrix representation
+        self._epsilon = get_epsilon_function(dim, nbcomps)
+        
+        # Strain operator, Voigt representation
+        self._epsilonVoigt = get_epsilonVoigt_function(dim, nbcomps)
 
         # L operators (waveguides): Lxy and Ls for 2D cross sections, Lx and Ls for 1D cross sections
-        #TODO: 1D
-        self._L_crosssection = lambda u: ufl.as_vector([u[0].dx(0), u[1].dx(1), 0, u[0].dx(1)+u[1].dx(0), u[2].dx(0), u[2].dx(1)])
-        self._L_onaxis       = lambda u: ufl.as_vector([0, 0, u[2], 0, u[0], u[1]])
-
+        self._L_crosssection, self._L_onaxis = get_L_operators(dim, nbcomps)
+        ####
+        
         #
         self._DGvariant = kwargs.pop('DGvariant', 'SIPG')
         self._damping   = kwargs.pop('damping', NoDamping())
@@ -103,9 +120,28 @@ class ElasticMaterial(Material):
         super().__init__(functionspace_tags_marker, rho, is_linear=True, **kwargs)
 
 
+
+    ### ### ### ### ### ###
+    ### Stress, strain  ###
+    ### ### ### ### ### ###
+    
+    @property
+    def epsilon(self):
+        """Strain function (matrix representation): epsilon(u)"""
+        return self._epsilon
+
+    @property
+    def epsilonVoigt(self):
+        """Strain function (Voigt representation): epsilon(u)"""
+        return self._epsilonVoigt
+        
     def sigma(self, u):
         """Stress function (matrix representation): sigma(u)"""
-        return self._sigma(u)
+        return self._Cijkm * self._epsilon(u)
+
+    def sigmaVoigt(self, u):
+        """Stress function (Voigt representation): sigma(u)"""
+        return self._Cij * self._epsilonVoigt(u)
     
     def sigma_n(self, u, n):
         """Stress in the 'n' direction: (sigma(u), n)"""
@@ -118,6 +154,23 @@ class ElasticMaterial(Material):
         i, j, k, m = ufl.indices(4)
         return ufl.as_matrix( self._Cijkm[i,j,k,m]*v1[i]*v2[m] , (j,k) )
     
+
+
+    ### ### ### ### ### ### ### ### ###
+    ### Damping and stiffness forms ###
+    ### ### ### ### ### ### ### ### ###
+    
+    @property
+    def c(self) -> 'function':
+        """Damping form function"""
+        return self._damping.c
+
+    @property
+    def k_CG(self) -> 'function':
+        """Stiffness form function for a Continuous Galerkin formulation"""
+        #return lambda u,v: ufl.inner(self._sigma(u), self._epsilon(v)) * self._dx
+        return lambda u,v: ufl.inner(self.sigmaVoigt(u), self._epsilonVoigt(v)) * self._dx
+
     @property
     def k1_CG(self) -> 'function':
         return lambda u,v: ufl.inner(self._Cij*self._L_crosssection(u), self._L_crosssection(v)) * self._dx
@@ -130,12 +183,13 @@ class ElasticMaterial(Material):
     @property
     def k3_CG(self) -> 'function':
         return lambda u,v: ufl.inner(self._Cij*self._L_onaxis(u), self._L_onaxis(v)) * self._dx
-    
-    @property
-    def k_CG(self) -> 'function':
-        """Stiffness form function for a Continuous Galerkin formulation"""
-        return lambda u,v: ufl.inner(self._sigma(u), self._epsilon(v)) * self._dx
-    
+
+
+
+    ### ### ### ### ### ### ### ### ### ### ###
+    ### Discontinuous Galerkin formulation  ###
+    ### ### ### ### ### ### ### ### ### ### ###
+
     @property
     def k_DG(self) -> 'function':
         """Stiffness form function for a Discontinuous Galerkin formulation"""
@@ -220,18 +274,142 @@ class ElasticMaterial(Material):
 
         return k_int_facets
 
-    @property
-    def c(self) -> 'function':
-        """Damping form function"""
-        return self._damping.c
+
+
+    ### ### ### ### ### ### ###
+    ### material constants  ###
+    ### ### ### ### ### ### ###
 
     @property
     def P_modulus(self):
-        """P-wave modulus
+        """
+        P-wave modulus
         = rho*c_max**2 where c_max is the highest wave velocity
         = lambda_ + 2*mu for isotropic materials
-        = mu for scalar materials"""
-        print('supercharge me')
+        = mu for scalar materials
+        """
+        raise NotImplementedError('ElasticMaterial::P_modulus -> supercharge me')
+        
+    def Cij_xyz_frame(self, i,j):
+        """Cij stiffness constant in the (xyz) coordinate frame"""
+        return self._Cij_6x6[i,j]
+
+    def Cijkm_xyz_frame(self, i,j,k,m):
+        """Cijkm stiffness constant in the (xyz) coordinate frame"""
+        return self._Cijkm_3x3x3x3[i,j,k,m]
+
+    def Cij_mat_frame(self, i,j):
+        """Cij stiffness constant in the material coordinate frame"""
+        return ElasticMaterial.Cij(self._C_21, i,j)
+
+    def Cijkm_mat_frame(self, i,j,k,m):
+        """Cijkm stiffness constant in the material coordinate frame"""
+        return ElasticMaterial.Cijkm(self._C_21, i,j,k,m)
+        
+    @property
+    def C11(self):
+        """C11 stiffness constant in the material coordinate frame"""
+        return self._C_21[0]
+
+    @property
+    def C12(self):
+        """C12 stiffness constant in the material coordinate frame"""
+        return self._C_21[1]
+        
+    @property
+    def C13(self):
+        """C13 stiffness constant in the material coordinate frame"""
+        return self._C_21[2]
+
+    @property
+    def C14(self):
+        """C14 stiffness constant in the material coordinate frame"""
+        return self._C_21[3]
+
+    @property
+    def C15(self):
+        """C15 stiffness constant in the material coordinate frame"""
+        return self._C_21[4]
+
+    @property
+    def C16(self):
+        """C16 stiffness constant in the material coordinate frame"""
+        return self._C_21[5]
+
+    @property
+    def C22(self):
+        """C22 stiffness constant in the material coordinate frame"""
+        return self._C_21[6]
+
+    @property
+    def C23(self):
+        """C23 stiffness constant in the material coordinate frame"""
+        return self._C_21[7]
+
+    @property
+    def C24(self):
+        """C24 stiffness constant in the material coordinate frame"""
+        return self._C_21[8]
+
+    @property
+    def C25(self):
+        """C25 stiffness constant in the material coordinate frame"""
+        return self._C_21[9]
+
+    @property
+    def C26(self):
+        """C26 stiffness constant in the material coordinate frame"""
+        return self._C_21[10]
+        
+    @property
+    def C33(self):
+        """C33 stiffness constant in the material coordinate frame"""
+        return self._C_21[11]
+
+    @property
+    def C34(self):
+        """C34 stiffness constant in the material coordinate frame"""
+        return self._C_21[12]
+
+    @property
+    def C35(self):
+        """C35 stiffness constant in the material coordinate frame"""
+        return self._C_21[13]
+
+    @property
+    def C36(self):
+        """C36 stiffness constant in the material coordinate frame"""
+        return self._C_21[14]
+        
+    @property
+    def C44(self):
+        """C44 stiffness constant in the material coordinate frame"""
+        return self._C_21[15]
+
+    @property
+    def C45(self):
+        """C45 stiffness constant in the material coordinate frame"""
+        return self._C_21[16]
+
+    @property
+    def C46(self):
+        """C46 stiffness constant in the material coordinate frame"""
+        return self._C_21[17]
+        
+    @property
+    def C55(self):
+        """C55 stiffness constant in the material coordinate frame"""
+        return self._C_21[18]
+
+    @property
+    def C56(self):
+        """C56 stiffness constant in the material coordinate frame"""
+        return self._C_21[19]
+        
+    @property
+    def C66(self):
+        """C66 stiffness constant in the material coordinate frame"""
+        return self._C_21[20]
 
 
 
@@ -252,22 +430,19 @@ class ScalarLinearMaterial(ElasticMaterial):
         """
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements==0, 'ScalarLinearMaterial requires a scalar function space'
-        
-        self._mu = mu
-        sigma = lambda u: self._mu*epsilon_scalar(u)
-        
+
         C11 = C22 = C33 = mu
         C12 = C13 = C23 = mu
         C_21 = [0]*21
         C_21[0] , C_21[6] , C_21[11] = C11, C22, C33
         C_21[1] , C_21[2] , C_21[7]  = C12, C13, C23
         #
-        super().__init__(functionspace_tags_marker, rho, C_21, sigma=sigma, epsilon=epsilon_scalar, **kwargs)
+        super().__init__(functionspace_tags_marker, rho, C_21, **kwargs)
 
     @property
     def mu(self):
         """The shear modulus"""
-        return self._mu
+        return self._C_21[0]
 
     @property
     def Z(self):
@@ -278,6 +453,14 @@ class ScalarLinearMaterial(ElasticMaterial):
     def P_modulus(self):
         return self.mu
 
+    def sigma(self, u):
+        """Stress function (matrix representation): sigma(u)"""
+        return self.mu * self._epsilon(u)
+
+    def sigmaVoigt(self, u):
+        """Stress function (Voigt representation): sigma(u)"""
+        return self.mu * self._epsilonVoigt(u)
+        
     @property
     def DG_numerical_flux_SIPG(self) -> 'function':
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
@@ -333,7 +516,7 @@ class ScalarLinearMaterial(ElasticMaterial):
         
 
 
-class IsotropicElasticMaterial(ElasticMaterial):
+class IsotropicMaterial(ElasticMaterial):
     """
     An isotropic linear elastic material
     """
@@ -350,19 +533,8 @@ class IsotropicElasticMaterial(ElasticMaterial):
             kwargs: Passed to ElasticMaterial
         """
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
-        assert function_space.element.num_sub_elements>0, 'IsotropicElasticMaterial requires a vector function space'
-        
-        self._lambda = lambda_
-        self._mu     = mu
-        
-        if function_space.mesh.geometry.dim == 1: #1D
-            di0     = ufl.as_vector([i==0 for i in range(function_space.num_sub_spaces)])
-            epsilon = lambda u: 0.5*(u.dx(0) + di0*u[0].dx(0))
-            sigma   = lambda u: self._lambda * u[0].dx(0) * di0 + 2*self._mu*u.dx(0)
-        else: #2D or 3D
-            epsilon = epsilon_vector
-            sigma   = lambda u: self._lambda * ufl.nabla_div(u) * ufl.Identity(len(u)) + 2*self._mu*epsilon(u)
-        
+        assert function_space.element.num_sub_elements>0, 'IsotropicMaterial requires a vector function space'
+
         C11 = C22 = C33 = lambda_ + 2*mu
         C12 = C13 = C23 = lambda_
         C44 = C55 = C66 = mu
@@ -371,100 +543,35 @@ class IsotropicElasticMaterial(ElasticMaterial):
         C_21[1] , C_21[2] , C_21[7]  = C12, C13, C23
         C_21[15], C_21[18], C_21[20] = C44, C55, C66
         #
-        super().__init__(functionspace_tags_marker, rho, C_21, sigma=sigma, epsilon=epsilon, **kwargs)
+        super().__init__(functionspace_tags_marker, rho, C_21, **kwargs)
 
     @property
     def lambda_(self):
         """Lame's first parameter"""
-        return self._lambda
+        return self._C_21[1]
 
     @property
     def mu(self):
         """Lame's second parameter (shear modulus)"""
-        return self._mu
+        return self._C_21[15]
 
     @property
     def P_modulus(self):
-        return self._lambda + 2*self._mu
+        """P-wave modulus: C11 stiffness constant"""
+        return self._C_21[0]
 
     @property
     def Z_N(self):
         """P-wave mechanical impedance: rho*c_L"""
-        return ufl.sqrt(self.rho*(self._lambda + 2*self._mu))
+        return ufl.sqrt(self.rho*self.P_modulus)
 
     @property
     def Z_T(self):
         """S-wave mechanical impedance: rho*c_S"""
-        return ufl.sqrt(self.rho*self._mu)
+        return ufl.sqrt(self.rho*self.mu)
 
+    def sigma(self, u):
+        """Stress function (matrix representation): sigma(u)"""
+        return self.lambda_ * ufl.nabla_div(u) * ufl.Identity(len(u)) + 2*self.mu*epsilon(u) #TODO: is this a speed up? otherwise: remove?
 
-
-class Damping():
-    """Dummy base class for damping laws"""
-
-    def build(type_, *args):
-        """
-        Convenience static method that instanciates the desired damping law
-        
-        Args:
-            type_: Available options are:
-                'none'
-                'rayleigh'
-            args: passed to the required damping law
-        """
-        if   type_.lower() == 'none':     return NoDamping()
-        elif type_.lower() == 'rayleigh': return RayleighDamping(*args)
-        else:
-            raise TypeError("Unknown damping law: {0:s}".format(type_))
-
-    @property
-    def c(self): print('supercharge me')
-
-class NoDamping(Damping):
-    """no damping"""
-        
-    @property
-    def c(self):
-        """The damping form"""
-        return None
-
-class RayleighDamping(Damping):
-    """Rayleigh damping law: c(u,v) = eta_m*m(u,v) + eta_k(u,v)"""
-
-    def __init__(self, eta_m, eta_k):
-        """
-        Args:
-            eta_m: Parameter of the mass-matrix part of the damping
-            eta_k: Parameter of the stiffness-matrix part of the damping
-        """
-        self._eta_m = eta_m
-        self._eta_k = eta_k
-        self._material = None
-
-    @property
-    def eta_m(self):
-        """Parameter of the mass-matrix part of the damping"""
-        return self._eta_m
-
-    @property
-    def eta_k(self):
-        """Parameter of the stiffness-matrix part of the damping"""
-        return self._eta_k
-
-    @property
-    def c(self):
-        """The damping form"""
-        return lambda u,v: self.eta_m*self._material.m(u,v) + self.eta_k*self._material.k(u,v)
-    
-    @property
-    def host_material(self):
-        """Host material from whom the mass and stiffness matrices are copied"""
-        return self._material
-
-    def link_material(self, host_material):
-        """
-        Connects to a host material from whom the mass and stiffness matrices
-        will be copied
-        """
-        self._material = host_material
 
