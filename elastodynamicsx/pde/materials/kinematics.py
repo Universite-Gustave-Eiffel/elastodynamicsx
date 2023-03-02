@@ -6,7 +6,7 @@
 
 import ufl
 
-def epsilon_vector(u): return ufl.sym(ufl.grad(u))
+def epsilon_vector(u): return ufl.sym(ufl.grad(u)) #requires 'space dimension' == 'number of components'
 def epsilon_scalar(u): return ufl.nabla_grad(u)
 
 
@@ -98,10 +98,13 @@ def get_L_operators(dim, nbcomps, k_nrm=None):
     # default value to print an error message befaire fail
     L_cs = lambda *a: print('kinematics, L operators: NotImplemented; dim=' + str(dim) + ', nbcomps=' + str(nbcomps))
 
+    if   nbcomps == 0:
+        L_cs = epsilon_scalar
+        L_oa = lambda u: u
+        return L_cs, L_oa
+        
     if   dim == 1:
-        if   nbcomps == 0: #TODO: scalar guide
-            pass
-        elif nbcomps == 2:
+        if   nbcomps == 2:
             L_cs = lambda u: ufl.as_vector([u[0].dx(0),
                                             0,
                                             u[1].dx(0)])
@@ -125,9 +128,7 @@ def get_L_operators(dim, nbcomps, k_nrm=None):
                                             k_nrm[1]*u[0]])
 
     elif dim == 2:
-        if   nbcomps == 0: #TODO: scalar guide
-            pass
-        elif nbcomps == 3: #2D, 3 components: ok
+        if nbcomps == 3: #2D, 3 components: ok
             L_cs = lambda u: ufl.as_vector([u[0].dx(0),
                                             u[1].dx(1),
                                             0,
@@ -135,11 +136,15 @@ def get_L_operators(dim, nbcomps, k_nrm=None):
                                             u[2].dx(0),
                                             u[0].dx(1)+u[1].dx(0)])
             L_oa = lambda u: ufl.as_vector([0, 0, u[2], u[1], u[0], 0])
-        else: #2D, 1 or 2 components: not ok -> default
+        else: #2D, 1 or 2 components: not ok -> error
             L_cs = lambda *a: print('kinematics:: ERROR:: L operators require 1 or 3 components')
 
-    else: #TODO: 3D
-        pass
+    else:
+        if   nbcomps == 3: #Warning: this is a special case: K1=K, K2=K3=0. The lines below don't compile because L_oa==0 -> treat it differently outside
+            L_cs = get_epsilonVoigt_function(dim, nbcomps)
+            L_oa = lambda u: ufl.as_vector([0]*6)
+        else: #3D, 1 or 2 components: not ok -> error
+            L_cs = lambda *a: print('kinematics:: ERROR:: L operators require 1 or 3 components')
 
     return L_cs, L_oa
 

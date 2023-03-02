@@ -24,9 +24,9 @@ def create_mesh(dim):
 
 
 
-def tst_scalar_material(dim=2):
+def tst_scalar_material(dim, eltname="Lagrange"):
     # FE domain
-    V = fem.FunctionSpace(create_mesh(dim), ("Lagrange", 1))
+    V = fem.FunctionSpace(create_mesh(dim), (eltname, 1))
     
     # Material
     const = lambda x: fem.Constant(V.mesh, PETSc.ScalarType(x))
@@ -38,15 +38,15 @@ def tst_scalar_material(dim=2):
     
     # Compile some matrices
     _, _, _ = pde.M() ,  pde.C() ,  pde.K()
-    #_, _, _ = pde.K1(),  pde.K2(),  pde.K3()
+    _, _, _ = pde.K1(),  pde.K2(),  pde.K3()
     
     # The end
 
 
 
-def tst_vector_materials(dim, nbcomps):
+def tst_vector_materials(dim, nbcomps, eltname="Lagrange"):
     # FE domain
-    V = fem.VectorFunctionSpace(create_mesh(dim), ("Lagrange", 1), dim=nbcomps)
+    V = fem.VectorFunctionSpace(create_mesh(dim), (eltname, 1), dim=nbcomps)
     
     # Material
     const = lambda x: fem.Constant(V.mesh, PETSc.ScalarType(x))
@@ -67,8 +67,8 @@ def tst_vector_materials(dim, nbcomps):
     
     if   dim==2 and nbcomps==2:
         print('skipping invalid case for waveguides')
-    elif dim==3:
-        print('skipping not implemented case for waveguides (dim=3)') #TODO
+    elif V.element.basix_element.discontinuous == True:
+        print('skipping not implemented case for waveguides (DG)')
     else:
         _, _, _ = pde.K1(),  pde.K2(),  pde.K3()
     
@@ -77,10 +77,11 @@ def tst_vector_materials(dim, nbcomps):
 
 
 def test_all():
-    for dim in range(3):
-        tst_scalar_material(dim+1)
-        for nbcomps in range(max(dim,1),3): #avoids dim=1 and nbcomps=1
-            print('test_all:: dim=' + str(dim+1) + ', nbcomps=' + str(nbcomps+1))
-            tst_vector_materials(dim+1, nbcomps+1)
+    for eltname in ["Lagrange"]:#, "DG"]:
+        for dim in range(3):
+            tst_scalar_material(dim+1, eltname)
+            for nbcomps in range(max(dim,1),3): #avoids dim=1 and nbcomps=1
+                print('test_all:: dim=' + str(dim+1) + ', nbcomps=' + str(nbcomps+1))
+                tst_vector_materials(dim+1, nbcomps+1, eltname)
             
 

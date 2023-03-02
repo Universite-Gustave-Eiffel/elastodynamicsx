@@ -145,7 +145,12 @@ class ElasticMaterial(Material):
     
     def sigma_n(self, u, n):
         """Stress in the 'n' direction: (sigma(u), n)"""
-        return ufl.dot(self._sigma(u), n)
+        sig = self.sigma(u)
+        dim = len(n)
+        col = sig.ufl_shape[1]
+        if col>dim:
+            n = ufl.as_vector([n[i] for i in range(dim)] + [0 for i in range(col-dim)])
+        return ufl.dot(sig, n)
 
     def diamond(self, v1,v2):
         """out_jk = C_ijkm * v1_i * v2_m"""
@@ -168,7 +173,7 @@ class ElasticMaterial(Material):
     @property
     def k_CG(self) -> 'function':
         """Stiffness form function for a Continuous Galerkin formulation"""
-        #return lambda u,v: ufl.inner(self._sigma(u), self._epsilon(v)) * self._dx
+        #return lambda u,v: ufl.inner(self.sigma(u), self.epsilon(v)) * self._dx
         return lambda u,v: ufl.inner(self.sigmaVoigt(u), self._epsilonVoigt(v)) * self._dx
 
     @property
@@ -460,6 +465,18 @@ class ScalarLinearMaterial(ElasticMaterial):
     def sigmaVoigt(self, u):
         """Stress function (Voigt representation): sigma(u)"""
         return self.mu * self._epsilonVoigt(u)
+
+    @property
+    def k1_CG(self) -> 'function':
+        return lambda u,v: ufl.inner(self.mu*self._L_crosssection(u), self._L_crosssection(v)) * self._dx
+
+    @property
+    def k2_CG(self) -> 'function':
+        return lambda u,v: fem.Constant(u.ufl_function_space(), PETSc.ScalarType(0)) * ufl.inner(u,v) * self._dx
+
+    @property
+    def k3_CG(self) -> 'function':
+        return lambda u,v: ufl.inner(self.mu*self._L_onaxis(u), self._L_onaxis(v)) * self._dx
         
     @property
     def DG_numerical_flux_SIPG(self) -> 'function':
@@ -572,6 +589,6 @@ class IsotropicMaterial(ElasticMaterial):
 
     def sigma(self, u):
         """Stress function (matrix representation): sigma(u)"""
-        return self.lambda_ * ufl.nabla_div(u) * ufl.Identity(len(u)) + 2*self.mu*epsilon(u) #TODO: is this a speed up? otherwise: remove?
+        return self.lambda_ * ufl.nabla_div(u) * ufl.Identity(len(u)) + 2*self.mu*self.epsilon(u) #TODO: is this a speed up? otherwise: remove?
 
 

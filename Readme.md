@@ -164,7 +164,7 @@ mbasis.plot(function_space=V) #V is a dolfinx.fem.function_space
 ```
 
 ## Dependencies
-ElastodynamiCSx requires FEniCSx / DOLFINx -> see [instructions here](https://github.com/FEniCS/dolfinx#installation). Tested with v0.4.1, v0.5.1, v0.5.2, v0.6.0.
+ElastodynamiCSx requires FEniCSx / DOLFINx -> see [instructions here](https://github.com/FEniCS/dolfinx#installation). Tested with v0.6.0.
 
 It also depends on [DOLFINx-MPC](https://github.com/jorgensd/dolfinx_mpc), although this dependence is optional (periodic BCs).
 
@@ -259,7 +259,7 @@ Several examples are provided in the *demo* subfolder:
     * (3D) resonances of an aluminum cube: *eigs_3D_AluminumCube.py*
 
   * **Guided waves**:
-    * *comming soon*
+    * *coming soon*
 
 Reference for the analytical solutions:
   * Kausel, E. (2006). Fundamental solutions in elastodynamics: a compendium. Cambridge University Press.

@@ -1,3 +1,9 @@
+# Copyright (C) 2023 Pierric Mora
+#
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
+
 from petsc4py import PETSc
 import numpy as np
 from dolfinx import fem
@@ -367,6 +373,8 @@ class PDE():
 
     def K2(self) -> PETSc.Mat:
         """K2 stiffness matrix (waveguide problems)"""
+        if self._function_space.mesh.geometry.dim == 3: #special case: K1=K, K2=K3=0
+            return None
         if self._k2_form is None:
             self._compile_K1_K2_K3()
         if self._mpc is None:
@@ -378,6 +386,8 @@ class PDE():
 
     def K3(self) -> PETSc.Mat:
         """K3 stiffness matrix (waveguide problems)"""
+        if self._function_space.mesh.geometry.dim == 3: #special case: K1=K, K2=K3=0
+            return None
         if self._k3_form is None:
             self._compile_K1_K2_K3()
         if self._mpc is None:
