@@ -1,8 +1,26 @@
-#TODO : Euler 1, RK4
+# Copyright (C) 2023 Pierric Mora
+#
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
 
 from petsc4py import PETSc
-try: from tqdm.auto import tqdm
-except ModuleNotFoundError: tqdm = lambda x: x
+try:
+    from tqdm.auto import tqdm
+except ModuleNotFoundError:
+    tqdm = lambda x: x
+
+
+class DiagonalSolver:
+    """
+    A solver with a diagonal left hand side
+    """
+    def __init__(self, A:PETSc.Vec):
+        self._A = A
+    
+    def solve(self, b, out):
+        out.setArray( b/self._A )
+
 
 class TimeStepper:
     """
@@ -137,16 +155,22 @@ class NonlinearTimeStepper(TimeStepper):
 class LinearTimeStepper(TimeStepper):
     def __init__(self, comm:'_MPI.Comm', timescheme:'TimeScheme', A:PETSc.Mat, b:PETSc.Vec, **kwargs):
         super().__init__(comm, timescheme, **kwargs)
+        if kwargs.get('diagonal', False) and type(A)==PETSc.Mat:
+            A = A.getDiagonal()
         self._A = A # Time-independent operator
         self._b = b # Time-dependent right-hand side
         self._explicit = timescheme.explicit
+        self._solver = None
         #
-        if self._explicit:
-            default_petsc_options = TimeStepper.petsc_options_explicit_scheme
+        if type(A)==PETSc.Vec:
+            self._init_solver_diagonal(A)
         else:
-            default_petsc_options = TimeStepper.petsc_options_implicit_scheme_linear
-        petsc_options = kwargs.get('petsc_options', default_petsc_options)
-        self._init_solver(comm, petsc_options)
+            if self._explicit:
+                default_petsc_options = TimeStepper.petsc_options_explicit_scheme
+            else:
+                default_petsc_options = TimeStepper.petsc_options_implicit_scheme_linear
+            petsc_options = kwargs.get('petsc_options', default_petsc_options)
+            self._init_solver(comm, petsc_options)
 
     @property
     def A(self) -> PETSc.Mat:
@@ -159,19 +183,26 @@ class LinearTimeStepper(TimeStepper):
     @property
     def explicit(self) -> bool:
         return self._explicit
+        
+    @property
+    def solver(self) -> PETSc.KSP:
+        return self._solver
 
+    def _init_solver_diagonal(self, A:PETSc.Vec):
+        self._solver = DiagonalSolver(A)
+    
     def _init_solver(self, comm:'_MPI.Comm', petsc_options={}):
         # see https://github.com/FEniCS/dolfinx/blob/main/python/dolfinx/fem/petsc.py
         # see also https://jsdokken.com/dolfinx-tutorial/chapter2/diffusion_code.html
         ###   ###   ###   ###
 
         # Solver
-        self.solver = PETSc.KSP().create(comm)
-        self.solver.setOperators(self._A)
+        self._solver = PETSc.KSP().create(comm)
+        self._solver.setOperators(self._A)
         
         # Give PETSc solver options a unique prefix
         problem_prefix = f"dolfinx_solve_{id(self)}"
-        self.solver.setOptionsPrefix(problem_prefix)
+        self._solver.setOptionsPrefix(problem_prefix)
         
         # Set PETSc options
         opts = PETSc.Options()
@@ -179,7 +210,7 @@ class LinearTimeStepper(TimeStepper):
         for k, v in petsc_options.items():
             opts[k] = v
         opts.prefixPop()
-        self.solver.setFromOptions()
+        self._solver.setFromOptions()
         
         # Set matrix and vector PETSc options
         self._A.setOptionsPrefix(problem_prefix)
@@ -260,7 +291,7 @@ class OneStepTimeStepper(LinearTimeStepper):
 
             # Solve linear problem
             if verbose >= 10: PETSc.Sys.Print('Solving...')
-            self.solver.solve(self._b, self._out)
+            self._solver.solve(self._b, self._out)
             
             #update the ghosts in the solution
             self._out.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)

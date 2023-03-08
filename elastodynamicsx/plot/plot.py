@@ -181,11 +181,13 @@ class CustomScalarPlotter(pyvista.Plotter):
             if "fem.function.Function" in str(type(vec)):
                 vec = vec.vector
             else:
-                try: vec = vec.u.vector #assume vec is a TimeStepper instance
+                try:
+                    vec = vec.u.vector #assume vec is a TimeStepper instance
                 except:
                     raise TypeError
         if self._refresh_step > 0 and i % self._refresh_step == 0:
-            self.update_scalars(vec.getArray())
+            with vec.localForm() as loc_v: # Necessary for correct handling of ghosts in parallel
+                self.update_scalars(loc_v.array)
             time.sleep(self._tsleep)
 
     def add_time_browser(self, update_fields_function:'function', timesteps:np.ndarray, **kwargs_slider):
@@ -201,7 +203,7 @@ class CustomScalarPlotter(pyvista.Plotter):
 
 class CustomVectorPlotter(pyvista.Plotter):
 
-    default_cmap = plt.cm.get_cmap("viridis", 25)
+    default_cmap = plt.cm.get_cmap("viridis")
     
     def __init__(self, *all_vectors, **kwargs):
         ###
@@ -238,7 +240,7 @@ class CustomVectorPlotter(pyvista.Plotter):
             self.grids.append(grid)
             dims.append(u_.function_space.mesh.topology.dim)
         
-        nbcomps = max(1, u_.function_space.element.num_sub_elements)
+        #nbcomps = max(1, u_.function_space.element.num_sub_elements)
         if len(self.grids)==1:
             defaultShape = (1,1)
         else:
@@ -276,7 +278,13 @@ class CustomVectorPlotter(pyvista.Plotter):
         if len(self.grids)>1: self.subplot(0) #resets the focus to first subplot
 
     def update_vectors(self, *all_vectors, render=True):
-        """Calls pyvista.Plotter.update_coordinates and .update_scalars for all subplots"""
+        """
+        Calls pyvista.Plotter.update_coordinates and .update_scalars for all subplots
+        
+        Args:
+            all_vectors: tuple of np.ndarray
+                e.g. all_vectors = (u1.x, u2.x, ...) where u1, u2 are dolfinx.fem.Function
+        """
         for i, (grid, u_) in enumerate(zip(self.grids, all_vectors)):
             nbpts = grid.number_of_points
             u3D   = get_3D_array_from_nparray(u_, nbpts)
@@ -292,11 +300,13 @@ class CustomVectorPlotter(pyvista.Plotter):
             if "fem.function.Function" in str(type(vec)):
                 vec = vec.vector
             else:
-                try: vec = vec.u.vector #assume vec is a TimeStepper instance
+                try:
+                    vec = vec.u.vector #assume vec is a TimeStepper instance
                 except:
                     raise TypeError
         if self._refresh_step > 0 and i % self._refresh_step == 0:
-            self.update_vectors(vec.getArray())
+            with vec.localForm() as loc_v: # Necessary for correct handling of ghosts in parallel
+                self.update_vectors(loc_v.array)
             time.sleep(self._tsleep)
 
     def add_time_browser(self, update_fields_function:'function', timesteps:np.ndarray, **kwargs_slider):
