@@ -1,8 +1,16 @@
+# Copyright (C) 2023 Pierric Mora
+#
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
+
+
 """
 Wave equation (time-domain)
 
 Propagation of SH elastic waves in a 2D, homogeneous isotropic solid, and comparison with an analytical solution
 """
+
 
 from dolfinx import mesh, fem
 from mpi4py import MPI
@@ -121,9 +129,9 @@ hx = length/Nx
 c_SH = np.sqrt(mu.value/rho.value) #phase velocity
 lbda0 = c_SH/f0
 
-print('Number of points per wavelength at central frequency: ', round(lbda0/hx, 2))
-print('Number of time steps per period at central frequency: ', round(T0/dt, 2))
-print('CFL condition: Courant number = ', round(TimeStepper.Courant_number(V.mesh, ufl.sqrt(mu/rho), dt), 2))
+PETSc.Sys.Print('Number of points per wavelength at central frequency: ', round(lbda0/hx, 2))
+PETSc.Sys.Print('Number of time steps per period at central frequency: ', round(T0/dt, 2))
+PETSc.Sys.Print('CFL condition: Courant number = ', round(TimeStepper.Courant_number(V.mesh, ufl.sqrt(mu/rho), dt), 2))
 ###
 
 
@@ -133,15 +141,9 @@ print('CFL condition: Courant number = ', round(TimeStepper.Courant_number(V.mes
 pde = PDE(V, materials=materials, bodyforces=bodyforces, bcs=bcs)
 
 #  Time integration
-tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
+tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog', diagonal=True)  # diagonal=True assumes the left hand side operator is indeed diagonal
 tStepper.initial_condition(u0=0, v0=0, t0=tstart)
 u_res = tStepper.timescheme.u # The solution
-
-from elastodynamicsx.plot import spy_petscMatrix
-fig = plt.figure()
-fig.suptitle('Mass matrix')
-spy_petscMatrix(tStepper.A, precision=1e-6)
-plt.show()
 #
 # -----------------------------------------------------
 
@@ -175,9 +177,12 @@ def cbck_storeAtPoints(i, out):
 
 ### enable live plotting
 clim = 0.1*F_0*np.array([-1, 1])
-p = plotter(u_res, refresh_step=10, **{'clim':clim}) #0 to disable
-if len(points_output_on_proc)>0:
-    p.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
+if domain.comm.rank == 0:
+    p = plotter(u_res, refresh_step=10, **{'clim':clim}) #0 to disable
+    if len(points_output_on_proc)>0:
+        p.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
+else:
+    p = None
 
 ### Run the big time loop!
 tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFullField, cbck_storeAtPoints], live_plotter=p)
@@ -189,7 +194,7 @@ tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_store
 # -----------------------------------------------------
 #     Interactive view of all time steps if stored
 # -----------------------------------------------------
-if storeAllSteps: #plotter with a slider to browse through all time steps
+if storeAllSteps and domain.comm.rank == 0: # plotter with a slider to browse through all time steps
     fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src) #accounts for the size of the source in the analytical formula
     
     ### -> Exact solution, Full field
@@ -201,7 +206,7 @@ if storeAllSteps: #plotter with a slider to browse through all time steps
     def update_fields_function(i):
         return (all_u[i].x.array, all_u_n_exact[:,i], all_u[i].x.array-all_u_n_exact[:,i])
     
-    #initializes with empty fem.Function(V) to have different valid pointers
+    # Initializes with empty fem.Function(V) to have different valid pointers
     p = plotter(fem.Function(V), fem.Function(V), fem.Function(V), labels=('FE', 'Exact', 'Diff.'), clim=clim)
     p.add_time_browser(update_fields_function, t)
     p.show()

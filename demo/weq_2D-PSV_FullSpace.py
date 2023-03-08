@@ -1,8 +1,16 @@
+# Copyright (C) 2023 Pierric Mora
+#
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
+
+
 """
 Wave equation (time-domain)
 
 Propagation of P and SV elastic waves in a 2D, homogeneous isotropic solid, and comparison with an analytical solution
 """
+
 
 from dolfinx import mesh, fem
 from mpi4py import MPI
@@ -125,9 +133,9 @@ dt = (tmax-tstart) / num_steps # time step size
 hx = length/Nx
 c_S = np.sqrt(mu.value/rho.value) #S-wave velocity
 lbda0 = c_S/f0
-print('Number of points per wavelength at central frequency: ', round(lbda0/hx, 2))
-print('Number of time steps per period at central frequency: ', round(T0/dt, 2))
-print('CFL condition: Courant number = ', round(TimeStepper.Courant_number(V.mesh, ufl.sqrt((lambda_+2*mu)/rho), dt), 2))
+PETSc.Sys.Print('Number of points per wavelength at central frequency: ', round(lbda0/hx, 2))
+PETSc.Sys.Print('Number of time steps per period at central frequency: ', round(T0/dt, 2))
+PETSc.Sys.Print('CFL condition: Courant number = ', round(TimeStepper.Courant_number(V.mesh, ufl.sqrt((lambda_+2*mu)/rho), dt), 2))
 ###
 
 
@@ -137,15 +145,9 @@ print('CFL condition: Courant number = ', round(TimeStepper.Courant_number(V.mes
 pde = PDE(V, materials=materials, bodyforces=bodyforces, bcs=bcs)
 
 #  Time integration
-tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
+tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog', diagonal=True)  # diagonal=True assumes the left hand side operator is indeed diagonal
 tStepper.initial_condition(u0=[0,0], v0=[0,0], t0=tstart)
 u_res = tStepper.timescheme.u # The solution
-
-from elastodynamicsx.plot import spy_petscMatrix
-fig = plt.figure()
-fig.suptitle('Mass matrix')
-spy_petscMatrix(tStepper.A)
-plt.show()
 #
 # -----------------------------------------------------
 
@@ -156,7 +158,7 @@ plt.show()
 ### -> Extract signals at few points
 points_output = X0_src[:,np.newaxis] + np.array([[1, 1, 0], [2, 2, 0], [3, 3, 0]]).T
 points_output_on_proc, cells_output_on_proc = find_points_and_cells_on_proc(points_output, domain)
-signals_at_points = np.zeros((points_output.shape[1], domain.topology.dim, num_steps)) #<- output stored here
+signals_at_points = np.zeros((len(points_output_on_proc), domain.topology.dim, num_steps)) #<- output stored here
 #
 # -----------------------------------------------------
 
@@ -174,9 +176,12 @@ def cbck_storeAtPoints(i, out):
 ### enable live plotting
 clim = 0.1*np.amax(F_0)*np.array([0, 1])
 kwplot = { 'clim':clim, 'warp_factor':0.5/np.amax(clim) }
-p = plotter(u_res, refresh_step=10, **kwplot) #0 to disable
-if len(points_output_on_proc)>0:
-    p.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
+if domain.comm.rank == 0:
+    p = plotter(u_res, refresh_step=10, **kwplot) #0 to disable
+    if len(points_output_on_proc)>0:
+        p.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
+else:
+    p = None
 
 ### Run the big time loop!
 tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints], live_plotter=p)
