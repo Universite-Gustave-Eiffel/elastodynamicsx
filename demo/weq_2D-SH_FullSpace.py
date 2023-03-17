@@ -22,8 +22,9 @@ import matplotlib.pyplot as plt
 from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import plotter
-from elastodynamicsx.utils import spectral_element, spectral_quadrature, find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
+from elastodynamicsx.utils import spectral_element, spectral_quadrature, make_facet_tags, make_cell_tags, ParallelEvaluator
 from analyticalsolutions import u_2D_SH_rt, int_Fraunhofer_2D
+
 
 # -----------------------------------------------------
 #                     FE domain
@@ -57,7 +58,6 @@ V  = fem.FunctionSpace(domain, specFE)
 # -----------------------------------------------------
 rho     = fem.Constant(domain, PETSc.ScalarType(1))
 mu      = fem.Constant(domain, PETSc.ScalarType(1))
-#lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
 
 mat   = material(V, 'scalar', rho, mu)
 materials = [mat]
@@ -156,9 +156,16 @@ storeAllSteps = True
 all_u = [fem.Function(V) for i in range(num_steps)] if storeAllSteps else None #all steps are stored here
 #
 ### -> Extract signals at few points
-points_output = X0_src[:,np.newaxis] + np.array([[1, 0, 0], [2, 0, 0], [3, 0, 0]]).T
-points_output_on_proc, cells_output_on_proc = find_points_and_cells_on_proc(points_output, domain)
-signals_at_points = np.zeros((len(points_output_on_proc), 1, num_steps)) #<- output stored here
+# Define points
+points_out = X0_src[:,np.newaxis] + np.array([[1, 0, 0], [2, 0, 0], [3, 0, 0]]).T
+
+# Declare a convenience ParallelEvaluator
+paraEval = ParallelEvaluator(domain, points_out)
+
+# Declare data (local)
+signals_local = np.zeros((paraEval.nb_points_local,
+                          1,
+                          num_steps))  # <- output stored here
 #
 # -----------------------------------------------------
 
@@ -171,20 +178,25 @@ def cfst_updateSources(t, tStepper):
     F_body.interpolate(F_body_function(t))
 
 def cbck_storeFullField(i, out):
-    if storeAllSteps: all_u[i+1].x.array[:] = u_res.x.array
+    if storeAllSteps and domain.comm.rank == 0:
+        all_u[i+1].x.array[:] = u_res.x.array
+
 def cbck_storeAtPoints(i, out):
-    if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = u_res.eval(points_output_on_proc, cells_output_on_proc)
+    if paraEval.nb_points_local > 0:
+        signals_local[:,:,i+1] = u_res.eval(paraEval.points_local, paraEval.cells_local)
 
 ### enable live plotting
+enable_plot = True
 clim = 0.1*F_0*np.array([-1, 1])
-if domain.comm.rank == 0:
+if domain.comm.rank == 0 and enable_plot:
     p = plotter(u_res, refresh_step=10, **{'clim':clim}) #0 to disable
-    if len(points_output_on_proc)>0:
-        p.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
+    if paraEval.nb_points_local > 0:
+        p.add_points(paraEval.points_local, render_points_as_spheres=True, point_size=12)  # add points to live_plotter
 else:
     p = None
 
 ### Run the big time loop!
+# WARNING: BUG IN PARALLEL: rank==0 does not return
 tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFullField, cbck_storeAtPoints], live_plotter=p)
 ### End of big calc.
 #
@@ -217,20 +229,22 @@ if storeAllSteps and domain.comm.rank == 0: # plotter with a slider to browse th
 # -----------------------------------------------------
 #              Plot signals at few points
 # -----------------------------------------------------
-if len(points_output_on_proc)>0:
+all_signals = paraEval.gather(signals_local, root=0)
+
+if domain.comm.rank == 0:
     fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src) #accounts for the size of the source in the analytical formula
     
     ### -> Exact solution, At few points
-    x = points_output_on_proc
+    x = points_out.T
     r = np.linalg.norm(x - X0_src[np.newaxis,:], axis=1)
     t = dt*np.arange(num_steps)
-    signals_at_points_exact = u_2D_SH_rt(r, src_t(t), rho.value, mu.value, dt, fn_kdomain_finite_size)
+    signals_exact = u_2D_SH_rt(r, src_t(t), rho.value, mu.value, dt, fn_kdomain_finite_size)
     #
     fig, ax = plt.subplots(1,1)
     ax.set_title('Signals at few points')
-    for i in range(len(signals_at_points)):
-        ax.plot(t, signals_at_points[i,0,:],     c='C'+str(i), ls='-') #FEM
-        ax.plot(t, signals_at_points_exact[i,:], c='C'+str(i), ls='--') #exact
+    for i in range(len(all_signals)):
+        ax.plot(t, all_signals[i,0,:], c='C'+str(i), ls='-') #FEM
+        ax.plot(t, signals_exact[i,:], c='C'+str(i), ls='--') #exact
     ax.set_xlabel('Time')
     plt.show()
 #

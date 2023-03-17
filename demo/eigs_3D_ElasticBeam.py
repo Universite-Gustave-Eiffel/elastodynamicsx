@@ -83,9 +83,9 @@ eps.solve()
 ### End of big calc.
 
 ### Get the result
-#eps.printEigenvalues()
+# eps.printEigenvalues()
 eigenfreqs = eps.getEigenfrequencies()
-#eigenmodes = eps.getEigenmodes()
+# eigenmodes = eps.getEigenmodes()
 eps.plot(V, wireframe=True, factor=50)
 
 verbose = False

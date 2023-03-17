@@ -22,8 +22,9 @@ import matplotlib.pyplot as plt
 from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import plotter
-from elastodynamicsx.utils import spectral_element, spectral_quadrature, find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
+from elastodynamicsx.utils import spectral_element, spectral_quadrature, make_facet_tags, make_cell_tags, ParallelEvaluator
 from analyticalsolutions import u_2D_PSV_xt, int_Fraunhofer_2D
+
 
 # -----------------------------------------------------
 #                     FE domain
@@ -156,9 +157,16 @@ u_res = tStepper.timescheme.u # The solution
 #                    define outputs
 # -----------------------------------------------------
 ### -> Extract signals at few points
-points_output = X0_src[:,np.newaxis] + np.array([[1, 1, 0], [2, 2, 0], [3, 3, 0]]).T
-points_output_on_proc, cells_output_on_proc = find_points_and_cells_on_proc(points_output, domain)
-signals_at_points = np.zeros((len(points_output_on_proc), domain.topology.dim, num_steps)) #<- output stored here
+# Define points
+points_out = X0_src[:,np.newaxis] + np.array([[1, 1, 0], [2, 2, 0], [3, 3, 0]]).T  # shape = (3, nbpts)
+
+# Declare a convenience ParallelEvaluator
+paraEval = ParallelEvaluator(domain, points_out)
+
+# Declare data (local)
+signals_local = np.zeros((paraEval.nb_points_local,
+                          V.num_sub_spaces,
+                          num_steps))  # <- output stored here
 #
 # -----------------------------------------------------
 
@@ -171,15 +179,17 @@ def cfst_updateSources(t, tStepper):
     F_body.interpolate(F_body_function(t))
 
 def cbck_storeAtPoints(i, out):
-    if len(points_output_on_proc)>0: signals_at_points[:,:,i+1] = u_res.eval(points_output_on_proc, cells_output_on_proc)
+    if paraEval.nb_points_local > 0:
+        signals_local[:,:,i+1] = u_res.eval(paraEval.points_local, paraEval.cells_local)
 
 ### enable live plotting
-clim = 0.1*np.amax(F_0)*np.array([0, 1])
-kwplot = { 'clim':clim, 'warp_factor':0.5/np.amax(clim) }
-if domain.comm.rank == 0:
+enable_plot = True
+if domain.comm.rank == 0 and enable_plot:
+    clim = 0.1*np.amax(F_0)*np.array([0, 1])
+    kwplot = { 'clim':clim, 'warp_factor':0.5/np.amax(clim) }
     p = plotter(u_res, refresh_step=10, **kwplot) #0 to disable
-    if len(points_output_on_proc)>0:
-        p.add_points(points_output_on_proc, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
+    if paraEval.nb_points_local > 0:
+        p.add_points(paraEval.points_local, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
 else:
     p = None
 
@@ -193,19 +203,22 @@ tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_store
 # -----------------------------------------------------
 #              Plot signals at few points
 # -----------------------------------------------------
-if len(points_output_on_proc)>0:
+# WARNING: BUG for mpiexec -n 5, 6, 8 -> ghostpoints included in the search for points_on_proc?
+all_signals = paraEval.gather(signals_local, root=0)
+
+if domain.comm.rank == 0:
     fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src) #accounts for the size of the source in the analytical formula
     
     ### -> Exact solution, At few points
-    x = points_output_on_proc
+    x = points_out.T
     t = dt*np.arange(num_steps)
-    signals_at_points_exact = u_2D_PSV_xt(x - X0_src[np.newaxis,:], src_t(t), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
+    signals_exact = u_2D_PSV_xt(x - X0_src[np.newaxis,:], src_t(t), F_0, rho.value,lambda_.value, mu.value, dt, fn_kdomain_finite_size)
     #
     fig, ax = plt.subplots(1,1)
     ax.set_title('Signals at few points')
-    for i in range(len(signals_at_points)):
-        ax.plot(t, signals_at_points[i,0,:],       c='C'+str(i), ls='-') #FEM
-        ax.plot(t, signals_at_points_exact[i,0,:], c='C'+str(i), ls='--') #exact
+    for i in range(len(all_signals)):
+        ax.plot(t, all_signals[i,0,:],   c='C'+str(i), ls='-') #FEM
+        ax.plot(t, signals_exact[i,0,:], c='C'+str(i), ls='--') #exact
     ax.set_xlabel('Time')
     plt.show()
 #

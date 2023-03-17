@@ -241,8 +241,13 @@ python3 demo/weq_2D-SH_FullSpace.py
 ```
 
 ## Examples
-Several examples are provided in the *demo* subfolder:
-  * **Time domain**, wave equation; high order (spectral) elements & **explicit** time scheme:
+Several examples are provided in the *demo* subfolder. To run in parallel:
+```bash
+# run on 2 nodes:
+mpiexec -n 2 python3 some_example.py
+```
+  * **Time domain**, wave equation; high order (spectral) elements & **explicit** time scheme:  
+    * In parallel: scatter the (large) mesh. The mass matrix is diagonal: efficient speed up.
     * (2D) homogeneous space, anti-plane line load (SH waves): *weq_2D-SH_FullSpace.py*
     * (2D) homogeneous space, in-plane line load (P-SV waves): *weq_2D-PSV_FullSpace.py*
     * (2D) half space, Lamb's problem, after [Komatitsch and Vilotte](https://doi.org/10.1785/bssa0880020368); meshed with GMSH: *weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.py*
@@ -260,6 +265,7 @@ Several examples are provided in the *demo* subfolder:
     * (3D) resonances of an aluminum cube: *eigs_3D_AluminumCube.py*
 
   * **Guided waves**:
+    * In parallel: Broadcast the (small) mesh to each proc & scatter the loop over the parameter (frequency or wavenumber): efficient speed up.
     * *coming soon*
 
 Reference for the analytical solutions:

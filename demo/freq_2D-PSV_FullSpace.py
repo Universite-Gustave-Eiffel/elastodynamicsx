@@ -1,7 +1,8 @@
 """
 Wave equation (frequency-domain)
 
-Propagation of P and SV elastic waves in a 2D, homogeneous isotropic solid, and comparison with an analytical solution
+Propagation of P and SV elastic waves in a 2D, homogeneous isotropic solid,
+and comparison with an analytical solution
 """
 
 from dolfinx import mesh, fem
@@ -14,10 +15,12 @@ import matplotlib.pyplot as plt
 from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
 from elastodynamicsx.solvers import FrequencyDomainSolver
 from elastodynamicsx.plot import plotter, live_plotter
-from elastodynamicsx.utils import find_points_and_cells_on_proc, make_facet_tags, make_cell_tags
+from elastodynamicsx.utils import make_facet_tags, make_cell_tags, ParallelEvaluator
 from analyticalsolutions import u_2D_PSV_xw, int_Fraunhofer_2D
 
-assert np.issubdtype(PETSc.ScalarType, np.complexfloating), "Demo should only be executed with DOLFINx complex mode"
+assert np.issubdtype(PETSc.ScalarType, np.complexfloating), \
+       "Demo should only be executed with DOLFINx complex mode"
+
 
 # -----------------------------------------------------
 #                     FE domain
@@ -58,7 +61,7 @@ materials = [mat]
 # -----------------------------------------------------
 #                 Boundary conditions
 # -----------------------------------------------------
-Z_N, Z_T = mat.Z_N, mat.Z_T #P and S mechanical impedances
+Z_N, Z_T = mat.Z_N, mat.Z_T  # P and S mechanical impedances
 bc  = BoundaryCondition((V, facet_tags, all_tags), 'Dashpot', (Z_N, Z_T))
 bcs = [bc]
 #
@@ -68,9 +71,9 @@ bcs = [bc]
 # -----------------------------------------------------
 #                Gaussian Source term
 # -----------------------------------------------------
-F0 = fem.Constant(domain, PETSc.ScalarType([1,0])) #amplitude
-R0 = 0.1 #radius
-X0 = np.array([length/2, height/2, 0]) #center
+F0 = fem.Constant(domain, PETSc.ScalarType([1,0]))  # amplitude
+R0 = 0.1  # radius
+X0 = np.array([length/2, height/2, 0])  # center
 x  = ufl.SpatialCoordinate(domain)
 gaussianBF = F0 * ufl.exp(-((x[0]-X0[0])**2+(x[1]-X0[1])**2)/2/R0**2) / (2*np.pi*R0**2)
 bf         = BodyForce(V, gaussianBF)
@@ -90,7 +93,8 @@ pde = PDE(V, materials=materials, bodyforces=bodyforces, bcs=bcs)
 # -----------------------------------------------------
 #                  Initialize solver
 # -----------------------------------------------------
-fdsolver = FrequencyDomainSolver(V.mesh.comm, pde.M(), pde.C(), pde.K(), pde.init_b(), b_update_function=pde.update_b_frequencydomain)
+fdsolver = FrequencyDomainSolver(V.mesh.comm, pde.M(), pde.C(), pde.K(),
+                                 pde.init_b(), b_update_function=pde.update_b_frequencydomain)
 #
 # -----------------------------------------------------
 
@@ -98,14 +102,15 @@ fdsolver = FrequencyDomainSolver(V.mesh.comm, pde.M(), pde.C(), pde.K(), pde.ini
 # -----------------------------------------------------
 #          Ex 1: Solve for a single frequency
 # -----------------------------------------------------
-#solve
+# Solve
 omega = 1.0
-u = fem.Function(V, name='solution')
-fdsolver.solve(omega=omega, out=u.vector)
+u_res = fem.Function(V, name='solution')
+fdsolver.solve(omega=omega, out=u_res.vector)
 
-#plot
-p = plotter(u, complex='real')
-p.show()
+# Plot
+if domain.comm.rank == 0:
+    p = plotter(u_res, complex='real')
+    p.show()
 #
 # ------------------ end of Ex 1 ----------------------
 
@@ -113,45 +118,69 @@ p.show()
 # -----------------------------------------------------
 #          Ex 2: Solve for several frequencies
 # -----------------------------------------------------
-#prepare post processing
+# Frequencies to solve for
+omegas = np.linspace(0.5, 3, num=5)
+
+# Declare solution
+u_res = fem.Function(V, name='solution')
+
+# Prepare post processing
 ### -> Extract field at few points
 from scipy.spatial.transform import Rotation as R
 theta = np.radians(35)
 pts = np.linspace(0, length/2, endpoint=False)[1:]
-points_output = X0[:,np.newaxis] + R.from_rotvec([0,0,theta]).as_matrix() @ np.array([pts, np.zeros_like(pts), np.zeros_like(pts)])
-points_output_on_proc, cells_output_on_proc = find_points_and_cells_on_proc(points_output, domain)
-u_at_pts = []
+points_out = X0[:,np.newaxis] + R.from_rotvec([0,0,theta]).as_matrix() @ np.array([pts,
+                                                                                   np.zeros_like(pts),
+                                                                                   np.zeros_like(pts)])
 
-#callback function: post process solution
-cbck_eval_at_points = lambda i, solver: u_at_pts.append(u.eval(points_output_on_proc, cells_output_on_proc))
+# Declare a convenience ParallelEvaluator
+paraEval = ParallelEvaluator(domain, points_out)
 
-#live plotting
-p = live_plotter(u, clim=0.25*np.linalg.norm(mu.value*F0.value)*np.array([0, 1]))
-if len(points_output_on_proc)>0:
-    p.add_points(points_output_on_proc) #adds points to live_plotter
+# Declare data (local)
+u_at_pts_local = np.zeros((paraEval.nb_points_local,
+                           V.num_sub_spaces,
+                           omegas.size))  # <- output stored here
 
-#solve
-omegas = np.linspace(0.5, 3, num=5)
-u = fem.Function(V, name='solution')
-fdsolver.solve(omega=omegas, out=u.vector, callbacks=[cbck_eval_at_points], live_plotter=p)
+# Callback function: post process solution
+def cbck_storeAtPoints(i, out):
+    if paraEval.nb_points_local > 0:
+        u_at_pts_local[:,:,i] = u_res.eval(paraEval.points_local, paraEval.cells_local)
 
-#plot
-if len(points_output_on_proc)>0:
+# Live plotting
+enable_plot = True
+if domain.comm.rank == 0 and enable_plot:
+    p = live_plotter(u_res, clim=0.25*np.linalg.norm(mu.value*F0.value)*np.array([0, 1]))
+    if paraEval.nb_points_local > 0:
+        p.add_points(paraEval.points_local)  # add points to live_plotter
+else:
+    p = None
+
+# Solve
+fdsolver.solve(omega=omegas, out=u_res.vector, callbacks=[cbck_storeAtPoints], live_plotter=p)
+
+# Plot
+u_at_pts = paraEval.gather(u_at_pts_local, root=0)
+
+if domain.comm.rank == 0:
     ### -> Exact solution, At few points
-    x = points_output_on_proc
-    fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0) #accounts for the size of the source in the analytical formula
-    u_at_pts_anal = u_2D_PSV_xw(x-X0[np.newaxis,:], omegas, F0.value, rho.value, lambda_.value, mu.value, fn_kdomain_finite_size)
+    x = points_out.T
+    
+    # account for the size of the source in the analytical formula
+    fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0)
+    u_at_pts_anal = u_2D_PSV_xw(x-X0[np.newaxis,:], omegas, F0.value, rho.value,
+                                lambda_.value, mu.value, fn_kdomain_finite_size)
     
     #
     fn = np.real
     
     icomp = 0
     fig, ax = plt.subplots(len(omegas),1)
-    fig.suptitle(r'u at few points, $\theta$='+str(int(round(np.degrees(theta),0)))+r'$^{\circ}$')
+    fig.suptitle(r'u at few points, $\theta$=' + str(int(round(np.degrees(theta),0))) + r'$^{\circ}$')
     r = np.linalg.norm(x - X0[np.newaxis,:], axis=1)
     for i in range(len(omegas)):
-        ax[i].text(0.15,0.95, r'$\omega$='+str(round(omegas[i],2)), ha='left', va='top', transform=ax[i].transAxes)
-        ax[i].plot(r, fn(u_at_pts[i][:,icomp]), ls='-' , label='FEM')
+        ax[i].text(0.15, 0.95, r'$\omega$='+str(round(omegas[i],2)),
+                   ha='left', va='top', transform=ax[i].transAxes)
+        ax[i].plot(r, fn(u_at_pts[:,icomp,i]), ls='-' , label='FEM')
         ax[i].plot(r, fn(u_at_pts_anal[:,icomp,i]), ls='--', label='analytical')
     ax[0].legend()
     ax[-1].set_xlabel('Distance to source')

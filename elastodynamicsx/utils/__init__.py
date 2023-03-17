@@ -1,4 +1,11 @@
+# Copyright (C) 2023 Pierric Mora
+#
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
+
 """Various tools that do not fit into the other packages"""
 
-from .utils import *
+from .tags import *
+from .eval import *
 from .spectralelements import *

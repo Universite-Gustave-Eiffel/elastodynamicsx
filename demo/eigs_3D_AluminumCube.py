@@ -19,7 +19,7 @@ from elastodynamicsx.solvers import EigenmodesSolver
 # -----------------------------------------------------
 #                     FE domain
 # -----------------------------------------------------
-L1, L2, L3 = 11.92, 10.93, 9.86 #millimeters
+L1, L2, L3 = 11.92, 10.93, 9.86  # millimeters
 
 Nx = Ny = Nz = 6
 
@@ -34,7 +34,7 @@ V = fem.VectorFunctionSpace(domain, ("CG", 2))
 # -----------------------------------------------------
 #                 Material parameters
 # -----------------------------------------------------
-rho, C11, C44 = 2.788, 109.26, 26.72 #aluminum. rho in g/cm3, Cij in GPa -> freq. in MHz
+rho, C11, C44 = 2.788, 109.26, 26.72  # Aluminum. rho in g/cm3, Cij in GPa -> freq. in MHz
 lambda_ = C11 - 2*C44
 mu      = C44
 rho     = fem.Constant(domain, PETSc.ScalarType(rho))
@@ -60,10 +60,10 @@ eps.solve()
 ### End of big calc.
 
 ### Get the result
-#eps.printEigenvalues()
+# eps.printEigenvalues()
 eigenfreqs = eps.getEigenfrequencies()
-#eigenmodes = eps.getEigenmodes()
-eps.plot(V, slice(6,6+9), wireframe=True, factor=30) #avoids the first 6 rigid body modes
+# eigenmodes = eps.getEigenmodes()
+eps.plot(V, slice(6,6+9), wireframe=True, factor=30)  # Avoid the first 6 rigid body modes
 #
 # -----------------------------------------------------
 
@@ -91,8 +91,8 @@ freqs_OgiEtAl_calc = np.array([116.32 , 143.186, 158.44 , 166.113, 169.338, 178.
 
 print('Eigenfrequencies: comparison with litterature values')
 print('  FE   \tOgi et al, calc.\t Ogi et al, exp. \t(kHz)')
-for fFE, fOgi_calc, fOgi_exp in zip(eigenfreqs[6:]*1e3, freqs_OgiEtAl_calc, freqs_OgiEtAl_exp): #*1e3 to convert MHz into kHz
-    print(str(round(fFE,3)) +"\t     "+ str(round(fOgi_calc,3)) +"\t\t     "+ str(round(fOgi_exp,3)))
+for fFE, fOgi_calc, fOgi_exp in zip(eigenfreqs[6:]*1e3, freqs_OgiEtAl_calc, freqs_OgiEtAl_exp):  # *1e3 to convert MHz into kHz
+    print(str(round(fFE, 3)) +"\t     "+ str(round(fOgi_calc, 3)) +"\t\t     "+ str(round(fOgi_exp, 3)))
 #
 # -----------------------------------------------------
 
