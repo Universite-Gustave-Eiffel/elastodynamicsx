@@ -1,7 +1,12 @@
+# Copyright (C) 2023 Pierric Mora
+#
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
+
 from petsc4py import PETSc
 try: from tqdm.auto import tqdm
 except ModuleNotFoundError: tqdm = lambda x: x
-
 
 
 class FrequencyDomainSolver:
@@ -48,9 +53,10 @@ class FrequencyDomainSolver:
         fdsolver.solve(omega=omega, out=u.vector)
     """
     
-    default_petsc_options = {"ksp_type": "preonly", "pc_type": "lu"} #"pc_factor_mat_solver_type": "mumps"
+    default_petsc_options = {"ksp_type": "preonly", "pc_type": "lu"}  # "pc_factor_mat_solver_type": "mumps"
 
-    def __init__(self, comm:'_MPI.Comm', M:PETSc.Mat, C:PETSc.Mat, K:PETSc.Mat, b:PETSc.Vec, b_update_function:'function'=None, **kwargs):
+    def __init__(self, comm:'_MPI.Comm', M:PETSc.Mat, C:PETSc.Mat, K:PETSc.Mat,
+                 b:PETSc.Vec, b_update_function:'function'=None, **kwargs):
         """
         Args:
             comm: The MPI communicator
@@ -78,7 +84,6 @@ class FrequencyDomainSolver:
         # Initialize the PETSc solver
         petsc_options = kwargs.get('petsc_options', FrequencyDomainSolver.default_petsc_options)
         self.solver = PETSc.KSP().create(comm)
-        #self.solver.setOperators(M.copy()) #do it at solve
         
         # Give PETSc solver options a unique prefix
         problem_prefix = f"dolfinx_solve_{id(self)}"
@@ -97,7 +102,7 @@ class FrequencyDomainSolver:
     def solve(self, omega, out:PETSc.Vec=None, callbacks:list=[], **kwargs) -> PETSc.Vec:
         """
         Solve the linear problem
-        
+
         Args:
             omega: The angular frequency (scalar or array)
             out: The solution (displacement field) to the last solve. If
@@ -107,7 +112,7 @@ class FrequencyDomainSolver:
             kwargs:
                 live_plotter: a plotter object that can refresh through
                 a live_plotter.live_plotter_update_function(i, out) function
-        
+
         Returns:
             out
         """
@@ -120,39 +125,40 @@ class FrequencyDomainSolver:
 
 
     def _solve_single_omega(self, omega, out:PETSc.Vec) -> PETSc.Vec:
-        #update load vector at angular frequency 'omega'
+        # Update load vector at angular frequency 'omega'
         if not(self._b_update_function is None):
             self._b_update_function(self._b, omega)
-            #self._b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE) #assume this has already been done
+            # Assume self._b.ghostUpdate(...) has already been done
         
-        #update PDE matrix
+        # Update PDE matrix
         w = omega
         A = PETSc.ScalarType(-w*w)*self._M + PETSc.ScalarType(1J*w)*self._C + self._K
         self.solver.setOperators(A)
 
-        #solve
+        # Solve
         self.solver.solve(self._b, out)
         
-        #update the ghosts in the solution
+        # Update the ghosts in the solution
         out.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
         return out
     
     
     def _solve_multiple_omegas(self, omegas, out:PETSc.Vec, callbacks:list=[], **kwargs) -> PETSc.Vec:
-        #loop on values in omegas -> _solve_single_omega
+        # Loop on values in omegas -> _solve_single_omega
         
         live_plt = kwargs.get('live_plotter', None)
         if not(live_plt is None):
             if type(live_plt)==dict:
-                from elastodynamicsx.plot import live_plotter
-                live_plt = live_plotter(self.u, live_plt.pop('refresh_step', 1), **live_plt)
+                # from elastodynamicsx.plot import live_plotter
+                # live_plt = live_plotter(self.u, live_plt.pop('refresh_step', 1), **live_plt)
+                raise NotImplementedError
             callbacks.append(live_plt.live_plotter_update_function)
             live_plt.show(interactive_update=True)
             
         for i in tqdm(range(len(omegas))):
             self._solve_single_omega(omegas[i], out)
             for callback in callbacks:
-                callback(i, out) #<- store solution, plot, print, ...
+                callback(i, out)  # <- store solution, plot, print, ...
         return out
 
     
@@ -174,15 +180,6 @@ class FrequencyDomainSolver:
     @property
     def b(self) -> PETSc.Vec:
         """The load vector"""
+        return self._b
 
-
-
-
-
-    def __OLD__solve_single_omega(self, omega): #TODO: remove
-        w = omega
-        a = -w*w*self._m + 1J*w*self._c + self._k
-        self._problem = fem.petsc.LinearProblem(a, self._L, bcs=self._bcs, petsc_options=self._petsc_options)
-        return self._problem.solve()
-    
 
