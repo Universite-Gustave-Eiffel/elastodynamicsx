@@ -28,6 +28,7 @@ from elastodynamicsx.pde     import material, BoundaryCondition, PDE
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot    import plotter
 from elastodynamicsx.utils   import spectral_element, spectral_quadrature, ParallelEvaluator
+
 from models.model_Lamb_KomatitschVilotte_BSSA1998 import create_model
 
 
@@ -90,7 +91,7 @@ materials = [mat]
 # -----------------------------------------------------
 #                 Boundary conditions
 # -----------------------------------------------------
-Z_N, Z_T = mat.Z_N, mat.Z_T # P and S mechanical impedances
+Z_N, Z_T = mat.Z_N, mat.Z_T   # P and S mechanical impedances
 T_N    = fem.Function(V)      # Normal traction (Neumann boundary condition)
 bc_top = BoundaryCondition((V, facet_tags, tagBdFree), 'Neumann', T_N)
 bc_int = BoundaryCondition((V, facet_tags, tagBdInt), 'Dashpot', (Z_N, Z_T))  # Absorbing BC on the artificial boundaries
@@ -109,7 +110,7 @@ X0_src = np.array([1.720*sizefactor, y_surf(1.720*sizefactor), 0])  # Center
 W0_src = 0.2*L_/50  # Width
 #
 ### Gaussian function
-nrm   = 1/np.sqrt(2*np.pi*W0_src**2)  #normalize to int[src_x(x) dx]=1
+nrm   = 1/np.sqrt(2*np.pi*W0_src**2)  # normalize to int[src_x(x) dx]=1
 
 def src_x(x):
     return nrm * np.exp(-1/2*((x[0]-X0_src[0])/(W0_src * np.cos(np.radians(tilt))))**2, dtype=PETSc.ScalarType)  # Source(x)
@@ -201,7 +202,8 @@ if domain.comm.rank == 0 and enable_plot:
     kwplot = {'clim':clim, 'show_edges':False, 'warp_factor':0.05/np.amax(clim) }
     p = plotter(u_res, refresh_step=30, **kwplot)
     if paraEval.nb_points_local > 0:
-        p.add_points(paraEval.points_local, render_points_as_spheres=True, opacity=0.75)  # adds points to live_plotter
+        # add points to live_plotter
+        p.add_points(paraEval.points_local, render_points_as_spheres=True, opacity=0.75)
 else:
     p = None
 
@@ -213,13 +215,18 @@ tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_store
 
 
 # -----------------------------------------------------
-#                  Plot seismograms
+#              Plot & export seismograms
 # -----------------------------------------------------
 all_signals = paraEval.gather(signals_local, root=0)
 
 if domain.comm.rank == 0:
     
     t = dt*np.arange(num_steps)
+
+    # Export as .npz file
+    np.savez('seismogram_weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.npz',
+             x=points_out.T, t=t, signals=all_signals)
+
     dx = np.linalg.norm(points_out.T[1] - points_out.T[0])
     x0 = np.linalg.norm(points_out.T[0] - X0_src)
     ampl = 4 * dx / np.amax(np.abs(all_signals))
@@ -230,8 +237,8 @@ if domain.comm.rank == 0:
     ax[1].set_title(r'$u_{normal}$')
     for i in range(len(all_signals)):
         offset = i*dx - x0
-        u2plt_t= offset + ampl * ( r11 * all_signals[i,0,:] + r12 * all_signals[i,1,:])
-        u2plt_n= offset + ampl * (-r12 * all_signals[i,0,:] + r11 * all_signals[i,1,:])
+        u2plt_t= offset + ampl * ( r11 * all_signals[i,0,:] + r12 * all_signals[i,1,:])  # tangential
+        u2plt_n= offset + ampl * (-r12 * all_signals[i,0,:] + r11 * all_signals[i,1,:])  # normal
         ax[0].plot(u2plt_t, t, c='k')
         ax[1].plot(u2plt_n, t, c='k')
         ax[0].fill_betweenx(t, offset, u2plt_t, where=(u2plt_t > offset), color='k')

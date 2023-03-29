@@ -203,7 +203,6 @@ tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_store
 # -----------------------------------------------------
 #              Plot signals at few points
 # -----------------------------------------------------
-# WARNING: BUG for mpiexec -n 5, 6, 8 -> ghostpoints included in the search for points_on_proc?
 all_signals = paraEval.gather(signals_local, root=0)
 
 if domain.comm.rank == 0:

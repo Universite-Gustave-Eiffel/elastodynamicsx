@@ -153,14 +153,14 @@ Using the **solutions** package:
 # eps.solve() has already been performed
 
 # Get the solutions
-mbasis = eps.getModalBasis()  #a elastodynamicsx.solutions.ModalBasis
+mbasis = eps.getModalBasis()  # a elastodynamicsx.solutions.ModalBasis
 
 # Access data
 eigenfreqs = mbasis.fn     # a np.ndarray
 modeshape5 = mbasis.un[5]  # a PETSc.Vec vector
 
 # Visualize
-mbasis.plot(function_space=V) #V is a dolfinx.fem.function_space
+mbasis.plot(function_space=V)  # V is a dolfinx.fem.function_space
 ```
 
 ## Dependencies
@@ -244,7 +244,7 @@ python3 demo/weq_2D-SH_FullSpace.py
 Several examples are provided in the *demo* subfolder. To run in parallel:
 ```bash
 # run on 2 nodes:
-mpiexec -n 2 python3 some_example.py
+mpiexec -n 2 python3 example.py
 ```
   * **Time domain**, wave equation; high order (spectral) elements & **explicit** time scheme:  
     * In parallel: scatter the (large) mesh. The mass matrix is diagonal: efficient speed up.
