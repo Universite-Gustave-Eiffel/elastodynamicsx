@@ -21,6 +21,26 @@ class ParallelEvaluator:
         points: shape=(3, nbpts). Should be defined either for all processes,
             or for the proc no 0. Does not support 'points' being scattered on
             several processes.
+
+    Example of use:
+        # Define some output points
+        x = np.linspace(0, 1, num=30)
+        y = np.zeros_like(x)
+        z = np.zeros_like(x)
+        points = np.array([x, y, z])
+        
+        # Initialize the evaluator
+        paraEval = ParallelEvaluator(domain, points)
+        
+        # Perform function evaluations
+        u_eval_local = u.eval(paraEval.points_local, paraEval.cells_local)
+        
+        # Gather all procs
+        u_eval = paraEval.gather(u_eval_local, root=0)
+        
+        # Do something, e.g. export to file
+        if domain.comm.rank == 0:
+            np.savez('u_eval.npz', x=points.T, u=u_eval)
     
     Adapted from:
         https://github.com/jorgensd/dolfinx-tutorial/issues/116
@@ -46,7 +66,7 @@ class ParallelEvaluator:
         return len(self.points_local)
 
     def gather(self, eval_results: np.ndarray, root=0) -> np.ndarray:
-        recv_eval = self.comm.gather(eval_results, root=0)
+        recv_eval = self.comm.gather(eval_results, root=root)
         rank = self.comm.Get_rank()
         if rank == 0:
             # concatenate
