@@ -71,7 +71,7 @@ dt, num_steps = 0.01, 100  # t=[0..1)
 
 # Initialize the time stepper
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
-tStepper.initial_condition(u0=[0,0], v0=[0,0], t0=0)
+tStepper.set_initial_condition(u0=[0,0], v0=[0,0], t0=0)
 
 # Define a function that will update the source term at each time step
 def update_T_N_function(t, timeStepper):
@@ -79,7 +79,10 @@ def update_T_N_function(t, timeStepper):
     T_N.value   = np.sin(t)*forceVector
 
 # Loop on time, and live-plot the result
-tStepper.run(num_steps-1, callfirsts=[update_T_N_function], callbacks=[], live_plotter={'refresh_step':1, 'clim':[-1,1]})
+tStepper.run(num_steps-1,
+             callfirsts=[update_T_N_function],
+             callbacks=[],
+             live_plotter={'refresh_step':1, 'clim':[-1,1]})
 
 # The end
 ```
@@ -268,8 +271,6 @@ mpiexec -n 2 python3 example.py
     * In parallel: Broadcast the (small) mesh to each proc & scatter the loop over the parameter (frequency or wavenumber): efficient speed up.
     * *coming soon*
 
-Reference for the analytical solutions:
-  * Kausel, E. (2006). Fundamental solutions in elastodynamics: a compendium. Cambridge University Press.
 
 ## Useful links
 Part of the code is largely inspired from:

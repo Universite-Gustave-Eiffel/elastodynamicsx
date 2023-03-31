@@ -109,7 +109,7 @@ pde = PDE(V, materials=[material], bodyforces=[], bcs=bcs)
 
 #  Time integration
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, **kwargsTScheme)
-tStepper.initial_condition(u0=[0,0,0], v0=[0,0,0], t0=0)
+tStepper.set_initial_condition(u0=[0,0,0], v0=[0,0,0], t0=0)
 #tStepper.solver.view()
 #
 # -----------------------------------------------------

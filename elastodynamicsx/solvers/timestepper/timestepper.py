@@ -115,7 +115,7 @@ class TimeStepper:
     @property
     def dt(self): return self._dt
     
-    def initial_condition(self, u0, v0, t0=0):
+    def set_initial_condition(self, u0, v0, t0=0):
         ###
         """
         Apply initial conditions
@@ -135,7 +135,7 @@ class TimeStepper:
                 - fem.function.Function
                     -> e.g. u0 = fem.Function(V)
         """
-        self._tscheme.initial_condition(u0, v0)
+        self._tscheme.set_initial_condition(u0, v0)
         self._t = t0
     
     def run(self, num_steps, **kwargs): #supercharge me

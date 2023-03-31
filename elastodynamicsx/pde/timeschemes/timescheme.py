@@ -46,7 +46,7 @@ class TimeScheme():
     def prepareNextIteration(self) -> None: # supercharge me
         raise NotImplementedError
 
-    def initial_condition(self, u0, v0) -> None: # supercharge me
+    def set_initial_condition(self, u0, v0) -> None: # supercharge me
         raise NotImplementedError
     
     def initialStep(self, t0, callfirsts:list=[], callbacks:list=[], verbose=0) -> None: # supercharge me
@@ -136,7 +136,7 @@ class FEniCSxTimeScheme(TimeScheme):
         fem.petsc.set_bc(b, self._bcs) #not modified by dolfinx_mpc
 
 
-    def initial_condition(self, u0, v0) -> None:
+    def set_initial_condition(self, u0, v0) -> None:
         ###
         """
         Apply initial conditions

@@ -142,7 +142,7 @@ pde = PDE(V, materials=materials, bodyforces=bodyforces, bcs=bcs)
 
 #  Time integration
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog', diagonal=True)  # diagonal=True assumes the left hand side operator is indeed diagonal
-tStepper.initial_condition(u0=0, v0=0, t0=tstart)
+tStepper.set_initial_condition(u0=0, v0=0, t0=tstart)
 u_res = tStepper.timescheme.u # The solution
 #
 # -----------------------------------------------------
