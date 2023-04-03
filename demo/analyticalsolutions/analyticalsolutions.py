@@ -163,7 +163,7 @@ def green_2D_PSV_xw(x, w, rho, lambda_, mu, fn_IntFraunhofer=None, eps=1e-8):
 
 
 # U(x,w): space - frequency domain after product with a source vector
-def u_2D_PSV_xw(x, w, F_=(1,0), rho, lambda_, mu, fn_IntFraunhofer=None, eps=1e-8):
+def u_2D_PSV_xw(x, w, F_, rho, lambda_, mu, fn_IntFraunhofer=None, eps=1e-8):
     """
     Displacement response to an in-plane line load of a 2D full, homogeneous space,
     in the frequency domain
@@ -198,7 +198,7 @@ def u_2D_PSV_xw(x, w, F_=(1,0), rho, lambda_, mu, fn_IntFraunhofer=None, eps=1e-
 
 
 # U(x,t): space - time domain after convolution with a source
-def u_2D_PSV_xt(x, src, F_=(1,0), rho, lambda_, mu, dt=1, fn_IntFraunhofer=None, eps=1e-8):
+def u_2D_PSV_xt(x, src, F_, rho, lambda_, mu, dt=1, fn_IntFraunhofer=None, eps=1e-8):
     """
     Displacement response to an in-plane line load with a given time-dependency,
     of a full, homogeneous space, in the time domain
@@ -301,7 +301,7 @@ def green_2D_PSV_half_S_xw(x, w, rho, lambda_, mu, fn_IntFraunhofer=None, eps=1e
 
 
 # U(r,t): space - time domain after convolution with a source
-def u_2D_PSV_half_S_rt(x, src, F_=(1,0), rho, lambda_, mu, dt=1, fn_IntFraunhofer=None, eps=1e-8):
+def u_2D_PSV_half_S_rt(x, src, F_, rho, lambda_, mu, dt=1, fn_IntFraunhofer=None, eps=1e-8):
     """
     Displacement response to an in-plane line load with a given time-dependency,
     of a full, homogeneous space, in the time domain
