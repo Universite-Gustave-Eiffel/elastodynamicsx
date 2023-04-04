@@ -7,13 +7,12 @@ except ImportError:
 import numpy as np
 
 
-
 class TimeScheme():
     """Abstract base class for time schemes as needed by the TimeStepper solvers"""
 
     labels = ['supercharge me']
     
-    def build_timestepper(*args, **kwargs) -> 'TimeStepper': # supercharge me
+    def build_timestepper(*args, **kwargs) -> 'TimeStepper':  # supercharge me
         raise NotImplementedError
     
     def __init__(self, dt, out:PETSc.Vec, **kwargs):
@@ -40,27 +39,26 @@ class TimeScheme():
         """The solution vector"""
         return self._out
         
-    def b_update_function(self, b:PETSc.Vec, t) -> None: # supercharge me
+    def b_update_function(self, b:PETSc.Vec, t) -> None:  # supercharge me
         raise NotImplementedError
     
-    def prepareNextIteration(self) -> None: # supercharge me
+    def prepareNextIteration(self) -> None:  # supercharge me
         raise NotImplementedError
 
-    def set_initial_condition(self, u0, v0) -> None: # supercharge me
+    def set_initial_condition(self, u0, v0) -> None:  # supercharge me
         raise NotImplementedError
     
-    def initialStep(self, t0, callfirsts:list=[], callbacks:list=[], verbose=0) -> None: # supercharge me
+    def initialStep(self, t0, callfirsts:list=[], callbacks:list=[], verbose=0) -> None:  # supercharge me
         raise NotImplementedError
-
 
 
 class FEniCSxTimeScheme(TimeScheme):
     """Abstract base class based on FEniCSx's form language"""
-    def __init__(self, dt, out:fem.Function, \
-                 bilinear_form:'dolfinx.fem.forms.Form', \
-                 linear_form:'dolfinx.fem.forms.Form', \
-                 mpc:'dolfinx_mpc.MultiPointConstraint'=None, \
-                 bcs=[], \
+    def __init__(self, dt, out:fem.Function,
+                 bilinear_form:'dolfinx.fem.forms.Form',
+                 linear_form:'dolfinx.fem.forms.Form',
+                 mpc:'dolfinx_mpc.MultiPointConstraint'=None,
+                 bcs=[],
                  **kwargs):
         super().__init__(dt, out.vector, **kwargs)
         self._bilinear_form = bilinear_form
@@ -95,49 +93,45 @@ class FEniCSxTimeScheme(TimeScheme):
         else:
             return dolfinx_mpc.assemble_vector(self._linear_form, self._mpc)
 
-
-    #def b_update_function(self, b:PETSc.Vec, t) -> None: #NOW SET TO EITHER METHOD BELOW IN __init__
+    # def b_update_function(self, b:PETSc.Vec, t) -> None:  # NOW SET TO EITHER METHOD BELOW IN __init__
     
-    def _b_update_function_WO_MPC(self, b:PETSc.Vec, t) -> None: #TODO: use t?
+    def _b_update_function_WO_MPC(self, b:PETSc.Vec, t) -> None:  # TODO: use t?
         """Updates the b vector (in-place) for a given time t"""
         with b.localForm() as loc_b:
             loc_b.set(0)
         
-        #fill with values
+        # fill with values
         fem.petsc.assemble_vector(b, self._linear_form)
             
-        #BC modifyier 
+        # BC modifyier 
         fem.petsc.apply_lifting(b, [self._bilinear_form], [self._bcs])
         
-        #ghost
+        # ghost
         b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)
         
-        #apply BC value
+        # apply BC value
         fem.petsc.set_bc(b, self._bcs)
 
 
-    def _b_update_function_WITH_MPC(self, b:PETSc.Vec, t) -> None: #TODO: use t?
+    def _b_update_function_WITH_MPC(self, b:PETSc.Vec, t) -> None:  # TODO: use t?
         """Updates the b vector (in-place) for a given time t"""
         with b.localForm() as loc_b:
             loc_b.set(0)
         
-        #fill with values
-        #fem.petsc.assemble_vector(b, self._linear_form)
+        # fill with values
         dolfinx_mpc.assemble_vector(self._linear_form, self._mpc, b)
             
-        #BC modifyier 
-        #fem.petsc.apply_lifting(b, [self._bilinear_form], [self._bcs])
+        # BC modifyier 
         dolfinx_mpc.apply_lifting(b, [self._bilinear_form], [self._bcs], self._mpc)
         
-        #ghost
+        # ghost
         b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)
         
-        #apply BC value
-        fem.petsc.set_bc(b, self._bcs) #not modified by dolfinx_mpc
+        # apply BC value
+        fem.petsc.set_bc(b, self._bcs)  # not modified by dolfinx_mpc
 
 
     def set_initial_condition(self, u0, v0) -> None:
-        ###
         """
         Apply initial conditions
         
