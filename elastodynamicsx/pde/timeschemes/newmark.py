@@ -193,7 +193,7 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
             PETSc.Sys.Print('Callfirsts...')
 
         for callfirst in callfirsts:
-            callfirst(t0, self)  # <- update stuff
+            callfirst(t0)  # <- update stuff
 
         # known: u0, v0. Solve for a0. u1 requires to solve a new system (loop)
         problem = fem.petsc.LinearProblem(self._m0_form, self._L0_form, bcs=self._bcs,

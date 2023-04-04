@@ -148,14 +148,14 @@ Energy_damping = lambda *a: dt*comm.allreduce( fem.assemble_scalar(fem.form( pde
 #                       Solve
 # -----------------------------------------------------
 ### define callfirsts and callbacks
-def cfst_updateSources(t, tStepper):
+def cfst_updateSources(t):
     T_N.value = T_N_function(t)
 
 def cbck_storeAtPoints(i, out):
     if paraEval.nb_points_local > 0:
         signals_local[:,:,i+1] = u_n.eval(paraEval.points_local, paraEval.cells_local)
 
-def cbck_energies(i, tStepper):
+def cbck_energies(i, out):
     global E_damp
     E_elas = Energy_elastic()
     E_kin  = Energy_kinetic()
@@ -168,7 +168,7 @@ clim = 0.4 * L_*B_*H_/(E*B_*H_**3/12) * np.amax(F_0)*np.array([0, 1])
 live_plotter = {'refresh_step':1, 'clim':clim} if domain.comm.rank == 0 else None
 
 ### Run the big time loop!
-tStepper.run(Nsteps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints, cbck_energies], live_plotter=live_plotter)
+tStepper.solve(Nsteps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints, cbck_energies], live_plotter=live_plotter)
 ### End of big calc.
 #
 # -----------------------------------------------------

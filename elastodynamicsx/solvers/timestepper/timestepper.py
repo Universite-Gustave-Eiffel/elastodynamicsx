@@ -143,7 +143,7 @@ class TimeStepper:
         self._tscheme.set_initial_condition(u0, v0)
         self._t = t0
 
-    def run(self, num_steps, **kwargs): #supercharge me
+    def solve(self, num_steps, **kwargs): #supercharge me
         raise NotImplementedError
 
 
@@ -234,7 +234,7 @@ class OneStepTimeStepper(LinearTimeStepper):
         self._i0 = 1*self._explicit
         self._intermediate_dt = timescheme.intermediate_dt  # non zero for generalized-alpha
 
-    def run(self, num_steps, **kwargs):
+    def solve(self, num_steps, **kwargs):
         """
         Run the loop on time steps
 
@@ -243,9 +243,8 @@ class OneStepTimeStepper(LinearTimeStepper):
             kwargs: important optional parameters are 'callfirsts' and 'callbacks'
                 callfirsts: (default=[]) list of functions to be called at the beginning
                     of each iteration (before solving). For instance: update a source term.
-                    Each callfirst if of the form: cf = lambda t, timestepper: do_something
-                    where t is the time at which to evaluate the sources and
-                    timestepper is the timestepper being run
+                    Each callfirst if of the form: cf = lambda t: do_something
+                    where t is the time at which to evaluate the sources
                 callbacks:  (detault=[]) similar to callfirsts, but the callbacks are called
                     at the end of each iteration (after solving). For instance: store/save, plot, print, ...
                     Each callback if of the form: cb = lambda i, out: do_something
@@ -257,7 +256,7 @@ class OneStepTimeStepper(LinearTimeStepper):
         """
         verbose = kwargs.get('verbose', 0)
 
-        callfirsts = kwargs.get('callfirsts', [lambda t, tStepper: 1])
+        callfirsts = kwargs.get('callfirsts', [lambda t: 1])
         callbacks  = kwargs.get('callbacks',  [lambda i, tStepper: 1])
 
         live_plt = kwargs.get('live_plotter', None)
@@ -276,9 +275,11 @@ class OneStepTimeStepper(LinearTimeStepper):
             self._t += self.dt
             t_calc = self.t - self.dt*self._intermediate_dt
 
-            if verbose >= 10: PETSc.Sys.Print('Callfirsts...')
+            if verbose >= 10:
+                PETSc.Sys.Print('Callfirsts...')
+
             for callfirst in callfirsts:
-                callfirst(t_calc, self)  # <- update stuff (e.g. sources)
+                callfirst(t_calc)  # <- update stuff (e.g. sources)
 
             # Update the right hand side reusing the initial vector
             if verbose >= 10:

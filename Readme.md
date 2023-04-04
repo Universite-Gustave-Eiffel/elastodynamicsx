@@ -74,15 +74,15 @@ tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme=
 tStepper.set_initial_condition(u0=[0,0], v0=[0,0], t0=0)
 
 # Define a function that will update the source term at each time step
-def update_T_N_function(t, timeStepper):
+def update_T_N_function(t):
     forceVector = PETSc.ScalarType([0,1])
     T_N.value   = np.sin(t)*forceVector
 
 # Loop on time, and live-plot the result
-tStepper.run(num_steps-1,
-             callfirsts=[update_T_N_function],
-             callbacks=[],
-             live_plotter={'refresh_step':1, 'clim':[-1,1]})
+tStepper.solve(num_steps-1,
+               callfirsts=[update_T_N_function],
+               callbacks=[],
+               live_plotter={'refresh_step':1, 'clim':[-1,1]})
 
 # The end
 ```

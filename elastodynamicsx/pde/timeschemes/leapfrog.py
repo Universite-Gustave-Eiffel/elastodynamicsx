@@ -131,7 +131,7 @@ class LeapFrog(FEniCSxTimeScheme):
             PETSc.Sys.Print('Callfirsts...')
 
         for callfirst in callfirsts:
-            callfirst(t0, self)  # <- update stuff
+            callfirst(t0)  # <- update stuff
         
         # Known: u0, v0.
         # Solve for a0.

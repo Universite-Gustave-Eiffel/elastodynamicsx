@@ -135,7 +135,7 @@ pde = PDE(V, materials=materials, bodyforces=[], bcs=bcs)
 #  Time integration
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog', diagonal=True)
 tStepper.set_initial_condition(u0=[0,0], v0=[0,0], t0=tstart)
-u_res = tStepper.timescheme.u # The solution
+u_res = tStepper.timescheme.u  # The solution
 #
 # -----------------------------------------------------
 
@@ -162,7 +162,7 @@ signals_local = np.zeros((paraEval.nb_points_local,
 #                       Solve
 # -----------------------------------------------------
 ### define callfirsts and callbacks
-def cfst_updateSources(t, tStepper):
+def cfst_updateSources(t):
     T_N.value = T_N_function(t)
 
 def cbck_storeAtPoints(i, out):
@@ -181,7 +181,7 @@ else:
     p = None
 
 ### Run the big time loop!
-tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints], live_plotter=p)
+tStepper.solve(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints], live_plotter=p)
 ### End of big calc.
 #
 # -----------------------------------------------------

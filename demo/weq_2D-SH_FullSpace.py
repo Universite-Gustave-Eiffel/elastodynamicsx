@@ -143,7 +143,7 @@ pde = PDE(V, materials=materials, bodyforces=bodyforces, bcs=bcs)
 #  Time integration
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog', diagonal=True)  # diagonal=True assumes the left hand side operator is indeed diagonal
 tStepper.set_initial_condition(u0=0, v0=0, t0=tstart)
-u_res = tStepper.timescheme.u # The solution
+u_res = tStepper.timescheme.u  # The solution
 #
 # -----------------------------------------------------
 
@@ -174,7 +174,7 @@ signals_local = np.zeros((paraEval.nb_points_local,
 #                       Solve
 # -----------------------------------------------------
 ### define callfirsts and callbacks
-def cfst_updateSources(t, tStepper):
+def cfst_updateSources(t):
     F_body.interpolate(F_body_function(t))
 
 def cbck_storeFullField(i, out):
@@ -197,7 +197,7 @@ else:
 
 ### Run the big time loop!
 # WARNING: BUG IN PARALLEL: rank==0 does not return
-tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFullField, cbck_storeAtPoints], live_plotter=p)
+tStepper.solve(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeFullField, cbck_storeAtPoints], live_plotter=p)
 ### End of big calc.
 #
 # -----------------------------------------------------

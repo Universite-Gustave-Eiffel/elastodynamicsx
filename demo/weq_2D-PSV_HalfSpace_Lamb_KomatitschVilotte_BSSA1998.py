@@ -53,8 +53,8 @@ comm = MPI.COMM_WORLD
 domain, cell_tags, facet_tags = gmshio.model_to_mesh(model, comm, gmsh_model_rank, gdim=2)
 
 #
-#V = fem.VectorFunctionSpace(domain, specFE, dim=2) #currently does not work
-# workaround
+# V = fem.VectorFunctionSpace(domain, specFE, dim=2)  # currently does not work
+# workaround:
 import basix.ufl_wrapper
 e        = specFE
 specFE_v = basix.ufl_wrapper.create_vector_element(e.family(), e.cell_type, e.degree(), e.lagrange_variant, e.dpc_variant, e.discontinuous, dim=2, gdim=domain.geometry.dim)
@@ -188,7 +188,7 @@ signals_local = np.zeros((paraEval.nb_points_local,
 #                       Solve
 # -----------------------------------------------------
 ### define callfirsts and callbacks
-def cfst_updateSources(t, tStepper):
+def cfst_updateSources(t):
     T_N.interpolate(T_N_function(t))
 
 def cbck_storeAtPoints(i, out):
@@ -208,7 +208,7 @@ else:
     p = None
 
 ### Run the big time loop!
-tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints], live_plotter=p)
+tStepper.solve(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints], live_plotter=p)
 ### End of big calc.
 #
 # -----------------------------------------------------
@@ -251,5 +251,5 @@ if domain.comm.rank == 0:
 # -----------------------------------------------------
 
 
-#TODO: analytical formula, check CFL
+# TODO: analytical formula
 

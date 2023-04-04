@@ -175,7 +175,7 @@ signals_local = np.zeros((paraEval.nb_points_local,
 #                       Solve
 # -----------------------------------------------------
 ### define callfirsts and callbacks
-def cfst_updateSources(t, tStepper):
+def cfst_updateSources(t):
     F_body.interpolate(F_body_function(t))
 
 def cbck_storeAtPoints(i, out):
@@ -194,7 +194,7 @@ else:
     p = None
 
 ### Run the big time loop!
-tStepper.run(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints], live_plotter=p)
+tStepper.solve(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints], live_plotter=p)
 ### End of big calc.
 #
 # -----------------------------------------------------
