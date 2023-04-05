@@ -69,20 +69,22 @@ from elastodynamicsx.solvers import TimeStepper
 
 dt, num_steps = 0.01, 100  # t=[0..1)
 
-# Initialize the time stepper
-tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
-tStepper.set_initial_condition(u0=[0,0], v0=[0,0], t0=0)
-
 # Define a function that will update the source term at each time step
 def update_T_N_function(t):
     forceVector = PETSc.ScalarType([0,1])
     T_N.value   = np.sin(t)*forceVector
 
-# Loop on time, and live-plot the result
+# Initialize the time stepper: compile forms and assemble the mass matrix
+tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
+
+# Define the initial values
+tStepper.set_initial_condition(u0=[0,0], v0=[0,0], t0=0)
+
+# Solve: run the loop on time steps; live-plot the result every 10 steps
 tStepper.solve(num_steps-1,
                callfirsts=[update_T_N_function],
                callbacks=[],
-               live_plotter={'refresh_step':1, 'clim':[-1,1]})
+               live_plotter={'refresh_step':10, 'clim':[-1,1]})
 
 # The end
 ```
@@ -130,11 +132,12 @@ comm = V.mesh.comm
 
 # (PETSc) Mass, damping, stiffness matrices
 M, K = pde.M(), pde.K()
+C = None  # Enforce no damping
 
 nev = 9  # Number of modes to compute
 
 # Initialize the solver
-eps = EigenmodesSolver(comm, M, None, K, nev=nev)
+eps = EigenmodesSolver(comm, M, C, K, nev=nev)
 
 # Solve
 eps.solve()
