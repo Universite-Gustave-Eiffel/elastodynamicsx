@@ -254,6 +254,9 @@ def green_2D_PSV_half_S_xw(x, w, rho, lambda_, mu, fn_IntFraunhofer=None, eps=1e
     -- Output --
        shape=(nbx,2,2,nbw)
     """
+    import warnings
+    warnings.warn('Incorrect results')  # TODO: fixme
+
     #nb : x.shape = [N, 3, newaxis]
     #nb : w.shape = [,, M]
     x = np.asarray(x)
@@ -264,7 +267,7 @@ def green_2D_PSV_half_S_xw(x, w, rho, lambda_, mu, fn_IntFraunhofer=None, eps=1e
         w = w[np.newaxis,np.newaxis,:]
     assert len(x.shape)==3, "Wrong format for x; expected 2D or 3D array"
     assert len(w.shape)==3, "Wrong format for w; expected scalar or 1D or 3D array"
-    
+
     N, M = x.shape[0], w.size
     green_xw = np.zeros((N,2,2,M), dtype=np.complex128)
     ups=lambda_/(2*(lambda_+mu))
@@ -274,8 +277,11 @@ def green_2D_PSV_half_S_xw(x, w, rho, lambda_, mu, fn_IntFraunhofer=None, eps=1e
     c_R=((0.862+1.14*ups)/(1+ups))*c_S  # approx R-wave velocity
     r = np.linalg.norm(x, axis=1)
     r = np.maximum(eps, r)
+
     if fn_IntFraunhofer is None:
         fn_IntFraunhofer = fn_IntFraunhofer_delta
+        # TODO: use fn_IntFraunhofer
+
     kP = w/c_P
     kS = w/c_S
     kR = w/c_R
@@ -287,16 +293,15 @@ def green_2D_PSV_half_S_xw(x, w, rho, lambda_, mu, fn_IntFraunhofer=None, eps=1e
     KK=-(kS**2*(kR**2-kP**2))/F_prime
     #
     wR, wP, wS = True, True , True
-    #
+
     green_xw[:,0,1,:]=-wR*(Q/mu)*HH*np.exp(-1J*kR*x[:,0]) \
-    +wS*(Q/mu)*np.sqrt(2/np.pi) * (1-(kP/kS)**2) * np.exp(-1J*(kS*x[:,0]+np.pi/4))/(kS*x[:,0])**(1.5) \
-    -wP*(Q/mu)*np.sqrt(2/np.pi) * kP**3*kS**2*np.sqrt(kS**2-kP**2)/(kS**2-2*kP**2)**3 * 1J*np.exp(-1J*(kP*x[:,0]+np.pi/4))/(kP*x[:,0])**(1.5)
-    
-    green_xw[:,1,1,:] = -1J*(Q/mu)*KK*np.exp(-1J*kR*x[:,0]) \
-    + (2*Q/mu)*np.sqrt(2/np.pi)*(1-(kP/kS)**2)*(1J*np.exp(-1J*(kS*x[:,0]+np.pi/4))/(kS*x[:,0])**(3/2)) \
-    - (Q/2*mu)*np.sqrt(2/np.pi)*((kP**3*kS**2)/(kS**2-kP**2)**2)*((1J*np.exp(-1J*(kP*x[:,0]+np.pi/4)))/((kP*x[:,0])**(3/2)))
-    
-    green_xw[:,1,1,:] *= 0
+    + wS*(Q/mu)*np.sqrt(2/np.pi) * (1-(kP/kS)**2) * np.exp(-1J*(kS*x[:,0]+np.pi/4)) / (kS*x[:,0])**(1.5) \
+    - wP*(Q/mu)*np.sqrt(2/np.pi) * kP**3*kS**2*np.sqrt(kS**2-kP**2)/(kS**2-2*kP**2)**3 * 1J*np.exp(-1J*(kP*x[:,0]+np.pi/4)) / (kP*x[:,0])**(1.5)
+
+    green_xw[:,1,1,:] = -1J*wR*(Q/mu)*KK*np.exp(-1J*kR*x[:,0]) \
+    + wS*(2*Q/mu)*np.sqrt(2/np.pi)*(1-(kP/kS)**2)*(1J*np.exp(-1J*(kS*x[:,0]+np.pi/4)) / (kS*x[:,0])**(1.5)) \
+    - wP*(Q/2*mu)*np.sqrt(2/np.pi)*((kP**3*kS**2)/(kS**2-kP**2)**2)*((1J*np.exp(-1J*(kP*x[:,0]+np.pi/4))) / ((kP*x[:,0])**(1.5)))
+
     return green_xw
 
 
@@ -340,42 +345,66 @@ def u_2D_PSV_half_S_rt(x, src, F_, rho, lambda_, mu, dt=1, fn_IntFraunhofer=None
 
 def _test():
     import matplotlib.pyplot as plt
-    
+
     # ## -> Time function
     #
-    f0 = 1 #central frequency of the source
-    T0 = 1/f0 #period
-    d0 = 2*T0 #duration of source
+    fc  = 14.5 # Central frequency
+    sig = np.sqrt(2)/(2*np.pi*fc)  # Gaussian standard deviation
+    t0  = 4*sig
+
+    def src_t(t):
+        return (1 - ((t-t0)/sig)**2) * np.exp(-0.5*((t-t0)/sig)**2)  # Source(t)
+
     #
-    src_t = lambda t: np.sin(2*np.pi*f0 * t) * np.sin(np.pi*t/d0)**2 * (t<d0) * (t>0)  # source(t)
-    
+    sizefactor = 0.5
+    tilt = 10  # tilt angle (degrees)
+    y_surf = lambda x: 2 * sizefactor + np.tan(np.radians(tilt)) * x
+    X0_src = np.array([1.720*sizefactor, y_surf(1.720*sizefactor), 0])  # Center
+
+    tstart = 0 # Start time
+    dt     = 0.25e-3 # Time step
+    num_steps = int(6000*sizefactor)
+
+    # -----------------------------------------------------
+    #                 Material parameters
+    # -----------------------------------------------------
+    rho     = 2.2  # density
+    cP, cS  = 3.2, 1.8475  # P- and S-wave velocities
+    c11, c44= rho * cP**2, rho * cS**2
+    mu      = c44
+    lambda_ = c11-2*c44
+
+    # ---------
+    #  FE Data
+    # ---------
+    dat = np.load('seismogram_weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.npz')
+    t = dat['t']
+    x = dat['x'] - X0_src[np.newaxis,:]
+    x = np.linalg.norm(x, axis=1) * np.sign(x[:,0])
+    x = np.array([x, 0*x, 0*x]).T
+    x = x[-10::3]
+    sigs_FE = dat['signals'][-10::3]
     #
-    tstart = 0  # Start time
-    tmax   = 4*d0 *1  # Final time
-    num_steps = 1000 *1
-    dt = (tmax-tstart) / num_steps  # time step size
-    
-    #
-    x = np.array([[1, 0, 0], [2, 0, 0], [3, 0, 0]])
-    rho, lambda_, mu = 1, 2, 1
-    #
-    F_0 = np.array([0,1])
-    signals_at_points_exact = u_2D_PSV_half_S_rt(x, src_t(dt*np.arange(num_steps)),
-                                                 F_0, rho, lambda_, mu, dt, None)
+    F_0 = np.array([0, -1])
+    src = src_t(dt*np.arange(num_steps))
+    src = src - np.mean(src)
+    sigs_analytical = u_2D_PSV_half_S_rt(x, src, F_0, rho, lambda_, mu, dt)
     #
     fig, ax = plt.subplots(1,1)
-    t = dt*np.arange(num_steps)
     ax.set_title('Signals at few points')
-    for i in range(len(signals_at_points_exact)):
-        ax.plot(t, signals_at_points_exact[i,0,:], c='C'+str(i), ls='--')  # exact
+    icomp = 0
+    for i in range(len(sigs_analytical)):
+        ax.plot(t, sigs_FE[i,icomp,:], c='C'+str(i), ls='-')  # FE
+        ax.plot(t, sigs_analytical[i,icomp,:], c='C'+str(i), ls='--')  # analytical
     ax.set_xlabel('Time')
-    
+
     fig, ax = plt.subplots(2,1)
     f = np.fft.rfftfreq(t.size)/dt
-    ax[0].plot( t, src_t(dt*np.arange(num_steps)), c='k' )
-    ax[1].plot( f, np.abs(np.fft.rfft(src_t(t))), c='k' )
-    ax[1].plot( f, np.abs(np.fft.rfft(signals_at_points_exact[0,0,:])) )
-    
+    ax[0].plot( t, src, c='k' )
+    ax[1].plot( f, np.abs(np.fft.rfft(src)), c='k' )
+    ax[1].plot( f, np.abs(np.fft.rfft(sigs_FE[0,icomp,:])), c='C0', ls='-' )
+    ax[1].plot( f, np.abs(np.fft.rfft(sigs_analytical[0,icomp,:])), c='C0', ls='--' )
+
     plt.show()
 
 
