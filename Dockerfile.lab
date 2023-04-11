@@ -1,7 +1,6 @@
-#FROM dolfinx/lab:v0.5.2
 FROM dolfinx/lab:latest
 LABEL maintainer="Pierric Mora <pierric.mora@univ-eiffel.fr>"
-LABEL description=" elastodynamics with Fenicsx/dolfinx "
+LABEL description=" elastodynamics with FEniCSx/DOLFINx "
 
 WORKDIR /tmp
 COPY . /tmp/
@@ -13,8 +12,8 @@ RUN pip3 install . &&\
     rm -rf /tmp/*
 
 
-######## install dolfinx_mpc #############
-#https://github.com/jorgensd/dolfinx_mpc/blob/main/docker/Dockerfile
+# ####### install dolfinx_mpc ############ #
+# https://github.com/jorgensd/dolfinx_mpc/blob/main/docker/Dockerfile
 
 # This argument should be the same as what-ever the python version of the dol
 ARG PYTHON_VERSION=3.10
