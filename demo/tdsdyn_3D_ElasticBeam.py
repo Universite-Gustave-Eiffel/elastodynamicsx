@@ -44,7 +44,7 @@ V = fem.VectorFunctionSpace(domain, ("CG", 1))
 # -----------------------------------------------------
 #                 Boundary conditions
 # -----------------------------------------------------
-T_N  = fem.Constant(domain, np.array([0]*3, dtype=PETSc.ScalarType)) #normal traction (Neumann boundary condition)
+T_N  = fem.Constant(domain, np.array([0]*3, dtype=PETSc.ScalarType))  # normal traction (Neumann boundary condition)
 bc_l = BoundaryCondition((V, facet_tags, tag_left ), 'Clamp')
 bc_r = BoundaryCondition((V, facet_tags, tag_right), 'Neumann', T_N)
 bcs  = [bc_l, bc_r]
@@ -77,9 +77,9 @@ material = material(V, 'isotropic', rho, lambda_, mu, damping=Damping.build('Ray
 # -----------------------------------------------------
 ### -> Time function
 #
-p0  = 1. #max amplitude
-F_0 = p0 * np.array([0,0,1], dtype=PETSc.ScalarType) #source orientation
-cutoff_Tc = 4/5 #release time
+p0  = 1.  # max amplitude
+F_0 = p0 * np.array([0,0,1], dtype=PETSc.ScalarType)  # source orientation
+cutoff_Tc = 4/5  # release time
 #
 src_t        = lambda t: t/cutoff_Tc * (t>0) * (t<=cutoff_Tc)
 T_N_function = lambda t: src_t(t) * F_0
@@ -90,7 +90,7 @@ T_N_function = lambda t: src_t(t) * F_0
 # -----------------------------------------------------
 #           Time scheme: Temporal parameters
 # -----------------------------------------------------
-T       = 4 #difference with original example: here t=[0,T-dt]
+T       = 4  # difference with original example: here t=[0,T-dt]
 Nsteps  = 50
 dt = T/Nsteps
 
@@ -107,10 +107,9 @@ kwargsTScheme = dict(scheme='g-a-newmark', alpha_m=alpha_m, alpha_f=alpha_f)
 # -----------------------------------------------------
 pde = PDE(V, materials=[material], bodyforces=[], bcs=bcs)
 
-#  Time integration
+# Time integration
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, **kwargsTScheme)
 tStepper.set_initial_condition(u0=[0,0,0], v0=[0,0,0], t0=0)
-#tStepper.solver.view()
 #
 # -----------------------------------------------------
 
@@ -134,7 +133,7 @@ signals_local = np.zeros((paraEval.nb_points_local,
 energies = np.zeros((Nsteps, 4))
 E_damp   = 0
 
-u_n = tStepper.timescheme.u #The solution at time t_n
+u_n = tStepper.timescheme.u  # The displacement at time t_n
 v_n = tStepper.timescheme.v
 comm = domain.comm
 Energy_elastic = lambda *a: comm.allreduce( fem.assemble_scalar(fem.form( 1/2* pde.k(u_n, u_n) )) , op=MPI.SUM)
@@ -168,16 +167,33 @@ clim = 0.4 * L_*B_*H_/(E*B_*H_**3/12) * np.amax(F_0)*np.array([0, 1])
 live_plotter = {'refresh_step':1, 'clim':clim} if domain.comm.rank == 0 else None
 
 ### Run the big time loop!
-tStepper.solve(Nsteps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints, cbck_energies], live_plotter=live_plotter)
+tStepper.solve(Nsteps-1,
+               callfirsts=[cfst_updateSources],
+               callbacks=[cbck_storeAtPoints, cbck_energies],
+               live_plotter=live_plotter)
 ### End of big calc.
 #
 # -----------------------------------------------------
 
-# Plot energies evolution
+# Plot tip displacement and energies evolution
+all_signals = paraEval.gather(signals_local, root=0)
+
 if domain.comm.rank == 0:
+    t = dt*np.arange(energies.shape[0])
+
+    # Tip displacement
+    u_tip = all_signals[0]
     plt.figure()
-    plt.plot(dt*np.arange(energies.shape[0]), energies, marker='o', ms=5)
+    plt.plot(t, u_tip[2,:])
+    plt.xlabel('Time')
+    plt.ylabel('Tip displacement')
+    plt.ylim(-0.5, 0.5)
+
+    # Energies
+    plt.figure()
+    plt.plot(t, energies, marker='o', ms=5)
     plt.legend(("elastic", "kinetic", "damping", "total"))
     plt.xlabel("Time")
     plt.ylabel("Energies")
+    plt.ylim(0, 0.0011)
     plt.show()

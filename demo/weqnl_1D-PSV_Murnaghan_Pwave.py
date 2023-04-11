@@ -45,7 +45,7 @@ boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
               (tag_right , lambda x: np.isclose(x[0], length))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-#V = fem.VectorFunctionSpace(domain, specFE, dim=2) #currently does not work
+# V = fem.VectorFunctionSpace(domain, specFE, dim=2) #currently does not work
 # workaround
 import basix.ufl_wrapper
 e        = specFE
@@ -64,8 +64,6 @@ lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
 l_      = fem.Constant(domain, PETSc.ScalarType(1))
 m_      = fem.Constant(domain, PETSc.ScalarType(1))
 n_      = fem.Constant(domain, PETSc.ScalarType(1))
-
-#mat = material(V, 'isotropic', rho, lambda_, mu)
 mat = material(V, 'murnaghan', rho, lambda_, mu, l_, m_, n_)
 materials = [mat]
 #
@@ -75,8 +73,8 @@ materials = [mat]
 # -----------------------------------------------------
 #                 Boundary conditions
 # -----------------------------------------------------
-T_N      = fem.Constant(domain, PETSc.ScalarType([0,0])) #normal traction (Neumann boundary condition)
-Z_N, Z_T = mat.Z_N, mat.Z_T #P and S mechanical impedances
+T_N      = fem.Constant(domain, PETSc.ScalarType([0,0]))  # normal traction (Neumann boundary condition)
+Z_N, Z_T = mat.Z_N, mat.Z_T  # P and S mechanical impedances
 bc_l  = BoundaryCondition((V, facet_tags, tag_left  ), 'Neumann', T_N)
 bc_rl = BoundaryCondition((V, facet_tags, (tag_left,tag_right) ), 'Dashpot', (Z_N, Z_T))
 bcs = [bc_l, bc_rl]
@@ -89,16 +87,18 @@ bcs = [bc_l, bc_rl]
 # -----------------------------------------------------
 ### -> Time function
 #
-f0 = 1 #central frequency of the source
-T0 = 1/f0 #period
-d0 = 5*T0 #duration of source
+f0 = 1     # central frequency of the source
+T0 = 1/f0  # period
+d0 = 5*T0  # duration of source
 #
-src_t = lambda t: np.sin(2*np.pi*f0 * t) * np.sin(np.pi*t/d0)**2 * (t<d0) * (t>0) #source(t)
+def src_t(t):  # source(t): Sine x Hann window
+    window = np.sin(np.pi*t/d0)**2 * (t<d0) * (t>0)  # Hann window
+    return np.sin(2*np.pi*f0 * t) * window
 
 ### -> Space-Time function
 #
-p0  = PETSc.ScalarType(7e-2)       #max amplitude
-F_0 = p0 * PETSc.ScalarType([1,1]) #source orientation
+p0  = PETSc.ScalarType(7e-2)        # max amplitude
+F_0 = p0 * PETSc.ScalarType([1,1])  # source orientation
 #
 T_N_function = lambda t: src_t(t) * F_0
 #
@@ -108,10 +108,10 @@ T_N_function = lambda t: src_t(t) * F_0
 # -----------------------------------------------------
 #           Time scheme: Temporal parameters
 # -----------------------------------------------------
-tstart = 0 # Start time
-tmax   = 15*T0 # Final time
+tstart = 0  # Start time
+tmax   = 15*T0  # Final time
 num_steps = 1500
-dt = (tmax-tstart) / num_steps # time step size
+dt = (tmax-tstart) / num_steps  # time step size
 #
 # -----------------------------------------------------
 
@@ -119,7 +119,7 @@ dt = (tmax-tstart) / num_steps # time step size
 ###
 # Some control numbers...
 hx = length/Nx
-c_S = np.sqrt(mu.value/rho.value) #S-wave velocity
+c_S = np.sqrt(mu.value/rho.value)  # S-wave velocity
 lbda0 = c_S/f0
 PETSc.Sys.Print('Number of points per wavelength at central frequency: ', round(lbda0/hx, 2))
 PETSc.Sys.Print('Number of time steps per period at central frequency: ', round(T0/dt, 2))
@@ -132,7 +132,7 @@ PETSc.Sys.Print('CFL condition: Courant number = ', round(TimeStepper.Courant_nu
 # -----------------------------------------------------
 pde = PDE(V, materials=materials, bodyforces=[], bcs=bcs)
 
-#  Time integration
+# Time integration
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog', diagonal=True)
 tStepper.set_initial_condition(u0=[0,0], v0=[0,0], t0=tstart)
 u_res = tStepper.timescheme.u  # The solution
@@ -174,14 +174,18 @@ enable_plot = True
 clim = 0.1*np.amax(F_0)*np.array([0, 1])
 kwplot = { 'clim':clim, 'warp_factor':0.5/np.amax(clim) }
 if domain.comm.rank == 0 and enable_plot:
-    p = plotter(u_res, refresh_step=10, **kwplot) #0 to disable
+    p = plotter(u_res, refresh_step=10, **kwplot)
     if paraEval.nb_points_local > 0:
-        p.add_points(paraEval.points_local, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
+        # add points to live_plotter
+        p.add_points(paraEval.points_local, render_points_as_spheres=True, point_size=12)
 else:
     p = None
 
 ### Run the big time loop!
-tStepper.solve(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints], live_plotter=p)
+tStepper.solve(num_steps-1,
+               callfirsts=[cfst_updateSources],
+               callbacks=[cbck_storeAtPoints],
+               live_plotter=p)
 ### End of big calc.
 #
 # -----------------------------------------------------
@@ -208,11 +212,11 @@ if domain.comm.rank == 0:
     for icomp, cax in enumerate(ax):
         for i in range(len(all_signals)):
             cax[0].text(0.02,0.97, 'U'+['x','y','z'][icomp], ha='left', va='top', transform=cax[0].transAxes)
-            cax[0].plot(t, all_signals[i,icomp,:],        c='C'+str(i), ls='-' ) #FEM
-            cax[0].plot(t, signals_linear[i,icomp,:], c='C'+str(i), ls='--') #exact linear
+            cax[0].plot(t, all_signals[i,icomp,:],    c='C'+str(i), ls='-' )  # FEM
+            cax[0].plot(t, signals_linear[i,icomp,:], c='C'+str(i), ls='--')  # exact linear
             #
-            cax[1].plot(f, np.abs(np.fft.rfft(all_signals[i,icomp,:])),        c='C'+str(i), ls='-' ) #FEM
-            cax[1].plot(f, np.abs(np.fft.rfft(signals_linear[i,icomp,:])), c='C'+str(i), ls='--') #exact linear
+            cax[1].plot(f, np.abs(np.fft.rfft(all_signals[i,icomp,:])),    c='C'+str(i), ls='-' )  # FEM
+            cax[1].plot(f, np.abs(np.fft.rfft(signals_linear[i,icomp,:])), c='C'+str(i), ls='--')  # exact linear
     specX = np.abs(np.fft.rfft(all_signals[i,0,:]))
     specX_f, specX_2f = specX[np.argmin(np.abs(f-1/T0))], specX[np.argmin(np.abs(f-2/T0))]
     ax[0, 1].annotate('2nd harmonic', xy=(2/T0, 1.2*specX_2f), xytext=(2.1/T0, 0.4*specX_f), arrowprops=dict(facecolor='black', shrink=0.05))

@@ -112,8 +112,9 @@ W0_src = 0.2*L_/50  # Width
 ### Gaussian function
 nrm   = 1/np.sqrt(2*np.pi*W0_src**2)  # normalize to int[src_x(x) dx]=1
 
-def src_x(x):
-    return nrm * np.exp(-1/2*((x[0]-X0_src[0])/(W0_src * np.cos(np.radians(tilt))))**2, dtype=PETSc.ScalarType)  # Source(x)
+def src_x(x):  # Source(x): Gaussian
+    r = (x[0]-X0_src[0]) / np.cos(np.radians(tilt))
+    return nrm * np.exp(-1/2*(r/W0_src)**2, dtype=PETSc.ScalarType)
 #
 ### -> Time function
 #
@@ -121,8 +122,8 @@ fc  = 14.5 # Central frequency
 sig = np.sqrt(2)/(2*np.pi*fc)  # Gaussian standard deviation
 t0  = 4*sig
 
-def src_t(t):
-    return (1 - ((t-t0)/sig)**2) * np.exp(-0.5*((t-t0)/sig)**2)  # Source(t)
+def src_t(t):  # Source(t): Ricker
+    return (1 - ((t-t0)/sig)**2) * np.exp(-0.5*((t-t0)/sig)**2)
 #
 ### -> Space-Time function
 #
@@ -130,7 +131,7 @@ p0  = 1.  # Max amplitude
 F_0 = p0 * PETSc.ScalarType([np.sin(np.radians(tilt)), -np.cos(np.radians(tilt))])  # Amplitude of the source
 #
 def T_N_function(t):
-    return lambda x: F_0[:,np.newaxis] * src_t(t) * src_x(x)[np.newaxis,:]  #source(x) at a given time
+    return lambda x: F_0[:,np.newaxis] * src_t(t) * src_x(x)[np.newaxis,:]  # source(x) at a given time
 
 # -----------------------------------------------------
 
@@ -138,15 +139,17 @@ def T_N_function(t):
 # -----------------------------------------------------
 #           Time scheme: Temporal parameters
 # -----------------------------------------------------
-tstart = 0 # Start time
-dt     = 0.25e-3 # Time step
+tstart = 0  # Start time
+dt     = 0.25e-3  # Time step
 num_steps = int(6000*sizefactor)
 #
 # -----------------------------------------------------
 
 
 ###
-PETSc.Sys.Print('CFL condition: Courant number = ', round(TimeStepper.Courant_number(V.mesh, ufl.sqrt((lambda_+2*mu)/rho), dt), 2))
+cmax = ufl.sqrt((lambda_+2*mu)/rho)  # max velocity
+courant_number = TimeStepper.Courant_number(V.mesh, cmax, dt)  # Courant number
+PETSc.Sys.Print('CFL condition: Courant number = ', round(courant_number, 2))
 ###
 
 
@@ -208,7 +211,10 @@ else:
     p = None
 
 ### Run the big time loop!
-tStepper.solve(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints], live_plotter=p)
+tStepper.solve(num_steps-1,
+               callfirsts=[cfst_updateSources],
+               callbacks=[cbck_storeAtPoints],
+               live_plotter=p)
 ### End of big calc.
 #
 # -----------------------------------------------------

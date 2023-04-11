@@ -1,10 +1,15 @@
+# Copyright (C) 2023 Pierric Mora
 #
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
 
 import numpy as np
 import matplotlib.pyplot as plt
-from dolfinx import plot
+from dolfinx import plot, fem
 import pyvista
 import time
+from petsc4py import PETSc
 
 ### ------------------------------------------------------------------------- ###
 ### --- preliminary: auto-configure pyvista backend for jupyter notebooks --- ###
@@ -14,7 +19,7 @@ pyvista.global_theme.background = 'white'
 pyvista.global_theme.font.color = 'grey'
 
 def is_notebook() -> bool:
-    #https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook/24937408
+    # https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook/24937408
     try:
         shell = get_ipython().__class__.__name__
         if shell == 'ZMQInteractiveShell':
@@ -27,12 +32,12 @@ def is_notebook() -> bool:
         return False      # Probably standard Python interpreter
 
 if is_notebook():
-    #This "ipyvtklink" backend supports almost every pyvista feature. However, it is run on server, leading to great lags
-    #"pythreejs" or "ipygany" blow the kernel when update_scalar is called
-    #In the (near?) future consider using "panel" (no slider or update_scalar at the moment), or itkwidgets, which seems great and fastly growing
+    # This "ipyvtklink" backend supports almost every pyvista feature. However, it is run on server, leading to great lags
+    # "pythreejs" or "ipygany" blow the kernel when update_scalar is called
+    # In the (near?) future consider using "panel" (no slider or update_scalar at the moment), or itkwidgets, which seems great and fastly growing
     DEFAULT_JUPYTER_BACKEND = "ipyvtklink"
     pyvista.set_jupyter_backend(DEFAULT_JUPYTER_BACKEND)
-    pyvista.start_xvfb() #required by ipyvtklink
+    pyvista.start_xvfb()  # required by ipyvtklink
 
 
 ### ---------------------------------------- ###
@@ -42,22 +47,22 @@ if is_notebook():
 def plot_mesh(mesh, cell_tags=None, **kwargs):
     """
     Plot the mesh with colored subdomains
-    
+
     Adapted from:
         https://jsdokken.com/dolfinx-tutorial/chapter3/em.html
-    
+
     Args:
         mesh: a dolfinx mesh
         cell_tags: (optional) a dolfinx MeshTag instance
         kwargs:
             show: (default=True) shows the plotter if set to True,
                 otherwise the plotter is returned
-    
+
     Returns:
         The pyvista.Plotter if show==False, else returns None
-    
+
     Example of use:
-    
+
         from mpi4py import MPI
         from dolfinx.mesh import create_unit_square
         from elastodynamicsx.utils import make_tags
@@ -67,7 +72,7 @@ def plot_mesh(mesh, cell_tags=None, **kwargs):
         Omegas = [(1, lambda x: x[1] <= 0.5),
                   (2, lambda x: x[1] >= 0.5)]
         cell_tags = make_tags(domain, Omegas, 'domains')
-    
+
         plot_mesh(domain, cell_tags)
     """
     p = pyvista.Plotter()
@@ -93,9 +98,9 @@ def live_plotter(u:'fem.Function', refresh_step:int=1, **kwargs) -> pyvista.Plot
 
 def plotter(*all_u, **kwargs) -> pyvista.Plotter:
     u1 = all_u[0]
-    #test whether u is scalar or vector and returns the appropriate plotter
-    nbcomps = u1.function_space.element.num_sub_elements #number of components if vector space, 0 if scalar space
-    
+    # test whether u is scalar or vector and returns the appropriate plotter
+    nbcomps = u1.function_space.element.num_sub_elements  # number of components if vector space, 0 if scalar space
+
     if nbcomps == 0:
         return CustomScalarPlotter(*all_u, **kwargs)
     else:
@@ -109,13 +114,13 @@ def plotter(*all_u, **kwargs) -> pyvista.Plotter:
 class CustomScalarPlotter(pyvista.Plotter):
 
     default_cmap = plt.cm.get_cmap("RdBu_r", 25)
-    
+
     def __init__(self, *all_scalars, **kwargs):
         self.grids=[]
         self._refresh_step = kwargs.pop('refresh_step', 1)
         self._tsleep = kwargs.pop('sleep', 0.01)
         dims = []
-        
+
         self._trans = lambda x:x
         cmplx = kwargs.pop('complex', 'real')
         if   cmplx.lower() == 'real':
@@ -126,7 +131,7 @@ class CustomScalarPlotter(pyvista.Plotter):
             self._trans = np.abs
         elif cmplx.lower() == 'angle':
             self._trans = np.angle
-        
+
         for u_ in all_scalars:
             if u_ is None: break
             topology, cell_types, geom = plot.create_vtk_mesh(u_.function_space)
@@ -134,7 +139,7 @@ class CustomScalarPlotter(pyvista.Plotter):
             grid.point_data["u"] = self._trans(u_.x.array)
             self.grids.append(grid)
             dims.append(u_.function_space.mesh.topology.dim)
-        
+
         if len(self.grids)==1:
             defaultShape = (1,1)
         else:
@@ -142,20 +147,20 @@ class CustomScalarPlotter(pyvista.Plotter):
             defaultShape = '1|'+str(len(self.grids)-1)
         shape = kwargs.pop('shape', defaultShape)
         super().__init__(shape=shape)
-        
+
         show_edges = kwargs.pop('show_edges', 'first')
         if   show_edges == False:
             show_edges = 'none'
         elif show_edges == True:
             show_edges = 'all'
-        
+
         if   show_edges == 'none':
             show_edges = [False for i in range(len(self.grids))]
         elif show_edges == 'all':
             show_edges = [True  for i in range(len(self.grids))]
         elif show_edges == 'first':
             show_edges = [i==0  for i in range(len(self.grids))]
-        
+
         labels = kwargs.pop('labels', ['' for i in range(len(self.grids))])
         cmap = kwargs.pop('cmap', CustomScalarPlotter.default_cmap)
         sargs = dict(color="black", position_y=0.0)
@@ -167,7 +172,9 @@ class CustomScalarPlotter(pyvista.Plotter):
                 self.view_xy()
                 self.camera.zoom(1.2)
 
-        if len(self.grids)>1: self.subplot(0) #resets the focus to first subplot
+        if len(self.grids)>1:
+            # reset the focus to first subplot
+            self.subplot(0)
 
     def update_scalars(self, *all_scalars, **kwargs):
         """Calls pyvista.Plotter.update_scalars for all subplots"""
@@ -176,17 +183,18 @@ class CustomScalarPlotter(pyvista.Plotter):
         if kwargs.get('render', True):
             self.render()
 
-    def live_plotter_update_function(self, i:int, vec:'PETSc.Vec') -> None:
-        if not("PETSc.Vec" in str(type(vec))):
-            if "fem.function.Function" in str(type(vec)):
+    def live_plotter_update_function(self, i:int, vec:PETSc.Vec) -> None:
+        if not(isinstance(vec, PETSc.Vec)):
+            if issubclass(type(vec), fem.function.Function):
                 vec = vec.vector
             else:
                 try:
-                    vec = vec.u.vector #assume vec is a TimeStepper instance
+                    # assume vec is a TimeStepper instance
+                    vec = vec.u.vector
                 except:
                     raise TypeError
-        if self._refresh_step > 0 and i % self._refresh_step == 0:
-            with vec.localForm() as loc_v: # Necessary for correct handling of ghosts in parallel
+        if (self._refresh_step > 0) and (i % self._refresh_step == 0):
+            with vec.localForm() as loc_v:  # Necessary for correct handling of ghosts in parallel
                 self.update_scalars(loc_v.array)
             time.sleep(self._tsleep)
 
@@ -198,7 +206,6 @@ class CustomScalarPlotter(pyvista.Plotter):
             updated_fields = self._time_browser_cbck(i)
             self.update_scalars(*updated_fields)
         self.add_slider_widget(updateTStep, [timesteps[0], timesteps[-1]], **kwargs_slider)
-
 
 
 class CustomVectorPlotter(pyvista.Plotter):
@@ -295,17 +302,17 @@ class CustomVectorPlotter(pyvista.Plotter):
         if render:
             self.render()
 
-    def live_plotter_update_function(self, i:int, vec:'PETSc.Vec') -> None:
-        if not("PETSc.Vec" in str(type(vec))):
-            if "fem.function.Function" in str(type(vec)):
+    def live_plotter_update_function(self, i:int, vec:PETSc.Vec) -> None:
+        if not(isinstance(vec, PETSc.Vec)):
+            if issubclass(type(vec), fem.function.Function):
                 vec = vec.vector
             else:
                 try:
-                    vec = vec.u.vector #assume vec is a TimeStepper instance
+                    vec = vec.u.vector  # assume vec is a TimeStepper instance
                 except:
                     raise TypeError
-        if self._refresh_step > 0 and i % self._refresh_step == 0:
-            with vec.localForm() as loc_v: # Necessary for correct handling of ghosts in parallel
+        if (self._refresh_step > 0) and (i % self._refresh_step == 0):
+            with vec.localForm() as loc_v:  # Necessary for correct handling of ghosts in parallel
                 self.update_vectors(loc_v.array)
             time.sleep(self._tsleep)
 
@@ -320,7 +327,7 @@ class CustomVectorPlotter(pyvista.Plotter):
         
 
 
-def spy_petscMatrix(Z:'PETSc.Mat', *args, **kwargs) -> 'matplotlib.pyplot.spy':
+def spy_petscMatrix(Z:PETSc.Mat, *args, **kwargs) -> 'matplotlib.pyplot.spy':
     """
     matplotlib.pyplot.spy with Z being a petsc4py.PETSc.Mat object
     
@@ -334,9 +341,9 @@ def spy_petscMatrix(Z:'PETSc.Mat', *args, **kwargs) -> 'matplotlib.pyplot.spy':
     """
     import scipy.sparse
     kwargs['markersize'] = kwargs.get('markersize', 1)
-    #[::-1] because:
-    ### ai, aj, av    = Z.getValuesCSR()
-    ### Z_scipysparse = scipy.sparse.csr_matrix((av, aj, ai))
+    # [::-1] because:
+    # ai, aj, av    = Z.getValuesCSR()
+    # Z_scipysparse = scipy.sparse.csr_matrix((av, aj, ai))
     return plt.spy(scipy.sparse.csr_matrix(Z.getValuesCSR()[::-1]), *args, **kwargs)
 
 ### ------------------------------------ ###
@@ -345,8 +352,8 @@ def spy_petscMatrix(Z:'PETSc.Mat', *args, **kwargs) -> 'matplotlib.pyplot.spy':
 
 def get_3D_array_from_FEFunction(u_):
     """Not intended to be called by user"""
-    #u_ is a fem.Function
-    nbcomps = max(1, u_.function_space.element.num_sub_elements) #number of components
+    # u_ is a fem.Function
+    nbcomps = max(1, u_.function_space.element.num_sub_elements)  # number of components
     nbpts   = u_.x.array.size // nbcomps
     if nbcomps < 3:
         z0s = np.zeros((nbpts, 3-nbcomps), dtype=u_.x.array.dtype)
@@ -356,7 +363,7 @@ def get_3D_array_from_FEFunction(u_):
 
 def get_3D_array_from_nparray(u_, nbpts):
     """Not intended to be called by user"""
-    #u_ is a np.array
+    # u_ is a np.array
     nbcomps = u_.size//nbpts
     if nbcomps < 3:
         z0s = np.zeros((nbpts, 3-nbcomps), dtype=u_.dtype)

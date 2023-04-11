@@ -48,7 +48,7 @@ boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
               (tag_top   , lambda x: np.isclose(x[1], height))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-#V = fem.VectorFunctionSpace(domain, specFE, dim=2) #currently does not work
+# V = fem.VectorFunctionSpace(domain, specFE, dim=2) #currently does not work
 # workaround
 import basix.ufl_wrapper
 e        = specFE
@@ -74,7 +74,7 @@ materials = [mat]
 # -----------------------------------------------------
 #                 Boundary conditions
 # -----------------------------------------------------
-Z_N, Z_T = mat.Z_N, mat.Z_T #P and S mechanical impedances
+Z_N, Z_T = mat.Z_N, mat.Z_T  # P and S mechanical impedances
 bc_l = BoundaryCondition((V, facet_tags, tag_left  ), 'Dashpot', (Z_N, Z_T))
 bc_r = BoundaryCondition((V, facet_tags, tag_right ), 'Dashpot', (Z_N, Z_T))
 bc_b = BoundaryCondition((V, facet_tags, tag_bottom), 'Dashpot', (Z_N, Z_T))
@@ -89,26 +89,32 @@ bcs = [bc_l, bc_r, bc_b, bc_t]
 # -----------------------------------------------------
 ### -> Space function
 #
-X0_src = np.array([length/2,height/2,0]) #center
-R0_src = 0.1 #radius
+X0_src = np.array([length/2,height/2,0])  # center
+R0_src = 0.1  # radius
 #
 ### Gaussian function
 nrm   = 1/(2*np.pi*R0_src**2) #normalize to int[src_x(x) dx]=1
-src_x = lambda x: nrm * np.exp(-1/2*(np.linalg.norm(x-X0_src[:,np.newaxis], axis=0)/R0_src)**2, dtype=PETSc.ScalarType) #source(x)
+
+def src_x(x):  # source(x): Gaussian
+    r = np.linalg.norm(x-X0_src[:,np.newaxis], axis=0)
+    return nrm * np.exp(-1/2*(r/R0_src)**2, dtype=PETSc.ScalarType)
 #
 ### -> Time function
 #
-f0 = 1 #central frequency of the source
-T0 = 1/f0 #period
-d0 = 2*T0 #duration of source
+f0 = 1  # central frequency of the source
+T0 = 1/f0  # period
+d0 = 2*T0  # duration of source
 #
-src_t = lambda t: np.sin(2*np.pi*f0 * t) * np.sin(np.pi*t/d0)**2 * (t<d0) * (t>0) #source(t)
+def src_t(t):  # source(t): Sine x Hann window
+    window = np.sin(np.pi*t/d0)**2 * (t<d0) * (t>0)  # Hann window
+    return np.sin(2*np.pi*f0 * t) * window
 
 ### -> Space-Time function
 #
-F_0 = PETSc.ScalarType([1,0]) #amplitude of the source
+F_0 = PETSc.ScalarType([1,0])  # amplitude of the source
 #
-def F_body_function(t): return lambda x: F_0[:,np.newaxis] * src_t(t) * src_x(x)[np.newaxis,:] #source(x) at a given time
+def F_body_function(t):  # source(x) at a given time
+    return lambda x: F_0[:,np.newaxis] * src_t(t) * src_x(x)[np.newaxis,:]
 
 ### Body force 'F_body'
 F_body = fem.Function(V) #body force
@@ -121,10 +127,10 @@ bodyforces = [gaussianBF]
 # -----------------------------------------------------
 #           Time scheme: Temporal parameters
 # -----------------------------------------------------
-tstart = 0 # Start time
-tmax   = 4*d0 # Final time
+tstart = 0  # Start time
+tmax   = 4*d0  # Final time
 num_steps = 1200
-dt = (tmax-tstart) / num_steps # time step size
+dt = (tmax-tstart) / num_steps  # time step size
 #
 # -----------------------------------------------------
 
@@ -187,14 +193,18 @@ enable_plot = True
 if domain.comm.rank == 0 and enable_plot:
     clim = 0.1*np.amax(F_0)*np.array([0, 1])
     kwplot = { 'clim':clim, 'warp_factor':0.5/np.amax(clim) }
-    p = plotter(u_res, refresh_step=10, **kwplot) #0 to disable
+    p = plotter(u_res, refresh_step=10, **kwplot)
     if paraEval.nb_points_local > 0:
-        p.add_points(paraEval.points_local, render_points_as_spheres=True, point_size=12) #adds points to live_plotter
+        # Add points to live_plotter
+        p.add_points(paraEval.points_local, render_points_as_spheres=True, point_size=12)
 else:
     p = None
 
 ### Run the big time loop!
-tStepper.solve(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_storeAtPoints], live_plotter=p)
+tStepper.solve(num_steps-1,
+               callfirsts=[cfst_updateSources],
+               callbacks=[cbck_storeAtPoints],
+               live_plotter=p)
 ### End of big calc.
 #
 # -----------------------------------------------------
@@ -206,7 +216,8 @@ tStepper.solve(num_steps-1, callfirsts=[cfst_updateSources], callbacks=[cbck_sto
 all_signals = paraEval.gather(signals_local, root=0)
 
 if domain.comm.rank == 0:
-    fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src) #accounts for the size of the source in the analytical formula
+    # Account for the size of the source in the analytical formula
+    fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0_src)
     
     ### -> Exact solution, At few points
     x = points_out.T
@@ -216,9 +227,10 @@ if domain.comm.rank == 0:
     fig, ax = plt.subplots(1,1)
     ax.set_title('Signals at few points')
     for i in range(len(all_signals)):
-        ax.plot(t, all_signals[i,0,:],   c='C'+str(i), ls='-') #FEM
-        ax.plot(t, signals_exact[i,0,:], c='C'+str(i), ls='--') #exact
+        ax.plot(t, all_signals[i,0,:],   c='C'+str(i), ls='-')   # FEM
+        ax.plot(t, signals_exact[i,0,:], c='C'+str(i), ls='--')  # exact
     ax.set_xlabel('Time')
+    ax.legend(['FEM', 'analytical'])
     plt.show()
 #
 # -----------------------------------------------------

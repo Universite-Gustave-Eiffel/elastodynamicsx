@@ -192,7 +192,7 @@ cd elastodynamicsx/
 pip3 install .
 
 # Test
-python3 elastodynamicsx/demo/weq_2D-SH_FullSpace.py
+python3 demo/weq_2D-SH_FullSpace.py
 ```
 
 ### Option 2: Inside a FEniCSx Docker image

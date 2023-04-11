@@ -256,8 +256,8 @@ class OneStepTimeStepper(LinearTimeStepper):
         """
         verbose = kwargs.get('verbose', 0)
 
-        callfirsts = kwargs.get('callfirsts', [lambda t: 1])
-        callbacks  = kwargs.get('callbacks',  [lambda i, tStepper: 1])
+        callfirsts = kwargs.get('callfirsts', [])
+        callbacks  = kwargs.get('callbacks',  [])
 
         live_plt = kwargs.get('live_plotter', None)
         if not(live_plt is None):
