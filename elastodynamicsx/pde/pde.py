@@ -43,6 +43,18 @@ class PDE():
     #
     default_metadata = None
 
+
+    # The default options for the just-in-time compiler used in the classes
+    # of the pde package: PDE, FEniCSxTimeScheme
+    # See:
+    #     https://jsdokken.com/dolfinx-tutorial/chapter4/compiler_parameters.html
+    # Example:
+    # >>> from elastodynamicsx.pde import PDE
+    # >>> PDE.default_jit_options = {"cffi_extra_compile_args": ["-Ofast", "-march=native"],
+    # >>>                            "cffi_libraries": ["m"]}
+    default_jit_options = {}
+
+
     def build_mpc(function_space, bcs):
         bcs_strong = BoundaryCondition.get_dirichlet_BCs(bcs)
         bcs_mpc    = BoundaryCondition.get_mpc_BCs(bcs)
@@ -76,11 +88,13 @@ class PDE():
         kwargs:
             bodyforces: (default=[]) a list of pde.BodyForce instances
             bcs: (default=[]) a list of fem.DirichletBCMetaClass and/or pde.BoundaryCondition instances
+            jit_options: (default=PDE.default_jit_options) options for the just-in-time compiler
         """
         self._function_space = function_space
         self.materials = materials
         self.bodyforces= kwargs.get('bodyforces', [])
         self.bcs = kwargs.get('bcs', [])
+        self.jit_options = kwargs.get('jit_options', PDE.default_jit_options)
         self._u, self._v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
 
         # Declare stuff without building
@@ -145,7 +159,7 @@ class PDE():
     def _compile_M(self) -> None:
         u, v = self._u, self._v
         m = self.m(u,v)
-        self._m_form = fem.form(m)
+        self._m_form = fem.form(m, jit_options=self.jit_options)
 
 
     def _compile_C_K_b(self) -> None:
@@ -182,16 +196,16 @@ class PDE():
             else:
                 raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
 
-        self._c_form = fem.form(c)
-        self._k_form = fem.form(k)
-        self._b_form = fem.form(L)
+        self._c_form = fem.form(c, jit_options=self.jit_options)
+        self._k_form = fem.form(k, jit_options=self.jit_options)
+        self._b_form = fem.form(L, jit_options=self.jit_options)
 
         # Executes the following only if using complex numbers
         if np.issubdtype(PETSc.ScalarType, np.complexfloating):
             ##Mat_lhs = -w*w*_M_ + 1J*w*_C_ + _K_
             m = self.m(u,v)
             w = self._omega_ufl
-            self._a_form = fem.form(-w*w*m + 1J*w*c + k)
+            self._a_form = fem.form(-w*w*m + 1J*w*c + k, jit_options=self.jit_options)
 
 
     def _compile_K1_K2_K3(self) -> None:
@@ -222,9 +236,9 @@ class PDE():
             else:
                 raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
 
-        self._k1_form = fem.form(k1)
-        self._k2_form = fem.form(k2)
-        self._k3_form = fem.form(k3)
+        self._k1_form = fem.form(k1, jit_options=self.jit_options)
+        self._k2_form = fem.form(k2, jit_options=self.jit_options)
+        self._k3_form = fem.form(k3, jit_options=self.jit_options)
 
 
 

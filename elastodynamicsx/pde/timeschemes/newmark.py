@@ -13,21 +13,21 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
     """
     Implementation of the 'g-a-newmark' (Generalized-alpha Newmark) time-stepping scheme,
     for beta>0. The special case beta=0 is implemented in the LeapFrog class.
-    
+
     Reference:
         J. Chung and G. M. Hulbert, "A time integration algorithm for structural
         dynamics with improved numerical dissipation: The generalized-α method,"
         J. Appl. Mech. 60(2), 371–375 (1993).
-    
+
     Adapted from:
         https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html
 
     implicit/explicit? implicit
     accuracy: first or second order, depending on parameters
     """
-    
     labels = ['g-a-newmark', 'generalized-alpha']
-    
+
+
     def build_timestepper(*args, **kwargs) -> 'TimeStepper':
         tscheme = GalphaNewmarkBeta(*args, **kwargs)
         comm = tscheme.u.function_space.mesh.comm
@@ -35,7 +35,8 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
             return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
         else:
             return NonlinearTimeStepper(comm, tscheme, **kwargs)
-    
+
+
     def __init__(self, function_space:fem.FunctionSpace,
                  m_:Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
                  c_:Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
@@ -55,21 +56,24 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
             dt: Time step
             bcs: The set of boundary conditions
 
-            kwargs: The four parameters ('alpha_m', 'alpha_m', 'gamma', 'beta')
-                    can be set manually, although the preferred way is by setting
-                    the desired spectral radius 'rho_inf'.
-                rho_inf: spectral radius in the high frequency limit. bounds: (1/2,1)
-                    default = 0.75
-                alpha_m: unconditionnal stability if -1 <= alpha_m <= alpha_f <= 0.5
-                    default = (2*rho_inf-1)/(rho_inf+1)
-                alpha_f: unconditionnal stability if -1 <= alpha_m <= alpha_f <= 0.5
-                    default = rho_inf/(rho_inf+1)
-                gamma: default value ensures second-order accuracy
-                    other values give first-order accuracy
-                    default = 1/2 - alpha_m + alpha_f
-                beta: unconditionnal stability if beta >= 0.25 + 0.5*(alpha_f-alpha_m)
-                    default = 1/4*(gamma+1/2)**2
+        kwargs: The four parameters ('alpha_m', 'alpha_m', 'gamma', 'beta')
+                can be set manually, although the preferred way is by setting
+                the desired spectral radius 'rho_inf'.
+            rho_inf: spectral radius in the high frequency limit. bounds: (1/2,1)
+                default = 0.75
+            alpha_m: unconditionnal stability if -1 <= alpha_m <= alpha_f <= 0.5
+                default = (2*rho_inf-1)/(rho_inf+1)
+            alpha_f: unconditionnal stability if -1 <= alpha_m <= alpha_f <= 0.5
+                default = rho_inf/(rho_inf+1)
+            gamma: default value ensures second-order accuracy
+                other values give first-order accuracy
+                default = 1/2 - alpha_m + alpha_f
+            beta: unconditionnal stability if beta >= 0.25 + 0.5*(alpha_f-alpha_m)
+                default = 1/4*(gamma+1/2)**2
+
+            jit_options: (default=PDE.default_jit_options) options for the just-in-time compiler
         """
+        self.jit_options = kwargs.get('jit_options', PDE.default_jit_options)
         rho_inf = kwargs.get('rho_inf', 0.75)
         alpha_m = (2*rho_inf-1)/(rho_inf+1)
         alpha_f = rho_inf/(rho_inf+1)
@@ -116,7 +120,7 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
 
         self._m0_form = m_(u,v)
         self._L0_form =-k_(self._u0, v)
-        
+
         if not(L is None):
             self._L += dt_*dt_*L(v)
             self._L0_form += L(v)
@@ -149,26 +153,30 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
                 self._L0_form += bc.bc(self._v0, v)
             else:
                 raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
-        
+
         # compile forms
-        bilinear_form = fem.form(self._a)
-        linear_form   = fem.form(self._L)
+        bilinear_form = fem.form(self._a, jit_options=self.jit_options)
+        linear_form   = fem.form(self._L, jit_options=self.jit_options)
         #
         super().__init__(dt, self._u_n, bilinear_form, linear_form, mpc, dirichletbcs,
                          explicit=False, intermediate_dt=self.alpha_f, **kwargs)
 
+
     @property
     def u(self) -> fem.Function:
         return self._u_n
-    
+
+
     @property
     def v(self) -> fem.Function:
         return self._v_n
-    
+
+
     @property
     def a(self) -> fem.Function:
         return self._a_n
-    
+
+
     def prepareNextIteration(self) -> None:
         """Next-time-step function, to prepare next iteration -> Call it after solving"""
         dt = self.dt
@@ -181,9 +189,9 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
         self._a_n.x.array[:]   = self._a_garb.x.array
         self._u_nm1.x.array[:] = un
 
+
     def initialStep(self, t0, callfirsts:list=[], callbacks:list=[], verbose=0) -> None:
         """Specific to the initial value step"""
-        
         ### -------------------------------------------------
         #   --- first step: given u0 and v0, solve for a0 ---
         ### -------------------------------------------------
@@ -196,8 +204,9 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
             callfirst(t0)  # <- update stuff
 
         # known: u0, v0. Solve for a0. u1 requires to solve a new system (loop)
-        problem = fem.petsc.LinearProblem(self._m0_form, self._L0_form, bcs=self._bcs,
-                                          u=self._a0, petsc_options=TimeStepper.petsc_options_t0)
+        problem = fem.petsc.LinearProblem(self._m0_form, self._L0_form, bcs=self._bcs, u=self._a0,
+                                          petsc_options=TimeStepper.petsc_options_t0,
+                                          jit_options=self.jit_options)
         problem.solve()
 
         if verbose >= 10:
@@ -221,8 +230,8 @@ class HilberHughesTaylor(GalphaNewmarkBeta):
 
     /!\ the definition of the alpha parameter is different from that in the original article. Here: alpha = -alpha_HHT
     """
-
     labels = ['hilber-hughes-taylor', 'hht', 'hht-alpha']
+
 
     def build_timestepper(*args, **kwargs) -> 'TimeStepper':
         tscheme = HilberHughesTaylor(*args, **kwargs)
@@ -231,6 +240,7 @@ class HilberHughesTaylor(GalphaNewmarkBeta):
             return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
         else:
             return NonlinearTimeStepper(comm, tscheme, **kwargs)
+
 
     def __init__(self, *args, **kwargs):
         """
@@ -267,8 +277,8 @@ class NewmarkBeta(GalphaNewmarkBeta):
     implicit/explicit? implicit
     accuracy: first-order unless gamma=1/2 (second-order)
     """
-
     labels = ['newmark', 'newmark-beta']
+
 
     def build_timestepper(*args, **kwargs) -> 'TimeStepper':
         tscheme = NewmarkBeta(*args, **kwargs)
@@ -277,6 +287,7 @@ class NewmarkBeta(GalphaNewmarkBeta):
             return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
         else:
             return NonlinearTimeStepper(comm, tscheme, **kwargs)
+
 
     def __init__(self, *args, **kwargs):
         kwargs['alpha_m'] = 0
@@ -296,8 +307,8 @@ class MidPoint(NewmarkBeta):
     implicit/explicit? implicit
     accuracy: second-order
     """
-
     labels = ['midpoint', 'average-acceleration-method', 'aam']
+
 
     def build_timestepper(*args, **kwargs) -> 'TimeStepper':
         tscheme = MidPoint(*args, **kwargs)
@@ -306,6 +317,7 @@ class MidPoint(NewmarkBeta):
             return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
         else:
             return NonlinearTimeStepper(comm, tscheme, **kwargs)
+
 
     def __init__(self, *args, **kwargs):
         kwargs['gamma'] = 1/2
@@ -322,8 +334,8 @@ class LinearAccelerationMethod(NewmarkBeta):
     implicit/explicit? implicit
     accuracy: second-order
     """
-
     labels = ['linear-acceleration-method', 'lam']
+
 
     def build_timestepper(*args, **kwargs) -> 'TimeStepper':
         tscheme = LinearAccelerationMethod(*args, **kwargs)
@@ -332,6 +344,7 @@ class LinearAccelerationMethod(NewmarkBeta):
             return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
         else:
             return NonlinearTimeStepper(comm, tscheme, **kwargs)
+
 
     def __init__(self, *args, **kwargs):
         kwargs['gamma'] = 1/2

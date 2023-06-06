@@ -17,19 +17,19 @@ class LeapFrog(FEniCSxTimeScheme):
 
     implicit/explicit? explicit
     accuracy: second-order
-    
+
     a_n = (u_n+1 - 2u_n + u_n-1)/dt**2
     v_n = (u_n+1 - u_n-1)/(2*dt)
     """
-
     labels = ['leapfrog', 'central-difference']
-    
+
+
     def build_timestepper(*args, **kwargs) -> 'TimeStepper':
         tscheme = LeapFrog(*args, **kwargs)
         comm = tscheme.u.function_space.mesh.comm
         return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
-    
-    
+
+
     def __init__(self, function_space:fem.FunctionSpace,
                  m_:Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
                  c_:Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
@@ -48,7 +48,10 @@ class LeapFrog(FEniCSxTimeScheme):
             L:  Linear form
             dt: Time step
             bcs: The set of boundary conditions
+        kwargs:
+            jit_options: (default=PDE.default_jit_options) options for the just-in-time compiler
         """
+        self.jit_options = kwargs.get('jit_options', PDE.default_jit_options)
         dt_  = fem.Constant(function_space.mesh, PETSc.ScalarType(dt))
 
         u, v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
@@ -98,10 +101,10 @@ class LeapFrog(FEniCSxTimeScheme):
                 self._L0_form += bc.bc(self._v0, v)
             else:
                 raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
-        
+
         # compile forms
-        bilinear_form = fem.form(self._a)
-        linear_form   = fem.form(self._L)
+        bilinear_form = fem.form(self._a, jit_options=self.jit_options)
+        linear_form   = fem.form(self._L, jit_options=self.jit_options)
         #
         super().__init__(dt, self._u_n, bilinear_form, linear_form, mpc, dirichletbcs, explicit=True, **kwargs)
 
@@ -110,18 +113,20 @@ class LeapFrog(FEniCSxTimeScheme):
     def u(self) -> fem.Function:
         return self._u_n
 
+
     @property
     def u_nm1(self) -> fem.Function:
         return self._u_nm1
+
 
     def prepareNextIteration(self) -> None:
         """Next-time-step function, to prepare next iteration -> Call it after solving"""
         self._u_nm2.x.array[:] = self._u_nm1.x.array
         self._u_nm1.x.array[:] = self._u_n.x.array
 
+
     def initialStep(self, t0, callfirsts:list=[], callbacks:list=[], verbose=0) -> None:
         """Specific to the initial value step"""
-        
         # ## -------------------------------------------------
         #    --- first step: given u0 and v0, solve for a0 ---
         # ## -------------------------------------------------
@@ -132,13 +137,14 @@ class LeapFrog(FEniCSxTimeScheme):
 
         for callfirst in callfirsts:
             callfirst(t0)  # <- update stuff
-        
+
         # Known: u0, v0.
         # Solve for a0.
         # u1 is directly obtained from u0, v0, a0 (explicit scheme)
         # u2 requires to solve a new system (enter the time loop)
-        problem = fem.petsc.LinearProblem(self._m0_form, self._L0_form, bcs=self._bcs,
-                                          u=self._a0, petsc_options=TimeStepper.petsc_options_t0)
+        problem = fem.petsc.LinearProblem(self._m0_form, self._L0_form, bcs=self._bcs, u=self._a0,
+                                          petsc_options=TimeStepper.petsc_options_t0,
+                                          jit_options=self.jit_options)
         problem.solve()
 
         u0, v0, a0 = self._u0.x.array, self._v0.x.array, self._a0.x.array
@@ -150,7 +156,7 @@ class LeapFrog(FEniCSxTimeScheme):
         # at this point: self._u_n = u1, self._u_nm1 = u0
 
         self.prepareNextIteration()
-        
+
         if verbose >= 10:
             PETSc.Sys.Print('Initial value problem solved, entering loop')
         for callback in callbacks:
