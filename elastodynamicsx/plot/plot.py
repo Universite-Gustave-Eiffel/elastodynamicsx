@@ -7,9 +7,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from dolfinx import plot, fem
+from dolfinx.mesh import Mesh
 import pyvista
 import time
 from petsc4py import PETSc
+
+from typing import Union, List
+
 
 ### ------------------------------------------------------------------------- ###
 ### --- preliminary: auto-configure pyvista backend for jupyter notebooks --- ###
@@ -54,12 +58,9 @@ def plot_mesh(mesh, cell_tags=None, **kwargs):
     Args:
         mesh: a dolfinx mesh
         cell_tags: (optional) a dolfinx MeshTag instance
-        kwargs:
-            show: (default=True) shows the plotter if set to True,
-                otherwise the plotter is returned
 
     Returns:
-        The pyvista.Plotter if show==False, else returns None
+        The pyvista.Plotter
 
     Example of use:
 
@@ -73,7 +74,8 @@ def plot_mesh(mesh, cell_tags=None, **kwargs):
                   (2, lambda x: x[1] >= 0.5)]
         cell_tags = make_tags(domain, Omegas, 'domains')
 
-        plot_mesh(domain, cell_tags)
+        p = plot_mesh(domain, cell_tags=cell_tags)
+        p.show()
     """
     p = pyvista.Plotter()
     grid = pyvista.UnstructuredGrid(*plot.create_vtk_mesh(mesh, mesh.topology.dim))
@@ -86,25 +88,31 @@ def plot_mesh(mesh, cell_tags=None, **kwargs):
     if mesh.topology.dim==2:
         p.view_xy()
     #
-    if kwargs.get('show'):
-        p.show()
-    else:
-        return p
+    return p
 
 
 def live_plotter(u:'fem.Function', refresh_step:int=1, **kwargs) -> pyvista.Plotter:
     kwargs['refresh_step'] = refresh_step
     return plotter(u, **kwargs)
 
-def plotter(*all_u, **kwargs) -> pyvista.Plotter:
-    u1 = all_u[0]
-    # test whether u is scalar or vector and returns the appropriate plotter
-    nbcomps = u1.function_space.element.num_sub_elements  # number of components if vector space, 0 if scalar space
 
-    if nbcomps == 0:
-        return CustomScalarPlotter(*all_u, **kwargs)
+def plotter(*all_u:Union[List['fem.Function'], Mesh], **kwargs) -> pyvista.Plotter:
+    """
+    A generic function to plot a mesh or one/several fields
+    """
+    u1 = all_u[0]
+
+    if isinstance(u1, Mesh):
+        return plot_mesh(*all_u, **kwargs)
+
     else:
-        return CustomVectorPlotter(*all_u, **kwargs)
+        # test whether u is scalar or vector and returns the appropriate plotter
+        nbcomps = u1.function_space.element.num_sub_elements  # number of components if vector space, 0 if scalar space
+
+        if nbcomps == 0:
+            return CustomScalarPlotter(*all_u, **kwargs)
+        else:
+            return CustomVectorPlotter(*all_u, **kwargs)
 
 
 ### -------------------------------------- ###
