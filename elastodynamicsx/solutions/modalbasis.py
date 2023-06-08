@@ -1,18 +1,26 @@
+# Copyright (C) 2023 Pierric Mora
+#
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
+
 import numpy as np
 from dolfinx import plot
 import pyvista
 
-import elastodynamicsx.plot #ensures automatic configuration of pyvista for jupyter
+import elastodynamicsx.plot  # ensures automatic configuration of pyvista for jupyter
 
 
 class ModalBasis():
     """
-    Representation of a modal basis, consisting of a set of eigen angular frequencies and modeshapes.
-    
-    at the moment: is merely a storage + plotter class
-    in the future: should be able to perform calculations with source terms, such as modal participation factors, modal summations, ...
+    Representation of a modal basis, consisting of a set of eigen angular
+    frequencies and modeshapes.
+
+    At the moment: is merely a storage + plotter class
+    In the future: should be able to perform calculations with source terms,
+        such as modal participation factors, modal summations, ...
     """
-    
+
     def __init__(self, wn, un, **kwargs):
         """
         Args:
@@ -22,25 +30,29 @@ class ModalBasis():
         self._wn = wn
         self._un = un
 
+
     @property
-    def fn(self):
+    def fn(self) -> np.ndarray:
         """The eigen frequencies"""
         return self._wn/(2*np.pi)
 
+
     @property
-    def wn(self):
+    def wn(self) -> np.ndarray:
         """The eigen angular frequencies"""
         return self._wn
-    
+
+
     @property
     def un(self):
         """The eigen modeshapes"""
         return self._un
-    
-    def plot(self, function_space:'dolfinx.fem.function_space', which='all', **kwargs):
+
+
+    def plot(self, function_space:'dolfinx.fem.function_space', which='all', **kwargs) -> None:
         """
         Plots the desired modeshapes
-        
+
         Args:
             function_space: The underlying function space
             which: 'all', or an integer, or a list of integers, or a slice object
@@ -55,7 +67,7 @@ class ModalBasis():
             plot(V, [3,5])           #plots modes number 4 and 6
             plot(V, slice(0,None,2)) #plots even modes
         """
-        #inspired from https://docs.pyvista.org/examples/99-advanced/warp-by-vector-eigenmodes.html
+        # inspired from https://docs.pyvista.org/examples/99-advanced/warp-by-vector-eigenmodes.html
         indexes    = _slice_array(np.arange(len(self._wn)), which)
         eigenmodes = _slice_array(self.un, which)
         eigenfreqs = _slice_array(self.fn, which)
@@ -81,11 +93,14 @@ class ModalBasis():
                 if kwargs.get('wireframe', False): plotter.add_mesh(grid, style='wireframe', color='black')
                 plotter.add_mesh(grid.warp_by_vector(vector, factor=factor), scalars=vector)
         plotter.show()
-        
-        
+
+
 def _slice_array(a, which):
     """Not intended to be used externally"""
-    if which == 'all'    : which = slice(0,None,None)
-    if type(which) is int: which = slice(which, which+1, None)
-    return a[which]
+    if which == 'all'    :
+        which = slice(0,None,None)
 
+    if type(which) is int:
+        which = slice(which, which+1, None)
+
+    return a[which]

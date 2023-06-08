@@ -1,3 +1,9 @@
+# Copyright (C) 2023 Pierric Mora
+#
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
+
 from dolfinx import fem
 from petsc4py import PETSc
 import ufl

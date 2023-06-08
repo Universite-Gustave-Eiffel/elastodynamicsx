@@ -12,7 +12,7 @@ except ModuleNotFoundError: tqdm = lambda x: x
 class FrequencyDomainSolver:
     """
     Class for solving frequency domain problems.
-    
+
     Example of use:
         #imports
         from dolfinx import mesh, fem
@@ -34,7 +34,7 @@ class FrequencyDomainSolver:
         #absorbing boundary condition
         Z_N, Z_T = mat.Z_N, mat.Z_T #P and S mechanical impedances
         bcs = [ BoundaryCondition(V, 'Dashpot', (Z_N, Z_T)) ]
-        
+
         #gaussian source term
         F0     = fem.Constant(domain, PETSc.ScalarType([1,0])) #polarization
         R0     = 0.1 #radius
@@ -42,18 +42,18 @@ class FrequencyDomainSolver:
         x      = ufl.SpatialCoordinate(domain)
         gaussianBF = F0 * ufl.exp(-((x[0]-x0)**2+(x[1]-y0)**2)/2/R0**2) / (2*3.141596*R0**2)
         bf         = BodyForce(V, gaussianBF)
-        
+
         #PDE
         pde = PDE(V, materials=[mat], bodyforces=[bf], bcs=bcs)
-        
+
         #solve
         fdsolver = FrequencyDomainSolver(V.mesh.comm, pde.M(), pde.C(), pde.K(), pde.b())
         omega    = 1.0
         u        = fem.Function(V, name='solution')
         fdsolver.solve(omega=omega, out=u.vector)
     """
-    
     default_petsc_options = {"ksp_type": "preonly", "pc_type": "lu"}  # "pc_factor_mat_solver_type": "mumps"
+
 
     def __init__(self, comm:'_MPI.Comm', M:PETSc.Mat, C:PETSc.Mat, K:PETSc.Mat,
                  b:PETSc.Vec, b_update_function:'function'=None, **kwargs):
@@ -79,16 +79,16 @@ class FrequencyDomainSolver:
         self._K = K
         self._b = b
         self._b_update_function = b_update_function
-        
+
         #### ####
         # Initialize the PETSc solver
         petsc_options = kwargs.get('petsc_options', FrequencyDomainSolver.default_petsc_options)
         self.solver = PETSc.KSP().create(comm)
-        
+
         # Give PETSc solver options a unique prefix
         problem_prefix = f"dolfinx_solve_{id(self)}"
         self.solver.setOptionsPrefix(problem_prefix)
-        
+
         # Set PETSc options
         opts = PETSc.Options()
         opts.prefixPush(problem_prefix)
@@ -118,8 +118,10 @@ class FrequencyDomainSolver:
         """
         if out is None:
             out = self._M.createVecRight()
+
         if hasattr(omega, '__iter__'):
             return self._solve_multiple_omegas(omega, out, callbacks, **kwargs)
+
         else:
             return self._solve_single_omega(omega, out)
 
@@ -129,7 +131,7 @@ class FrequencyDomainSolver:
         if not(self._b_update_function is None):
             self._b_update_function(self._b, omega)
             # Assume self._b.ghostUpdate(...) has already been done
-        
+
         # Update PDE matrix
         w = omega
         A = PETSc.ScalarType(-w*w)*self._M + PETSc.ScalarType(1J*w)*self._C + self._K
@@ -137,15 +139,15 @@ class FrequencyDomainSolver:
 
         # Solve
         self.solver.solve(self._b, out)
-        
+
         # Update the ghosts in the solution
         out.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
         return out
-    
-    
+
+
     def _solve_multiple_omegas(self, omegas, out:PETSc.Vec, callbacks:list=[], **kwargs) -> PETSc.Vec:
         # Loop on values in omegas -> _solve_single_omega
-        
+
         live_plt = kwargs.get('live_plotter', None)
         if not(live_plt is None):
             if type(live_plt)==dict:
@@ -154,32 +156,34 @@ class FrequencyDomainSolver:
                 raise NotImplementedError
             callbacks.append(live_plt.live_plotter_update_function)
             live_plt.show(interactive_update=True)
-            
+
         for i in tqdm(range(len(omegas))):
             self._solve_single_omega(omegas[i], out)
             for callback in callbacks:
                 callback(i, out)  # <- store solution, plot, print, ...
+
         return out
 
-    
+
     @property
     def M(self) -> PETSc.Mat:
         """The mass matrix"""
         return self._M
-    
+
+
     @property
     def C(self) -> PETSc.Mat:
         """The damping matrix"""
         return self._C
-    
+
+
     @property
     def K(self) -> PETSc.Mat:
         """The stiffness matrix"""
         return self._K
 
+
     @property
     def b(self) -> PETSc.Vec:
         """The load vector"""
         return self._b
-
-

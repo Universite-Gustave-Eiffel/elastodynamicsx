@@ -1,3 +1,9 @@
+# Copyright (C) 2023 Pierric Mora
+#
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
+
 """
 Tools for building a Partial Differential Equation from material laws. The
 package also provides tools for building Boundary Conditions.
@@ -24,12 +30,9 @@ Assembling a PDE:
     pde = PDE(materials=[mat1, mat2, ...], bodyforces=[bf1, bf2, ...])
 """
 
-
 from .boundarycondition import *
 
 from .pde import *
 from .materials import *
-#from .elasticmaterial import *
-#from .hyperelasticmaterial import *
 from .bodyforce import *
 from .timeschemes import *

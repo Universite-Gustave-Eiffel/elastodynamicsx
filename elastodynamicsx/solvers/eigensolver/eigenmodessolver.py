@@ -1,3 +1,9 @@
+# Copyright (C) 2023 Pierric Mora
+#
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
+
 #TODO: optimize SLEPc default options
 
 from petsc4py import PETSc
@@ -19,9 +25,9 @@ class EigenmodesSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue problem
     Convenience class inhereted from SLEPc.EPS, with default parameters
     and convenience methods that are relevant for computing the resonances
     of an elastic component.
-    
+
     Example of use (free resonances of an elastic cube):
-        
+
         from dolfinx import mesh, fem
         from mpi4py import MPI
         from elastodynamicsx.solvers import EigenmodesSolver
@@ -46,27 +52,27 @@ class EigenmodesSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue problem
         Args:
             comm: The MPI communicator
             M: The mass matrix
-            C: The damping matrix
+            C: The damping matrix. C=None means no dissipation. C!=None is not supported yet.
             K: The stiffness matrix
             kwargs:
                 nev: the number of eigenvalues to be computed
         """
         super().__init__()
-        
-        if not(C is None): #TODO
+
+        if not(C is None):  # TODO
             raise NotImplementedError
-        
+
         #
         self.create(comm)
         self.setOperators(K, M)
-        self.setProblemType(SLEPc.EPS.ProblemType.GHEP) #GHEP = Generalized Hermitian Eigenvalue Problem
+        self.setProblemType(SLEPc.EPS.ProblemType.GHEP)  # GHEP = Generalized Hermitian Eigenvalue Problem
         #self.setTolerances(tol=1e-9)
-        self.setType(SLEPc.EPS.Type.KRYLOVSCHUR) #note that Krylov-Schur is the default solver
+        self.setType(SLEPc.EPS.Type.KRYLOVSCHUR)  # Note that Krylov-Schur is the default solver
 
         ### Spectral transform
         st = self.getST()
-        st.setType(SLEPc.ST.Type.SINVERT) #SINVERT = Shift and invert. By default, Slepc computes the largest eigenvalue, while we are interested in the smallest ones
-        st.setShift( 1e-8 ) #can be set to a different value if the focus is set on another part of the spectrum
+        st.setType(SLEPc.ST.Type.SINVERT)  # SINVERT = Shift and invert. By default, Slepc computes the largest eigenvalue, while we are interested in the smallest ones
+        st.setShift( 1e-8 )  # can be set to a different value if the focus is set on another part of the spectrum
 
         ### Number of eigenvalues to be computed
         nev = kwargs.get('nev', 10)
@@ -75,11 +81,13 @@ class EigenmodesSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue problem
 
     def getWn(self) -> np.ndarray:
         """The eigen angular frequencies from the computed eigenvalues"""
-        return np.array([np.sqrt(abs(self.getEigenvalue(i).real)) for i in range(self._getNout())]) #abs because rigid body motions may lead to minus zero: -0.00000
-        
+        return np.array([np.sqrt(abs(self.getEigenvalue(i).real)) for i in range(self._getNout())])  # abs because rigid body motions may lead to minus zero: -0.00000
+
+
     def getEigenfrequencies(self) -> np.ndarray:
         """The eigenfrequencies from the computed eigenvalues"""
         return self.getWn()/(2*np.pi)
+
 
     def getEigenmodes(self, which='all'):
         """
@@ -97,34 +105,42 @@ class EigenmodesSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue problem
         K, M = self.getOperators()
         indexes = _slice_array(np.arange(self._getNout()), which)
         eigenmodes = [ K.createVecRight() for i in range(np.size(indexes)) ]
+
         for i, eigM in zip(indexes, eigenmodes):
-            self.getEigenpair(i, eigM) # Save eigenvector in eigM
+            self.getEigenpair(i, eigM)  # Save eigenvector in eigM
+
         return eigenmodes
-    
+
+
     def getModalBasis(self) -> 'elastodynamicsx.solutions.ModalBasis':
         return ModalBasis(self.getWn(), self.getEigenmodes())
 
+
     def getErrors(self) -> np.ndarray:
         """Returns the error estimate on the computed eigenvalues"""
-        return np.array([self.computeError(i, SLEPc.EPS.ErrorType.RELATIVE) for i in range(self._getNout())]) # Compute error for i-th eigenvalue
-    
+        return np.array([self.computeError(i, SLEPc.EPS.ErrorType.RELATIVE) for i in range(self._getNout())])  # Compute error for i-th eigenvalue
+
+
     def plot(self, function_space:'dolfinx.fem.function_space', which='all', **kwargs) -> None:
         """
         Plots the desired modeshapes
-        
+
         Args:
             function_space: The underlying function space
             which: 'all', or an integer, or a list of integers, or a slice object
                 -> the same as for getEigenmodes
         """
         self.getModalBasis().plot(function_space, which, **kwargs)
-    
+
+
     def printEigenvalues(self) -> None:
         """Prints the computed eigenvalues and error estimates"""
         v = [self.getEigenvalue(i) for i in range(self._getNout())]
         e = self.getErrors()
         PETSc.Sys.Print("       eigenvalue \t\t\t error ")
-        for cv, ce in zip(v, e): PETSc.Sys.Print(cv, '\t', ce)
+        for cv, ce in zip(v, e):
+            PETSc.Sys.Print(cv, '\t', ce)
+
 
     def _getNout(self):
         """Returns the number of eigenpairs that can be returned. Usually equal to 'nev'."""
@@ -137,7 +153,10 @@ class EigenmodesSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue problem
 
 def _slice_array(a, which):
     """Not intended to be called by user"""
-    if which == 'all'    : which = slice(0,None,None)
-    if type(which) is int: which = slice(which, which+1, None)
-    return a[which]
+    if which == 'all'    :
+        which = slice(0,None,None)
 
+    if type(which) is int:
+        which = slice(which, which+1, None)
+
+    return a[which]

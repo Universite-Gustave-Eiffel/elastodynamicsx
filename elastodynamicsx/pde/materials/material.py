@@ -90,9 +90,9 @@ class Material():
                     application of the material in the entire domain
             rho:   Density
             is_linear: True for linear, False for hyperelastic
-            kwargs:
-                metadata: (default=None) The metadata used by the ufl measures (dx, dS)
-                    If set to None, uses the PDE.default_metadata
+        kwargs:
+            metadata: (default=None) The metadata used by the ufl measures (dx, dS)
+                If set to None, uses the PDE.default_metadata
         """
         self._rho = rho
         self._is_linear = is_linear
@@ -118,35 +118,42 @@ class Material():
     def is_linear(self) -> bool:
         return self._is_linear
 
+
     @property
     def m(self) -> 'function':
         """(bilinear) mass form function"""
         return lambda u,v: self._rho* ufl.inner(u, v) * self._dx
+
 
     @property
     def c(self) -> 'function':
         """(bilinear) damping form function"""
         return None
 
+
     @property
     def k(self) -> 'function':
         """Stiffness form function"""
         return self._k
+
 
     @property
     def k_CG(self) -> 'function':
         """Stiffness form function for a Continuous Galerkin formulation"""
         print("supercharge me")
 
+
     @property
     def k_DG(self) -> 'function':
         """Stiffness form function for a Disontinuous Galerkin formulation"""
         print("supercharge me")
 
+
     @property
     def DG_numerical_flux(self) -> 'function':
         """Numerical flux for a Disontinuous Galerkin formulation"""
         print("supercharge me")
+
 
     @property
     def rho(self):

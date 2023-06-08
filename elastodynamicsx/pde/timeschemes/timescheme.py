@@ -1,3 +1,9 @@
+# Copyright (C) 2023 Pierric Mora
+#
+# This file is part of ElastodynamiCSx
+#
+# SPDX-License-Identifier: MIT
+
 from petsc4py import PETSc
 from dolfinx import fem
 try:
@@ -162,6 +168,3 @@ class FEniCSxTimeScheme(TimeScheme):
                 selfVal.x.array[:] = val.x.array
             else:
                 raise TypeError("Unknown type of initial value "+str(type(val)))
-
-
-

@@ -14,10 +14,10 @@ def epsilon_scalar(u): return ufl.nabla_grad(u)
 def get_epsilon_function(dim, nbcomps):
     if nbcomps == 0: #scalar function space
         return epsilon_scalar
-    
+
     elif dim == nbcomps:
         return epsilon_vector
-    
+
     if   dim == 1:
         if   nbcomps == 2: # [ [exx, exy], [eyx, eyy] ]
             return lambda u: ufl.as_matrix([ [u[0].dx(0)    , 0.5*u[1].dx(0)],
@@ -26,13 +26,13 @@ def get_epsilon_function(dim, nbcomps):
             return lambda u: ufl.as_matrix([ [u[0].dx(0)    , 0.5*u[1].dx(0), 0.5*u[2].dx(0)],
                                              [0.5*u[1].dx(0), 0             , 0             ],
                                              [0.5*u[2].dx(0), 0             , 0             ] ])
-    
+
     elif dim == 2:
         if   nbcomps == 3: # [ [exx, exy, exz], [eyx, eyy, eyz], [ezx, ezy, ezz] ]
             return lambda u: ufl.as_matrix([ [u[0].dx(0)                 , 0.5*(u[1].dx(0)+u[0].dx(1)), 0.5*u[2].dx(0)],
                                              [0.5*(u[1].dx(0)+u[0].dx(1)), u[1].dx(1)                 , 0.5*u[2].dx(1)],
                                              [0.5*u[2].dx(0)             , 0.5*u[2].dx(1)             , 0             ] ])
-    
+
     else:
         raise NotImplementedError('dim = ' + str(dim) + ', nbcomps = ' + str(nbcomps))
 
@@ -94,7 +94,7 @@ def get_L_operators(dim, nbcomps, k_nrm=None):
     """
     L_cs = None #cross section
     L_oa = None #on axis
-    
+
     # default value to print an error message befaire fail
     L_cs = lambda *a: print('kinematics, L operators: NotImplemented; dim=' + str(dim) + ', nbcomps=' + str(nbcomps))
 
@@ -102,7 +102,7 @@ def get_L_operators(dim, nbcomps, k_nrm=None):
         L_cs = epsilon_scalar
         L_oa = lambda u: u
         return L_cs, L_oa
-        
+
     if   dim == 1:
         if   nbcomps == 2:
             L_cs = lambda u: ufl.as_vector([u[0].dx(0),
@@ -147,4 +147,3 @@ def get_L_operators(dim, nbcomps, k_nrm=None):
             L_cs = lambda *a: print('kinematics:: ERROR:: L operators require 1 or 3 components')
 
     return L_cs, L_oa
-
