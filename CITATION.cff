@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Mora
+    given-names: Pierric
+    orcid: https://orcid.org/0000-0002-1013-6863
+title: "ElastodynamiCSx"
+version: 0.2
+date-released: 2023-06-08
