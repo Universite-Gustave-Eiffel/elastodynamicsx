@@ -77,21 +77,29 @@ class ModalBasis():
         for i, eigM in zip(indexes, eigenmodes):
             nbpts = grid.number_of_points
             grid['eigenmode_'+str(i)] = elastodynamicsx.plot.get_3D_array_from_nparray(np.array(eigM), nbpts)
-        #
+
         nbcols = int(np.ceil(np.sqrt(indexes.size)))
         nbrows = int(np.ceil(indexes.size/nbcols))
-        shape  = kwargs.get('shape', (nbrows, nbcols))
-        factor = kwargs.get('factor', 1.)
+        shape  = kwargs.pop('shape', (nbrows, nbcols))
+        factor = kwargs.pop('factor', 1.)
+        wireframe = kwargs.pop('wireframe', False)
+        if wireframe and not 'opacity' in kwargs.keys():
+            kwargs['opacity'] = 0.8
+
         plotter = pyvista.Plotter(shape=shape)
         for i in range(shape[0]):
             for j in range(shape[1]):
                 plotter.subplot(i,j)
                 current_index = i*shape[1] + j
-                if current_index >= indexes.size: break
+
+                if current_index >= indexes.size:
+                    break
+
                 vector = 'eigenmode_'+str(indexes[current_index])
                 plotter.add_text("mode "+str(indexes[current_index])+", freq. "+str(round(eigenfreqs[current_index],2)), font_size=10)
-                if kwargs.get('wireframe', False): plotter.add_mesh(grid, style='wireframe', color='black')
-                plotter.add_mesh(grid.warp_by_vector(vector, factor=factor), scalars=vector)
+                if wireframe:
+                    plotter.add_mesh(grid, style='wireframe', color='black')
+                plotter.add_mesh(grid.warp_by_vector(vector, factor=factor), scalars=vector, **kwargs)
         plotter.show()
 
 
