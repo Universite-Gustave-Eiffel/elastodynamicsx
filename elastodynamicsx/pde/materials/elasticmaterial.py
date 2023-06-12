@@ -180,10 +180,14 @@ class ElasticMaterial(Material):
     def k1_CG(self) -> 'function':
         return lambda u,v: ufl.inner(self._Cij*self._L_crosssection(u), self._L_crosssection(v)) * self._dx
 
+    #@property
+    #def k2_CG(self) -> 'function':  # This is K2 - K2.T
+    #    return lambda u,v: ( ufl.inner(self._Cij*self._L_onaxis(u), self._L_crosssection(v)) \
+    #                        -ufl.inner(self._L_crosssection(u), self._Cij*self._L_onaxis(v)) )* self._dx
+
     @property
     def k2_CG(self) -> 'function':
-        return lambda u,v: ( ufl.inner(self._Cij*self._L_onaxis(u), self._L_crosssection(v)) \
-                            -ufl.inner(self._L_crosssection(u), self._Cij*self._L_onaxis(v)) )* self._dx
+        return lambda u,v: ufl.inner(self._Cij*self._L_onaxis(u), self._L_crosssection(v)) * self._dx
 
     @property
     def k3_CG(self) -> 'function':
