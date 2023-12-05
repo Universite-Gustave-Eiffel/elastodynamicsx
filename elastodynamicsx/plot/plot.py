@@ -159,8 +159,13 @@ class CustomScalarPlotter(pyvista.Plotter):
         else:
             pyvista.global_theme.multi_rendering_splitting_position = 0.75
             defaultShape = '1|'+str(len(self.grids)-1)
-        shape = kwargs.pop('shape', defaultShape)
-        super().__init__(shape=shape)
+        kwinit = {'shape': kwargs.pop('shape', defaultShape)}
+        for k in ('off_screen', 'notebook', 'border', 'border_color',
+                  'window_size', 'multi_samples', 'line_smoothing',
+                  'polygon_smoothing', 'lighting', 'theme'):
+            if k in kwargs:
+                kwinit[k] = kwargs.pop(k)
+        super().__init__(**kwinit)
 
         show_edges = kwargs.pop('show_edges', 'first')
         if   show_edges == False:
@@ -267,8 +272,13 @@ class CustomVectorPlotter(pyvista.Plotter):
         else:
             pyvista.global_theme.multi_rendering_splitting_position = 0.75
             defaultShape = '1|'+str(len(self.grids)-1)
-        shape = kwargs.pop('shape', defaultShape)
-        super().__init__(shape=shape)
+        kwinit = {'shape': kwargs.pop('shape', defaultShape)}
+        for k in ('off_screen', 'notebook', 'border', 'border_color',
+                  'window_size', 'multi_samples', 'line_smoothing',
+                  'polygon_smoothing', 'lighting', 'theme'):
+            if k in kwargs:
+                kwinit[k] = kwargs.pop(k)
+        super().__init__(**kwinit)
 
         show_edges = kwargs.pop('show_edges', 'first')
         if   show_edges == False:
