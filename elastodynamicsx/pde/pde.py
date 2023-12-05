@@ -25,8 +25,9 @@ class PDE():
     Representation of a PDE of the kind:
 
         M*a + C*v + K(u) = b
+        + Boundary conditions
 
-    as an assembly of materials and forces defined over different subdomains
+    as an assembly of materials, forces and bcs defined over different subdomains
     """
 
     ### ### ### ###
