@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: MIT
 
 import numpy as np
-from dolfinx.fem import FunctionSpace
+from dolfinx.fem import FunctionSpaceBase
 from dolfinx.mesh import Mesh, locate_entities, meshtags
 
 from typing import Tuple, Callable, Union
@@ -74,7 +74,7 @@ def make_tags(domain: Mesh, locators: Tuple[Tuple[int, Callable]], type_='unknow
     return loc_tags
 
 
-def get_functionspace_tags_marker(functionspace_tags_marker: Union[FunctionSpace, Tuple[FunctionSpace, 'MeshTags', int]]) -> Tuple[FunctionSpace, 'MeshTags', int]:
+def get_functionspace_tags_marker(functionspace_tags_marker: Union[FunctionSpaceBase, Tuple[FunctionSpaceBase, 'MeshTags', int]]) -> Tuple[FunctionSpaceBase, 'MeshTags', int]:
     """
     This is a convenience function for several classes/functions of other packages.
     It is not intended to be used in other context.
@@ -87,7 +87,7 @@ def get_functionspace_tags_marker(functionspace_tags_marker: Union[FunctionSpace
             functionspace_tags_marker = (function_space, cell_tags, marker)
             functionspace_tags_marker = function_space #means tags=None and marker=None
     """
-    if isinstance(functionspace_tags_marker, FunctionSpace):
+    if isinstance(functionspace_tags_marker, FunctionSpaceBase):
         return functionspace_tags_marker, None, None
     else:
         return functionspace_tags_marker

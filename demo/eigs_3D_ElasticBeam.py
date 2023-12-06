@@ -37,7 +37,7 @@ boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0 )),\
               (tag_front , lambda x: np.isclose(x[2], H_))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-V = fem.VectorFunctionSpace(domain, ("CG", 2))
+V = fem.FunctionSpace(domain, ("Lagrange", 2, (domain.geometry.dim,)))
 #
 # -----------------------------------------------------
 

@@ -47,7 +47,7 @@ boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
               (tag_top   , lambda x: np.isclose(x[1], height))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-V = fem.VectorFunctionSpace(domain, ("CG", degElement))
+V = fem.FunctionSpace(domain, ("Lagrange", degElement, (domain.geometry.dim,)))
 #
 # -----------------------------------------------------
 
@@ -146,7 +146,8 @@ paraEval = ParallelEvaluator(domain, points_out)
 # Declare data (local)
 u_at_pts_local = np.zeros((paraEval.nb_points_local,
                            V.num_sub_spaces,
-                           omegas.size))  # <- output stored here
+                           omegas.size),
+                           dtype=PETSc.ScalarType)  # <- output stored here
 
 # Callback function: post process solution
 def cbck_storeAtPoints(i, out):

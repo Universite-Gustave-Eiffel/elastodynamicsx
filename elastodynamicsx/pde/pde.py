@@ -6,7 +6,7 @@
 
 from petsc4py import PETSc
 import numpy as np
-from dolfinx import fem
+from dolfinx import fem, default_scalar_type
 try:
     import dolfinx_mpc
 except ImportError:
@@ -114,7 +114,7 @@ class PDE():
         self._bcs_mpc    = BoundaryCondition.get_mpc_BCs(self.bcs)       # instances of BoundaryCondition used to add multi-point constraints
         #new_list = filter(lambda v: v not in b, a)
 
-        self._omega_ufl = fem.Constant(function_space, PETSc.ScalarType(0))
+        self._omega_ufl = fem.Constant(function_space.mesh, default_scalar_type(0))
 
         # Finalize the PDE (compile, ...). Optionnally this can be done
         # manually later on by passing kwargs['finalize']=False
@@ -167,10 +167,10 @@ class PDE():
         """Required for frequency domain or eigenvalue problems"""
         u, v = self._u, self._v
 
-        zero = fem.Constant(self._function_space, PETSc.ScalarType(0.))
+        zero = fem.Constant(self._function_space.mesh, default_scalar_type(0.))
         vzero = zero
         if v.ufl_function_space().num_sub_spaces != 0:  # VectorFunctionSpace
-            vzero = fem.Constant(self._function_space, PETSc.ScalarType([0.] * len(v)))
+            vzero = fem.Constant(self._function_space.mesh, default_scalar_type([0.] * len(v)))
 
         # Interior
         k = self.k(u,v)
@@ -202,7 +202,7 @@ class PDE():
         self._b_form = fem.form(L, jit_options=self.jit_options)
 
         # Executes the following only if using complex numbers
-        if np.issubdtype(PETSc.ScalarType, np.complexfloating):
+        if np.issubdtype(default_scalar_type, np.complexfloating):
             ##Mat_lhs = -w*w*_M_ + 1J*w*_C_ + _K_
             m = self.m(u,v)
             w = self._omega_ufl

@@ -89,9 +89,9 @@ class BoundaryCondition():
     def get_dirichlet_BCs(bcs):
         out = []
         for bc in bcs:
-            if issubclass(type(bc), fem.DirichletBCMetaClass):
+            if issubclass(type(bc), fem.bcs.DirichletBC):
                 out.append(bc)
-            if type(bc) == BoundaryCondition and issubclass(type(bc.bc), fem.DirichletBCMetaClass):
+            if type(bc) == BoundaryCondition and issubclass(type(bc.bc), fem.bcs.DirichletBC):
                 out.append(bc.bc)
         return out
 
@@ -109,7 +109,7 @@ class BoundaryCondition():
         for bc in bcs:
             if type(bc) == BoundaryCondition:
                 test_mpc = bc.type == 'periodic'
-                test_d   = issubclass(type(bc.bc), fem.DirichletBCMetaClass)
+                test_d   = issubclass(type(bc.bc), fem.bcs.DirichletBC)
                 if not(test_mpc or test_d):
                     out.append(bc)
         return out
@@ -170,7 +170,7 @@ class BoundaryCondition():
                 if function_space.mesh.topology.dim == 1:
                     self._bc = lambda u_t,v: ((values[0]-values[1])*ufl.inner(u_t[0], v[0]) + values[1]*ufl.inner(u_t, v))* ds  # Bilinear form, to be applied on du/dt
                 else:
-                    n = ufl.FacetNormal(function_space)
+                    n = ufl.FacetNormal(function_space.mesh)
                     self._bc = lambda u_t,v: ((values[0]-values[1])*ufl.dot(u_t, n)*ufl.inner(n, v) + values[1]*ufl.inner(u_t, v))* ds  # Bilinear form, to be applied on du/dt
 
         elif type_ == 'periodic-do-not-use': #TODO: try to calculate P from two given boundary markers
