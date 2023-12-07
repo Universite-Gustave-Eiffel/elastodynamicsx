@@ -8,10 +8,9 @@ Welcome to ElastoDynamiCSx's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    readme_link
    sources
-   demo
+   examples
 
 
