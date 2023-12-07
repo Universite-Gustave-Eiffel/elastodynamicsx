@@ -12,7 +12,7 @@ Propagation of P and SV elastic waves in a 2D, homogeneous isotropic solid, and 
 """
 
 
-from dolfinx import mesh, fem
+from dolfinx import mesh, fem, default_scalar_type
 from mpi4py import MPI
 from petsc4py import PETSc
 import ufl
@@ -32,7 +32,7 @@ from analyticalsolutions import u_2D_PSV_xt, int_Fraunhofer_2D
 # Set up a Spectral Element Method
 degElement, nameElement = 4, "GLL"
 cell_type = mesh.CellType.quadrilateral
-specFE               = spectral_element(nameElement, cell_type, degElement)
+specFE               = spectral_element(nameElement, cell_type, degElement, (2,))
 PDE.default_metadata = spectral_quadrature(nameElement, degElement)
 
 length, height = 10, 10
@@ -48,12 +48,7 @@ boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
               (tag_top   , lambda x: np.isclose(x[1], height))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-# V = fem.VectorFunctionSpace(domain, specFE, dim=2) #currently does not work
-# workaround
-import basix.ufl_wrapper
-e        = specFE
-specFE_v = basix.ufl_wrapper.create_vector_element(e.family(), e.cell_type, e.degree(), e.lagrange_variant, e.dpc_variant, e.discontinuous, dim=2, gdim=domain.geometry.dim)
-V = fem.FunctionSpace(domain, specFE_v)
+V = fem.FunctionSpace(domain, specFE)
 #
 # -----------------------------------------------------
 
@@ -61,9 +56,9 @@ V = fem.FunctionSpace(domain, specFE_v)
 # -----------------------------------------------------
 #                 Material parameters
 # -----------------------------------------------------
-rho     = fem.Constant(domain, PETSc.ScalarType(1))
-mu      = fem.Constant(domain, PETSc.ScalarType(1))
-lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
+rho     = fem.Constant(domain, default_scalar_type(1))
+mu      = fem.Constant(domain, default_scalar_type(1))
+lambda_ = fem.Constant(domain, default_scalar_type(2))
 
 mat   = material(V, 'isotropic', rho, lambda_, mu)
 materials = [mat]
@@ -97,7 +92,7 @@ nrm   = 1/(2*np.pi*R0_src**2) #normalize to int[src_x(x) dx]=1
 
 def src_x(x):  # source(x): Gaussian
     r = np.linalg.norm(x-X0_src[:,np.newaxis], axis=0)
-    return nrm * np.exp(-1/2*(r/R0_src)**2, dtype=PETSc.ScalarType)
+    return nrm * np.exp(-1/2*(r/R0_src)**2, dtype=default_scalar_type)
 #
 ### -> Time function
 #
@@ -111,7 +106,7 @@ def src_t(t):  # source(t): Sine x Hann window
 
 ### -> Space-Time function
 #
-F_0 = PETSc.ScalarType([1,0])  # amplitude of the source
+F_0 = default_scalar_type([1,0])  # amplitude of the source
 #
 def F_body_function(t):  # source(x) at a given time
     return lambda x: F_0[:,np.newaxis] * src_t(t) * src_x(x)[np.newaxis,:]

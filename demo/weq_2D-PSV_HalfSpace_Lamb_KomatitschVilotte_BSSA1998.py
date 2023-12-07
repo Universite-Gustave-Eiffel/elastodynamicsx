@@ -16,7 +16,7 @@ After [1], Fig. 1:
 """
 
 
-from dolfinx import mesh, fem
+from dolfinx import mesh, fem, default_scalar_type
 from dolfinx.io import gmshio
 from mpi4py import MPI
 from petsc4py import PETSc
@@ -38,7 +38,7 @@ from models.model_Lamb_KomatitschVilotte_BSSA1998 import create_model
 # Set up a Spectral Element Method
 degElement, nameElement = 8, "GLL"
 cell_type = mesh.CellType.quadrilateral
-specFE               = spectral_element(nameElement, cell_type, degElement)
+specFE               = spectral_element(nameElement, cell_type, degElement, (2,))
 PDE.default_metadata = spectral_quadrature(nameElement, degElement)
 
 # Create a GMSH model
@@ -53,12 +53,7 @@ comm = MPI.COMM_WORLD
 domain, cell_tags, facet_tags = gmshio.model_to_mesh(model, comm, gmsh_model_rank, gdim=2)
 
 #
-# V = fem.VectorFunctionSpace(domain, specFE, dim=2)  # currently does not work
-# workaround:
-import basix.ufl_wrapper
-e        = specFE
-specFE_v = basix.ufl_wrapper.create_vector_element(e.family(), e.cell_type, e.degree(), e.lagrange_variant, e.dpc_variant, e.discontinuous, dim=2, gdim=domain.geometry.dim)
-V = fem.FunctionSpace(domain, specFE_v)
+V = fem.FunctionSpace(domain, specFE)
 #
 # -----------------------------------------------------
 
@@ -78,9 +73,9 @@ def y_surf(x):
 rho     = 2.2  # density
 cP, cS  = 3.2, 1.8475  # P- and S-wave velocities
 c11, c44= rho * cP**2, rho * cS**2
-rho     = fem.Constant(domain, PETSc.ScalarType(rho))
-mu      = fem.Constant(domain, PETSc.ScalarType(c44))
-lambda_ = fem.Constant(domain, PETSc.ScalarType(c11-2*c44))
+rho     = fem.Constant(domain, default_scalar_type(rho))
+mu      = fem.Constant(domain, default_scalar_type(c44))
+lambda_ = fem.Constant(domain, default_scalar_type(c11 - 2 * c44))
 
 mat   = material(V, 'isotropic', rho, lambda_, mu)
 materials = [mat]
@@ -114,7 +109,7 @@ nrm   = 1/np.sqrt(2*np.pi*W0_src**2)  # normalize to int[src_x(x) dx]=1
 
 def src_x(x):  # Source(x): Gaussian
     r = (x[0]-X0_src[0]) / np.cos(np.radians(tilt))
-    return nrm * np.exp(-1/2*(r/W0_src)**2, dtype=PETSc.ScalarType)
+    return nrm * np.exp(-1/2*(r/W0_src)**2, dtype=default_scalar_type)
 #
 ### -> Time function
 #
@@ -128,7 +123,7 @@ def src_t(t):  # Source(t): Ricker
 ### -> Space-Time function
 #
 p0  = 1.  # Max amplitude
-F_0 = p0 * PETSc.ScalarType([np.sin(np.radians(tilt)), -np.cos(np.radians(tilt))])  # Amplitude of the source
+F_0 = p0 * default_scalar_type([np.sin(np.radians(tilt)), -np.cos(np.radians(tilt))])  # Amplitude of the source
 #
 def T_N_function(t):
     return lambda x: F_0[:,np.newaxis] * src_t(t) * src_x(x)[np.newaxis,:]  # source(x) at a given time

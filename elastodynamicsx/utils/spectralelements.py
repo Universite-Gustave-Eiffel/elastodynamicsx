@@ -9,7 +9,9 @@
 # https://github.com/FEniCS/dolfinx/issues/2537
 
 
+import typing
 import basix
+import basix.ufl
 from dolfinx.mesh import CellType
 
 
@@ -39,24 +41,30 @@ def _suitable_cell_type_format(cell_type):
         raise TypeError("Unknown cell type: {0:s}".format(cell_type))
 
 
-def GLL_element(cell_type, degree: int) -> basix._basixcpp.FiniteElement:
+def GLL_element(cell_type,
+                degree: int,
+                shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
     """Element defined using the Gauss-Lobatto-Legendre points"""
     cell_type = _suitable_cell_type_format(cell_type)
-    element   = basix.create_element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.gll_warped)
+    element = basix.ufl.element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.gll_warped, shape=shape)
     return element
 
 
-def GL_element(cell_type, degree: int) -> basix._basixcpp.FiniteElement:
+def GL_element(cell_type,
+               degree: int,
+               shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
     """(discontinuous) Element defined using the Gauss-Legendre points"""
     cell_type = _suitable_cell_type_format(cell_type)
-    element   = basix.create_element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.gl_warped, True)
+    element   = basix.ufl.element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.gl_warped, True)
     return element
 
 
-def Legendre_element(cell_type, degree: int) -> basix._basixcpp.FiniteElement:
+def Legendre_element(cell_type,
+                     degree: int,
+                     shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
     """(discontinuous) Element whose basis functions are the orthonormal Legendre polynomials"""
     cell_type = _suitable_cell_type_format(cell_type)
-    element   = basix.create_element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.legendre, True)
+    element   = basix.ufl.element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.legendre, True)
     return element
 
 
@@ -68,22 +76,25 @@ def GLL_quadrature(degree: int) -> dict:
     if degree == 2:
         return {"quadrature_rule": "GLL", "quadrature_degree": 3}
     else:
-        return {"quadrature_rule": "GLL", "quadrature_degree": 2*(degree-1)}
+        return {"quadrature_rule": "GLL", "quadrature_degree": 2 * (degree - 1)}
 
 
 def GL_quadrature(degree: int) -> dict:
-    return {"quadrature_rule": "GL",  "quadrature_degree": 2*degree}  # 2*degree+1 ?
+    return {"quadrature_rule": "GL",  "quadrature_degree": 2 * degree}  # 2 * degree + 1 ?
 
 
 def Legendre_quadrature(degree: int) -> dict:
-    return {"quadrature_rule": "GL",  "quadrature_degree": 2*degree}
+    return {"quadrature_rule": "GL",  "quadrature_degree": 2 * degree}
 
 
 # ## ### ### ### ###
 # ## ALL IN ONE  ###
 # ## ### ### ### ###
 
-def spectral_element(name: str, cell_type, degree: int) -> basix._basixcpp.FiniteElement:
+def spectral_element(name: str,
+                     cell_type,
+                     degree: int,
+                     shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
     """
     A spectral element that can be used in a dolfinx.fem.FunctionSpace
 
@@ -155,11 +166,11 @@ def spectral_element(name: str, cell_type, degree: int) -> basix._basixcpp.Finit
         plt.show()
     """
     if   name.lower() == "gll":
-        return GLL_element(cell_type, degree)
+        return GLL_element(cell_type, degree, shape)
     elif name.lower() == "gl":
-        return GL_element(cell_type, degree)
+        return GL_element(cell_type, degree, shape)
     elif name.lower() == "legendre":
-        return Legendre_element(cell_type, degree)
+        return Legendre_element(cell_type, degree, shape)
     else:
         raise TypeError("Unknown element name: {0:s}".format(name))
 
