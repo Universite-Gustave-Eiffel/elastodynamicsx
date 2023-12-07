@@ -6,7 +6,7 @@
 
 # TODO: currently only testing for build & compile, not for the validity of a result.
 
-from dolfinx import mesh, fem
+from dolfinx import mesh, fem, default_scalar_type
 from mpi4py import MPI
 from petsc4py import PETSc
 
@@ -27,29 +27,29 @@ def create_mesh(dim):
 def tst_scalar_material(dim, eltname="Lagrange"):
     # FE domain
     V = fem.FunctionSpace(create_mesh(dim), (eltname, 1))
-    
+
     # Material
-    const = lambda x: fem.Constant(V.mesh, PETSc.ScalarType(x))
+    const = lambda x: fem.Constant(V.mesh, default_scalar_type(x))
     mat  = material(V, 'scalar', rho=const(1), mu=const(1))
     mats = [mat]
-    
+
     # PDE
     pde = PDE(V, materials=mats)
-    
+
     # Compile some matrices
     _, _, _ = pde.M() ,  pde.C() ,  pde.K()
     _, _, _ = pde.K1(),  pde.K2(),  pde.K3()
-    
+
     # The end
 
 
 
 def tst_vector_materials(dim, nbcomps, eltname="Lagrange"):
     # FE domain
-    V = fem.VectorFunctionSpace(create_mesh(dim), (eltname, 1), dim=nbcomps)
+    V = fem.FunctionSpace(create_mesh(dim), (eltname, 1, (nbcomps,)))
     
     # Material
-    const = lambda x: fem.Constant(V.mesh, PETSc.ScalarType(x))
+    const = lambda x: fem.Constant(V.mesh, default_scalar_type(x))
     rho  = const(1)
     Coo  = const(1) #a dummy Cij
     types= ('isotropic', 'cubic', 'hexagonal', 'trigonal', 'tetragonal', 'orthotropic', 'monoclinic', 'triclinic')

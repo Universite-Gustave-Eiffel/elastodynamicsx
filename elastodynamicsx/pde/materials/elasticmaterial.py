@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-from dolfinx import fem
+from dolfinx import fem, default_scalar_type
 from petsc4py import PETSc
 import ufl
 import numpy as np
@@ -222,8 +222,8 @@ class ElasticMaterial(Material):
     def DG_SIPG_regularization_parameter(self) -> 'dolfinx.fem.Constant':
         """Regularization parameter for the Symmetric Interior Penalty Galerkin methods (SIPG)"""
         degree = self._function_space.ufl_element().degree()
-        gamma  = fem.Constant(self._function_space.mesh, PETSc.ScalarType(degree*(degree+1) + 1)) #+1 otherwise blows with elements of degree 1
-        #gamma  = fem.Constant(self._function_space.mesh, PETSc.ScalarType(160)) #+1 otherwise blows with elements of degree 1
+        gamma  = fem.Constant(self._function_space.mesh, default_scalar_type(degree*(degree+1) + 1)) #+1 otherwise blows with elements of degree 1
+        #gamma  = fem.Constant(self._function_space.mesh, default_scalar_type(160)) #+1 otherwise blows with elements of degree 1
         P_mod  = self.P_modulus
         R_     = gamma*P_mod
         return R_
@@ -476,23 +476,23 @@ class ScalarLinearMaterial(ElasticMaterial):
 
     @property
     def k2_CG(self) -> 'function':
-        return lambda u,v: fem.Constant(u.ufl_function_space(), PETSc.ScalarType(0)) * ufl.inner(u,v) * self._dx
+        return lambda u,v: fem.Constant(u.ufl_function_space().mesh, default_scalar_type(0)) * ufl.inner(u,v) * self._dx
 
     @property
     def k3_CG(self) -> 'function':
         return lambda u,v: ufl.inner(self.mu*self._L_onaxis(u), self._L_onaxis(v)) * self._dx
-        
+
     @property
     def DG_numerical_flux_SIPG(self) -> 'function':
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
-        h = ufl.MinCellEdgeLength(V) #works!
+        h = ufl.MinCellEdgeLength(V)  # works!
         h_avg  = (h('+') + h('-'))/2.0
         R_ = self.DG_SIPG_regularization_parameter()
         dS = self._dS
         sigma = self.sigma
-        
+
         k_int_facets = lambda u,v: \
                        -           inner(avg(sigma(u)), jump(v,n)    ) * dS \
                        -           inner(jump(u,n)    , avg(sigma(v))) * dS \
@@ -510,7 +510,7 @@ class ScalarLinearMaterial(ElasticMaterial):
         R_ = self.DG_SIPG_regularization_parameter()
         dS = self._dS
         sigma = self.sigma
-        
+
         k_int_facets = lambda u,v: \
                        -           inner(avg(sigma(u)), jump(v,n)    ) * dS \
                        +           inner(jump(u,n)    , avg(sigma(v))) * dS \
