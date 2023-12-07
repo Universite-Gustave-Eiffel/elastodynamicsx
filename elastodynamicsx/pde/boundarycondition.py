@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: MIT
 
 import numpy as np
-from dolfinx import fem
+from dolfinx import fem, default_scalar_type
 from petsc4py import PETSc
 import ufl
 
@@ -15,6 +15,12 @@ from elastodynamicsx.utils import get_functionspace_tags_marker
 class BoundaryCondition():
     """
     Representation of a variety of boundary conditions
+
+    Possible BCs are:
+        'Free', 'Clamp'
+        'Dirichlet', 'Neumann', 'Robin'
+        'Periodic'
+        'Dashpot'
 
     Examples of use:
         #####       #####
@@ -36,13 +42,13 @@ class BoundaryCondition():
         # General #
         ##### #####
 
-        # Imposes u=u_D on boundary n°1
+        # Imposes u = u_D on boundary n°1
         bc = BoundaryCondition((V, facet_tags, 1), 'Dirichlet', u_D)
 
-        # Imposes sigma(u).n=T_N on boundary n°1
+        # Imposes sigma(u).n = T_N on boundary n°1
         bc = BoundaryCondition((V, facet_tags, 1), 'Neumann', T_N)
 
-        # Imposes sigma(u).n=r*(u-s) on boundary n°1
+        # Imposes sigma(u).n = r * (u - s) on boundary n°1
         bc = BoundaryCondition((V, facet_tags, 1), 'Robin', (r, s))
 
 
@@ -69,13 +75,13 @@ class BoundaryCondition():
         #####                    #####
 
         # (for a scalar function_space)
-        # Imposes sigma(u).n = z*v on boundary n°1, with v=du/dt. Usually z=rho*c
+        # Imposes sigma(u).n = z * v on boundary n°1, with v=du/dt. Usually z=rho*c
         bc = BoundaryCondition((V, facet_tags, 1), 'Dashpot', z)
 
         # (for a vector function_space)
-        # Imposes sigma(u).n = z_N*v_N+z_T*v_T on boundary n°1,
-        # with v=du/dt, v_N=(v.n)n, v_T=v-v_N
-        # Usually z_N=rho*c_L and z_T=rho*c_S
+        # Imposes sigma(u).n = z_N * v_N + z_T * v_T on boundary n°1,
+        # with v = du/dt, v_N = (v.n) n, v_T = v - v_N
+        # Usually z_N = rho * c_L and z_T = rho * c_S
         bc = BoundaryCondition((V, facet_tags, 1), 'Dashpot', (z_N, z_T))
 
     Adapted from:
@@ -120,7 +126,7 @@ class BoundaryCondition():
     ### ### ### ### ###
 
 
-    def __init__(self, functionspace_tags_marker, type_, values=None, **kwargs):
+    def __init__(self, functionspace_tags_marker, type_: str, values = None, **kwargs):
         from elastodynamicsx.pde import PDE
         #
         function_space, facet_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
@@ -131,12 +137,12 @@ class BoundaryCondition():
         # shortcuts: Free->Neumann with value=0; Clamp->Dirichlet with value=0
         if type_ == "free":
             type_   = "neumann"
-            z0s     = np.array([0]*nbcomps, dtype=PETSc.ScalarType) if nbcomps>0 else PETSc.ScalarType(0)
+            z0s     = np.array([0]*nbcomps, dtype=default_scalar_type) if nbcomps>0 else default_scalar_type(0)
             values  = fem.Constant(function_space.mesh, z0s)
 
         elif type_ == "clamp":
             type_   = "dirichlet"
-            z0s     = np.array([0]*nbcomps, dtype=PETSc.ScalarType) if nbcomps>0 else PETSc.ScalarType(0)
+            z0s     = np.array([0]*nbcomps, dtype=default_scalar_type) if nbcomps>0 else default_scalar_type(0)
             values  = fem.Constant(function_space.mesh, z0s)
 
         self._type   = type_
@@ -149,31 +155,47 @@ class BoundaryCondition():
 
         if type_ == "dirichlet":
             fdim   = function_space.mesh.topology.dim - 1
-            #facets = facet_tags.find(marker)  # not available on dolfinx v0.4.1
-            facets = facet_tags.indices[ facet_tags.values == marker ]
+            facets = facet_tags.find(marker)
             dofs   = fem.locate_dofs_topological(function_space, fdim, facets)
-            self._bc = fem.dirichletbc(values, dofs, function_space)  # fem.dirichletbc
+            self._bc = fem.dirichletbc(values, dofs, function_space)
 
         elif type_ == "neumann":
             self._bc = lambda v  : ufl.inner(values, v) * ds  # Linear form
 
         elif type_ == "robin":
             r_, s_ = values
-            if nbcomps>0:
+            if nbcomps > 0:
                 r_, s_ = ufl.as_matrix(r_), ufl.as_vector(s_)
-            self._bc = lambda u,v: ufl.inner(r_*(u-s_), v)* ds  # Bilinear form
+            self._bc = lambda u,v: ufl.inner(r_ * (u - s_), v) * ds  # Bilinear form
 
         elif type_ == 'dashpot':
-            if nbcomps == 0:  # scalar function space
-                self._bc = lambda u_t,v: values * ufl.inner(u_t, v)* ds  # Bilinear form, to be applied on du/dt
-            else:  # vector function space
+            # scalar function space
+            if nbcomps == 0:
+                # Bilinear form, to be applied on du/dt
+                self._bc = lambda u_t, v: values * ufl.inner(u_t, v) * ds
+
+            # vector function space
+            else:
                 if function_space.mesh.topology.dim == 1:
-                    self._bc = lambda u_t,v: ((values[0]-values[1])*ufl.inner(u_t[0], v[0]) + values[1]*ufl.inner(u_t, v))* ds  # Bilinear form, to be applied on du/dt
+                    # Bilinear form, to be applied on du/dt
+                    self._bc = lambda u_t, v: ((values[0] - values[1]) * ufl.inner(u_t[0], v[0]) + values[1] * ufl.inner(u_t, v)) * ds
                 else:
                     n = ufl.FacetNormal(function_space.mesh)
-                    self._bc = lambda u_t,v: ((values[0]-values[1])*ufl.dot(u_t, n)*ufl.inner(n, v) + values[1]*ufl.inner(u_t, v))* ds  # Bilinear form, to be applied on du/dt
+                    dim = len(n)
+                    if nbcomps > dim:
+                        n = ufl.as_vector([n[i] for i in range(dim)] + [0 for i in range(nbcomps-dim)])
+                    # Bilinear form, to be applied on du/dt
+                    self._bc = lambda u_t, v: ((values[0] - values[1]) * ufl.dot(u_t, n) * ufl.inner(n, v) + values[1] * ufl.inner(u_t, v)) * ds
 
-        elif type_ == 'periodic-do-not-use': #TODO: try to calculate P from two given boundary markers
+        elif type_ == 'periodic':
+            assert type(marker)==int, "Periodic BC requires a single facet tag"
+            P = np.asarray(values)
+            def slave_to_master_map(x):
+                return x + P[:,np.newaxis]
+            self._bc = (facet_tags, marker, slave_to_master_map)
+
+
+        elif type_ == 'periodic-do-not-use':  # TODO: try to calculate P from two given boundary markers
             assert len(marker)==2, "Periodic BC requires two facet tags"
             fdim   = function_space.mesh.topology.dim - 1
             marker_master, marker_slave = marker
@@ -187,12 +209,6 @@ class BoundaryCondition():
             slave_to_master_map = None
             raise NotImplementedError
 
-        elif type_ == 'periodic':
-            assert type(marker)==int, "Periodic BC requires a single facet tag"
-            P = np.asarray(values)
-            def slave_to_master_map(x):
-                return x + P[:,np.newaxis]
-            self._bc = (facet_tags, marker, slave_to_master_map)
 
         else:
             raise TypeError("Unknown boundary condition: {0:s}".format(type_))
@@ -203,11 +219,9 @@ class BoundaryCondition():
         """The boundary condition"""
         return self._bc
 
-
     @property
-    def type(self):
+    def type(self) -> str:
         return self._type
-
 
     @property
     def values(self):
