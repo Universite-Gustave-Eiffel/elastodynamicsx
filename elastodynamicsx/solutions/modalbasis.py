@@ -72,11 +72,12 @@ class ModalBasis():
         eigenmodes = _slice_array(self.un, which)
         eigenfreqs = _slice_array(self.fn, which)
         #
-        topology, cell_types, geom = plot.create_vtk_mesh(function_space)
+        topology, cell_types, geom = plot.vtk_mesh(function_space)
         grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
         for i, eigM in zip(indexes, eigenmodes):
             nbpts = grid.number_of_points
-            grid['eigenmode_'+str(i)] = elastodynamicsx.plot.get_3D_array_from_nparray(np.array(eigM), nbpts)
+            with eigM.localForm() as loc_eigM:  # Necessary for correct handling of ghosts in parallel
+                grid['eigenmode_'+str(i)] = elastodynamicsx.plot.get_3D_array_from_nparray(loc_eigM.array, nbpts)
 
         nbcols = int(np.ceil(np.sqrt(indexes.size)))
         nbrows = int(np.ceil(indexes.size/nbcols))

@@ -6,4 +6,4 @@
 
 """Main module for ElastodynamiCSx"""
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'

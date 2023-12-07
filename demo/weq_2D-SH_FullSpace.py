@@ -12,7 +12,7 @@ Propagation of SH elastic waves in a 2D, homogeneous isotropic solid, and compar
 """
 
 
-from dolfinx import mesh, fem
+from dolfinx import mesh, fem, default_scalar_type
 from mpi4py import MPI
 from petsc4py import PETSc
 import ufl
@@ -56,8 +56,8 @@ V  = fem.FunctionSpace(domain, specFE)
 # -----------------------------------------------------
 #                 Material parameters
 # -----------------------------------------------------
-rho     = fem.Constant(domain, PETSc.ScalarType(1))
-mu      = fem.Constant(domain, PETSc.ScalarType(1))
+rho     = fem.Constant(domain, default_scalar_type(1))
+mu      = fem.Constant(domain, default_scalar_type(1))
 
 mat   = material(V, 'scalar', rho, mu)
 materials = [mat]
@@ -91,7 +91,7 @@ nrm   = 1/(2*np.pi*R0_src**2)  # normalize to int[src_x(x) dx]=1
 
 def src_x(x):  # source(x): Gaussian
     r = np.linalg.norm(x-X0_src[:,np.newaxis], axis=0)
-    return nrm * np.exp(-1/2*(r/R0_src)**2, dtype=PETSc.ScalarType)
+    return nrm * np.exp(-1/2*(r/R0_src)**2, dtype=default_scalar_type)
 
 ### -> Time function
 #

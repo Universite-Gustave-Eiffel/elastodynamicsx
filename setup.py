@@ -9,7 +9,7 @@ setuptools.setup(
     name='ElastodynamiCSx',
     author="Pierric Mora",
     author_email="pierric.mora@univ-eiffel.fr",
-    version="0.2.0",
+    version="0.2.1",
     packages=setuptools.find_packages(),
     url='https://github.com/Universite-Gustave-Eiffel/elastodynamicsx',
     license='MIT License',
@@ -28,7 +28,6 @@ setuptools.setup(
         # === "official" packages
         'numpy', 
         'matplotlib',
-        'pyvista',
-        #'dolfinx >= 0.4.1', ufl
+        'pyvista'
         ],
     python_requires='>=3')

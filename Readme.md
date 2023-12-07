@@ -170,9 +170,9 @@ mbasis.plot(function_space=V)  # V is a dolfinx.fem.function_space
 ```
 
 ## Dependencies
-ElastodynamiCSx requires FEniCSx / DOLFINx -> see [instructions here](https://github.com/FEniCS/dolfinx#installation). Tested with v0.6.0.
+ElastodynamiCSx requires FEniCSx / DOLFINx v0.7.2 -> see [instructions here](https://github.com/FEniCS/dolfinx#installation).
 
-It also depends on [DOLFINx-MPC](https://github.com/jorgensd/dolfinx_mpc), although this dependence is optional (periodic BCs).
+It also depends on [DOLFINx-MPC](https://github.com/jorgensd/dolfinx_mpc) v0.7.0.post1, although this dependence is optional (periodic BCs).
 
 ### Packages required for the examples
 numpy  

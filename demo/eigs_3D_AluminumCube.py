@@ -26,7 +26,7 @@ Nx = Ny = Nz = 6
 extent = [[0., 0., 0.], [L1, L2, L3]]
 domain = mesh.create_box(MPI.COMM_WORLD, extent, [Nx, Ny, Nz])
 #
-V = fem.VectorFunctionSpace(domain, ("CG", 2))
+V = fem.FunctionSpace(domain, ("Lagrange", 2, (domain.geometry.dim,)))
 #
 # -----------------------------------------------------
 

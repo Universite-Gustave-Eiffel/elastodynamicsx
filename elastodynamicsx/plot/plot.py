@@ -81,7 +81,7 @@ def plot_mesh(mesh, cell_tags=None, **kwargs):
         p.show()
     """
     p = pyvista.Plotter()
-    grid = pyvista.UnstructuredGrid(*plot.create_vtk_mesh(mesh, mesh.topology.dim))
+    grid = pyvista.UnstructuredGrid(*plot.vtk_mesh(mesh, mesh.topology.dim))
     num_local_cells = mesh.topology.index_map(mesh.topology.dim).size_local
 
     if not cell_tags is None:
@@ -148,7 +148,7 @@ class CustomScalarPlotter(pyvista.Plotter):
         for u_ in all_scalars:
             if u_ is None:
                 break
-            topology, cell_types, geom = plot.create_vtk_mesh(u_.function_space)
+            topology, cell_types, geom = plot.vtk_mesh(u_.function_space)
             grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
             grid.point_data["u"] = self._trans(u_.x.array)
             self.grids.append(grid)
@@ -258,7 +258,7 @@ class CustomVectorPlotter(pyvista.Plotter):
 
         for u_ in all_vectors:
             if u_ is None: break
-            topology, cell_types, geom = plot.create_vtk_mesh(u_.function_space)
+            topology, cell_types, geom = plot.vtk_mesh(u_.function_space)
             grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
             u3D   = get_3D_array_from_FEFunction(u_)
             grid["u"] = self._trans(u3D)

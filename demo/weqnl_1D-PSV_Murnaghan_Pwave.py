@@ -12,7 +12,7 @@ Propagation of a P wave in a 1D nonlinear (Murnaghan) elastic medium
 """
 
 
-from dolfinx import mesh, fem
+from dolfinx import mesh, fem, default_scalar_type
 from mpi4py import MPI
 from petsc4py import PETSc
 import ufl
@@ -30,7 +30,7 @@ from elastodynamicsx.utils import spectral_element, spectral_quadrature, make_fa
 # Set up a Spectral Element Method
 degElement, nameElement = 4, "GLL"
 cell_type = mesh.CellType.interval
-specFE               = spectral_element(nameElement, cell_type, degElement)
+specFE               = spectral_element(nameElement, cell_type, degElement, (2,))
 PDE.default_metadata = spectral_quadrature(nameElement, degElement)
 
 
@@ -45,12 +45,7 @@ boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
               (tag_right , lambda x: np.isclose(x[0], length))]
 facet_tags = make_facet_tags(domain, boundaries)
 #
-# V = fem.VectorFunctionSpace(domain, specFE, dim=2) #currently does not work
-# workaround
-import basix.ufl_wrapper
-e        = specFE
-specFE_v = basix.ufl_wrapper.create_vector_element(e.family(), e.cell_type, e.degree(), e.lagrange_variant, e.dpc_variant, e.discontinuous, dim=2, gdim=domain.geometry.dim)
-V = fem.FunctionSpace(domain, specFE_v)
+V = fem.FunctionSpace(domain, specFE)
 #
 # -----------------------------------------------------
 
@@ -58,12 +53,12 @@ V = fem.FunctionSpace(domain, specFE_v)
 # -----------------------------------------------------
 #                 Material parameters
 # -----------------------------------------------------
-rho     = fem.Constant(domain, PETSc.ScalarType(1))
-mu      = fem.Constant(domain, PETSc.ScalarType(1))
-lambda_ = fem.Constant(domain, PETSc.ScalarType(2))
-l_      = fem.Constant(domain, PETSc.ScalarType(1))
-m_      = fem.Constant(domain, PETSc.ScalarType(1))
-n_      = fem.Constant(domain, PETSc.ScalarType(1))
+rho     = fem.Constant(domain, default_scalar_type(1))
+mu      = fem.Constant(domain, default_scalar_type(1))
+lambda_ = fem.Constant(domain, default_scalar_type(2))
+l_      = fem.Constant(domain, default_scalar_type(1))
+m_      = fem.Constant(domain, default_scalar_type(1))
+n_      = fem.Constant(domain, default_scalar_type(1))
 mat = material(V, 'murnaghan', rho, lambda_, mu, l_, m_, n_)
 materials = [mat]
 #
@@ -73,7 +68,7 @@ materials = [mat]
 # -----------------------------------------------------
 #                 Boundary conditions
 # -----------------------------------------------------
-T_N      = fem.Constant(domain, PETSc.ScalarType([0,0]))  # normal traction (Neumann boundary condition)
+T_N      = fem.Constant(domain, default_scalar_type([0,0]))  # normal traction (Neumann boundary condition)
 Z_N, Z_T = mat.Z_N, mat.Z_T  # P and S mechanical impedances
 bc_l  = BoundaryCondition((V, facet_tags, tag_left  ), 'Neumann', T_N)
 bc_rl = BoundaryCondition((V, facet_tags, (tag_left,tag_right) ), 'Dashpot', (Z_N, Z_T))
@@ -97,8 +92,8 @@ def src_t(t):  # source(t): Sine x Hann window
 
 ### -> Space-Time function
 #
-p0  = PETSc.ScalarType(7e-2)        # max amplitude
-F_0 = p0 * PETSc.ScalarType([1,1])  # source orientation
+p0  = default_scalar_type(7e-2)        # max amplitude
+F_0 = p0 * default_scalar_type([1,1])  # source orientation
 #
 T_N_function = lambda t: src_t(t) * F_0
 #
