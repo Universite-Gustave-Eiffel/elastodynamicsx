@@ -167,7 +167,7 @@ class DummyIsotropicMaterial(HyperelasticMaterial):
     def P(self, u):
         """Infinitesimal stress function; NOT the first Piola-Kirchhoff stress"""
         # Infinitesimal strain
-        e = ufl.variable(0.5*(ufl.grad(u) + ufl.grad(u).T)) #TODO: not valid for 1D
+        e = ufl.variable(0.5*(ufl.grad(u) + ufl.grad(u).T))  # TODO: not valid for 1D
 
         # Strain-energy function
         W = self._lambda/2*(ufl.tr(e)**2) + self._mu*ufl.tr(e*e)
