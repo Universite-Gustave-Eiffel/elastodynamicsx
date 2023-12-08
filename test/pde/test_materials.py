@@ -10,7 +10,7 @@ from dolfinx import mesh, fem, default_scalar_type
 from mpi4py import MPI
 from petsc4py import PETSc
 
-from elastodynamicsx.pde import material, PDE
+from elastodynamicsx.pde import material, PDE, Damping
 
 def create_mesh(dim):
     if dim == 1:
@@ -30,8 +30,11 @@ def tst_scalar_material(dim, eltname="Lagrange"):
 
     # Material
     const = lambda x: fem.Constant(V.mesh, default_scalar_type(x))
-    mat  = material(V, 'scalar', rho=const(1), mu=const(1))
-    mats = [mat]
+    mats = []
+    mats.append( material(V, 'scalar', rho=const(1), mu=const(1)) )
+
+    # Damping laws
+    mats.append( material(V, 'scalar', rho=const(1), mu=const(1), damping=Damping.build('Rayleigh', const(1), const(1))) )
 
     # PDE
     pde = PDE(V, materials=mats)
@@ -55,10 +58,14 @@ def tst_vector_materials(dim, nbcomps, eltname="Lagrange"):
     types= ('isotropic', 'cubic', 'hexagonal', 'trigonal', 'tetragonal', 'orthotropic', 'monoclinic', 'triclinic')
     nbCij= (2, 3, 5, 7, 7, 9, 13, 21)
     mats = []
+
     for type_, nb in zip( types, nbCij ):
         Cij = [Coo]*nb
         mats.append( material(V, type_, rho, *Cij) )
-    
+
+    # Damping laws
+    mats.append( material(V, 'isotropic', rho, Coo, Coo, damping=Damping.build('Rayleigh', const(1), const(1)))  )
+
     # PDE
     pde = PDE(V, materials=mats)
     
@@ -67,8 +74,10 @@ def tst_vector_materials(dim, nbcomps, eltname="Lagrange"):
     
     if   dim==2 and nbcomps==2:
         print('skipping invalid case for waveguides')
+
     elif V.element.basix_element.discontinuous == True:
         print('skipping not implemented case for waveguides (DG)')
+
     else:
         _, _, _ = pde.K1(),  pde.K2(),  pde.K3()
     
