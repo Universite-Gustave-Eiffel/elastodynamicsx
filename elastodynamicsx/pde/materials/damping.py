@@ -4,35 +4,45 @@
 #
 # SPDX-License-Identifier: MIT
 
+
+class Damping: pass
+def damping(type_, *args) -> Damping:
+    """
+    Builder method that instanciates the desired damping law type
+
+    Args:
+        type_: Available options are:
+            'none', 'rayleigh'
+
+        args:   Passed to the required damping law
+
+    Returns:
+        An instance of the desired damping law
+
+    Examples of use:
+        dmp = damping('none')
+        dmp = damping('rayleigh', eta_m, eta_k)
+    """
+    for Damp in all_dampings:
+        if type_.lower() in Damp.labels:
+            return Damp(*args)
+
+    raise TypeError("Unknown damping law: {0:s}".format(type_))
+
+
 class Damping():
     """Dummy base class for damping laws"""
-
-    def build(type_, *args):
-        """
-        Convenience static method that instanciates the desired damping law
-
-        Args:
-            type_: Available options are:
-                'none'
-                'rayleigh'
-            args: passed to the required damping law
-        """
-        if   type_.lower() == 'none':
-            return NoDamping()
-
-        elif type_.lower() == 'rayleigh':
-            return RayleighDamping(*args)
-
-        else:
-            raise TypeError("Unknown damping law: {0:s}".format(type_))
 
     @property
     def c(self):
         print('supercharge me')
+        raise NotImplementedError
 
 
 class NoDamping(Damping):
-    """no damping"""        
+    """no damping"""
+    labels = ['none']
+
     @property
     def c(self):
         """The damping form"""
@@ -41,6 +51,7 @@ class NoDamping(Damping):
 
 class RayleighDamping(Damping):
     """Rayleigh damping law: c(u,v) = eta_m * m(u,v) + eta_k * k(u,v)"""
+    labels = ['rayleigh']
 
     def __init__(self, eta_m, eta_k):
         """
@@ -83,3 +94,7 @@ class RayleighDamping(Damping):
         will be copied
         """
         self._material = host_material
+
+
+# ### ### ###
+all_dampings = [NoDamping, RayleighDamping]

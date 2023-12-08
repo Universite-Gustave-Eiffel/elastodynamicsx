@@ -10,7 +10,7 @@ from dolfinx import mesh, fem, default_scalar_type
 from mpi4py import MPI
 from petsc4py import PETSc
 
-from elastodynamicsx.pde import material, PDE, Damping
+from elastodynamicsx.pde import material, PDE, damping
 
 def create_mesh(dim):
     if dim == 1:
@@ -34,7 +34,7 @@ def tst_scalar_material(dim, eltname="Lagrange"):
     mats.append( material(V, 'scalar', rho=const(1), mu=const(1)) )
 
     # Damping laws
-    mats.append( material(V, 'scalar', rho=const(1), mu=const(1), damping=Damping.build('Rayleigh', const(1), const(1))) )
+    mats.append( material(V, 'scalar', rho=const(1), mu=const(1), damping=damping('Rayleigh', const(1), const(1))) )
 
     # PDE
     pde = PDE(V, materials=mats)
@@ -64,7 +64,7 @@ def tst_vector_materials(dim, nbcomps, eltname="Lagrange"):
         mats.append( material(V, type_, rho, *Cij) )
 
     # Damping laws
-    mats.append( material(V, 'isotropic', rho, Coo, Coo, damping=Damping.build('Rayleigh', const(1), const(1)))  )
+    mats.append( material(V, 'isotropic', rho, Coo, Coo, damping=damping('Rayleigh', const(1), const(1)))  )
 
     # PDE
     pde = PDE(V, materials=mats)
