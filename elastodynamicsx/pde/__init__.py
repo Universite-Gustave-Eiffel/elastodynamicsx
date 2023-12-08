@@ -27,7 +27,7 @@ Boundary conditions:
 
 Assembling a PDE:
     from elastodynamicsx.pde import PDE
-    pde = PDE(materials=[mat1, mat2, ...], bodyforces=[bf1, bf2, ...])
+    pde = PDE(materials=[mat1, mat2, ...], bodyforces=[bf1, bf2, ...], bcs=[bc1, bc2, ...])
 """
 
 from .boundarycondition import *

@@ -26,10 +26,9 @@ class Damping():
         else:
             raise TypeError("Unknown damping law: {0:s}".format(type_))
 
-
     @property
-    def c(self): print('supercharge me')
-
+    def c(self):
+        print('supercharge me')
 
 
 class NoDamping(Damping):
@@ -40,9 +39,8 @@ class NoDamping(Damping):
         return None
 
 
-
 class RayleighDamping(Damping):
-    """Rayleigh damping law: c(u,v) = eta_m*m(u,v) + eta_k(u,v)"""
+    """Rayleigh damping law: c(u,v) = eta_m * m(u,v) + eta_k * k(u,v)"""
 
     def __init__(self, eta_m, eta_k):
         """
@@ -70,7 +68,7 @@ class RayleighDamping(Damping):
     @property
     def c(self):
         """The damping form"""
-        return lambda u,v: self.eta_m*self._material.m(u,v) + self.eta_k*self._material.k(u,v)
+        return lambda u,v: self.eta_m * self._material.m(u,v) + self.eta_k * self._material.k(u,v)
 
 
     @property
