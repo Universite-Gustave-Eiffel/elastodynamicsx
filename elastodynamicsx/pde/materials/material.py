@@ -10,7 +10,8 @@ from elastodynamicsx.utils import get_functionspace_tags_marker
 from elastodynamicsx.pde import PDE
 
 
-def material(functionspace_tags_marker, type_, *args, **kwargs):
+class Material: pass
+def material(functionspace_tags_marker, type_, *args, **kwargs) -> Material:
     """
     Builder method that instanciates the desired material type
 
@@ -18,11 +19,14 @@ def material(functionspace_tags_marker, type_, *args, **kwargs):
         functionspace_tags_marker: Available possibilities are
             (function_space, cell_tags, marker)  # Meaning application of the
                 material in the cells whose tag correspond to marker
-            function_space #In this case cell_tags=None and marker=None, meaning
+            function_space  # In this case cell_tags=None and marker=None, meaning
                 application of the material in the entire domain
+
         type_: Available options are:
-                 'scalar'
-                 'isotropic'
+            * scalar, linear: 'scalar'
+            * linear: 'isotropic', 'cubic', 'hexagonal', 'trigonal', 'tetragonal', 'orthotropic', 'monoclinic', 'triclinic'
+            * nonlinear, hyperelastic: 'murnaghan', 'saintvenant-kirchhoff', 'mooney-rivlin-incomp'
+
         args:   Passed to the required material
         kwargs: Passed to the required material
 
@@ -31,9 +35,9 @@ def material(functionspace_tags_marker, type_, *args, **kwargs):
 
     Examples of use:
         aluminum = material((function_space, cell_tags, 1), 'isotropic',
-                             rho=2.8, lambda_=58, mu=26) #restricted to subdomain number 1
+                             rho=2.8, lambda_=58, mu=26)  # restricted to subdomain number 1
         aluminum = material( function_space, 'isotropic',
-                             rho=2.8, lambda_=58, mu=26) #entire domain
+                             rho=2.8, lambda_=58, mu=26)  # entire domain
 
         mat = material( function_space, 'isotropic'  , rho, C12, C44)
         mat = material( function_space, 'cubic'      , rho, C11, C12, C44)
