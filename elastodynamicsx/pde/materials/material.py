@@ -10,7 +10,8 @@ from elastodynamicsx.utils import get_functionspace_tags_marker
 from elastodynamicsx.pde import PDE
 
 
-def material(functionspace_tags_marker, type_, *args, **kwargs):
+class Material: pass
+def material(functionspace_tags_marker, type_, *args, **kwargs) -> Material:
     """
     Builder method that instanciates the desired material type
 
