@@ -1,8 +1,13 @@
-Examples
-======== 
+Demos
+=====
    
-.. include:: examples_head.md
-   :parser: myst_parser.sphinx_
+Several examples are provided in the *demo/* subfolder. To run in parallel:
+
+.. code-block:: bash
+
+  # run on 2 nodes:
+  mpiexec -n 2 python3 example.py
+
    
 .. toctree::
    :maxdepth: 3

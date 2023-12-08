@@ -1,8 +1,8 @@
-Sources
+API reference
 =======
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    elastodynamicsx.pde
    elastodynamicsx.plot
