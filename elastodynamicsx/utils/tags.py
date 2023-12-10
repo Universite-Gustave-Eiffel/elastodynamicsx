@@ -36,22 +36,25 @@ def make_tags(domain: Mesh, locators: Tuple[Tuple[int, Callable]], type_='unknow
     Adapted from:
         https://jsdokken.com/dolfinx-tutorial/chapter3/robin_neumann_dirichlet.html
 
-    Example of use:
-        import numpy as np
-        from mpi4py import MPI
-        from dolfinx.mesh import create_unit_square
-        #
-        domain = create_unit_square(MPI.COMM_WORLD, 10, 10)
+    Example:
+        .. highlight:: python
+        .. code-block:: python
 
-        boundaries = ((1, lambda x: np.isclose(x[0], 0)),
-                      (2, lambda x: np.isclose(x[0], 1)),
-                      (3, lambda x: np.isclose(x[1], 0)),
-                      (4, lambda x: np.isclose(x[1], 1)))
-        facet_tags = make_tags(domain, boundaries, 'boundaries')
+          import numpy as np
+          from mpi4py import MPI
+          from dolfinx.mesh import create_unit_square
+          #
+          domain = create_unit_square(MPI.COMM_WORLD, 10, 10)
 
-        Omegas = ((1, lambda x: x[1] <= 0.5),
-                  (2, lambda x: x[1] >= 0.5))
-        cell_tags = make_tags(domain, Omegas, 'domains')
+          boundaries = ((1, lambda x: np.isclose(x[0], 0)),
+                        (2, lambda x: np.isclose(x[0], 1)),
+                        (3, lambda x: np.isclose(x[1], 0)),
+                        (4, lambda x: np.isclose(x[1], 1)))
+          facet_tags = make_tags(domain, boundaries, 'boundaries')
+
+          Omegas = ((1, lambda x: x[1] <= 0.5),
+                    (2, lambda x: x[1] >= 0.5))
+          cell_tags = make_tags(domain, Omegas, 'domains')
     """
     if   type_.lower() == 'boundaries':
         fdim = domain.topology.dim - 1
@@ -79,10 +82,17 @@ def get_functionspace_tags_marker(functionspace_tags_marker: Union[FunctionSpace
     This is a convenience function for several classes/functions of other packages.
     It is not intended to be used in other context.
 
-    Example of use:
-        function_space, tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
+    Example:
+        .. highlight:: python
+        .. code-block:: python
+
+          function_space, tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
 
         where functionspace_tags_marker can be:
+
+        .. highlight:: python
+        .. code-block:: python
+
             functionspace_tags_marker = (function_space, facet_tags, marker)
             functionspace_tags_marker = (function_space, cell_tags, marker)
             functionspace_tags_marker = function_space #means tags=None and marker=None

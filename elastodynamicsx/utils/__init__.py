@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""Various tools that do not fit into the other packages"""
+"""The utils module contains various tools that do not fit into the other packages"""
 
 from .tags import *
 from .eval import *
