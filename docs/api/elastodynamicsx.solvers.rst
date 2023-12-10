@@ -1,6 +1,14 @@
 elastodynamicsx.solvers
 =======================
 
+Module contents
+---------------
+
+.. automodule:: elastodynamicsx.solvers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Subpackages
 -----------
 
@@ -10,11 +18,3 @@ Subpackages
    elastodynamicsx.solvers.eigensolver
    elastodynamicsx.solvers.frequencydomain
    elastodynamicsx.solvers.timestepper
-
-Module contents
----------------
-
-.. automodule:: elastodynamicsx.solvers
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -1,6 +1,14 @@
 elastodynamicsx.utils
 =====================
 
+Module contents
+---------------
+
+.. automodule:: elastodynamicsx.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -24,14 +32,6 @@ elastodynamicsx.utils.tags
 --------------------------
 
 .. automodule:: elastodynamicsx.utils.tags
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: elastodynamicsx.utils
    :members:
    :undoc-members:
    :show-inheritance:
