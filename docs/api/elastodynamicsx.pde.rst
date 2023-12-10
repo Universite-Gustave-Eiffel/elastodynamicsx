@@ -1,6 +1,14 @@
 elastodynamicsx.pde
 ===================
 
+Module contents
+---------------
+
+.. automodule:: elastodynamicsx.pde
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Subpackages
 -----------
 
@@ -33,14 +41,6 @@ elastodynamicsx.pde.pde
 -----------------------
 
 .. automodule:: elastodynamicsx.pde.pde
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: elastodynamicsx.pde
    :members:
    :undoc-members:
    :show-inheritance:
