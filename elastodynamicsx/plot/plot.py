@@ -4,6 +4,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+from typing import Union, List, Callable
+
 import time
 
 import numpy as np
@@ -14,8 +16,6 @@ from dolfinx import plot, fem
 from dolfinx.mesh import Mesh
 from petsc4py import PETSc
 
-from typing import Union, List
-
 
 ### ------------------------------------------------------------------------- ###
 ### --- preliminary: auto-configure pyvista backend for jupyter notebooks --- ###
@@ -24,7 +24,8 @@ from typing import Union, List
 pyvista.global_theme.background = 'white'
 pyvista.global_theme.font.color = 'grey'
 
-def is_notebook() -> bool:
+
+def _is_notebook() -> bool:
     # https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook/24937408
     try:
         shell = get_ipython().__class__.__name__
@@ -38,7 +39,7 @@ def is_notebook() -> bool:
         return False      # Probably standard Python interpreter
 
 
-if is_notebook():
+if _is_notebook():
     # This "ipyvtklink" backend supports almost every pyvista feature. However, it is run on server, leading to great lags
     # "pythreejs" or "ipygany" blow the kernel when update_scalar is called
     # In the (near?) future consider using "panel" (no slider or update_scalar at the moment), or itkwidgets, which seems great and fastly growing
@@ -51,12 +52,9 @@ if is_notebook():
 ### --- define useful plotting functions --- ###
 ### ---------------------------------------- ###
 
-def plot_mesh(mesh, cell_tags=None, **kwargs):
+def plot_mesh(mesh:Mesh, cell_tags=None, **kwargs):
     """
     Plot the mesh with colored subdomains
-
-    Adapted from:
-        https://jsdokken.com/dolfinx-tutorial/chapter3/em.html
 
     Args:
         mesh: a dolfinx mesh
@@ -65,20 +63,25 @@ def plot_mesh(mesh, cell_tags=None, **kwargs):
     Returns:
         The pyvista.Plotter
 
+    Adapted from:
+        https://jsdokken.com/dolfinx-tutorial/chapter3/em.html
+
     Example:
+        .. highlight:: python
+        .. code-block:: python
 
-        from mpi4py import MPI
-        from dolfinx.mesh import create_unit_square
-        from elastodynamicsx.utils import make_tags
-        #
-        domain = create_unit_square(MPI.COMM_WORLD, 10, 10)
+          from mpi4py import MPI
+          from dolfinx.mesh import create_unit_square
+          from elastodynamicsx.utils import make_tags
 
-        Omegas = [(1, lambda x: x[1] <= 0.5),
-                  (2, lambda x: x[1] >= 0.5)]
-        cell_tags = make_tags(domain, Omegas, 'domains')
+          domain = create_unit_square(MPI.COMM_WORLD, 10, 10)
 
-        p = plot_mesh(domain, cell_tags=cell_tags)
-        p.show()
+          Omegas = [(1, lambda x: x[1] <= 0.5),
+                    (2, lambda x: x[1] >= 0.5)]
+          cell_tags = make_tags(domain, Omegas, 'domains')
+
+          p = plot_mesh(domain, cell_tags=cell_tags)
+          p.show()
     """
     p = pyvista.Plotter()
     grid = pyvista.UnstructuredGrid(*plot.vtk_mesh(mesh, mesh.topology.dim))
@@ -89,21 +92,71 @@ def plot_mesh(mesh, cell_tags=None, **kwargs):
         grid.set_active_scalars("Marker")
 
     actor = p.add_mesh(grid, show_edges=True)
-    #
+
     if mesh.topology.dim==2:
         p.view_xy()
-    #
+
     return p
 
 
-def live_plotter(u:'fem.Function', refresh_step:int=1, **kwargs) -> pyvista.Plotter:
+def live_plotter(u:fem.Function, refresh_step:int=1, **kwargs) -> pyvista.Plotter:
+    """
+    Convenience function to initialize a plotter for live-plotting within a
+    time- or frequency-domain computation
+
+    Args:
+        u: The FEM function to be live-plotted
+        refresh_step: Refresh each # step
+
+    Keyword Args:
+        kwargs: passed to *plotter*
+
+    Example:
+        Time-domain problems:
+
+        .. highlight:: python
+        .. code-block:: python
+
+          tStepper = TimeStepper.build(...)
+          u_res = tStepper.timescheme.u  # The solution
+          p = live_plotter(u_res, refresh_step=10)
+          tStepper.solve(..., live_plotter=p)
+
+        Frequency-domain problems:
+
+        .. highlight:: python
+        .. code-block:: python
+
+          fdsolver = FrequencyDomainSolver(...)
+          u_res = fem.Function(V, name='solution')
+          p = live_plotter(u_res)
+          fdsolver.solve(omega=omegas,
+                         out=u_res.vector,
+                         callbacks=[],
+                         live_plotter=p)
+    """
     kwargs['refresh_step'] = refresh_step
     return plotter(u, **kwargs)
 
 
-def plotter(*args:Union[List['fem.Function'], Mesh], **kwargs) -> pyvista.Plotter:
+def plotter(*args:Union[List[fem.Function], Mesh], **kwargs) -> pyvista.Plotter:
     """
     A generic function to plot a mesh or one/several fields
+
+    Args:
+        *args: FEM functions to be plotted, sharing the same underlying function space
+
+    Keyword Args:
+        **kwargs: passed to either CustomScalarPlotter or CustomVectorPlotter
+
+    Example:
+        .. highlight:: python
+        .. code-block:: python
+
+          u1 = fem.Function(V)
+          u2 = fem.Function(V)
+          p = plotter(u1, u2, labels=['first', 'second'])
+          p.show()
     """
     u1 = args[0]
 
@@ -125,6 +178,19 @@ def plotter(*args:Union[List['fem.Function'], Mesh], **kwargs) -> pyvista.Plotte
 ### -------------------------------------- ###
 
 class CustomScalarPlotter(pyvista.Plotter):
+    """
+    Not intended to be instanciated by user; better use the *plotter* function
+
+    Args:
+        u1, u2, ...: fem.Function; the underlying function space is a scalar function space
+
+    Keyword Args:
+        refresh_step: (default=1) The refresh step, if used for live-plotting
+        sleep: (default=0.01) The sleep time after refresh, if used for live-plotting
+        complex: (default='real') The way complex functions are plotted. Possible options: 'real', 'imag', 'abs', 'angle'
+        labels: list of labels
+        **kwargs: any valid kwarg for pyvista.Plotter and pyvista.Plotter.add_mesh
+    """
 
     default_cmap = plt.cm.get_cmap("RdBu_r", 25)
 
@@ -220,14 +286,29 @@ class CustomScalarPlotter(pyvista.Plotter):
     def add_time_browser(self, update_fields_function:'function', timesteps:np.ndarray, **kwargs_slider):
         self._time_browser_cbck  = update_fields_function
         self._time_browser_times = timesteps
+
         def updateTStep(value):
             i = np.argmin(np.abs(value-self._time_browser_times))
             updated_fields = self._time_browser_cbck(i)
             self.update_scalars(*updated_fields)
+
         self.add_slider_widget(updateTStep, [timesteps[0], timesteps[-1]], **kwargs_slider)
 
 
 class CustomVectorPlotter(pyvista.Plotter):
+    """
+    Args:
+        u1, u2, ...: fem.Function; the underlying function space is a scalar function space
+
+    Keyword Args:
+        refresh_step: (default=1) The refresh step, if used for live-plotting
+        sleep: (default=0.01) The sleep time after refresh, if used for live-plotting
+        complex: (default='real') The way complex functions are plotted. Possible options: 'real', 'imag', 'abs', 'angle'
+        labels: list of labels
+        warp_factor: (default=1 or 0.5/max(clim) if provided) Factor for plotting mesh deformation
+        ref_mesh: (default=False) Whether to show the undeformed mesh
+        **kwargs: any valid kwarg for pyvista.Plotter and pyvista.Plotter.add_mesh
+    """
 
     default_cmap = plt.cm.get_cmap("viridis")
 
@@ -322,7 +403,7 @@ class CustomVectorPlotter(pyvista.Plotter):
         Calls pyvista.Plotter.update_coordinates and .update_scalars for all subplots
 
         Args:
-            all_vectors: tuple of np.ndarray
+            all_vectors: tuple of np.ndarray,
                 e.g. all_vectors = (u1.x, u2.x, ...) where u1, u2 are dolfinx.fem.Function
         """
         for i, (grid, u_) in enumerate(zip(self.grids, all_vectors)):
@@ -351,13 +432,15 @@ class CustomVectorPlotter(pyvista.Plotter):
             time.sleep(self._tsleep)
 
 
-    def add_time_browser(self, update_fields_function:'function', timesteps:np.ndarray, **kwargs_slider):
+    def add_time_browser(self, update_fields_function: Callable, timesteps: np.ndarray, **kwargs_slider):
         self._time_browser_cbck  = update_fields_function
         self._time_browser_times = timesteps
+
         def updateTStep(value):
             i = np.argmin(np.abs(value-self._time_browser_times))
             updated_fields = self._time_browser_cbck(i)
             self.update_vectors(*updated_fields)
+
         self.add_slider_widget(updateTStep, [timesteps[0], timesteps[-1]], **kwargs_slider)
 
 
@@ -369,6 +452,8 @@ def spy_petscMatrix(Z:PETSc.Mat, *args, **kwargs) -> 'matplotlib.pyplot.spy':
     Args:
         Z:      The array to be plotted, of type petsc4py.PETSc.Mat
         args:   Passed to matplotlib.pyplot.spy (see doc)
+
+    Keyword Args:
         kwargs: Passed to matplotlib.pyplot.spy (see doc)
 
     Returns:

@@ -4,7 +4,10 @@
 #
 # SPDX-License-Identifier: MIT
 
+import typing
+
 import numpy as np
+from petsc4py import PETSc
 from dolfinx import plot
 import pyvista
 
@@ -14,38 +17,37 @@ import elastodynamicsx.plot  # ensures automatic configuration of pyvista for ju
 class ModalBasis():
     """
     Representation of a modal basis, consisting of a set of eigen angular
-    frequencies and modeshapes.
+    frequencies :math:`\omega_n` and modeshapes :math:`\mathbf{u}_n`.
 
     At the moment: is merely a storage + plotter class
     In the future: should be able to perform calculations with source terms,
-        such as modal participation factors, modal summations, ...
+    such as modal participation factors, modal summations, ...
+
+    Args:
+        wn: eigen angular frequencies
+        un: eigen modeshapes
     """
 
-    def __init__(self, wn, un, **kwargs):
-        """
-        Args:
-            wn: eigen angular frequencies
-            un: eigen modeshapes
-        """
+    def __init__(self, wn: np.ndarray, un: typing.List[PETSc.Vec], **kwargs):
         self._wn = wn
         self._un = un
 
 
     @property
     def fn(self) -> np.ndarray:
-        """The eigen frequencies"""
+        """The eigen frequencies :math:`f_n = \omega_n/2\pi`"""
         return self._wn/(2*np.pi)
 
 
     @property
     def wn(self) -> np.ndarray:
-        """The eigen angular frequencies"""
+        """The eigen angular frequencies :math:`\omega_n`"""
         return self._wn
 
 
     @property
-    def un(self):
-        """The eigen modeshapes"""
+    def un(self) -> typing.List[PETSc.Vec]:
+        """The eigen modeshapes :math:`\mathbf{u}_n`"""
         return self._un
 
 
@@ -61,11 +63,14 @@ class ModalBasis():
                 factor: (default=1) Scale factor for the deformation
                 wireframe: (default=False) Plot the wireframe of the undeformed mesh
 
-        Examples of use:
-            plot(V)                  #plots all computed eigenmodes
-            plot(V, 3)               #plots mode number 4
-            plot(V, [3,5])           #plots modes number 4 and 6
-            plot(V, slice(0,None,2)) #plots even modes
+        Example:
+            .. highlight:: python
+            .. code-block:: python
+
+              plot(V)                   # plots all computed eigenmodes
+              plot(V, 3)                # plots mode number 4
+              plot(V, [3,5])            # plots modes number 4 and 6
+              plot(V, slice(0,None,2))  # plots even modes
         """
         # inspired from https://docs.pyvista.org/examples/99-advanced/warp-by-vector-eigenmodes.html
         indexes    = _slice_array(np.arange(len(self._wn)), which)

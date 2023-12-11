@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-The pde module contains tools for building a Partial Differential Equation
+The *pde* module contains tools for building a Partial Differential Equation
 from material laws. The package also provides tools for building Boundary Conditions.
 
 The PDE is of the form:

@@ -4,6 +4,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""Tools for plotting"""
+"""The *plot* module contains convenience tools for plotting"""
 
 from .plot import *
