@@ -4,8 +4,10 @@
 #
 # SPDX-License-Identifier: MIT
 
-from dolfinx import fem, default_scalar_type
+import typing
+
 from petsc4py import PETSc
+from dolfinx import fem, default_scalar_type
 import ufl
 import numpy as np
 
@@ -17,51 +19,71 @@ from elastodynamicsx.utils import get_functionspace_tags_marker
 class ElasticMaterial(Material):
     """
     Base class for linear elastic materials, supporting full anisotropy
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        C_21: list of the 21 independent elastic constants
+
+    Keyword Args:
+        damping: (default=NoDamping()) An instance of a subclass of Damping
     """
     
     ### ### ### ###
     ### static  ###
     ### ### ### ###
     
-    eq_IJ=np.zeros((6,6),dtype='int')
-    cpt=0
-    for i in range(6):
-        for j in range(6-i):
-            eq_IJ[i,i+j]=cpt
-            cpt+=1
-    for i in range(6):
-        for j in range(i):
-            eq_IJ[i,j]=eq_IJ[j,i]
+    eq_IJ: np.ndarray = np.zeros((6,6),dtype='int')
 
-    ijkm=np.zeros((21,4),dtype='int')
-    ijkm[ 0,:] = 0,0,0,0 # C11 <-> 0
-    ijkm[ 1,:] = 0,0,1,1 # C12 <-> 1
-    ijkm[ 2,:] = 0,0,2,2 # C13 <-> 2
-    ijkm[ 3,:] = 0,0,1,2 # C14 <-> 3
-    ijkm[ 4,:] = 0,0,0,2 # C15 <-> 4
-    ijkm[ 5,:] = 0,0,0,1 # C16 <-> 5
-    ijkm[ 6,:] = 1,1,1,1 # C22 <-> 6
-    ijkm[ 7,:] = 1,1,2,2 # C23 <-> 7
-    ijkm[ 8,:] = 1,1,1,2 # C24 <-> 8
-    ijkm[ 9,:] = 1,1,0,2 # C25 <-> 9
-    ijkm[10,:] = 1,1,0,1 # C26 <-> 10
-    ijkm[11,:] = 2,2,2,2 # C33 <-> 11
-    ijkm[12,:] = 2,2,1,2 # C34 <-> 12
-    ijkm[13,:] = 2,2,0,2 # C35 <-> 13
-    ijkm[14,:] = 2,2,0,1 # C36 <-> 14
-    ijkm[15,:] = 1,2,1,2 # C44 <-> 15
-    ijkm[16,:] = 1,2,0,2 # C45 <-> 16
-    ijkm[17,:] = 1,2,0,1 # C46 <-> 17
-    ijkm[18,:] = 0,2,0,2 # C55 <-> 18
-    ijkm[19,:] = 0,2,0,1 # C56 <-> 19
-    ijkm[20,:] = 0,1,0,1 # C66 <-> 20
+    # fill eq_IJ
+    _cpt=0
+    for _i in range(6):
+        for _j in range(6 - _i):
+            eq_IJ[_i,_i+_j] = _cpt
+            _cpt += 1
+    for _i in range(6):
+        for _j in range(_i):
+            eq_IJ[_i,_j] = eq_IJ[_j,_i]
 
-    def Cij(C_21, i:int,j:int):
-        """i,j=0..5"""
+    ijkm: np.ndarray = np.zeros((21,4),dtype='int')
+    ijkm[ 0,:] = 0,0,0,0  # C11 <-> 0
+    ijkm[ 1,:] = 0,0,1,1  # C12 <-> 1
+    ijkm[ 2,:] = 0,0,2,2  # C13 <-> 2
+    ijkm[ 3,:] = 0,0,1,2  # C14 <-> 3
+    ijkm[ 4,:] = 0,0,0,2  # C15 <-> 4
+    ijkm[ 5,:] = 0,0,0,1  # C16 <-> 5
+    ijkm[ 6,:] = 1,1,1,1  # C22 <-> 6
+    ijkm[ 7,:] = 1,1,2,2  # C23 <-> 7
+    ijkm[ 8,:] = 1,1,1,2  # C24 <-> 8
+    ijkm[ 9,:] = 1,1,0,2  # C25 <-> 9
+    ijkm[10,:] = 1,1,0,1  # C26 <-> 10
+    ijkm[11,:] = 2,2,2,2  # C33 <-> 11
+    ijkm[12,:] = 2,2,1,2  # C34 <-> 12
+    ijkm[13,:] = 2,2,0,2  # C35 <-> 13
+    ijkm[14,:] = 2,2,0,1  # C36 <-> 14
+    ijkm[15,:] = 1,2,1,2  # C44 <-> 15
+    ijkm[16,:] = 1,2,0,2  # C45 <-> 16
+    ijkm[17,:] = 1,2,0,1  # C46 <-> 17
+    ijkm[18,:] = 0,2,0,2  # C55 <-> 18
+    ijkm[19,:] = 0,2,0,1  # C56 <-> 19
+    ijkm[20,:] = 0,1,0,1  # C66 <-> 20
+
+
+    def Cij(C_21: typing.List, i: int, j: int):
+        """
+        Returns the :math:`C_{ij}` coefficient from the C_21 list
+
+        i, j = 0..5
+        """
         return C_21[ElasticMaterial.eq_IJ[i,j]]
 
-    def Cijkm(C_21, i:int,j:int,k:int,m:int):
-        """i,j,k,m=0..2"""
+
+    def Cijkm(C_21: typing.List, i:int, j:int, k:int, m:int):
+        """
+        Returns the :math:`C_{ijkm}` coefficient from the C_21 list
+
+        i, j, k, m = 0..2
+        """
         ij = i if i==j else 6-i-j
         km = k if k==m else 6-k-m
         return ElasticMaterial.Cij(C_21, ij,km)
@@ -72,15 +94,8 @@ class ElasticMaterial(Material):
     ### non-static  ###
     ### ### ### ### ###
     
-    def __init__(self, functionspace_tags_marker, rho, C_21, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            C_21: list of the 21 independent elastic constants
-            kwargs:
-                damping: (default=NoDamping()) An instance of a subclass of Damping
-        """
+    def __init__(self, functionspace_tags_marker, rho, C_21: typing.List, **kwargs):
+
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         dim     = function_space.mesh.geometry.dim # space dimension
         nbcomps = function_space.num_sub_spaces    # number of components (0 for scalar)
@@ -89,7 +104,8 @@ class ElasticMaterial(Material):
         self._C_21  = C_21
         self._Cij_6x6       = ufl.as_matrix( [[ElasticMaterial.Cij(C_21, i,j) for j in range(6)] for i in range(6)] )
         self._Cijkm_3x3x3x3 = ufl.as_tensor( [[[[ElasticMaterial.Cijkm(C_21, i,j,k,m) for m in range(3)] for k in range(3)] for j in range(3)] for i in range(3)] )
-        #TODO: rotate with Euler angles
+
+        # TODO: rotate with Euler angles
 
         # Cij coefficients, in (3x3) or (2x2x2x2) representations if nbcomps == 2
         if nbcomps == 2: #Cij -> 3x3 matrix; Cijkm -> 2x2x2x2 tensor
@@ -124,41 +140,48 @@ class ElasticMaterial(Material):
     ### ### ### ### ### ###
     ### Stress, strain  ###
     ### ### ### ### ### ###
-    
+
     @property
     def epsilon(self):
-        """Strain function (matrix representation): epsilon(u)"""
+        """Strain function (matrix representation) :math:`\\boldsymbol{\epsilon}(\mathbf{u})`"""
         return self._epsilon
 
     @property
     def epsilonVoigt(self):
-        """Strain function (Voigt representation): epsilon(u)"""
+        """Strain function (Voigt representation) :math:`\\boldsymbol{\epsilon}(\mathbf{u})`"""
         return self._epsilonVoigt
-        
+
     def sigma(self, u):
-        """Stress function (matrix representation): sigma(u)"""
+        """Stress function (matrix representation) :math:`\\boldsymbol{\sigma}(\mathbf{u})`"""
         return self._Cijkm * self._epsilon(u)
 
     def sigmaVoigt(self, u):
-        """Stress function (Voigt representation): sigma(u)"""
+        """Stress function (Voigt representation) :math:`\\boldsymbol{\sigma}(\mathbf{u})`"""
         return self._Cij * self._epsilonVoigt(u)
-    
+
     def sigma_n(self, u, n):
-        """Stress in the 'n' direction: (sigma(u), n)"""
+        """Stress in the 'n' direction :math:`\\boldsymbol{\sigma}(\mathbf{u}) \cdot \mathbf{n}`"""
         sig = self.sigma(u)
         dim = len(n)
         col = sig.ufl_shape[1]
+
         if col>dim:
             n = ufl.as_vector([n[i] for i in range(dim)] + [0 for i in range(col-dim)])
+
         return ufl.dot(sig, n)
 
-    def diamond(self, v1,v2):
-        """out_jk = C_ijkm * v1_i * v2_m"""
+    def diamond(self, v1, v2):
+        """
+        Returns the diamond product of vectors v1 and v2.
+
+        Returns:
+            :math:`\mathbf{d}`, such as :math:`d_{jk} = C_{ijkm}  v_{1,i}  v_{2,m}`
+        """
         v1 = ufl.as_vector(v1)
         v2 = ufl.as_vector(v2)
         i, j, k, m = ufl.indices(4)
         return ufl.as_matrix( self._Cijkm[i,j,k,m]*v1[i]*v2[m] , (j,k) )
-    
+
 
 
     ### ### ### ### ### ### ### ### ###
@@ -166,31 +189,31 @@ class ElasticMaterial(Material):
     ### ### ### ### ### ### ### ### ###
     
     @property
-    def c(self) -> 'function':
+    def c(self) -> typing.Callable:
         """Damping form function"""
         return self._damping.c
 
     @property
-    def k_CG(self) -> 'function':
+    def k_CG(self) -> typing.Callable:
         """Stiffness form function for a Continuous Galerkin formulation"""
         #return lambda u,v: ufl.inner(self.sigma(u), self.epsilon(v)) * self._dx
         return lambda u,v: ufl.inner(self.sigmaVoigt(u), self._epsilonVoigt(v)) * self._dx
 
     @property
-    def k1_CG(self) -> 'function':
+    def k1_CG(self) -> typing.Callable:
         return lambda u,v: ufl.inner(self._Cij*self._L_crosssection(u), self._L_crosssection(v)) * self._dx
 
     #@property
-    #def k2_CG(self) -> 'function':  # This is K2 - K2.T
+    #def k2_CG(self) -> typing.Callable:  # This is K2 - K2.T
     #    return lambda u,v: ( ufl.inner(self._Cij*self._L_onaxis(u), self._L_crosssection(v)) \
     #                        -ufl.inner(self._L_crosssection(u), self._Cij*self._L_onaxis(v)) )* self._dx
 
     @property
-    def k2_CG(self) -> 'function':
+    def k2_CG(self) -> typing.Callable:
         return lambda u,v: ufl.inner(self._Cij*self._L_onaxis(u), self._L_crosssection(v)) * self._dx
 
     @property
-    def k3_CG(self) -> 'function':
+    def k3_CG(self) -> typing.Callable:
         return lambda u,v: ufl.inner(self._Cij*self._L_onaxis(u), self._L_onaxis(v)) * self._dx
 
 
@@ -200,11 +223,11 @@ class ElasticMaterial(Material):
     ### ### ### ### ### ### ### ### ### ### ###
 
     @property
-    def k_DG(self) -> 'function':
+    def k_DG(self) -> typing.Callable:
         """Stiffness form function for a Discontinuous Galerkin formulation"""
         return lambda u,v: self.k_CG(u,v) + self.DG_numerical_flux(u,v)
         
-    def select_DG_numerical_flux(self, variant='SIPG') -> 'function':
+    def select_DG_numerical_flux(self, variant: str='SIPG') -> typing.Callable:
         if   variant.upper() == 'SIPG':
             return self.DG_numerical_flux_SIPG
         elif variant.upper() == 'NIPG':
@@ -215,11 +238,11 @@ class ElasticMaterial(Material):
             raise TypeError('Unknown DG variant ' + variant)
 
     @property
-    def DG_numerical_flux(self) -> 'function':
+    def DG_numerical_flux(self) -> typing.Callable:
         """Numerical flux for a Disontinuous Galerkin formulation"""
         return self.DG_numerical_flux_SIPG
     
-    def DG_SIPG_regularization_parameter(self) -> 'dolfinx.fem.Constant':
+    def DG_SIPG_regularization_parameter(self) -> fem.Constant:
         """Regularization parameter for the Symmetric Interior Penalty Galerkin methods (SIPG)"""
         degree = self._function_space.ufl_element().degree()
         gamma  = fem.Constant(self._function_space.mesh, default_scalar_type(degree*(degree+1) + 1)) #+1 otherwise blows with elements of degree 1
@@ -229,7 +252,7 @@ class ElasticMaterial(Material):
         return R_
         
     @property
-    def DG_numerical_flux_SIPG(self) -> 'function':
+    def DG_numerical_flux_SIPG(self) -> typing.Callable:
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -247,8 +270,8 @@ class ElasticMaterial(Material):
         return k_int_facets
         
     @property
-    def DG_numerical_flux_NIPG(self) -> 'function':
-        """WARNING: instable for elasticity"""
+    def DG_numerical_flux_NIPG(self) -> typing.Callable:
+        """WARNING, instable for elasticity"""
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -266,8 +289,8 @@ class ElasticMaterial(Material):
         return k_int_facets
         
     @property
-    def DG_numerical_flux_IIPG(self) -> 'function':
-        """WARNING: instable for elasticity"""
+    def DG_numerical_flux_IIPG(self) -> typing.Callable:
+        """WARNING, instable for elasticity"""
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -293,9 +316,12 @@ class ElasticMaterial(Material):
     def P_modulus(self):
         """
         P-wave modulus
-        = rho*c_max**2 where c_max is the highest wave velocity
-        = lambda_ + 2*mu for isotropic materials
-        = mu for scalar materials
+
+        Returns:
+
+            - :math:`\\rho c_{max}^2` where :math:`c_{max}` is the highest wave velocity
+            - :math:`\lambda + 2 \mu` for isotropic materials
+            - :math:`\mu` for scalar materials
         """
         raise NotImplementedError('ElasticMaterial::P_modulus -> supercharge me')
         
@@ -425,18 +451,20 @@ class ElasticMaterial(Material):
 class ScalarLinearMaterial(ElasticMaterial):
     """
     A scalar linear material (e.g. 2D-SH or fluid)
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        mu : Shear modulus (or rho*c**2 for a fluid, with c the sound velocity)
+
+    Keyword Args:
+        **kwargs: Passed to ElasticMaterial
     """
-    
+
     labels = ['scalar', '2d-sh', 'fluid']
     
     def __init__(self, functionspace_tags_marker, rho, mu, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            mu : Shear modulus (or rho*c**2 for a fluid, with c the sound velocity)
-            kwargs: Passed to ElasticMaterial
-        """
+
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements==0, 'ScalarLinearMaterial requires a scalar function space'
 
@@ -455,11 +483,12 @@ class ScalarLinearMaterial(ElasticMaterial):
 
     @property
     def Z(self):
-        """The Mechanical impedance: rho*c"""
+        """The mechanical impedance :math:`\\rho c`"""
         return ufl.sqrt(self.rho*self.mu)
 
     @property
     def P_modulus(self):
+        """P-wave modulus, mu stiffness constant"""
         return self.mu
 
     def sigma(self, u):
@@ -471,19 +500,19 @@ class ScalarLinearMaterial(ElasticMaterial):
         return self.mu * self._epsilonVoigt(u)
 
     @property
-    def k1_CG(self) -> 'function':
+    def k1_CG(self) -> typing.Callable:
         return lambda u,v: ufl.inner(self.mu*self._L_crosssection(u), self._L_crosssection(v)) * self._dx
 
     @property
-    def k2_CG(self) -> 'function':
+    def k2_CG(self) -> typing.Callable:
         return lambda u,v: fem.Constant(u.ufl_function_space().mesh, default_scalar_type(0)) * ufl.inner(u,v) * self._dx
 
     @property
-    def k3_CG(self) -> 'function':
+    def k3_CG(self) -> typing.Callable:
         return lambda u,v: ufl.inner(self.mu*self._L_onaxis(u), self._L_onaxis(v)) * self._dx
 
     @property
-    def DG_numerical_flux_SIPG(self) -> 'function':
+    def DG_numerical_flux_SIPG(self) -> typing.Callable:
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -501,7 +530,7 @@ class ScalarLinearMaterial(ElasticMaterial):
         return k_int_facets
 
     @property
-    def DG_numerical_flux_NIPG(self) -> 'function':
+    def DG_numerical_flux_NIPG(self) -> typing.Callable:
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -519,7 +548,7 @@ class ScalarLinearMaterial(ElasticMaterial):
         return k_int_facets
 
     @property
-    def DG_numerical_flux_IIPG(self) -> 'function':
+    def DG_numerical_flux_IIPG(self) -> typing.Callable:
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -540,19 +569,21 @@ class ScalarLinearMaterial(ElasticMaterial):
 class IsotropicMaterial(ElasticMaterial):
     """
     An isotropic linear elastic material
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        lambda_: Lame's first parameter
+        mu: Lame's second parameter (shear modulus)
+
+    Keyword Args:
+        **kwargs: Passed to ElasticMaterial
     """
 
     labels = ['isotropic']
     
     def __init__(self, functionspace_tags_marker, rho, lambda_, mu, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            lambda_: Lame's first parameter
-            mu: Lame's second parameter (shear modulus)
-            kwargs: Passed to ElasticMaterial
-        """
+
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements>0, 'IsotropicMaterial requires a vector function space'
 
@@ -578,21 +609,20 @@ class IsotropicMaterial(ElasticMaterial):
 
     @property
     def P_modulus(self):
-        """P-wave modulus: C11 stiffness constant"""
+        """P-wave modulus, C11 stiffness constant"""
         return self._C_21[0]
 
     @property
     def Z_N(self):
-        """P-wave mechanical impedance: rho*c_L"""
+        """P-wave mechanical impedance :math:`\\rho c_L`"""
         return ufl.sqrt(self.rho*self.P_modulus)
 
     @property
     def Z_T(self):
-        """S-wave mechanical impedance: rho*c_S"""
+        """S-wave mechanical impedance :math:`\\rho c_S`"""
         return ufl.sqrt(self.rho*self.mu)
 
     def sigma(self, u):
-        """Stress function (matrix representation): sigma(u)"""
-        return self.lambda_ * ufl.nabla_div(u) * ufl.Identity(len(u)) + 2*self.mu*self.epsilon(u) #TODO: is this a speed up? otherwise: remove?
+        return self.lambda_ * ufl.nabla_div(u) * ufl.Identity(len(u)) + 2*self.mu*self.epsilon(u)  # TODO: is this a speed up? otherwise: remove?
 
 

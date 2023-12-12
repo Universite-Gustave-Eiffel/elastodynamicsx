@@ -4,21 +4,65 @@
 #
 # SPDX-License-Identifier: MIT
 
-from dolfinx import fem
+from typing import Union, Callable, List
+
 from petsc4py import PETSc
+
+from dolfinx import fem
 import ufl
 
 from . import FEniCSxTimeScheme
 from elastodynamicsx.solvers import TimeStepper, NonlinearTimeStepper, OneStepTimeStepper
 from elastodynamicsx.pde import PDE, BoundaryCondition
 
-from typing import Union, Callable
-
 
 class GalphaNewmarkBeta(FEniCSxTimeScheme):
     """
-    Implementation of the 'g-a-newmark' (Generalized-alpha Newmark) time-stepping scheme,
-    for beta>0. The special case beta=0 is implemented in the LeapFrog class.
+    .. role:: python(code)
+      :language: python
+
+    Implementation of the 'g-a-newmark' (*Generalized-alpha Newmark*) time-stepping scheme,
+    for :math:`\\beta>0`. The special case :math:`\\beta=0` is implemented in the :python:`LeapFrog` class.
+
+    Implicit / explicit?
+        Implicit
+
+    Accuracy:
+        First or second order, depending on parameters
+
+    Args:
+        function_space: The Finite Element functionnal space
+        m: The mass form. Usually:
+
+            :python:`m = lambda u,v: rho* ufl.dot(u, v) * ufl.dx`
+
+        c (optional, ignored if None): The damping form. E.g. for Rayleigh damping:
+
+            :python:`c = lambda u,v: eta_m * m(u,v) + eta_k * k(u,v)`
+
+        k: The stiffness form. Usually:
+
+            :python:`k = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx`
+
+        L (optional, ignored if None): Linear form
+        dt: Time step
+        bcs: The set of boundary conditions
+
+    Keyword Args:
+        rho_inf (default = 0.75): Spectral radius in the high frequency limit.
+            Bounds: (1/2,1). Setting **rho_inf** is the preferred way of defining the scheme.
+
+        alpha_m (default = (2*rho_inf-1)/(rho_inf+1)): Unconditionnal stability
+            if :math:`-1 \leq \\alpha_m \leq \\alpha_f \leq 0.5`
+
+        alpha_f (default = rho_inf/(rho_inf+1)): Unconditionnal stability if :math:`-1 \leq \\alpha_m \leq \\alpha_f \leq 0.5`
+
+        gamma (default = 1/2 - alpha_m + alpha_f): Default value ensures second-order accuracy.
+            Other values give first-order accuracy
+
+        beta (default = 1/4*(gamma+1/2)**2): Unconditionnal stability if :math:`\\beta \geq 0.25 + 0.5 (\\alpha_f - \\alpha_m)`
+
+        jit_options (default=PDE.default_jit_options): Options for the just-in-time compiler
 
     Reference:
         J. Chung and G. M. Hulbert, "A time integration algorithm for structural
@@ -27,9 +71,6 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
 
     Adapted from:
         https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html
-
-    implicit/explicit? implicit
-    accuracy: first or second order, depending on parameters
     """
     labels = ['g-a-newmark', 'generalized-alpha']
 
@@ -44,41 +85,13 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
 
 
     def __init__(self, function_space:fem.FunctionSpace,
-                 m_:Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
-                 c_:Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
-                 k_:Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
-                 L:Union[None, Callable[['ufl.TestFunction'], ufl.form.Form]],
-                 dt, bcs:list=[], **kwargs):
-        """
-        Args:
-            function_space: The Finite Element functionnal space
-            m_: The mass form
-                -> usually: m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
-            c_: (optional, ignored if None) The damping form
-                -> e.g. for Rayleigh damping: c_ = lambda u,v: eta_m * m_(u,v) + eta_k * k_(u,v)
-            k_: The stiffness form
-                -> usually: k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
-            L:  Linear form
-            dt: Time step
-            bcs: The set of boundary conditions
+                 m_: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
+                 c_: Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
+                 k_: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
+                 L: Union[None, Callable[['ufl.TestFunction'], ufl.form.Form]],
+                 dt,
+                 bcs: List[BoundaryCondition]=[], **kwargs):
 
-        kwargs: The four parameters ('alpha_m', 'alpha_m', 'gamma', 'beta')
-                can be set manually, although the preferred way is by setting
-                the desired spectral radius 'rho_inf'.
-            rho_inf: spectral radius in the high frequency limit. bounds: (1/2,1)
-                default = 0.75
-            alpha_m: unconditionnal stability if -1 <= alpha_m <= alpha_f <= 0.5
-                default = (2*rho_inf-1)/(rho_inf+1)
-            alpha_f: unconditionnal stability if -1 <= alpha_m <= alpha_f <= 0.5
-                default = rho_inf/(rho_inf+1)
-            gamma: default value ensures second-order accuracy
-                other values give first-order accuracy
-                default = 1/2 - alpha_m + alpha_f
-            beta: unconditionnal stability if beta >= 0.25 + 0.5*(alpha_f-alpha_m)
-                default = 1/4*(gamma+1/2)**2
-
-            jit_options: (default=PDE.default_jit_options) options for the just-in-time compiler
-        """
         self.jit_options = kwargs.get('jit_options', PDE.default_jit_options)
         rho_inf = kwargs.get('rho_inf', 0.75)
         alpha_m = (2*rho_inf-1)/(rho_inf+1)
@@ -196,8 +209,12 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
         self._u_nm1.x.array[:] = un
 
 
-    def initialStep(self, t0, callfirsts:list=[], callbacks:list=[], verbose=0) -> None:
-        """Specific to the initial value step"""
+    def initialStep(self,
+                    t0,
+                    callfirsts: List[Callable]=[],
+                    callbacks: List[Callable]=[],
+                    verbose: int=0) -> None:
+
         ### -------------------------------------------------
         #   --- first step: given u0 and v0, solve for a0 ---
         ### -------------------------------------------------
@@ -224,17 +241,35 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
 
 class HilberHughesTaylor(GalphaNewmarkBeta):
     """
-    Implementation of the 'hilber-hughes-taylor' or 'alpha-newmark' time-stepping scheme.
+    Implementation of the *Hilber-Hughes-Taylor* or *alpha-Newmark* time-stepping scheme.
+    *HHT* is a special case of the *Generalized-alpha* scheme (:math:`\\alpha_m=0` and :math:`\\alpha_f=\\alpha`).
+
+    **(!)** The definition of the :math:`\\alpha` parameter is different from that in the original article. Here: :math:`\\alpha = -\\alpha_{HHT}`
+
+    Implicit / explicit?
+        Implicit
+
+    Accuracy:
+        First or second order, depending on parameters
+
+    Args:
+        *args: See GalphaNewmarkBeta
+
+    Keyword Args:
+        rho_inf (default = 0.9): Spectral radius in the high frequency limit. Bounds: (1/2,1).
+            Setting **rho_inf** is the preferred way of defining the scheme.
+
+        alpha (default = (1-rho_inf)/(1+rho_inf)): Set to e.g. 0.05 or sqrt(2) for low or moderate dissipation
+
+        gamma (default = 1/2 + alpha): Default value ensures second-order accuracy.
+            Other values give first-order accuracy
+
+        beta (default = 1/4*(gamma+1/2)**2): Unconditionnal stability if :math:`\\beta \geq 0.25 + 0.5 \\alpha`
 
     Reference:
         H. M. Hilber, T. J. R. Hughes, and R. L. Taylor,
         "Improved Numerical Dissipation for Time Integration Algorithms in Structural Dynamics",
         Earthquake Engineering and Structural Dynamics, vol. 5, pp. 283–292, 1977.
-
-    implicit/explicit? implicit
-    accuracy: first or second order, depending on parameters
-
-    /!\ the definition of the alpha parameter is different from that in the original article. Here: alpha = -alpha_HHT
     """
     labels = ['hilber-hughes-taylor', 'hht', 'hht-alpha']
 
@@ -249,19 +284,7 @@ class HilberHughesTaylor(GalphaNewmarkBeta):
 
 
     def __init__(self, *args, **kwargs):
-        """
-        *args: See GalphaNewmarkBeta
-        **kwargs: The three parameters ('alpha', 'gamma', 'beta') can be set manually,
-            although the preferred way is by setting the desired spectral radius 'rho_inf'.
-            rho_inf: spectral radius in the high frequency limit. bounds: (1/2,1)
-                default = 0.9
-            alpha: set to e.g. 0.05 // sqrt(2) for low // moderate dissipation
-                default = (1-rho_inf)/(1+rho_inf)
-            gamma: default value ensures second-order accuracy; other values give first-order accuracy
-                default = 1/2 + alpha
-            beta: unconditionnal stability if beta >= 0.25 + 0.5*alpha
-                default = 1/4*(gamma+1/2)**2
-        """
+
         rho_inf = kwargs.pop('rho_inf', 0.9)
         alpha_m = 0
         alpha_f = (1-rho_inf)/(1+rho_inf)
@@ -274,14 +297,30 @@ class HilberHughesTaylor(GalphaNewmarkBeta):
 
 class NewmarkBeta(GalphaNewmarkBeta):
     """
-    Implementation of the 'newmark' or 'newmark-beta' time-stepping scheme, for beta>0.
-    The special case beta=0 is implemented in the LeapFrog class.
+    .. role:: python(code)
+      :language: python
+
+    Implementation of the *Newmark* or *Newmark-beta* time-stepping scheme, for :math:`\\beta>0`.
+    The special case :math:`\\beta=0` is implemented in the :python:`LeapFrog` class.
+    *Newmark-beta* is a special case of the *Generalized-alpha* scheme (:math:`\\alpha_m=\\alpha_f=0`).
+
+    Implicit / explicit?
+        Implicit
+
+    Accuracy:
+        First-order unless :math:`gamma=1/2` (second-order)
+
+    Args:
+        *args: See GalphaNewmarkBeta
+
+    Keyword Args:
+        gamma (default = 1/2): Default value ensures second-order accuracy.
+            Other values give first-order accuracy
+
+        beta (default = 1/4*(gamma+1/2)**2): Unconditionnal stability if :math:`\\beta \geq 0.25`
 
     See:
         https://en.wikipedia.org/wiki/Newmark-beta_method
-
-    implicit/explicit? implicit
-    accuracy: first-order unless gamma=1/2 (second-order)
     """
     labels = ['newmark', 'newmark-beta']
 
@@ -303,15 +342,21 @@ class NewmarkBeta(GalphaNewmarkBeta):
 
 class MidPoint(NewmarkBeta):
     """
-    Implementation of the 'midpoint' time-stepping scheme, or Average Acceleration Method.
-    Midpoint is a special case of Newmark-beta methods with beta=1/4 and gamma=1/2
+    Implementation of the *Midpoint* time-stepping scheme, or *Average Acceleration Method*.
+    *Midpoint* is a special case of *Newmark-beta* methods with :math:`\\beta=1/4` and :math:`\gamma=1/2`
     and is unconditionally stable.
+
+    Implicit / explicit?
+        Implicit
+
+    Accuracy:
+        Second-order
+
+    Args:
+        *args: See GalphaNewmarkBeta
 
     See:
         https://en.wikipedia.org/wiki/Midpoint_method
-
-    implicit/explicit? implicit
-    accuracy: second-order
     """
     labels = ['midpoint', 'average-acceleration-method', 'aam']
 
@@ -333,12 +378,18 @@ class MidPoint(NewmarkBeta):
 
 class LinearAccelerationMethod(NewmarkBeta):
     """
-    Implementation 'linear-acceleration-method' time-stepping scheme.
-    It is a special case of Newmark-beta methods with beta=1/6 and gamma=1/2
+    Implementation *Linear Acceleration Method* time-stepping scheme.
+    It is a special case of *Newmark-beta* methods with :math:`\\beta=1/6` and :math:`\gamma=1/2`
     and is unconditionally stable.
 
-    implicit/explicit? implicit
-    accuracy: second-order
+    Implicit / explicit?
+        Implicit
+
+    Accuracy:
+        Second-order
+
+    Args:
+        *args: See GalphaNewmarkBeta
     """
     labels = ['linear-acceleration-method', 'lam']
 

@@ -9,12 +9,26 @@ Module contents
    :undoc-members:
    :show-inheritance:
 
-Subpackages
------------
+elastodynamicsx.solvers.eigensolver
+-----------------------------------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
    elastodynamicsx.solvers.eigensolver
+
+elastodynamicsx.solvers.frequencydomain
+---------------------------------------
+
+.. toctree::
+   :maxdepth: 3
+
    elastodynamicsx.solvers.frequencydomain
+
+elastodynamicsx.solvers.timestepper
+-----------------------------------
+
+.. toctree::
+   :maxdepth: 3
+
    elastodynamicsx.solvers.timestepper

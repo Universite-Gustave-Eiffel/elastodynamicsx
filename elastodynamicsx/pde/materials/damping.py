@@ -4,24 +4,43 @@
 #
 # SPDX-License-Identifier: MIT
 
+"""
+.. role:: python(code)
+   :language: python
+
+The *damping* module implements laws to model attenuation. A Damping instance
+is meant to be connected to a Material instance and thereby provides the damping form
+of the PDE.
+
+The recommended way to instanciate a damping law is to use the :python:`damping` function.
+"""
 
 class Damping: pass
-def damping(type_, *args) -> Damping:
+def damping(type_:str, *args) -> Damping:
     """
     Builder method that instanciates the desired damping law type
 
     Args:
         type_: Available options are:
-            'none', 'rayleigh'
 
-        args:   Passed to the required damping law
+            - 'none'
+            - 'rayleigh'
+
+        *args: Passed to the required damping law
 
     Returns:
         An instance of the desired damping law
 
-    Examples of use:
-        dmp = damping('none')
-        dmp = damping('rayleigh', eta_m, eta_k)
+    Example:
+        .. highlight:: python
+        .. code-block:: python
+
+          from elastodynamicsx.pde import damping, material
+
+          dmp = damping('none')
+          dmp = damping('rayleigh', eta_m, eta_k)
+
+          mat = material(V, 'isotropic', rho, lambda_, mu, damping=dmp)
     """
     for Damp in all_dampings:
         if type_.lower() in Damp.labels:
@@ -35,22 +54,34 @@ class Damping():
 
     @property
     def c(self):
+        """The damping form"""
         print('supercharge me')
         raise NotImplementedError
 
 
 class NoDamping(Damping):
-    """no damping"""
+    """No damping"""
     labels = ['none']
 
     @property
     def c(self):
-        """The damping form"""
+        """
+        The damping form
+
+        Returns:
+            None
+        """
         return None
 
 
 class RayleighDamping(Damping):
-    """Rayleigh damping law: c(u,v) = eta_m * m(u,v) + eta_k * k(u,v)"""
+    """Rayleigh damping law, i.e. whose damping form is a linear combination
+    of the mass and stiffness forms of the host material
+
+    .. math::
+      c(u,v) = \eta_m  m(u,v) + \eta_k  k(u,v)
+    """
+
     labels = ['rayleigh']
 
     def __init__(self, eta_m, eta_k):
@@ -78,7 +109,6 @@ class RayleighDamping(Damping):
 
     @property
     def c(self):
-        """The damping form"""
         return lambda u,v: self.eta_m * self._material.m(u,v) + self.eta_k * self._material.k(u,v)
 
 

@@ -1,21 +1,21 @@
 elastodynamicsx.pde.materials package
 =====================================
 
-Submodules
-----------
+Module contents
+---------------
 
-elastodynamicsx.pde.materials.anisotropicmaterials module
----------------------------------------------------------
-
-.. automodule:: elastodynamicsx.pde.materials.anisotropicmaterials
+.. automodule:: elastodynamicsx.pde.materials
    :members:
    :undoc-members:
    :show-inheritance:
 
-elastodynamicsx.pde.materials.damping module
---------------------------------------------
+Submodules
+----------
 
-.. automodule:: elastodynamicsx.pde.materials.damping
+elastodynamicsx.pde.materials.material module
+---------------------------------------------
+
+.. automodule:: elastodynamicsx.pde.materials.material
    :members:
    :undoc-members:
    :show-inheritance:
@@ -28,6 +28,14 @@ elastodynamicsx.pde.materials.elasticmaterial module
    :undoc-members:
    :show-inheritance:
 
+elastodynamicsx.pde.materials.anisotropicmaterials module
+---------------------------------------------------------
+
+.. automodule:: elastodynamicsx.pde.materials.anisotropicmaterials
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 elastodynamicsx.pde.materials.hyperelasticmaterial module
 ---------------------------------------------------------
 
@@ -36,26 +44,18 @@ elastodynamicsx.pde.materials.hyperelasticmaterial module
    :undoc-members:
    :show-inheritance:
 
+elastodynamicsx.pde.materials.damping module
+--------------------------------------------
+
+.. automodule:: elastodynamicsx.pde.materials.damping
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 elastodynamicsx.pde.materials.kinematics module
 -----------------------------------------------
 
 .. automodule:: elastodynamicsx.pde.materials.kinematics
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-elastodynamicsx.pde.materials.material module
----------------------------------------------
-
-.. automodule:: elastodynamicsx.pde.materials.material
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: elastodynamicsx.pde.materials
    :members:
    :undoc-members:
    :show-inheritance:

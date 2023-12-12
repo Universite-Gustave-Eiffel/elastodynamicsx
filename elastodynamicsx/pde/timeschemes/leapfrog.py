@@ -4,29 +4,60 @@
 #
 # SPDX-License-Identifier: MIT
 
-from dolfinx import fem
+from typing import Union, Callable, List
+
 from petsc4py import PETSc
+
+from dolfinx import fem
 import ufl
 
 from . import FEniCSxTimeScheme
 from elastodynamicsx.solvers import TimeStepper, OneStepTimeStepper
 from elastodynamicsx.pde import PDE, BoundaryCondition
 
-from typing import Union, Callable
-
 
 class LeapFrog(FEniCSxTimeScheme):
     """
-    Implementation of the 'leapfrog' time-stepping scheme, or Explicit central difference scheme.
-    Leapfrog is a special case of Newmark-beta methods with beta=0 and gamma=0.5
-    see: https://en.wikipedia.org/wiki/Leapfrog_integration
+    Implementation of the *Leapfrog* time-stepping scheme, or *Explicit central difference scheme*.
+    *Leapfrog* is a special case of *Newmark-beta* methods with :math:`\\beta=0` and :math:`\gamma=0.5`
 
-    implicit/explicit? explicit
-    accuracy: second-order
+    Scheme:
+        | :math:`u_n`, :math:`v_n`, :math:`a_n` are the (known) displacement, velocity and acceleration at current time step
+        | :math:`u_{n+1}` is the unknown: displacement at next time step
+        | :math:`a_n = (u_{n+1} - 2 u_n + u_{n-1}) / dt^2`
+        | :math:`v_n = (u_{n+1} - u_n-1) / (2 dt)`
 
-    a_n = (u_n+1 - 2u_n + u_n-1)/dt**2
-    v_n = (u_n+1 - u_n-1)/(2*dt)
+    Implicit / explicit?
+        Explicit
+
+    Accuracy:
+        Second-order
+
+    Args:
+        function_space: The Finite Element functionnal space
+        m: The mass form. Usually:
+
+            :python:`m = lambda u,v: rho* ufl.dot(u, v) * ufl.dx`
+
+        c (optional, ignored if None): The damping form. E.g. for Rayleigh damping:
+
+            :python:`c = lambda u,v: eta_m * m(u,v) + eta_k * k(u,v)`
+
+        k: The stiffness form. Usually:
+
+            :python:`k = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx`
+
+        L (optional, ignored if None): Linear form
+        dt: Time step
+        bcs: The set of boundary conditions
+
+    Keyword Args:
+        jit_options: (default=PDE.default_jit_options) options for the just-in-time compiler
+
+    See:
+        https://en.wikipedia.org/wiki/Leapfrog_integration
     """
+
     labels = ['leapfrog', 'central-difference']
 
 
@@ -37,26 +68,14 @@ class LeapFrog(FEniCSxTimeScheme):
 
 
     def __init__(self, function_space:fem.FunctionSpace,
-                 m_:Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
-                 c_:Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
-                 k_:Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
-                 L:Union[None, Callable[['ufl.TestFunction'], ufl.form.Form]],
-                 dt, bcs:list=[], **kwargs):
-        """
-        Args:
-            function_space: The Finite Element functionnal space
-            m_: The mass form
-                -> usually: m_ = lambda u,v: rho* ufl.dot(u, v) * ufl.dx
-            c_: (optional, ignored if None) The damping form
-                -> e.g. for Rayleigh damping: c_ = lambda u,v: eta_m * m_(u,v) + eta_k * k_(u,v)
-            k_: The stiffness form
-                -> usually: k_ = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx
-            L:  Linear form
-            dt: Time step
-            bcs: The set of boundary conditions
-        kwargs:
-            jit_options: (default=PDE.default_jit_options) options for the just-in-time compiler
-        """
+                 m_: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
+                 c_: Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
+                 k_: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
+                 L: Union[None, Callable[['ufl.TestFunction'], ufl.form.Form]],
+                 dt,
+                 bcs: List[BoundaryCondition]=[],
+                 **kwargs):
+
         self.jit_options = kwargs.get('jit_options', PDE.default_jit_options)
         dt_  = fem.Constant(function_space.mesh, PETSc.ScalarType(dt))
 
@@ -117,11 +136,13 @@ class LeapFrog(FEniCSxTimeScheme):
 
     @property
     def u(self) -> fem.Function:
+        """The displacement field at current time step"""
         return self._u_n
 
 
     @property
     def u_nm1(self) -> fem.Function:
+        """The displacement field at previous time step"""
         return self._u_nm1
 
 
@@ -131,8 +152,12 @@ class LeapFrog(FEniCSxTimeScheme):
         self._u_nm1.x.array[:] = self._u_n.x.array
 
 
-    def initialStep(self, t0, callfirsts:list=[], callbacks:list=[], verbose=0) -> None:
-        """Specific to the initial value step"""
+    def initialStep(self,
+                    t0,
+                    callfirsts: List[Callable]=[],
+                    callbacks: List[Callable]=[],
+                    verbose: int=0) -> None:
+
         # ## -------------------------------------------------
         #    --- first step: given u0 and v0, solve for a0 ---
         # ## -------------------------------------------------

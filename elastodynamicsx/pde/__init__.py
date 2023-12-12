@@ -5,11 +5,19 @@
 # SPDX-License-Identifier: MIT
 
 """
+.. role:: python(code)
+  :language: python
+
 The *pde* module contains tools for building a Partial Differential Equation
-from material laws. The package also provides tools for building Boundary Conditions.
+from material and damping laws, as well as boundary conditions.
 
 The PDE is of the form:
-    M*a + C*v + K(u) = b.
+    | M*a + C*v + K(u) = b,
+    | + Boundary conditions.
+
+The module also contains tools to formulate a time domain problem using implicit
+or explicit time schemes, although the preferred way to use these tools is through
+the :python:`elastodynamicsx.solvers.timestepper` function.
 
 --- --- ---
 

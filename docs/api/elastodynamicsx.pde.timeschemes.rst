@@ -1,8 +1,13 @@
 elastodynamicsx.pde.timeschemes
 =======================================
 
-Submodules
-----------
+Module contents
+---------------
+
+.. automodule:: elastodynamicsx.pde.timeschemes
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 elastodynamicsx.pde.timeschemes.leapfrog
 -----------------------------------------------
@@ -24,14 +29,6 @@ elastodynamicsx.pde.timeschemes.timescheme
 -------------------------------------------------
 
 .. automodule:: elastodynamicsx.pde.timeschemes.timescheme
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: elastodynamicsx.pde.timeschemes
    :members:
    :undoc-members:
    :show-inheritance:

@@ -4,6 +4,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+import typing
+
 import ufl
 
 from elastodynamicsx.utils import get_functionspace_tags_marker
@@ -13,40 +15,76 @@ from elastodynamicsx.pde import PDE
 class Material: pass
 def material(functionspace_tags_marker, type_, *args, **kwargs) -> Material:
     """
+    .. role:: python(code)
+       :language: python
+
     Builder method that instanciates the desired material type
 
     Args:
-        functionspace_tags_marker: Available possibilities are
-            (function_space, cell_tags, marker)  # Meaning application of the
-                material in the cells whose tag correspond to marker
-            function_space  # In this case cell_tags=None and marker=None, meaning
-                application of the material in the entire domain
+        functionspace_tags_marker: Available possibilities are:
+
+            - :python:`(function_space, cell_tags, marker)`: meaning application of the material in the cells whose tag correspond to marker
+            - :python:`function_space`: in this case :python:`cell_tags=None` and :python:`marker=None`, meaning application of the material in the entire domain
 
         type_: Available options are:
-            * scalar, linear: 'scalar'
-            * linear: 'isotropic', 'cubic', 'hexagonal', 'trigonal', 'tetragonal', 'orthotropic', 'monoclinic', 'triclinic'
-            * nonlinear, hyperelastic: 'murnaghan', 'saintvenant-kirchhoff', 'mooney-rivlin-incomp'
 
-        args:   Passed to the required material
-        kwargs: Passed to the required material
+            - *linear (scalar):* 'scalar'
+            - *linear:* 'isotropic', 'cubic', 'hexagonal', 'trigonal', 'tetragonal', 'orthotropic', 'monoclinic', 'triclinic'
+            - *nonlinear, hyperelastic:* 'murnaghan', 'saintvenant-kirchhoff', 'mooney-rivlin-incomp'
+
+        *args: Passed to the required material
+
+    Keyword Args:
+        **kwargs: Passed to the required material
 
     Returns:
         An instance of the desired material
 
-    Examples of use:
-        aluminum = material((function_space, cell_tags, 1), 'isotropic',
-                             rho=2.8, lambda_=58, mu=26)  # restricted to subdomain number 1
-        aluminum = material( function_space, 'isotropic',
-                             rho=2.8, lambda_=58, mu=26)  # entire domain
+    Example:
+        .. highlight:: python
+        .. code-block:: python
 
-        mat = material( function_space, 'isotropic'  , rho, C12, C44)
-        mat = material( function_space, 'cubic'      , rho, C11, C12, C44)
-        mat = material( function_space, 'hexagonal'  , rho, C11, C13, C33, C44, C66)
-        mat = material( function_space, 'trigonal'   , rho, C11, C12, C13, C14, C25, C33, C44)
-        mat = material( function_space, 'tetragonal' , rho, C11, C12, C13, C16, C33, C44, C66)
-        mat = material( function_space, 'orthotropic', rho, C11, C12, C13, C22, C23, C33, C44, C55, C66)
-        mat = material( function_space, 'monoclinic' , rho, C11, C12, C13, C15, C22, C23, C25, C33, C35, C44, C46, C55, C66)
-        mat = material( function_space, 'triclinic'  , rho, C11, C12, C13, C14, C15, C16, C22, C23, C24, C25, C26, C33, C34, C35, C36, C44, C45, C46, C55, C56, C66)
+          # ###
+          # Constant / variable material parameter
+          # ###
+          rho = 2.8
+          rho = fem.Constant(function_space.mesh, default_scalar_type(2.8))
+          rho = fem.Function(scalar_function_space); rho.interpolate(lambda x: 2.8 * np.ones(len(x)))
+
+          # ###
+          # Subdomain(s) or entire domain?
+          # ###
+
+          # restricted to subdomain number 1
+          aluminum = material((function_space, cell_tags, 1), 'isotropic',
+                               rho=2.8, lambda_=58, mu=26)
+
+          # restricted to subdomains number 1, 2, 5
+          aluminum = material((function_space, cell_tags, (1,2,5)), 'isotropic',
+                               rho=2.8, lambda_=58, mu=26)
+
+          # entire domain
+          aluminum = material( function_space, 'isotropic',
+                               rho=2.8, lambda_=58, mu=26)
+
+          # ###
+          # Available laws
+          # ###
+
+          # Linear elasticity
+          mat = material( function_space, 'isotropic'  , rho, C12, C44)
+          mat = material( function_space, 'cubic'      , rho, C11, C12, C44)
+          mat = material( function_space, 'hexagonal'  , rho, C11, C13, C33, C44, C66)
+          mat = material( function_space, 'trigonal'   , rho, C11, C12, C13, C14, C25, C33, C44)
+          mat = material( function_space, 'tetragonal' , rho, C11, C12, C13, C16, C33, C44, C66)
+          mat = material( function_space, 'orthotropic', rho, C11, C12, C13, C22, C23, C33, C44, C55, C66)
+          mat = material( function_space, 'monoclinic' , rho, C11, C12, C13, C15, C22, C23, C25, C33, C35, C44, C46, C55, C66)
+          mat = material( function_space, 'triclinic'  , rho, C11, C12, C13, C14, C15, C16, C22, C23, C24, C25, C26, C33, C34, C35, C36, C44, C45, C46, C55, C56, C66)
+
+          # Hyperelasticity
+          mat = material( function_space, 'saintvenant-kirchhoff', rho, C12, C44)
+          mat = material( function_space, 'murnaghan', rho, C12, C44, l, m, n)
+          mat = material( function_space, 'mooney-rivlin-incomp', rho, C1, C2)
     """
     for Mat in all_materials:
         if type_.lower() in Mat.labels:
@@ -58,12 +96,23 @@ def material(functionspace_tags_marker, type_, *args, **kwargs) -> Material:
 
 class Material():
     """
-    Base class for a representation of a PDE of the kind:
+    .. role:: python(code)
+       :language: python
 
-        M*a + C*v + K(u) = 0
+    Base class for a representation of a material law.
 
-    i.e. the lhs of a pde such as defined in the PDE class. An instance represents
-    a single (possibly arbitrarily space-dependent) material.
+    Args:
+        functionspace_tags_marker: Available possibilities are:
+
+            - :python:`(function_space, cell_tags, marker)`: meaning application of the material in the cells whose tag correspond to marker
+            - :python:`function_space`: in this case :python:`cell_tags=None` and :python:`marker=None`, meaning application of the material in the entire domain
+
+        rho: Density
+        is_linear: True for linear, False for hyperelastic
+
+    Keyword Args:
+        metadata: (default=None) The metadata used by the ufl measures (dx, dS).
+            If set to :python:`None`, uses the :python:`PDE.default_metadata`
     """
 
 
@@ -71,11 +120,14 @@ class Material():
     ### --------- static ---------
     ### --------------------------
 
-    labels = ['supercharge me']
+    labels: typing.List[str]
 
     def build(*args, **kwargs):
         """
-        Same as material(*args, **kwargs).
+        .. role:: python(code)
+           :language: python
+
+        Same as :python:`material(*args, **kwargs)`
         """
         return material(*args, **kwargs)
 
@@ -85,19 +137,6 @@ class Material():
     ### --------------------------
 
     def __init__(self, functionspace_tags_marker, rho, is_linear, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: Available possibilities are
-                (function_space, cell_tags, marker) #Meaning application of the
-                    material in the cells whose tag correspond to marker
-                function_space #In this case cell_tags=None and marker=None, meaning
-                    application of the material in the entire domain
-            rho:   Density
-            is_linear: True for linear, False for hyperelastic
-        kwargs:
-            metadata: (default=None) The metadata used by the ufl measures (dx, dS)
-                If set to None, uses the PDE.default_metadata
-        """
         self._rho = rho
         self._is_linear = is_linear
 
@@ -124,37 +163,37 @@ class Material():
 
 
     @property
-    def m(self) -> 'function':
+    def m(self) -> typing.Callable:
         """(bilinear) mass form function"""
         return lambda u,v: self._rho* ufl.inner(u, v) * self._dx
 
 
     @property
-    def c(self) -> 'function':
+    def c(self) -> typing.Callable:
         """(bilinear) damping form function"""
         return None
 
 
     @property
-    def k(self) -> 'function':
-        """Stiffness form function"""
+    def k(self) -> typing.Callable:
+        """(bilinear) Stiffness form function"""
         return self._k
 
 
     @property
-    def k_CG(self) -> 'function':
+    def k_CG(self) -> typing.Callable:
         """Stiffness form function for a Continuous Galerkin formulation"""
         print("supercharge me")
 
 
     @property
-    def k_DG(self) -> 'function':
+    def k_DG(self) -> typing.Callable:
         """Stiffness form function for a Disontinuous Galerkin formulation"""
         print("supercharge me")
 
 
     @property
-    def DG_numerical_flux(self) -> 'function':
+    def DG_numerical_flux(self) -> typing.Callable:
         """Numerical flux for a Disontinuous Galerkin formulation"""
         print("supercharge me")
 

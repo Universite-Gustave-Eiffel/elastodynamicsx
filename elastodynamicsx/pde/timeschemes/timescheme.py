@@ -4,19 +4,29 @@
 #
 # SPDX-License-Identifier: MIT
 
+import typing
+
+import numpy as np
+
 from petsc4py import PETSc
+
 from dolfinx import fem
+
 try:
     import dolfinx_mpc
 except ImportError:
     dolfinx_mpc = None
-import numpy as np
 
 
 class TimeScheme():
-    """Abstract base class for time schemes as needed by the TimeStepper solvers"""
+    """
+    .. role:: python(code)
+      :language: python
 
-    labels = ['supercharge me']
+    Abstract base class for time schemes as needed by the :python:`TimeStepper` solvers
+    """
+
+    labels: typing.List[str] = ['supercharge me']
     
     def build_timestepper(*args, **kwargs) -> 'TimeStepper':  # supercharge me
         raise NotImplementedError
@@ -54,12 +64,18 @@ class TimeScheme():
     def set_initial_condition(self, u0, v0) -> None:  # supercharge me
         raise NotImplementedError
     
-    def initialStep(self, t0, callfirsts:list=[], callbacks:list=[], verbose=0) -> None:  # supercharge me
+    def initialStep(self,
+                    t0,
+                    callfirsts: typing.List[typing.Callable]=[],
+                    callbacks: typing.List[typing.Callable]=[],
+                    verbose: int=0) -> None:  # supercharge me
+        """Specific to the initial value step"""
         raise NotImplementedError
 
 
 class FEniCSxTimeScheme(TimeScheme):
     """Abstract base class based on FEniCSx's form language"""
+
     def __init__(self, dt, out:fem.Function,
                  bilinear_form:'dolfinx.fem.forms.Form',
                  linear_form:'dolfinx.fem.forms.Form',
@@ -82,7 +98,7 @@ class FEniCSxTimeScheme(TimeScheme):
     def out_fenicsx(self) -> fem.Function:
         """The solution vector"""
         return self._out_fenicsx
-        
+
     def A(self) -> PETSc.Mat:
         """The time-independent matrix (bilinear form)"""
         if self._mpc is None:
@@ -91,7 +107,7 @@ class FEniCSxTimeScheme(TimeScheme):
             A = dolfinx_mpc.assemble_matrix(self._bilinear_form, self._mpc, bcs=self._bcs)
         A.assemble()
         return A
-        
+
     def init_b(self) -> PETSc.Vec:
         """Declares a zero vector compatible with the linear form"""
         if self._mpc is None:
@@ -100,21 +116,21 @@ class FEniCSxTimeScheme(TimeScheme):
             return dolfinx_mpc.assemble_vector(self._linear_form, self._mpc)
 
     # def b_update_function(self, b:PETSc.Vec, t) -> None:  # NOW SET TO EITHER METHOD BELOW IN __init__
-    
+
     def _b_update_function_WO_MPC(self, b:PETSc.Vec, t) -> None:  # TODO: use t?
         """Updates the b vector (in-place) for a given time t"""
         with b.localForm() as loc_b:
             loc_b.set(0)
-        
+
         # fill with values
         fem.petsc.assemble_vector(b, self._linear_form)
-            
-        # BC modifyier 
+
+        # BC modifyier
         fem.petsc.apply_lifting(b, [self._bilinear_form], [self._bcs])
-        
+
         # ghost
         b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)
-        
+
         # apply BC value
         fem.petsc.set_bc(b, self._bcs)
 
@@ -123,37 +139,44 @@ class FEniCSxTimeScheme(TimeScheme):
         """Updates the b vector (in-place) for a given time t"""
         with b.localForm() as loc_b:
             loc_b.set(0)
-        
+
         # fill with values
         dolfinx_mpc.assemble_vector(self._linear_form, self._mpc, b)
-            
-        # BC modifyier 
+
+        # BC modifyier
         dolfinx_mpc.apply_lifting(b, [self._bilinear_form], [self._bcs], self._mpc)
-        
+
         # ghost
         b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)
-        
+
         # apply BC value
         fem.petsc.set_bc(b, self._bcs)  # not modified by dolfinx_mpc
 
 
     def set_initial_condition(self, u0, v0) -> None:
         """
+        .. role:: python(code)
+          :language: python
+
         Apply initial conditions
-        
+
         Args:
             u0: u at t0
             v0: du/dt at t0
-        
-            u0 and v0 can be:
-                - function -> interpolated at nodes
-                    -> e.g. u0 = lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType)
-                - scalar (int, float, complex, PETSc.ScalarType)
-                    -> e.g. u0 = 0
-                - array (list, tuple, np.ndarray) or fem.function.Constant
-                    -> e.g. u0 = [0,0,0]
-                - fem.function.Function
-                    -> e.g. u0 = fem.Function(V)
+
+                u0 and v0 can be:
+
+                - Python Callable -> interpolated at nodes
+                    -> e.g. :python:`u0 = lambda x: np.zeros((domain.topology.dim, x.shape[1]), dtype=PETSc.ScalarType)`
+
+                - scalar (:python:`int`, :python:`float`, :python:`complex`, :python:`PETSc.ScalarType`)
+                    -> e.g. :python:`u0 = 0`
+
+                - array (:python:`list`, :python:`tuple`, :python:`np.ndarray`)
+                    -> e.g. :python:`u0 = [0,0,0]`
+
+                - :python:`fem.function.Function` or :python:`fem.function.Constant`
+                    -> e.g. :python:`u0 = fem.Function(V)`
         """
         for selfVal, val in ((self._u0, u0), (self._v0, v0)):
             if   type(val) == type(lambda x:x):

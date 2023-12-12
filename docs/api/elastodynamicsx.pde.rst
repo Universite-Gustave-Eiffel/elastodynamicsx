@@ -9,18 +9,6 @@ Module contents
    :undoc-members:
    :show-inheritance:
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   elastodynamicsx.pde.materials
-   elastodynamicsx.pde.timeschemes
-
-Submodules
-----------
-
 elastodynamicsx.pde.bodyforce
 -----------------------------
 
@@ -37,6 +25,14 @@ elastodynamicsx.pde.boundarycondition
    :undoc-members:
    :show-inheritance:
 
+elastodynamicsx.pde.materials
+-----------------------------
+
+.. toctree::
+   :maxdepth: 3
+
+   elastodynamicsx.pde.materials
+
 elastodynamicsx.pde.pde
 -----------------------
 
@@ -44,3 +40,11 @@ elastodynamicsx.pde.pde
    :members:
    :undoc-members:
    :show-inheritance:
+
+elastodynamicsx.pde.timeschemes
+-------------------------------
+
+.. toctree::
+   :maxdepth: 3
+
+   elastodynamicsx.pde.timeschemes

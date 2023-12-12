@@ -9,9 +9,6 @@ Module contents
    :undoc-members:
    :show-inheritance:
 
-Submodules
-----------
-
 elastodynamicsx.plot.plot
 -------------------------
 
