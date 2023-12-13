@@ -4,11 +4,20 @@
 #
 # SPDX-License-Identifier: MIT
 
+"""
+The *kinematics* module is mainly designed for internal use and will probably not
+be used by an external user. It contains convenience functions to build some
+useful differential operators at the required ufl format, for many possible
+space dimensions and number of components of the function space.
+"""
+
 import ufl
 
-def epsilon_vector(u): return ufl.sym(ufl.grad(u)) #requires 'space dimension' == 'number of components'
-def epsilon_scalar(u): return ufl.nabla_grad(u)
+def epsilon_vector(u):
+    return ufl.sym(ufl.grad(u)) #requires 'space dimension' == 'number of components'
 
+def epsilon_scalar(u):
+    return ufl.nabla_grad(u)
 
 
 def get_epsilon_function(dim, nbcomps):
@@ -87,10 +96,16 @@ def get_epsilonVoigt_function(dim, nbcomps):
 
 def get_L_operators(dim, nbcomps, k_nrm=None):
     """
+    .. role:: python(code)
+       :language: python
+
     Args:
-        k_nrm: (dim==1 only) A unitary vector (len=3) representing the phase direction
-            typically: ufl.as_vector([0,ay,az])
-            default  : ufl.as_vector([0,1,0])
+        dim: space dimension
+        nbcomps: number of components
+        k_nrm: (dim==1 only) A unitary vector (len=3) representing the phase direction.
+
+            typically: :python:`ufl.as_vector([0,ay,az])`
+            default  : :python:`ufl.as_vector([0,1,0])`
     """
     L_cs = None #cross section
     L_oa = None #on axis

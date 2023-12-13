@@ -12,18 +12,20 @@ class CubicMaterial(ElasticMaterial):
     """
     A linear elastic material with cubic symmetry
     -> 3 independent constants
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        C11, C12, C44: Stiffness constant
+
+    Keyword Args:
+        **kwargs: Passed to ElasticMaterial
     """
 
     labels = ['cubic']
     
     def __init__(self, functionspace_tags_marker, rho, C11, C12, C44, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            C11, C12, C44: Stiffness constants
-            kwargs: Passed to ElasticMaterial
-        """
+
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements>0, 'CubicMaterial requires a vector function space'
 
@@ -43,18 +45,20 @@ class HexagonalMaterial(ElasticMaterial):
     """
     A linear elastic material with hexagonal symmetry
     -> 5 independent constants
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        C11, ..., C66: Stiffness constant
+
+    Keyword Args:
+        **kwargs: Passed to ElasticMaterial
     """
 
     labels = ['hexagonal']
     
     def __init__(self, functionspace_tags_marker, rho, C11, C13, C33, C44, C66, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            C11 .. C66: Stiffness constants
-            kwargs: Passed to ElasticMaterial
-        """
+
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements>0, 'HexagonalMaterial requires a vector function space'
 
@@ -75,18 +79,20 @@ class TrigonalMaterial(ElasticMaterial):
     """
     A linear elastic material with trigonal symmetry
     -> 7 independent constants
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        C11, ..., C44: Stiffness constant
+
+    Keyword Args:
+        **kwargs: Passed to ElasticMaterial
     """
 
     labels = ['trigonal']
     
     def __init__(self, functionspace_tags_marker, rho, C11, C12, C13, C14, C25, C33, C44, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            C11 .. C44: Stiffness constants
-            kwargs: Passed to ElasticMaterial
-        """
+
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements>0, 'TrigonalMaterial requires a vector function space'
 
@@ -115,18 +121,20 @@ class TetragonalMaterial(ElasticMaterial):
     """
     A linear elastic material with tetragonal symmetry
     -> 7 independent constants
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        C11, ..., C66: Stiffness constant
+
+    Keyword Args:
+        **kwargs: Passed to ElasticMaterial
     """
 
     labels = ['tetragonal']
     
     def __init__(self, functionspace_tags_marker, rho, C11, C12, C13, C16, C33, C44, C66, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            C11 .. C66: Stiffness constants
-            kwargs: Passed to ElasticMaterial
-        """
+
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements>0, 'TetragonalMaterial requires a vector function space'
 
@@ -151,18 +159,20 @@ class OrthotropicMaterial(ElasticMaterial):
     """
     A linear elastic material with orthotropic symmetry
     -> 9 independent constants
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        C11, ..., C66: Stiffness constant
+
+    Keyword Args:
+        **kwargs: Passed to ElasticMaterial
     """
 
     labels = ['orthotropic']
     
     def __init__(self, functionspace_tags_marker, rho, C11, C12, C13, C22, C23, C33, C44, C55, C66, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            C11 .. C66: Stiffness constants
-            kwargs: Passed to ElasticMaterial
-        """
+
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements>0, 'OrthotropicMaterial requires a vector function space'
 
@@ -185,18 +195,20 @@ class MonoclinicMaterial(ElasticMaterial):
     """
     A linear elastic material with monoclinic symmetry
     -> 13 independent constants
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        C11, ..., C66: Stiffness constant
+
+    Keyword Args:
+        **kwargs: Passed to ElasticMaterial
     """
 
     labels = ['monoclinic']
     
     def __init__(self, functionspace_tags_marker, rho, C11, C12, C13, C15, C22, C23, C25, C33, C35, C44, C46, C55, C66, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            C11 .. C66: Stiffness constants
-            kwargs: Passed to ElasticMaterial
-        """
+
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements>0, 'MonoclinicMaterial requires a vector function space'
 
@@ -223,18 +235,20 @@ class TriclinicMaterial(ElasticMaterial):
     """
     A linear elastic material with triclinic symmetry
     -> 21 independent constants
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        C11, ..., C66: Stiffness constant
+
+    Keyword Args:
+        **kwargs: Passed to ElasticMaterial
     """
 
     labels = ['triclinic']
     
     def __init__(self, functionspace_tags_marker, rho, C11, C12, C13, C14, C15, C16, C22, C23, C24, C25, C26, C33, C34, C35, C36, C44, C45, C46, C55, C56, C66, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            C11 .. C66: Stiffness constants
-            kwargs: Passed to ElasticMaterial
-        """
+
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements>0, 'TriclinicMaterial requires a vector function space'
 

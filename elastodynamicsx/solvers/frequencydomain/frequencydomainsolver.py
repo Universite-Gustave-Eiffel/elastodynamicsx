@@ -4,76 +4,88 @@
 #
 # SPDX-License-Identifier: MIT
 
+from typing import Callable, List, Union
+
+from mpi4py import MPI
 from petsc4py import PETSc
-try: from tqdm.auto import tqdm
-except ModuleNotFoundError: tqdm = lambda x: x
+import numpy as np
+
+try:
+    from tqdm.auto import tqdm
+except ModuleNotFoundError:
+    tqdm = lambda x: x
 
 
 class FrequencyDomainSolver:
     """
     Class for solving frequency domain problems.
 
-    Example of use:
-        #imports
-        from dolfinx import mesh, fem
-        import ufl
-        from mpi4py import MPI
-        from elastodynamicsx.solvers import FrequencyDomainSolver
-        from elastodynamicsx.pde import material, BoundaryCondition, PDE
+    Args:
+        comm: The MPI communicator
+        M: The mass matrix
+        C: The damping matrix
+        K: The stiffness matrix
+        b: The load vector
+        b_update_function: A function that updates the load vector (in-place)
+            The function must take b,omega as parameters.
+            e.g.: b_update_function = lambda b,omega: b[:]=omega
+            If set to None, the call is ignored.
 
-        #domain
-        length, height = 10, 10
-        Nx, Ny = 10, 10
-        domain = mesh.create_rectangle(MPI.COMM_WORLD, [[0,0], [length,height]], [Nx,Ny])
-        V      = dolfinx.fem.VectorFunctionSpace(domain, ("CG", 1))
+    Keyword Args:
+        petsc_options: Options that are passed to the linear
+            algebra backend PETSc. For available choices for the
+            'petsc_options' kwarg, see the `PETSc documentation
+            <https://petsc4py.readthedocs.io/en/stable/manual/ksp/>`_.
 
-        #material
-        rho, lambda_, mu = 1, 2, 1
-        mat = material(V, rho, lambda_, mu)
+    Example:
+        .. highlight:: python
+        .. code-block:: python
 
-        #absorbing boundary condition
-        Z_N, Z_T = mat.Z_N, mat.Z_T #P and S mechanical impedances
-        bcs = [ BoundaryCondition(V, 'Dashpot', (Z_N, Z_T)) ]
+          from mpi4py import MPI
 
-        #gaussian source term
-        F0     = fem.Constant(domain, PETSc.ScalarType([1,0])) #polarization
-        R0     = 0.1 #radius
-        x0, y0 = length/2, height/2 #center
-        x      = ufl.SpatialCoordinate(domain)
-        gaussianBF = F0 * ufl.exp(-((x[0]-x0)**2+(x[1]-y0)**2)/2/R0**2) / (2*3.141596*R0**2)
-        bf         = BodyForce(V, gaussianBF)
+          from dolfinx import mesh, fem
+          import ufl
 
-        #PDE
-        pde = PDE(V, materials=[mat], bodyforces=[bf], bcs=bcs)
+          from elastodynamicsx.solvers import FrequencyDomainSolver
+          from elastodynamicsx.pde import material, BoundaryCondition, PDE
 
-        #solve
-        fdsolver = FrequencyDomainSolver(V.mesh.comm, pde.M(), pde.C(), pde.K(), pde.b())
-        omega    = 1.0
-        u        = fem.Function(V, name='solution')
-        fdsolver.solve(omega=omega, out=u.vector)
+          # domain
+          length, height = 10, 10
+          Nx, Ny = 10, 10
+          domain = mesh.create_rectangle(MPI.COMM_WORLD, [[0,0], [length,height]], [Nx,Ny])
+          V      = dolfinx.fem.VectorFunctionSpace(domain, ("CG", 1))
+
+          # material
+          rho, lambda_, mu = 1, 2, 1
+          mat = material(V, rho, lambda_, mu)
+
+          # absorbing boundary condition
+          Z_N, Z_T = mat.Z_N, mat.Z_T  # P and S mechanical impedances
+          bcs = [ BoundaryCondition(V, 'Dashpot', (Z_N, Z_T)) ]
+
+          # gaussian source term
+          F0     = fem.Constant(domain, PETSc.ScalarType([1,0]))  # polarization
+          R0     = 0.1  # radius
+          x0, y0 = length/2, height/2  # center
+          x      = ufl.SpatialCoordinate(domain)
+          gaussianBF = F0 * ufl.exp(-((x[0]-x0)**2 + (x[1]-y0)**2) /2 /R0**2) / (2 * 3.141596*R0**2)
+          bf         = BodyForce(V, gaussianBF)
+
+          # PDE
+          pde = PDE(V, materials=[mat], bodyforces=[bf], bcs=bcs)
+
+          # solve
+          fdsolver = FrequencyDomainSolver(V.mesh.comm, pde.M(), pde.C(), pde.K(), pde.b())
+          omega    = 1.0
+          u        = fem.Function(V, name='solution')
+          fdsolver.solve(omega=omega, out=u.vector)
     """
+
     default_petsc_options = {"ksp_type": "preonly", "pc_type": "lu"}  # "pc_factor_mat_solver_type": "mumps"
 
 
-    def __init__(self, comm:'_MPI.Comm', M:PETSc.Mat, C:PETSc.Mat, K:PETSc.Mat,
-                 b:PETSc.Vec, b_update_function:'function'=None, **kwargs):
-        """
-        Args:
-            comm: The MPI communicator
-            M: The mass matrix
-            C: The damping matrix
-            K: The stiffness matrix
-            b: The load vector
-            b_update_function: A function that updates the load vector (in-place)
-                The function must take b,omega as parameters.
-                e.g.: b_update_function = lambda b,omega: b[:]=omega
-                If set to None, the call is ignored.
-            kwargs:
-                petsc_options: Options that are passed to the linear
-                algebra backend PETSc. For available choices for the
-                'petsc_options' kwarg, see the `PETSc documentation
-                <https://petsc4py.readthedocs.io/en/stable/manual/ksp/>`_.
-        """
+    def __init__(self, comm: MPI.Comm, M: PETSc.Mat, C: PETSc.Mat, K: PETSc.Mat,
+                 b: PETSc.Vec, b_update_function: Callable=None, **kwargs):
         self._M = M
         self._C = C
         self._K = K
@@ -92,14 +104,19 @@ class FrequencyDomainSolver:
         # Set PETSc options
         opts = PETSc.Options()
         opts.prefixPush(problem_prefix)
+
         for k, v in petsc_options.items():
             opts[k] = v
+
         opts.prefixPop()
         self.solver.setFromOptions()
         #### ####
 
 
-    def solve(self, omega, out:PETSc.Vec=None, callbacks:list=[], **kwargs) -> PETSc.Vec:
+    def solve(self, omega: Union[float, np.ndarray],
+              out: PETSc.Vec=None,
+              callbacks: List[Callable]=[],
+              **kwargs) -> PETSc.Vec:
         """
         Solve the linear problem
 
@@ -109,8 +126,10 @@ class FrequencyDomainSolver:
                 None a new PETSc.Vec is created
             callbacks: If omega is an array, list of callback functions
                 to be called after each solve (e.g. plot, store solution, ...).
-            kwargs:
-                live_plotter: a plotter object that can refresh through
+                Ignored if omega is a scalar.
+
+        Keyword Args:
+            live_plotter: a plotter object that can refresh through
                 a live_plotter.live_plotter_update_function(i, out) function
 
         Returns:
@@ -126,7 +145,7 @@ class FrequencyDomainSolver:
             return self._solve_single_omega(omega, out)
 
 
-    def _solve_single_omega(self, omega, out:PETSc.Vec) -> PETSc.Vec:
+    def _solve_single_omega(self, omega: float, out: PETSc.Vec) -> PETSc.Vec:
         # Update load vector at angular frequency 'omega'
         if not(self._b_update_function is None):
             self._b_update_function(self._b, omega)
@@ -145,10 +164,13 @@ class FrequencyDomainSolver:
         return out
 
 
-    def _solve_multiple_omegas(self, omegas, out:PETSc.Vec, callbacks:list=[], **kwargs) -> PETSc.Vec:
+    def _solve_multiple_omegas(self, omegas: np.ndarray,
+                               out:PETSc.Vec,
+                               callbacks: List[Callable]=[], **kwargs) -> PETSc.Vec:
         # Loop on values in omegas -> _solve_single_omega
 
         live_plt = kwargs.get('live_plotter', None)
+
         if not(live_plt is None):
             if type(live_plt)==dict:
                 # from elastodynamicsx.plot import live_plotter

@@ -6,6 +6,8 @@
 
 #TODO: optimize SLEPc default options
 
+import typing
+
 from petsc4py import PETSc
 from slepc4py import SLEPc
 import ufl
@@ -20,43 +22,48 @@ from elastodynamicsx.solutions import ModalBasis
 #    https://slepc4py.readthedocs.io/en/stable/
 
 
-class EigenmodesSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue problem
+class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue problem
     """
-    Convenience class inhereted from SLEPc.EPS, with default parameters
-    and convenience methods that are relevant for computing the resonances
+    Convenience class inhereted from SLEPc.EPS, with methods and
+    default parameters that are relevant for computing the resonances
     of an elastic component.
 
-    Example of use (free resonances of an elastic cube):
+    Args:
+        comm: The MPI communicator
+        M: The mass matrix
+        C: The damping matrix. C=None means no dissipation. C!=None is not supported yet.
+        K: The stiffness matrix
 
-        from dolfinx import mesh, fem
-        from mpi4py import MPI
-        from elastodynamicsx.solvers import EigenmodesSolver
-        from elastodynamicsx.pde import material, PDE
-        #
-        domain = mesh.create_box(MPI.COMM_WORLD, [[0,0,0], [1,1,1]], [10,10,10])
-        V      = dolfinx.fem.VectorFunctionSpace(domain, ("CG", 1))
-        #
-        rho, lambda_, mu = 1, 2, 1
-        mat = material(V, rho, lambda_, mu)
-        pde = PDE(V, materials=[mat])
-        eps = EigenmodesSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=6+6) #the first 6 resonances are rigid body motion
-        eps.solve()
-        eps.plot(V)
-        freqs = eps.getEigenfrequencies()
-        print('First resonance frequencies:', freqs)
+    Keyword Args:
+        nev: The number of eigenvalues to be computed
+
+    Example:
+        .. highlight:: python
+        .. code-block:: python
+
+          # ###
+          # Free resonances of an elastic cube
+          # ###
+          from mpi4py import MPI
+          from dolfinx import mesh, fem
+          from elastodynamicsx.solvers import EigenmodesSolver
+          from elastodynamicsx.pde import material, PDE
+
+          domain = mesh.create_box(MPI.COMM_WORLD, [[0,0,0], [1,1,1]], [10,10,10])
+          V      = dolfinx.fem.VectorFunctionSpace(domain, ("CG", 1))
+
+          rho, lambda_, mu = 1, 2, 1
+          mat = material(V, rho, lambda_, mu)
+          pde = PDE(V, materials=[mat])
+          eps = EigenmodesSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=6+6)  # the first 6 resonances are rigid body motion
+          eps.solve()
+          eps.plot(V)
+          freqs = eps.getEigenfrequencies()
+          print('First resonance frequencies:', freqs)
     """
 
 
     def __init__(self, comm:'_MPI.Comm', M:PETSc.Mat, C:PETSc.Mat, K:PETSc.Mat, **kwargs):
-        """
-        Args:
-            comm: The MPI communicator
-            M: The mass matrix
-            C: The damping matrix. C=None means no dissipation. C!=None is not supported yet.
-            K: The stiffness matrix
-            kwargs:
-                nev: the number of eigenvalues to be computed
-        """
         super().__init__()
 
         if not(C is None):  # TODO
@@ -89,18 +96,21 @@ class EigenmodesSolver(SLEPc.EPS): #SLEPc.PEP for polynomial eigenvalue problem
         return self.getWn()/(2*np.pi)
 
 
-    def getEigenmodes(self, which='all'):
+    def getEigenmodes(self, which='all') -> typing.List[PETSc.Vec]:
         """
         Returns the desired modeshapes
-        
+
         Args:
             which: 'all', or an integer, or a list of integers, or a slice object
-        
-        Examples of use:
-            getEigenmodes()  #returns all computed eigenmodes
-            getEigenmodes(3) #returns mode number 4
-            getEigenmodes([3,5]) #returns modes number 4 and 6
-            getEigenmodes(slice(0,None,2)) #returns even modes
+
+        Example:
+            .. highlight:: python
+            .. code-block:: python
+
+              getEigenmodes()   # returns all computed eigenmodes
+              getEigenmodes(3)  # returns mode number 4
+              getEigenmodes([3,5])  # returns modes number 4 and 6
+              getEigenmodes(slice(0,None,2))  # returns even modes
         """
         K, M = self.getOperators()
         indexes = _slice_array(np.arange(self._getNout()), which)

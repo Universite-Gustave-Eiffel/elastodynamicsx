@@ -16,24 +16,25 @@ from elastodynamicsx.utils import get_functionspace_tags_marker
 class HyperelasticMaterial(Material):
     """
     Base class for hyperelastic materials
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        sigma: Stress function
+
+    Keyword Args:
+        **kwargs: see Material
     """
 
     def __init__(self, functionspace_tags_marker, rho, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            sigma: Stress function
-        kwargs:
-            see Material
-        """
+
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         nbcomps = function_space.element.num_sub_elements
 
         assert nbcomps>0, 'HyperelasticMaterial requires a vector function space'
 
         dim = function_space.mesh.geometry.dim
-        if dim == 1: #1D
+        if dim == 1:  # 1D
             if nbcomps == 2:
                 self.Grad = lambda u: ufl.as_matrix([ [u[0].dx(0),0], [u[1].dx(0),0] ])
             else:
@@ -58,13 +59,13 @@ class HyperelasticMaterial(Material):
 
     @property
     def k_DG(self) -> 'function':
-        """Stiffness form function for a Discontinuous Galerkin formulation"""
+        """**(Not implemented)** Stiffness form function for a Discontinuous Galerkin formulation"""
         raise NotImplementedError
 
 
     @property
     def DG_numerical_flux(self) -> 'function':
-        """Numerical flux for a Disontinuous Galerkin formulation"""
+        """**(Not implemented)** Numerical flux for a Disontinuous Galerkin formulation"""
         raise NotImplementedError
 
 
@@ -72,21 +73,33 @@ class HyperelasticMaterial(Material):
 class Murnaghan(HyperelasticMaterial):
     """
     Murnaghan's model
-    see: https://en.wikipedia.org/wiki/Acoustoelastic_effect
+
+    Strain energy density:
+        .. math::
+          W = \\frac{\lambda}{2} \mathrm{tr}(\mathbf{E})^2 + \mu \mathrm{tr}(\mathbf{E}^2)
+              + \\frac{A}{3} \mathrm{tr}(\mathbf{E}^3)
+              + B \mathrm{tr}(\mathbf{E}) \mathrm{tr}(\mathbf{E}^2)
+              + \\frac{C}{3} \mathrm{tr}(\mathbf{E})^3
+
+        with: :math:`l=B+C`, :math:`m=\\frac{1}{2}A+B`, :math:`n=A`.
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        lambda_: Lame's first parameter
+        mu: Lame's second parameter (shear modulus)
+        l, m, n: Murnaghan's third order elastic constant
+
+    Keyword Args:
+        **kwargs: Passed to HyperelasticMaterial
+
+    See:
+        https://en.wikipedia.org/wiki/Acoustoelastic_effect
     """
     labels = ['murnaghan']
 
 
     def __init__(self, functionspace_tags_marker, rho, lambda_, mu, l, m, n, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            lambda_: Lame's first parameter
-            mu: Lame's second parameter (shear modulus)
-            l, m, n: Murnaghan's third order elastic constants
-            kwargs: Passed to HyperelasticMaterial
-        """
 
         self._lambda = lambda_
         self._mu     = mu
@@ -127,13 +140,13 @@ class Murnaghan(HyperelasticMaterial):
         
     @property
     def Z_N(self):
-        """(WARNING: infinitesimal strain asymptotics) P-wave mechanical impedance: rho*c_L"""
+        """**(WARNING, infinitesimal strain asymptotics)** P-wave mechanical impedance :math:`\\rho c_L`"""
         return ufl.sqrt(self.rho*(self._lambda + 2*self._mu))
 
 
     @property
     def Z_T(self):
-        """(WARNING: infinitesimal strain asymptotics) S-wave mechanical impedance: rho*c_S"""
+        """**(WARNING, infinitesimal strain asymptotics)** S-wave mechanical impedance :math:`\\rho c_S`"""
         return ufl.sqrt(self.rho*self._mu)
 
 
@@ -142,20 +155,20 @@ class DummyIsotropicMaterial(HyperelasticMaterial):
     """
     A dummy implementation of an isotropic linear elastic material
     based on a HyperelasticMaterial
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        lambda_: Lame's first parameter
+        mu: Lame's second parameter (shear modulus)
+
+    Keyword Args:
+        **kwargs: Passed to HyperelasticMaterial
     """
     labels = ['dummy-isotropic']
 
 
     def __init__(self, functionspace_tags_marker, rho, lambda_, mu, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            lambda_: Lame's first parameter
-            mu: Lame's second parameter (shear modulus)
-        kwargs:
-            Passed to HyperelasticMaterial
-        """
 
         self._lambda = lambda_
         self._mu     = mu
@@ -177,13 +190,13 @@ class DummyIsotropicMaterial(HyperelasticMaterial):
 
     @property
     def Z_N(self):
-        """P-wave mechanical impedance: rho*c_L"""
+        """P-wave mechanical impedance :math:`\\rho c_L`"""
         return ufl.sqrt(self.rho*(self._lambda + 2*self._mu))
 
 
     @property
     def Z_T(self):
-        """S-wave mechanical impedance: rho*c_S"""
+        """S-wave mechanical impedance :math:`\\rho c_S`"""
         return ufl.sqrt(self.rho*self._mu)
 
 
@@ -191,22 +204,27 @@ class DummyIsotropicMaterial(HyperelasticMaterial):
 class StVenantKirchhoff(HyperelasticMaterial):
     """
     Saint Venant-Kirchhoff model
-    see: https://en.wikipedia.org/wiki/Hyperelastic_material
+
+    Strain energy density:
+        .. math::
+          W = \\frac{\lambda}{2} \mathrm{tr}(\mathbf{E})^2 + \mu \mathrm{tr}(\mathbf{E}^2)
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        lambda_: Lame's first parameter
+        mu: Lame's second parameter (shear modulus)
+
+    Keyword Args:
+        **kwargs: Passed to HyperelasticMaterial
+
+    See:
+        https://en.wikipedia.org/wiki/Hyperelastic_material
     """
     labels = ['stvenant-kirchhoff', 'saintvenant-kirchhoff']
 
 
     def __init__(self, functionspace_tags_marker, rho, lambda_, mu, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            lambda_: Lame's first parameter
-            mu: Lame's second parameter (shear modulus)
-        kwargs:
-            Passed to HyperelasticMaterial
-        """
-
         self._lambda = lambda_
         self._mu     = mu
 
@@ -238,34 +256,40 @@ class StVenantKirchhoff(HyperelasticMaterial):
 
     @property
     def Z_N(self):
-        """(WARNING: infinitesimal strain asymptotics) P-wave mechanical impedance: rho*c_L"""
+        """**(WARNING, infinitesimal strain asymptotics)** P-wave mechanical impedance :math:`\\rho c_L`"""
         return ufl.sqrt(self.rho*(self._lambda + 2*self._mu))
 
 
     @property
     def Z_T(self):
-        """(WARNING: infinitesimal strain asymptotics) S-wave mechanical impedance: rho*c_S"""
+        """**(WARNING, infinitesimal strain asymptotics)** S-wave mechanical impedance :math:`\\rho c_S`"""
         return ufl.sqrt(self.rho*self._mu)
 
 
 class MooneyRivlinIncompressible(HyperelasticMaterial):
     """
     Mooney-Rivlin model for an incompressible solid
-    see: https://en.wikipedia.org/wiki/Mooney%E2%80%93Rivlin_solid
+    
+    Strain energy density:
+        .. math::
+          W = C_1 (\overline{I}_1 - 3) + C_2 (\overline{I}_2 - 3)
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        C1: first parameter
+        C2: second parameter
+
+    Keyword Args:
+        **kwargs: Passed to HyperelasticMaterial
+
+    See:
+        https://en.wikipedia.org/wiki/Mooney%E2%80%93Rivlin_solid
     """
     labels = ['mooney-rivlin-incomp']
 
 
     def __init__(self, functionspace_tags_marker, rho, C1, C2, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            C1: first parameter
-            C2: second parameter
-        kwargs:
-            Passed to HyperelasticMaterial
-        """
 
         self._C1 = C1
         self._C2 = C2
@@ -314,23 +338,28 @@ class MooneyRivlinIncompressible(HyperelasticMaterial):
 class MooneyRivlinCompressible(HyperelasticMaterial):
     """
     Mooney-Rivlin model for a compressible solid
-    see: https://en.wikipedia.org/wiki/Mooney%E2%80%93Rivlin_solid
+
+    Strain energy density:
+        .. math::
+          W = C_{10} (\overline{I}_1 - 3) + C_{01} (\overline{I}_2 - 3) + \\frac{1}{D_1} (J - 1)^2
+
+    Args:
+        functionspace_tags_marker: See Material
+        rho: Density
+        C10: First parameter
+        C01: Second parameter
+        D1: Third parameter
+
+    Keyword Args:
+        **kwargs: Passed to HyperelasticMaterial
+
+    See:
+        https://en.wikipedia.org/wiki/Mooney%E2%80%93Rivlin_solid
     """
     labels = ['mooney-rivlin-comp']
 
 
     def __init__(self, functionspace_tags_marker, rho, C10, C01, D1, **kwargs):
-        """
-        Args:
-            functionspace_tags_marker: See Material
-            rho: Density
-            C10: first parameter
-            C01: second parameter
-            D1 : third parameter
-        kwargs:
-            Passed to HyperelasticMaterial
-        """
-
         self._C10 = C10
         self._C01 = C01
         self._D1  = D1

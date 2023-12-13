@@ -4,6 +4,26 @@
 #
 # SPDX-License-Identifier: MIT
 
+"""
+.. role:: python(code)
+  :language: python
+
+The *timeschemes* module contains tools to construct the weak form of a time-dependent
+problem. Several implicit and explicit schemes are supported. The preferred way to use
+this module is however through the :python:`elastodynamicsx.solvers.timestepper` function.
+
+List of supported schemes:
+    Explicit schemes:
+        - 'leapfrog'
+
+    Implicit schemes:
+        - 'midpoint'
+        - 'linear-acceleration-method'
+        - 'newmark'
+        - 'hht-alpha'
+        - 'generalized-alpha'
+"""
+
 from .timescheme import *
 from .leapfrog import *
 from .newmark import *

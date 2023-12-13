@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""Tools to access and post-process solutions"""
+"""The *solutions* module contains tools to access and post-process solutions"""
 
 from .modalbasis import *
 

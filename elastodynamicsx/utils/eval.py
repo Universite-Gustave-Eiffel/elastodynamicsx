@@ -21,26 +21,30 @@ class ParallelEvaluator:
         points: shape=(3, nbpts). Should be defined either for all processes,
             or for the proc no 0. Does not support 'points' being scattered on
             several processes.
+        padding: close-to-zero parameter used in dolfinx.cpp.geometry.determine_point_ownership
 
-    Example of use:
-        # Define some output points
-        x = np.linspace(0, 1, num=30)
-        y = np.zeros_like(x)
-        z = np.zeros_like(x)
-        points = np.array([x, y, z])
-        
-        # Initialize the evaluator
-        paraEval = ParallelEvaluator(domain, points)
-        
-        # Perform function evaluations
-        u_eval_local = u.eval(paraEval.points_local, paraEval.cells_local)
-        
-        # Gather all procs
-        u_eval = paraEval.gather(u_eval_local, root=0)
-        
-        # Do something, e.g. export to file
-        if domain.comm.rank == 0:
-            np.savez('u_eval.npz', x=points.T, u=u_eval)
+    Example:
+        .. highlight:: python
+        .. code-block:: python
+
+          # Define some output points
+          x = np.linspace(0, 1, num=30)
+          y = np.zeros_like(x)
+          z = np.zeros_like(x)
+          points = np.array([x, y, z])
+
+          # Initialize the evaluator
+          paraEval = ParallelEvaluator(domain, points)
+
+          # Perform function evaluations
+          u_eval_local = u.eval(paraEval.points_local, paraEval.cells_local)
+
+          # Gather all procs
+          u_eval = paraEval.gather(u_eval_local, root=0)
+
+          # Do something, e.g. export to file
+          if domain.comm.rank == 0:
+              np.savez('u_eval.npz', x=points.T, u=u_eval)
 
     Adapted from:
         https://github.com/jorgensd/dolfinx-tutorial/issues/116

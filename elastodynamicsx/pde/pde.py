@@ -4,6 +4,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+import typing
+
 from petsc4py import PETSc
 import numpy as np
 from dolfinx import fem, default_scalar_type
@@ -19,7 +21,6 @@ from elastodynamicsx.utils import get_functionspace_tags_marker
 from . import BoundaryCondition
 
 
-
 class PDE():
     """
     Representation of a PDE of the kind:
@@ -27,7 +28,17 @@ class PDE():
         M*a + C*v + K(u) = b
         + Boundary conditions
 
-    as an assembly of materials, forces and bcs defined over different subdomains
+    as an assembly of materials, forces and bcs defined over different subdomains.
+
+    Args:
+        functions_space
+        materials: a list of pde.Material instances
+
+    Keyword Args:
+        bodyforces: (default=[]) a list of pde.BodyForce instances
+        bcs: (default=[]) a list of fem.DirichletBCMetaClass and/or pde.BoundaryCondition instances
+        jit_options: (default=PDE.default_jit_options) options for the just-in-time compiler
+        finalize: (default=True) call self.finalize() on build
     """
 
     ### ### ### ###
@@ -81,22 +92,14 @@ class PDE():
     ### non-static  ###
     ### ### ### ### ###
 
-    def __init__(self, function_space:'dolfinx.fem.FunctionSpace', materials:list, **kwargs):
-        """
-        Args:
-            functions_space
-            materials: a list of pde.Material instances
-        kwargs:
-            bodyforces: (default=[]) a list of pde.BodyForce instances
-            bcs: (default=[]) a list of fem.DirichletBCMetaClass and/or pde.BoundaryCondition instances
-            jit_options: (default=PDE.default_jit_options) options for the just-in-time compiler
-        """
+    def __init__(self, function_space:'dolfinx.fem.FunctionSpace', materials:typing.List['Material'], **kwargs):
         self._function_space = function_space
         self.materials = materials
         self.bodyforces= kwargs.get('bodyforces', [])
         self.bcs = kwargs.get('bcs', [])
         self.jit_options = kwargs.get('jit_options', PDE.default_jit_options)
-        self._u, self._v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
+        self._u = ufl.TrialFunction(function_space)
+        self._v = ufl.TestFunction(function_space)
 
         # Declare stuff without building
         self._mpc = None
@@ -137,6 +140,9 @@ class PDE():
 ### ### ### ### ### ### ### ### ### ###
 
     def finalize(self) -> None:
+        """
+        Finalize dolfinx-mpc objects
+        """
         self._build_mpc()
         if self._mpc is None:
             self.update_b_frequencydomain = self._update_b_frequencydomain_WO_MPC
@@ -248,13 +254,13 @@ class PDE():
 ### ### ### ### ### ### ### ### ### ### ###
 
     @property
-    def m(self) -> 'function':
+    def m(self) -> typing.Callable:
         """(bilinear) Mass form function"""
         return lambda u,v: sum([mat.m(u,v) for mat in self.materials])
 
 
     @property
-    def c(self) -> 'function':
+    def c(self) -> typing.Callable:
         """(bilinear) Damping form function"""
         non0dampings = [mat.c for mat in self.materials if not(mat.c) is None]
         if len(non0dampings)==0:
@@ -264,49 +270,49 @@ class PDE():
 
 
     @property
-    def k(self) -> 'function':
+    def k(self) -> typing.Callable:
         """(bilinear) Stiffness form function"""
         return lambda u,v: sum([mat.k(u,v) for mat in self.materials])
 
 
     @property
-    def k1(self) -> 'function':
+    def k1(self) -> typing.Callable:
         """(bilinear) k1 stiffness form function (waveguide problems)"""
         return lambda u,v: sum([mat.k1_CG(u,v) for mat in self.materials])
 
 
     @property
-    def k2(self) -> 'function':
+    def k2(self) -> typing.Callable:
         """(bilinear) k2 stiffness form function (waveguide problems)"""
         return lambda u,v: sum([mat.k2_CG(u,v) for mat in self.materials])
 
 
     @property
-    def k3(self) -> 'function':
+    def k3(self) -> typing.Callable:
         """(bilinear) k3 stiffness form function (waveguide problems)"""
         return lambda u,v: sum([mat.k3_CG(u,v) for mat in self.materials])
 
 
     @property
-    def k_CG(self) -> 'function':
+    def k_CG(self) -> typing.Callable:
         """(bilinear) Stiffness form function (Continuous Galerkin)"""
         return lambda u,v: sum([mat.k_CG(u,v) for mat in self.materials])
 
 
     @property
-    def k_DG(self) -> 'function':
+    def k_DG(self) -> typing.Callable:
         """(bilinear) Stiffness form function (Discontinuous Galerkin)"""
         return lambda u,v: sum([mat.k_DG(u,v) for mat in self.materials])
 
 
     @property
-    def DG_numerical_flux(self) -> 'function':
+    def DG_numerical_flux(self) -> typing.Callable:
         """(bilinear) Numerical flux form function (Disontinuous Galerkin)"""
         return lambda u,v: sum([mat.DG_numerical_flux(u,v) for mat in self.materials])
 
 
     @property
-    def L(self) -> 'function':
+    def L(self) -> typing.Callable:
         """Linear form function"""
         if len(self.bodyforces)==0:
             return None
