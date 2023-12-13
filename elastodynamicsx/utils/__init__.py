@@ -6,6 +6,8 @@
 
 """The *utils* module contains various tools that do not fit into the other packages"""
 
+# flake8: noqa
+
 from .tags import *
 from .eval import *
 from .spectralelements import *

@@ -4,18 +4,18 @@
 #
 # SPDX-License-Identifier: MIT
 
+from mpi4py import MPI
+
 import numpy as np
 from dolfinx.mesh import Mesh
 from dolfinx.cpp.geometry import determine_point_ownership
-
-from typing import Tuple
 
 
 class ParallelEvaluator:
     """
     Convenience class to evaluate functions (fem.Function) when the mesh is
     distributed over several processes
-    
+
     Args:
         domain: a distributed mesh (MPI.COMM_WORLD)
         points: shape=(3, nbpts). Should be defined either for all processes,
@@ -49,21 +49,22 @@ class ParallelEvaluator:
     Adapted from:
         https://github.com/jorgensd/dolfinx-tutorial/issues/116
     """
-    def __init__(self, domain: Mesh, points: np.ndarray, padding: float=1.e-4):
+    def __init__(self, domain: Mesh, points: np.ndarray, padding: float = 1.e-4):
         if domain.comm.rank == 0:
             pass
         else:
             # Only add points on one process
             points = np.zeros((3, 0))
 
-        src_owner, dest_owner, dest_points, dest_cells = determine_point_ownership(domain._cpp_object, points.T, padding)
+        src_owner, dest_owner, dest_points, dest_cells = \
+            determine_point_ownership(domain._cpp_object, points.T, padding)
 
-        self.comm         = domain.comm
-        self.points       = points
-        self.src_owner    = src_owner
-        self.dest_owner   = dest_owner
-        self.points_local = np.array(dest_points).reshape(len(dest_points)//3, 3)
-        self.cells_local  = dest_cells
+        self.comm: MPI.comm = domain.comm
+        self.points: np.ndarray = points
+        self.src_owner = src_owner
+        self.dest_owner = dest_owner
+        self.points_local: np.ndarray = np.array(dest_points).reshape(len(dest_points)//3, 3)
+        self.cells_local = dest_cells
 
     @property
     def nb_points_local(self) -> int:
@@ -77,11 +78,9 @@ class ParallelEvaluator:
             recv_eval = np.concatenate(recv_eval, axis=0)
             # re-order
             recv_indx = np.argsort(np.asarray(self.src_owner) + np.linspace(0, 0.1, num=len(self.src_owner)))
-            out_eval  = np.empty(recv_eval.shape, dtype=recv_eval.dtype)
+            out_eval = np.empty(recv_eval.shape, dtype=recv_eval.dtype)
             out_eval[recv_indx] = recv_eval
         else:
             out_eval = None
 
         return out_eval
-
-
