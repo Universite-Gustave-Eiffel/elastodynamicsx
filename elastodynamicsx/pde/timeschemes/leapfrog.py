@@ -11,9 +11,9 @@ from petsc4py import PETSc
 from dolfinx import fem
 import ufl
 
-from . import FEniCSxTimeScheme
+from .timescheme import FEniCSxTimeScheme
 from elastodynamicsx.solvers import TimeStepper, OneStepTimeStepper
-from elastodynamicsx.pde import BoundaryCondition, default_jit_options, build_mpc
+from elastodynamicsx.pde import BoundaryCondition, PDECONFIG, build_mpc
 
 
 class LeapFrog(FEniCSxTimeScheme):
@@ -53,7 +53,7 @@ class LeapFrog(FEniCSxTimeScheme):
         bcs: The set of boundary conditions
 
     Keyword Args:
-        jit_options: (default=pde.default_jit_options) options for the just-in-time compiler
+        jit_options: (default=PDECONFIG.default_jit_options) options for the just-in-time compiler
 
     See:
         https://en.wikipedia.org/wiki/Leapfrog_integration
@@ -61,7 +61,7 @@ class LeapFrog(FEniCSxTimeScheme):
 
     labels = ['leapfrog', 'central-difference']
 
-    def build_timestepper(*args, **kwargs) -> 'TimeStepper':
+    def build_timestepper(*args, **kwargs) -> TimeStepper:
         tscheme = LeapFrog(*args, **kwargs)
         comm = tscheme.u.function_space.mesh.comm
         return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
@@ -75,7 +75,7 @@ class LeapFrog(FEniCSxTimeScheme):
                  bcs: List[BoundaryCondition] = [],
                  **kwargs):
 
-        self.jit_options = kwargs.get('jit_options', default_jit_options)
+        self.jit_options = kwargs.get('jit_options', PDECONFIG.default_jit_options)
         dt_ = fem.Constant(function_space.mesh, PETSc.ScalarType(dt))
 
         u, v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)

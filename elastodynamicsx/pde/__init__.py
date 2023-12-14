@@ -58,7 +58,7 @@ Getting the forms:
       # Use as:
       # u = ufl.TrialFunction(function_space)
       # v = ufl.TestFunction(function_space)
-      # m_ufl = m(u,v)
+      # m_ufl = m(u, v)
 
       # Compiled dolfinx forms
       m_form = pde.m_form
@@ -67,19 +67,15 @@ Getting the forms:
       M = pde.M()
 """
 
-from .common import default_metadata, default_jit_options
-from .boundarycondition import *
-from .pde import *
-from .materials import *
-from .bodyforce import *
-from .timeschemes import *
-
-# from . import boundarycondition
-# from . import bodyforce
-# from . import timeschemes
-# from . import pde
-# from . import materials
+from .common import PDECONFIG
+from .buildmpc import build_mpc
+from .boundarycondition import BoundaryCondition
+from .bodyforce import BodyForce
+from .pde import PDE
+from .materials import material, damping
+from . import materials
+from . import timeschemes
 
 
-#__all__ = ["bodyforce", "boundarycondition", "materials", "pde", "timeschemes",
-#           "default_metadata", "build_mpc"]
+__all__ = ["BodyForce", "BoundaryCondition", "material", "damping", "PDE", "PDECONFIG",
+           "build_mpc", "materials", "timeschemes"]

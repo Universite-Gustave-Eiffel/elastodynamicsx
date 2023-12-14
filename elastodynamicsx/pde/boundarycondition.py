@@ -12,8 +12,8 @@ import numpy as np
 from dolfinx import fem, default_scalar_type
 import ufl
 
+from .common import PDECONFIG
 from elastodynamicsx.utils import get_functionspace_tags_marker
-from . import default_metadata
 
 
 class BoundaryCondition:
@@ -164,7 +164,7 @@ class BoundaryCondition:
 
         self._type = type_
         self._values = values
-        md = kwargs.get('metadata', default_metadata)
+        md = kwargs.get('metadata', PDECONFIG.default_metadata)
         ds = ufl.Measure("ds",
                          domain=function_space.mesh,
                          subdomain_data=facet_tags,

@@ -9,7 +9,7 @@ import typing
 import ufl
 
 from elastodynamicsx.utils import get_functionspace_tags_marker
-from elastodynamicsx.pde import default_metadata  # PDE
+from elastodynamicsx.pde import PDECONFIG
 
 
 class Material:
@@ -32,7 +32,7 @@ class Material:
 
     Keyword Args:
         metadata: (default=None) The metadata used by the ufl measures (dx, dS).
-            If set to :python:`None`, uses the :python:`PDE.default_metadata`
+            If set to :python:`None`, uses the :python:`PDECONFIG.default_metadata`
     """
 
     # ## --------------------------
@@ -52,7 +52,7 @@ class Material:
         function_space, cell_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
 
         domain = function_space.mesh
-        md = kwargs.get('metadata', default_metadata)
+        md = kwargs.get('metadata', PDECONFIG.default_metadata)
         # also valid if cell_tags or marker are None
         self._dx = ufl.Measure("dx", domain=domain, subdomain_data=cell_tags, metadata=md)(marker)
         self._dS = ufl.Measure("dS", domain=domain, subdomain_data=cell_tags, metadata=md)(marker)

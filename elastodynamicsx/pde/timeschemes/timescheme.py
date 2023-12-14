@@ -19,6 +19,8 @@ except ImportError:
     dolfinx_mpc = None
     MultiPointConstraint = None
 
+from elastodynamicsx.solvers import TimeStepper
+
 
 class TimeScheme():
     """
@@ -30,7 +32,7 @@ class TimeScheme():
 
     labels: typing.List[str] = ['supercharge me']
 
-    def build_timestepper(*args, **kwargs) -> 'TimeStepper':  # supercharge me
+    def build_timestepper(*args, **kwargs) -> TimeStepper:  # supercharge me
         raise NotImplementedError
 
     def __init__(self, dt, out: PETSc.Vec, **kwargs):

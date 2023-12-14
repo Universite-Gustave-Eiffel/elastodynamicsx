@@ -70,7 +70,7 @@ class TimeStepper:
                 'linear-acceleration-method', 'newmark', 'hht-alpha', 'generalized-alpha'
             **kwargs: (passed to the required scheme)
         """
-        from elastodynamicsx.pde import all_timeschemes
+        from elastodynamicsx.pde.timeschemes import all_timeschemes
 
         scheme = kwargs.pop('scheme', 'unknown')
         allSchemes = all_timeschemes

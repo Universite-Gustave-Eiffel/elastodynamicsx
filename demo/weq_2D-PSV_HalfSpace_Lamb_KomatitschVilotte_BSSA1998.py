@@ -24,7 +24,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde     import material, BoundaryCondition, PDE
+from elastodynamicsx.pde     import material, BoundaryCondition, PDE, PDECONFIG
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot    import plotter
 from elastodynamicsx.utils   import spectral_element, spectral_quadrature, ParallelEvaluator
@@ -38,8 +38,8 @@ from models.model_Lamb_KomatitschVilotte_BSSA1998 import create_model
 # Set up a Spectral Element Method
 degElement, nameElement = 8, "GLL"
 cell_type = mesh.CellType.quadrilateral
-specFE               = spectral_element(nameElement, cell_type, degElement, (2,))
-PDE.default_metadata = spectral_quadrature(nameElement, degElement)
+specFE = spectral_element(nameElement, cell_type, degElement, (2,))
+PDECONFIG.default_metadata = spectral_quadrature(nameElement, degElement)
 
 # Create a GMSH model
 sizefactor = 0.5

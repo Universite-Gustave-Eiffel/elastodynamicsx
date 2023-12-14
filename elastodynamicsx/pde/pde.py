@@ -19,12 +19,13 @@ except ImportError:
     warnings.warn("Can't import dolfinx_mpc. Periodic boundaries are not available", Warning)
     dolfinx_mpc = None
 
-from . import BoundaryCondition, default_jit_options
-from .materials import Material
 from .buildmpc import build_mpc
+from .common import PDECONFIG
+from .boundarycondition import BoundaryCondition
+from .materials import Material
 
 
-class PDE():
+class PDE:
     """
     Representation of a PDE of the kind:
 
@@ -40,7 +41,7 @@ class PDE():
     Keyword Args:
         bodyforces: (default=[]) a list of pde.BodyForce instances
         bcs: (default=[]) a list of fem.DirichletBCMetaClass and/or pde.BoundaryCondition instances
-        jit_options: (default=pde.default_jit_options) options for the just-in-time compiler
+        jit_options: (default=PDECONFIG.default_jit_options) options for the just-in-time compiler
         finalize: (default=True) call self.finalize() on build
     """
 
@@ -49,7 +50,7 @@ class PDE():
         self.materials = materials
         self.bodyforces = kwargs.get('bodyforces', [])
         self.bcs = kwargs.get('bcs', [])
-        self.jit_options = kwargs.get('jit_options', default_jit_options)
+        self.jit_options = kwargs.get('jit_options', PDECONFIG.default_jit_options)
         self._u = ufl.TrialFunction(function_space)
         self._v = ufl.TestFunction(function_space)
 

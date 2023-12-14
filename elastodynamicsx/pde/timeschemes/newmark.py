@@ -11,9 +11,9 @@ from petsc4py import PETSc
 from dolfinx import fem
 import ufl
 
-from . import FEniCSxTimeScheme
+from .timescheme import FEniCSxTimeScheme
 from elastodynamicsx.solvers import TimeStepper, NonlinearTimeStepper, OneStepTimeStepper
-from elastodynamicsx.pde import BoundaryCondition, default_jit_options, build_mpc
+from elastodynamicsx.pde import BoundaryCondition, PDECONFIG, build_mpc
 
 
 class GalphaNewmarkBeta(FEniCSxTimeScheme):
@@ -64,7 +64,7 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
         beta (default = 1/4*(gamma+1/2)**2): Unconditionnal stability
             if :math:`\\beta \geq 0.25 + 0.5 (\\alpha_f - \\alpha_m)`
 
-        jit_options (default=pde.default_jit_options): Options for the just-in-time compiler
+        jit_options (default=PDECONFIG.default_jit_options): Options for the just-in-time compiler
 
     Reference:
         J. Chung and G. M. Hulbert, "A time integration algorithm for structural
@@ -92,7 +92,7 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
                  dt,
                  bcs: List[BoundaryCondition] = [], **kwargs):
 
-        self.jit_options = kwargs.get('jit_options', default_jit_options)
+        self.jit_options = kwargs.get('jit_options', PDECONFIG.default_jit_options)
         rho_inf = kwargs.get('rho_inf', 0.75)
         alpha_m = (2 * rho_inf - 1) / (rho_inf + 1)
         alpha_f = rho_inf / (rho_inf + 1)
