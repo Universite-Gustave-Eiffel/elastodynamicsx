@@ -14,8 +14,10 @@ from dolfinx import fem
 
 try:
     import dolfinx_mpc
+    from dolfinx_mpc import MultiPointConstraint
 except ImportError:
     dolfinx_mpc = None
+    MultiPointConstraint = None
 
 
 class TimeScheme():
@@ -27,48 +29,48 @@ class TimeScheme():
     """
 
     labels: typing.List[str] = ['supercharge me']
-    
+
     def build_timestepper(*args, **kwargs) -> 'TimeStepper':  # supercharge me
         raise NotImplementedError
-    
-    def __init__(self, dt, out:PETSc.Vec, **kwargs):
+
+    def __init__(self, dt, out: PETSc.Vec, **kwargs):
         self._dt = dt
-        self._out = out
-        self._explicit = kwargs.get('explicit', False)
-        self._intermediate_dt = kwargs.get('intermediate_dt', 0.)
+        self._out: PETSc.Vec = out
+        self._explicit: bool = kwargs.get('explicit', False)
+        self._intermediate_dt: float = kwargs.get('intermediate_dt', 0.)
 
     @property
     def explicit(self) -> bool:
         return self._explicit
-        
+
     @property
     def dt(self):
         """The time step"""
         return self._dt
-    
+
     @property
     def intermediate_dt(self):
         return self._intermediate_dt
-        
+
     @property
     def out(self) -> PETSc.Vec:
         """The solution vector"""
         return self._out
-        
-    def b_update_function(self, b:PETSc.Vec, t) -> None:  # supercharge me
+
+    def b_update_function(self, b: PETSc.Vec, t) -> None:  # supercharge me
         raise NotImplementedError
-    
+
     def prepareNextIteration(self) -> None:  # supercharge me
         raise NotImplementedError
 
     def set_initial_condition(self, u0, v0) -> None:  # supercharge me
         raise NotImplementedError
-    
+
     def initialStep(self,
                     t0,
-                    callfirsts: typing.List[typing.Callable]=[],
-                    callbacks: typing.List[typing.Callable]=[],
-                    verbose: int=0) -> None:  # supercharge me
+                    callfirsts: typing.List[typing.Callable] = [],
+                    callbacks: typing.List[typing.Callable] = [],
+                    verbose: int = 0) -> None:  # supercharge me
         """Specific to the initial value step"""
         raise NotImplementedError
 
@@ -76,19 +78,19 @@ class TimeScheme():
 class FEniCSxTimeScheme(TimeScheme):
     """Abstract base class based on FEniCSx's form language"""
 
-    def __init__(self, dt, out:fem.Function,
-                 bilinear_form:'dolfinx.fem.forms.Form',
-                 linear_form:'dolfinx.fem.forms.Form',
-                 mpc:'dolfinx_mpc.MultiPointConstraint'=None,
+    def __init__(self, dt, out: fem.Function,
+                 bilinear_form: fem.forms.Form,
+                 linear_form: fem.forms.Form,
+                 mpc: MultiPointConstraint = None,
                  bcs=[],
                  **kwargs):
         super().__init__(dt, out.vector, **kwargs)
         self._bilinear_form = bilinear_form
-        self._linear_form   = linear_form
-        self._mpc           = mpc
-        self._bcs           = bcs # dirichlet BCs only
-        self._out_fenicsx   = out
-        #
+        self._linear_form = linear_form
+        self._mpc = mpc
+        self._bcs = bcs  # dirichlet BCs only
+        self._out_fenicsx = out
+
         if self._mpc is None:
             self.b_update_function = self._b_update_function_WO_MPC
         else:
@@ -115,9 +117,9 @@ class FEniCSxTimeScheme(TimeScheme):
         else:
             return dolfinx_mpc.assemble_vector(self._linear_form, self._mpc)
 
-    # def b_update_function(self, b:PETSc.Vec, t) -> None:  # NOW SET TO EITHER METHOD BELOW IN __init__
+    # def b_update_function(self, b: PETSc.Vec, t) -> None:  # NOW SET TO EITHER METHOD BELOW IN __init__
 
-    def _b_update_function_WO_MPC(self, b:PETSc.Vec, t) -> None:  # TODO: use t?
+    def _b_update_function_WO_MPC(self, b: PETSc.Vec, t) -> None:  # TODO: use t?
         """Updates the b vector (in-place) for a given time t"""
         with b.localForm() as loc_b:
             loc_b.set(0)
@@ -134,8 +136,7 @@ class FEniCSxTimeScheme(TimeScheme):
         # apply BC value
         fem.petsc.set_bc(b, self._bcs)
 
-
-    def _b_update_function_WITH_MPC(self, b:PETSc.Vec, t) -> None:  # TODO: use t?
+    def _b_update_function_WITH_MPC(self, b: PETSc.Vec, t) -> None:  # TODO: use t?
         """Updates the b vector (in-place) for a given time t"""
         with b.localForm() as loc_b:
             loc_b.set(0)
@@ -151,7 +152,6 @@ class FEniCSxTimeScheme(TimeScheme):
 
         # apply BC value
         fem.petsc.set_bc(b, self._bcs)  # not modified by dolfinx_mpc
-
 
     def set_initial_condition(self, u0, v0) -> None:
         """
@@ -179,15 +179,15 @@ class FEniCSxTimeScheme(TimeScheme):
                     -> e.g. :python:`u0 = fem.Function(V)`
         """
         for selfVal, val in ((self._u0, u0), (self._v0, v0)):
-            if   type(val) == type(lambda x:x):
+            if callable(val):
                 selfVal.interpolate(val)
             elif issubclass(type(val), fem.function.Constant):
-                selfVal.x.array[:] = np.tile(val.value, np.size(selfVal.x.array)//np.size(val.value))
+                selfVal.x.array[:] = np.tile(val.value, np.size(selfVal.x.array) // np.size(val.value))
             elif type(val) in (list, tuple, np.ndarray):
-                selfVal.x.array[:] = np.tile(val, np.size(selfVal.x.array)//np.size(val))
+                selfVal.x.array[:] = np.tile(val, np.size(selfVal.x.array) // np.size(val))
             elif type(val) in (int, float, complex, PETSc.ScalarType):
                 selfVal.x.array[:] = val
             elif issubclass(type(val), fem.function.Function):
                 selfVal.x.array[:] = val.x.array
             else:
-                raise TypeError("Unknown type of initial value "+str(type(val)))
+                raise TypeError("Unknown type of initial value " + str(type(val)))

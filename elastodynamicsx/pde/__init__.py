@@ -68,8 +68,17 @@ Getting the forms:
 """
 
 from .boundarycondition import *
-
 from .pde import *
 from .materials import *
 from .bodyforce import *
 from .timeschemes import *
+
+# from . import boundarycondition
+# from . import bodyforce
+# from . import timeschemes
+# from . import pde
+# from . import materials
+
+
+#__all__ = ["bodyforce", "boundarycondition", "materials", "pde", "timeschemes",
+#           "default_metadata", "build_mpc"]

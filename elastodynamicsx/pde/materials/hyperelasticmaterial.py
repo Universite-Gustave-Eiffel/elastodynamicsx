@@ -4,6 +4,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+from typing import Callable
+
 import ufl
 
 from .material import Material
@@ -27,47 +29,41 @@ class HyperelasticMaterial(Material):
     """
 
     def __init__(self, functionspace_tags_marker, rho, **kwargs):
-
         function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
         nbcomps = function_space.element.num_sub_elements
 
-        assert nbcomps>0, 'HyperelasticMaterial requires a vector function space'
+        assert nbcomps > 0, 'HyperelasticMaterial requires a vector function space'
 
         dim = function_space.mesh.geometry.dim
         if dim == 1:  # 1D
             if nbcomps == 2:
-                self.Grad = lambda u: ufl.as_matrix([ [u[0].dx(0),0], [u[1].dx(0),0] ])
+                self.Grad = lambda u: ufl.as_matrix([[u[0].dx(0), 0], [u[1].dx(0), 0]])
             else:
-                self.Grad = lambda u: ufl.as_matrix([ [u[0].dx(0),0,0], [u[1].dx(0),0,0], [u[2].dx(0),0,0] ])
+                self.Grad = lambda u: ufl.as_matrix([[u[0].dx(0), 0, 0], [u[1].dx(0), 0, 0], [u[2].dx(0), 0, 0]])
 
         else:
             self.Grad = lambda u: ufl.grad(u)
 
         super().__init__(functionspace_tags_marker, rho, is_linear=False, **kwargs)
 
-
     def P(self, u):
         """First Piola-Kirchhoff stress"""
         print("supercharge me")
 
-
     @property
     def k_CG(self):
         """Stiffness form function for a Continuous Galerkin formulation"""
-        return lambda u,v: ufl.inner(self.P(u), self.Grad(v)) * self._dx
-
+        return lambda u, v: ufl.inner(self.P(u), self.Grad(v)) * self._dx
 
     @property
-    def k_DG(self) -> 'function':
+    def k_DG(self) -> Callable:
         """**(Not implemented)** Stiffness form function for a Discontinuous Galerkin formulation"""
         raise NotImplementedError
 
-
     @property
-    def DG_numerical_flux(self) -> 'function':
+    def DG_numerical_flux(self) -> Callable:
         """**(Not implemented)** Numerical flux for a Disontinuous Galerkin formulation"""
         raise NotImplementedError
-
 
 
 class Murnaghan(HyperelasticMaterial):
@@ -98,18 +94,14 @@ class Murnaghan(HyperelasticMaterial):
     """
     labels = ['murnaghan']
 
-
-    def __init__(self, functionspace_tags_marker, rho, lambda_, mu, l, m, n, **kwargs):
-
+    def __init__(self, functionspace_tags_marker, rho, lambda_, mu, l_, m_, n_, **kwargs):
         self._lambda = lambda_
-        self._mu     = mu
-        self._l      = l
-        self._m      = m
-        self._n      = n
+        self._mu = mu
+        self._l = l_
+        self._m = m_
+        self._n = n_
 
-        #
         super().__init__(functionspace_tags_marker, rho, **kwargs)
-
 
     def P(self, u):
         """First Piola-Kirchhoff stress"""
@@ -117,38 +109,36 @@ class Murnaghan(HyperelasticMaterial):
         d = len(u)
 
         # Identity tensor
-        I = ufl.variable(ufl.Identity(d))
+        Id = ufl.variable(ufl.Identity(d))
 
         # Deformation gradient
-        F = ufl.variable(I + self.Grad(u))
+        F = ufl.variable(Id + self.Grad(u))
 
         # Right Cauchy-Green tensor
         C = ufl.variable(F.T * F)
 
-        E = ufl.variable(0.5*(C - I))
+        E = ufl.variable(0.5 * (C - Id))
 
         # convert Murnaghan's constants into Landau & Lifshitz constants
         A = self._n
-        B = self._m - self._n/2
+        B = self._m - self._n / 2
         C = self._l - B
 
         # Strain-energy function
-        W = self._lambda/2*(ufl.tr(E)**2) + self._mu*ufl.tr(E*E) + C/3*(ufl.tr(E)**3) + B*(ufl.tr(E)*ufl.tr(E*E)) + A/3*(ufl.tr(E*E*E))
+        W = self._lambda / 2 * (ufl.tr(E)**2) + self._mu * ufl.tr(E * E) \
+            + C / 3 * (ufl.tr(E)**3) + B * (ufl.tr(E) * ufl.tr(E * E)) + A / 3 * (ufl.tr(E * E * E))
 
-        return F*ufl.diff(W, E)
+        return F * ufl.diff(W, E)
 
-        
     @property
     def Z_N(self):
         """**(WARNING, infinitesimal strain asymptotics)** P-wave mechanical impedance :math:`\\rho c_L`"""
-        return ufl.sqrt(self.rho*(self._lambda + 2*self._mu))
-
+        return ufl.sqrt(self.rho * (self._lambda + 2 * self._mu))
 
     @property
     def Z_T(self):
         """**(WARNING, infinitesimal strain asymptotics)** S-wave mechanical impedance :math:`\\rho c_S`"""
-        return ufl.sqrt(self.rho*self._mu)
-
+        return ufl.sqrt(self.rho * self._mu)
 
 
 class DummyIsotropicMaterial(HyperelasticMaterial):
@@ -167,38 +157,31 @@ class DummyIsotropicMaterial(HyperelasticMaterial):
     """
     labels = ['dummy-isotropic']
 
-
     def __init__(self, functionspace_tags_marker, rho, lambda_, mu, **kwargs):
-
         self._lambda = lambda_
-        self._mu     = mu
+        self._mu = mu
 
-        #
         super().__init__(functionspace_tags_marker, rho, **kwargs)
-
 
     def P(self, u):
         """Infinitesimal stress function; NOT the first Piola-Kirchhoff stress"""
         # Infinitesimal strain
-        e = ufl.variable(0.5*(ufl.grad(u) + ufl.grad(u).T))  # TODO: not valid for 1D
+        e = ufl.variable(0.5 * (ufl.grad(u) + ufl.grad(u).T))  # TODO: not valid for 1D
 
         # Strain-energy function
-        W = self._lambda/2*(ufl.tr(e)**2) + self._mu*ufl.tr(e*e)
+        W = self._lambda / 2 * (ufl.tr(e)**2) + self._mu * ufl.tr(e * e)
 
         return ufl.diff(W, e)
-
 
     @property
     def Z_N(self):
         """P-wave mechanical impedance :math:`\\rho c_L`"""
-        return ufl.sqrt(self.rho*(self._lambda + 2*self._mu))
-
+        return ufl.sqrt(self.rho * (self._lambda + 2 * self._mu))
 
     @property
     def Z_T(self):
         """S-wave mechanical impedance :math:`\\rho c_S`"""
-        return ufl.sqrt(self.rho*self._mu)
-
+        return ufl.sqrt(self.rho * self._mu)
 
 
 class StVenantKirchhoff(HyperelasticMaterial):
@@ -223,14 +206,11 @@ class StVenantKirchhoff(HyperelasticMaterial):
     """
     labels = ['stvenant-kirchhoff', 'saintvenant-kirchhoff']
 
-
     def __init__(self, functionspace_tags_marker, rho, lambda_, mu, **kwargs):
         self._lambda = lambda_
-        self._mu     = mu
+        self._mu = mu
 
-        #
         super().__init__(functionspace_tags_marker, rho, **kwargs)
-
 
     def P(self, u):
         """First Piola-Kirchhoff stress"""
@@ -238,38 +218,36 @@ class StVenantKirchhoff(HyperelasticMaterial):
         d = len(u)
 
         # Identity tensor
-        I = ufl.variable(ufl.Identity(d))
+        Id = ufl.variable(ufl.Identity(d))
 
         # Deformation gradient
-        F = ufl.variable(I + self.Grad(u))
+        F = ufl.variable(Id + self.Grad(u))
 
         # Right Cauchy-Green tensor
         C = ufl.variable(F.T * F)
 
-        E = ufl.variable(0.5*(C - I))
+        E = ufl.variable(0.5 * (C - Id))
 
         # Strain-energy function
-        W = self._lambda/2*(ufl.tr(E)**2) + self._mu*ufl.tr(E*E)
+        W = self._lambda / 2 * (ufl.tr(E)**2) + self._mu * ufl.tr(E * E)
 
-        return F*ufl.diff(W, E)
-
+        return F * ufl.diff(W, E)
 
     @property
     def Z_N(self):
         """**(WARNING, infinitesimal strain asymptotics)** P-wave mechanical impedance :math:`\\rho c_L`"""
-        return ufl.sqrt(self.rho*(self._lambda + 2*self._mu))
-
+        return ufl.sqrt(self.rho * (self._lambda + 2 * self._mu))
 
     @property
     def Z_T(self):
         """**(WARNING, infinitesimal strain asymptotics)** S-wave mechanical impedance :math:`\\rho c_S`"""
-        return ufl.sqrt(self.rho*self._mu)
+        return ufl.sqrt(self.rho * self._mu)
 
 
 class MooneyRivlinIncompressible(HyperelasticMaterial):
     """
     Mooney-Rivlin model for an incompressible solid
-    
+
     Strain energy density:
         .. math::
           W = C_1 (\overline{I}_1 - 3) + C_2 (\overline{I}_2 - 3)
@@ -288,47 +266,41 @@ class MooneyRivlinIncompressible(HyperelasticMaterial):
     """
     labels = ['mooney-rivlin-incomp']
 
-
     def __init__(self, functionspace_tags_marker, rho, C1, C2, **kwargs):
-
         self._C1 = C1
         self._C2 = C2
 
-        #
         super().__init__(functionspace_tags_marker, rho, **kwargs)
-
 
     def P(self, u):
         """First Piola-Kirchhoff stress"""
         # Number of components
         d = len(u)
 
-        assert d==3, 'The MooneyRivlinIncompressible class is only defined for 3D'
+        assert d == 3, 'The MooneyRivlinIncompressible class is only defined for 3D'
 
         # Identity tensor
-        I = ufl.variable(ufl.Identity(d))
+        Id = ufl.variable(ufl.Identity(d))
 
         # Deformation gradient
-        F = ufl.variable(I + self.Grad(u))
+        F = ufl.variable(Id + self.Grad(u))
 
         # Right Cauchy-Green tensor
         C = ufl.variable(F.T * F)
 
         # Invariants
         I1 = ufl.tr(C)
-        I2 = 0.5*(ufl.tr(C)**2 - ufl.tr(C*C))
-        #I3 = ufl.det(C)
+        I2 = 0.5 * (ufl.tr(C)**2 - ufl.tr(C * C))
+        # I3 = ufl.det(C)
 
         # Strain-energy function
-        W = self._C1*(I1 - 3) + self._C2*(I2 - 3)
+        W = self._C1 * (I1 - 3) + self._C2 * (I2 - 3)
 
         return ufl.diff(W, F)
-
 
     @property
     def C1(self):
         return self._C1
-
 
     @property
     def C2(self):
@@ -358,27 +330,24 @@ class MooneyRivlinCompressible(HyperelasticMaterial):
     """
     labels = ['mooney-rivlin-comp']
 
-
     def __init__(self, functionspace_tags_marker, rho, C10, C01, D1, **kwargs):
         self._C10 = C10
         self._C01 = C01
-        self._D1  = D1
+        self._D1 = D1
 
-        #
         super().__init__(functionspace_tags_marker, rho, **kwargs)
-
 
     def P(self, u):
         """First Piola-Kirchhoff stress"""
         # Number of components
         d = len(u)
-        #assert d==3, 'The MooneyRivlinIncompressible class is only defined for 3D'
+        # assert d==3, 'The MooneyRivlinIncompressible class is only defined for 3D'
 
         # Identity tensor
-        I = ufl.variable(ufl.Identity(d))
+        Id = ufl.variable(ufl.Identity(d))
 
         # Deformation gradient
-        F = ufl.variable(I + self.Grad(u))
+        F = ufl.variable(Id + self.Grad(u))
 
         # Jacobian
         J = ufl.variable(ufl.det(F))
@@ -387,22 +356,20 @@ class MooneyRivlinCompressible(HyperelasticMaterial):
         C = ufl.variable(F.T * F)
 
         # Isochoric C
-        Cb = ufl.variable(J**(-2.0/3.0)*C)
+        Cb = ufl.variable(J**(-2.0 / 3.0) * C)
 
         # Invariants
         I1bar = ufl.tr(Cb)
-        I2bar = 0.5*(ufl.tr(Cb)**2 - ufl.tr(Cb*Cb)) 
+        I2bar = 0.5 * (ufl.tr(Cb)**2 - ufl.tr(Cb * Cb))
 
         # Strain-energy function
-        W = self._C10*(I1bar - 3) + self._C01*(I2bar - 3) + 1/self._D1*(J-1)*(J-1)
+        W = self._C10 * (I1bar - 3) + self._C01 * (I2bar - 3) + 1 / self._D1 * (J - 1) * (J - 1)
 
         return ufl.diff(W, F)
-
 
     @property
     def C1(self):
         return self._C1
-
 
     @property
     def C2(self):
@@ -420,12 +387,12 @@ def GreenLagrangeStrain(u):
     d = len(u)
 
     # Identity tensor
-    I = ufl.variable(ufl.Identity(d))
+    Id = ufl.variable(ufl.Identity(d))
 
     # Deformation gradient
-    F = ufl.variable(I + ufl.grad(u)) #self.Grad
+    F = ufl.variable(Id + ufl.grad(u))  # self.Grad
 
     # Right Cauchy-Green tensor
     C = ufl.variable(F.T * F)
 
-    return ufl.variable(0.5*(C - I))
+    return ufl.variable(0.5 * (C - Id))

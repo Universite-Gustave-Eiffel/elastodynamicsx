@@ -24,11 +24,15 @@ List of supported schemes:
         - 'generalized-alpha'
 """
 
-from .timescheme import *
-from .leapfrog import *
-from .newmark import *
-
+from .timescheme import TimeScheme, FEniCSxTimeScheme
+from .leapfrog import LeapFrog
+from .newmark import GalphaNewmarkBeta, HilberHughesTaylor, NewmarkBeta, MidPoint, LinearAccelerationMethod
 
 all_timeschemes_explicit = [LeapFrog]
 all_timeschemes_implicit = [GalphaNewmarkBeta, HilberHughesTaylor, NewmarkBeta, MidPoint, LinearAccelerationMethod]
 all_timeschemes = all_timeschemes_explicit + all_timeschemes_implicit
+
+__all__ = ["all_timeschemes_explicit", "all_timeschemes_implicit", "all_timeschemes",
+           "TimeScheme", "FEniCSxTimeScheme",
+           "LeapFrog",
+           "GalphaNewmarkBeta", "HilberHughesTaylor", "NewmarkBeta", "MidPoint", "LinearAccelerationMethod"]

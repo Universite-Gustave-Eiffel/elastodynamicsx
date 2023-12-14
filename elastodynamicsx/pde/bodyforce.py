@@ -16,7 +16,7 @@ import numpy as np
 from dolfinx.fem.function import Constant, Function
 
 
-class BodyForce():
+class BodyForce:
     """
     Representation of the rhs term (the 'b' term) of a pde such as defined
     in the PDE class. An instance represents a single source.
@@ -55,14 +55,13 @@ class BodyForce():
         self._value = value
         function_space, cell_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
         md = kwargs.get('metadata', PDE.default_metadata)
+        # md = kwargs.get('metadata', None)
         self._dx = ufl.Measure("dx", domain=function_space.mesh, subdomain_data=cell_tags, metadata=md)(marker)
-
 
     @property
     def L(self) -> typing.Callable:
         """The linear form function"""
         return lambda v: ufl.inner(self._value, v) * self._dx
-
 
     @property
     def value(self) -> typing.Union[Function, Constant, np.ndarray]:
