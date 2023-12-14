@@ -124,7 +124,7 @@ def tst_bcs_vector_materials(dim, nbcomps, eltname="Lagrange"):
 def test_all():
     for eltname in ["Lagrange"]:  # , "DG"]:
         for dim in range(3):
-            tst_bcs_scalar_material(dim+1, eltname)
+            tst_bcs_scalar_material(dim + 1, eltname)
             for nbcomps in range(max(dim, 1), 3):  # avoids dim=1 and nbcomps=1
-                print('test_all:: dim=' + str(dim+1) + ', nbcomps=' + str(nbcomps+1))
-                tst_bcs_vector_materials(dim+1, nbcomps+1, eltname)
+                print('test_all:: dim=' + str(dim + 1) + ', nbcomps=' + str(nbcomps + 1))
+                tst_bcs_vector_materials(dim + 1, nbcomps + 1, eltname)

@@ -82,12 +82,12 @@ def GLL_quadrature(degree: int) -> dict:
 
 def GL_quadrature(degree: int) -> dict:
     """Returns the dolfinx quadrature rule for use with GL elements of the given degree."""
-    return {"quadrature_rule": "GL",  "quadrature_degree": 2 * degree}  # 2 * degree + 1 ?
+    return {"quadrature_rule": "GL", "quadrature_degree": 2 * degree}  # 2 * degree + 1 ?
 
 
 def Legendre_quadrature(degree: int) -> dict:
     """Returns the dolfinx quadrature rule for use with Legendre elements of the given degree."""
-    return {"quadrature_rule": "GL",  "quadrature_degree": 2 * degree}
+    return {"quadrature_rule": "GL", "quadrature_degree": 2 * degree}
 
 
 # ## ### ### ### ###

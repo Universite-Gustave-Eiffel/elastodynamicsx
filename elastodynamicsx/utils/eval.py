@@ -63,7 +63,7 @@ class ParallelEvaluator:
         self.points: np.ndarray = points
         self.src_owner = src_owner
         self.dest_owner = dest_owner
-        self.points_local: np.ndarray = np.array(dest_points).reshape(len(dest_points)//3, 3)
+        self.points_local: np.ndarray = np.array(dest_points).reshape(len(dest_points) // 3, 3)
         self.cells_local = dest_cells
 
     @property

@@ -41,8 +41,8 @@ def tst_scalar_material(dim, eltname="Lagrange"):
     pde = PDE(V, materials=mats)
 
     # Compile some matrices
-    _, _, _ = pde.M(),  pde.C(),  pde.K()
-    _, _, _ = pde.K1(),  pde.K2(),  pde.K3()
+    _, _, _ = pde.M(), pde.C(), pde.K()
+    _, _, _ = pde.K1(), pde.K2(), pde.K3()
 
     # The end
 
@@ -62,7 +62,7 @@ def tst_vector_materials(dim, nbcomps, eltname="Lagrange"):
     mats = []
 
     for type_, nb in zip(types, nbCij):
-        Cij = [Coo]*nb
+        Cij = [Coo] * nb
         mats.append(material(V, type_, rho, *Cij))
 
     # Damping laws
@@ -72,7 +72,7 @@ def tst_vector_materials(dim, nbcomps, eltname="Lagrange"):
     pde = PDE(V, materials=mats)
 
     # Compile some matrices
-    _, _, _ = pde.M(),  pde.C(),  pde.K()
+    _, _, _ = pde.M(), pde.C(), pde.K()
 
     if dim == 2 and nbcomps == 2:
         print('skipping invalid case for waveguides')
@@ -81,7 +81,7 @@ def tst_vector_materials(dim, nbcomps, eltname="Lagrange"):
         print('skipping not implemented case for waveguides (DG)')
 
     else:
-        _, _, _ = pde.K1(),  pde.K2(),  pde.K3()
+        _, _, _ = pde.K1(), pde.K2(), pde.K3()
 
     # The end
 
@@ -89,7 +89,7 @@ def tst_vector_materials(dim, nbcomps, eltname="Lagrange"):
 def test_all():
     for eltname in ["Lagrange"]:  # , "DG"]:
         for dim in range(3):
-            tst_scalar_material(dim+1, eltname)
+            tst_scalar_material(dim + 1, eltname)
             for nbcomps in range(max(dim, 1), 3):  # avoids dim=1 and nbcomps=1
-                print('test_all:: dim=' + str(dim+1) + ', nbcomps=' + str(nbcomps+1))
-                tst_vector_materials(dim+1, nbcomps+1, eltname)
+                print('test_all:: dim=' + str(dim + 1) + ', nbcomps=' + str(nbcomps + 1))
+                tst_vector_materials(dim + 1, nbcomps + 1, eltname)
