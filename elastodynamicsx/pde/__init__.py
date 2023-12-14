@@ -67,6 +67,7 @@ Getting the forms:
       M = pde.M()
 """
 
+from .common import default_metadata, default_jit_options
 from .boundarycondition import *
 from .pde import *
 from .materials import *

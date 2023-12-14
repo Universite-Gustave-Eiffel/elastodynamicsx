@@ -9,7 +9,7 @@ import typing
 import ufl
 
 from elastodynamicsx.utils import get_functionspace_tags_marker
-from elastodynamicsx.pde import PDE
+from elastodynamicsx.pde import default_metadata  # PDE
 
 
 class Material:
@@ -52,7 +52,7 @@ class Material:
         function_space, cell_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
 
         domain = function_space.mesh
-        md = kwargs.get('metadata', PDE.default_metadata)
+        md = kwargs.get('metadata', default_metadata)
         # also valid if cell_tags or marker are None
         self._dx = ufl.Measure("dx", domain=domain, subdomain_data=cell_tags, metadata=md)(marker)
         self._dS = ufl.Measure("dS", domain=domain, subdomain_data=cell_tags, metadata=md)(marker)
@@ -107,13 +107,3 @@ class Material:
     def rho(self):
         """Density"""
         return self._rho
-
-
-# -----------------------------------------------------
-# Import subclasses -- must be done at the end to avoid loop imports
-# -----------------------------------------------------
-# from .elasticmaterial import ScalarLinearMaterial, IsotropicMaterial
-# from .anisotropicmaterials import CubicMaterial, HexagonalMaterial, TrigonalMaterial, TetragonalMaterial, \
-#     OrthotropicMaterial, MonoclinicMaterial, TriclinicMaterial
-# from .hyperelasticmaterial import DummyIsotropicMaterial, Murnaghan, StVenantKirchhoff, MooneyRivlinIncompressible, \
-#     MooneyRivlinCompressible

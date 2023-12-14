@@ -13,7 +13,7 @@ import ufl
 
 from . import FEniCSxTimeScheme
 from elastodynamicsx.solvers import TimeStepper, OneStepTimeStepper
-from elastodynamicsx.pde import PDE, BoundaryCondition
+from elastodynamicsx.pde import BoundaryCondition, default_jit_options, build_mpc
 
 
 class LeapFrog(FEniCSxTimeScheme):
@@ -53,7 +53,7 @@ class LeapFrog(FEniCSxTimeScheme):
         bcs: The set of boundary conditions
 
     Keyword Args:
-        jit_options: (default=PDE.default_jit_options) options for the just-in-time compiler
+        jit_options: (default=pde.default_jit_options) options for the just-in-time compiler
 
     See:
         https://en.wikipedia.org/wiki/Leapfrog_integration
@@ -75,7 +75,7 @@ class LeapFrog(FEniCSxTimeScheme):
                  bcs: List[BoundaryCondition] = [],
                  **kwargs):
 
-        self.jit_options = kwargs.get('jit_options', PDE.default_jit_options)
+        self.jit_options = kwargs.get('jit_options', default_jit_options)
         dt_ = fem.Constant(function_space.mesh, PETSc.ScalarType(dt))
 
         u, v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
@@ -106,7 +106,7 @@ class LeapFrog(FEniCSxTimeScheme):
             self._L0_form -= c_(self._v0, v)
 
         # boundary conditions
-        mpc = PDE.build_mpc(function_space, bcs)
+        mpc = build_mpc(function_space, bcs)
         dirichletbcs = BoundaryCondition.get_dirichlet_BCs(bcs)
         supportedbcs = BoundaryCondition.get_weak_BCs(bcs)
 

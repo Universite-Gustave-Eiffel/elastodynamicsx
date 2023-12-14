@@ -13,7 +13,7 @@ import ufl
 
 from . import FEniCSxTimeScheme
 from elastodynamicsx.solvers import TimeStepper, NonlinearTimeStepper, OneStepTimeStepper
-from elastodynamicsx.pde import PDE, BoundaryCondition
+from elastodynamicsx.pde import BoundaryCondition, default_jit_options, build_mpc
 
 
 class GalphaNewmarkBeta(FEniCSxTimeScheme):
@@ -64,7 +64,7 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
         beta (default = 1/4*(gamma+1/2)**2): Unconditionnal stability
             if :math:`\\beta \geq 0.25 + 0.5 (\\alpha_f - \\alpha_m)`
 
-        jit_options (default=PDE.default_jit_options): Options for the just-in-time compiler
+        jit_options (default=pde.default_jit_options): Options for the just-in-time compiler
 
     Reference:
         J. Chung and G. M. Hulbert, "A time integration algorithm for structural
@@ -92,7 +92,7 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
                  dt,
                  bcs: List[BoundaryCondition] = [], **kwargs):
 
-        self.jit_options = kwargs.get('jit_options', PDE.default_jit_options)
+        self.jit_options = kwargs.get('jit_options', default_jit_options)
         rho_inf = kwargs.get('rho_inf', 0.75)
         alpha_m = (2 * rho_inf - 1) / (rho_inf + 1)
         alpha_f = rho_inf / (rho_inf + 1)
@@ -152,7 +152,7 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
             self._L0_form -= c_(self._v0, v)
 
         # boundary conditions
-        mpc = PDE.build_mpc(function_space, bcs)
+        mpc = build_mpc(function_space, bcs)
         dirichletbcs = BoundaryCondition.get_dirichlet_BCs(bcs)
         supportedbcs = BoundaryCondition.get_weak_BCs(bcs)
 

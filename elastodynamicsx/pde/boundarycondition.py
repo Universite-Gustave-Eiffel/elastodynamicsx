@@ -13,6 +13,7 @@ from dolfinx import fem, default_scalar_type
 import ufl
 
 from elastodynamicsx.utils import get_functionspace_tags_marker
+from . import default_metadata
 
 
 class BoundaryCondition:
@@ -144,7 +145,6 @@ class BoundaryCondition:
 
     def __init__(self, functionspace_tags_marker, type_: str,
                  values: typing.Union[fem.Function, fem.Constant, np.ndarray, typing.Tuple] = None, **kwargs):
-        # from elastodynamicsx.pde import PDE
         #
         function_space, facet_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
 
@@ -164,8 +164,7 @@ class BoundaryCondition:
 
         self._type = type_
         self._values = values
-        # md = kwargs.get('metadata', PDE.default_metadata)
-        md = kwargs.get('metadata', {})
+        md = kwargs.get('metadata', default_metadata)
         ds = ufl.Measure("ds",
                          domain=function_space.mesh,
                          subdomain_data=facet_tags,

@@ -9,7 +9,7 @@ import typing
 import ufl
 
 from elastodynamicsx.utils import get_functionspace_tags_marker
-from elastodynamicsx.pde import PDE
+from . import default_metadata
 
 # just for types
 import numpy as np
@@ -54,7 +54,7 @@ class BodyForce:
     def __init__(self, functionspace_tags_marker, value: typing.Union[Function, Constant, np.ndarray], **kwargs):
         self._value = value
         function_space, cell_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
-        md = kwargs.get('metadata', PDE.default_metadata)
+        md = kwargs.get('metadata', default_metadata)
         # md = kwargs.get('metadata', None)
         self._dx = ufl.Measure("dx", domain=function_space.mesh, subdomain_data=cell_tags, metadata=md)(marker)
 

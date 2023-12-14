@@ -19,7 +19,9 @@ except ImportError:
     warnings.warn("Can't import dolfinx_mpc. Periodic boundaries are not available", Warning)
     dolfinx_mpc = None
 
-from . import BoundaryCondition
+from . import BoundaryCondition, default_jit_options
+from .materials import Material
+from .buildmpc import build_mpc
 
 
 class PDE():
@@ -38,67 +40,16 @@ class PDE():
     Keyword Args:
         bodyforces: (default=[]) a list of pde.BodyForce instances
         bcs: (default=[]) a list of fem.DirichletBCMetaClass and/or pde.BoundaryCondition instances
-        jit_options: (default=PDE.default_jit_options) options for the just-in-time compiler
+        jit_options: (default=pde.default_jit_options) options for the just-in-time compiler
         finalize: (default=True) call self.finalize() on build
     """
 
-    # ## ### ### ## #
-    # ## static  ## #
-    # ## ### ### ## #
-
-    # The default metadata used by all measures (dx, ds, dS, ...) in the classes
-    # of the pde package: Material, BoundaryCondition, BodyForce
-    # Example: Spectral Element Method with GLL elements of degree 6
-    # >>> from elastodynamicsx.pde import PDE
-    # >>> from elastodynamicsx.utils import spectral_quadrature
-    # >>> specmd = spectral_quadrature("GLL", 6)
-    # >>> PDE.default_metadata = specmd
-    #
-    default_metadata = None
-
-    # The default options for the just-in-time compiler used in the classes
-    # of the pde package: PDE, FEniCSxTimeScheme
-    # See:
-    #     https://jsdokken.com/dolfinx-tutorial/chapter4/compiler_parameters.html
-    # Example:
-    # >>> from elastodynamicsx.pde import PDE
-    # >>> PDE.default_jit_options = {"cffi_extra_compile_args": ["-Ofast", "-march=native"],
-    # >>>                            "cffi_libraries": ["m"]}
-    default_jit_options = {}
-
-    def build_mpc(function_space, bcs):
-        bcs_strong = BoundaryCondition.get_dirichlet_BCs(bcs)
-        bcs_mpc = BoundaryCondition.get_mpc_BCs(bcs)
-
-        if len(bcs_mpc) == 0:
-            return None
-
-        mpc = dolfinx_mpc.MultiPointConstraint(function_space)
-
-        for bc in bcs_mpc:
-            if bc.type == 'periodic':
-                facet_tags, marker, slave_to_master_map = bc.bc
-                mpc.create_periodic_constraint_topological(function_space,
-                                                           facet_tags,
-                                                           marker,
-                                                           slave_to_master_map,
-                                                           bcs_strong)
-            else:
-                raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
-
-        mpc.finalize()
-        return mpc
-
-    # ## ### ### ### ## #
-    # ## non-static  ## #
-    # ## ### ### ### ## #
-
-    def __init__(self, function_space: fem.FunctionSpace, materials: typing.List['Material'], **kwargs):
+    def __init__(self, function_space: fem.FunctionSpace, materials: typing.List[Material], **kwargs):
         self._function_space = function_space
         self.materials = materials
         self.bodyforces = kwargs.get('bodyforces', [])
         self.bcs = kwargs.get('bcs', [])
-        self.jit_options = kwargs.get('jit_options', PDE.default_jit_options)
+        self.jit_options = kwargs.get('jit_options', default_jit_options)
         self._u = ufl.TrialFunction(function_space)
         self._v = ufl.TestFunction(function_space)
 
@@ -165,7 +116,7 @@ class PDE():
         if len(self._bcs_mpc) == 0:
             return
         #
-        self._mpc = PDE.build_mpc(self._function_space, self._bcs_strong + self._bcs_mpc)
+        self._mpc = build_mpc(self._function_space, self._bcs_strong + self._bcs_mpc)
 
     def _compile_M(self) -> None:
         u, v = self._u, self._v
