@@ -13,9 +13,9 @@ import matplotlib.pyplot as plt
 from matplotlib.image import AxesImage
 import pyvista
 
+from petsc4py import PETSc
 from dolfinx import plot, fem
 from dolfinx.mesh import Mesh
-from petsc4py import PETSc
 
 
 # ## ------------------------------------------------------------------------- ## #

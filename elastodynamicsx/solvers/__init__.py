@@ -32,6 +32,8 @@ Frequency domain:
       from elastodynamicsx.solvers import ...
 """
 
+# flake8: noqa
+
 from .timestepper import *
 from .eigensolver import *
 from .frequencydomain import *

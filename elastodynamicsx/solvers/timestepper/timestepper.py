@@ -14,10 +14,14 @@ from typing import Union
 from mpi4py import MPI
 from petsc4py import PETSc
 
+from dolfinx import fem, mesh
+import ufl
+
 try:
     from tqdm.auto import tqdm
 except ModuleNotFoundError:
-    tqdm = lambda x: x
+    def tqdm(x):
+        return x
 
 
 class DiagonalSolver:
@@ -30,12 +34,12 @@ class DiagonalSolver:
     def __init__(self, A: PETSc.Vec):
         self._A = A
 
-    def solve(self, b: PETSc.Vec, out: PETSc.Vec):
+    def solve(self, b: PETSc.Vec, out: PETSc.Vec) -> None:
         """
         Solve (in-place) the linear system
         :math:`\mathbf{A} * \mathbf{out} = \mathbf{b}`
         """
-        out.setArray( b/self._A )
+        out.setArray(b / self._A)
 
 
 class TimeStepper:
@@ -47,7 +51,9 @@ class TimeStepper:
     # --------- static ---------
     # --------------------------
 
-    petsc_options_t0 = {"ksp_type": "preonly", "pc_type": "lu"}  # PETSc options to solve a0 = M_inv.(F(t0) - C.v0 - K(u0))
+    # PETSc options to solve a0 = M_inv.(F(t0) - C.v0 - K(u0))
+    petsc_options_t0 = {"ksp_type": "preonly", "pc_type": "lu"}
+
     petsc_options_explicit_scheme = petsc_options_t0
     petsc_options_implicit_scheme_linear = {"ksp_type": "preonly", "pc_type": "lu"}
     # petsc_options_implicit_scheme_nonlinear =  # TODO
@@ -65,16 +71,16 @@ class TimeStepper:
             **kwargs: (passed to the required scheme)
         """
         from elastodynamicsx.pde import all_timeschemes
-        
+
         scheme = kwargs.pop('scheme', 'unknown')
         allSchemes = all_timeschemes
         for s_ in allSchemes:
-          if scheme.lower() in s_.labels:
-              return s_.build_timestepper(*args, **kwargs)
+            if scheme.lower() in s_.labels:
+                return s_.build_timestepper(*args, **kwargs)
 
-        raise TypeError('unknown scheme: '+scheme)
+        raise TypeError('unknown scheme: ' + scheme)
 
-    def Courant_number(domain:'dolfinx.mesh.Mesh', c_max, dt):
+    def Courant_number(domain: mesh.Mesh, c_max, dt):
         """
         The Courant number: :math:`C = c_{max} \, \mathrm{d}t / h`, with :math:`h` the cell diameter
 
@@ -88,9 +94,6 @@ class TimeStepper:
         See:
             https://en.wikipedia.org/wiki/Courant%E2%80%93Friedrichs%E2%80%93Lewy_condition
         """
-        from dolfinx import fem
-        import ufl
-
         V = fem.FunctionSpace(domain, ("DG", 0))
         c_number = fem.Function(V)
         pts = V.element.interpolation_points()  # DOLFINx.__version__ >=0.5
@@ -99,22 +102,21 @@ class TimeStepper:
         c_number_max = max(c_number.x.array)
         return V.mesh.comm.allreduce(c_number_max, op=MPI.MAX)
 
-
     # --------------------------
     # ------- non-static -------
     # --------------------------
 
-    def __init__(self, comm: MPI.Comm, timescheme:'pde.TimeScheme', **kwargs):
+    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', **kwargs):
         """
         Args:
             comm: The MPI communicator
             timescheme: Time scheme
         """
         self._tscheme = timescheme
-        self._comm    = comm
-        self._t       = 0
-        self._dt      = self._tscheme.dt
-        self._out     = self._tscheme.out
+        self._comm: MPI.Comm = comm
+        self._t = 0
+        self._dt = self._tscheme.dt
+        self._out = self._tscheme.out
 
     @property
     def timescheme(self):
@@ -123,7 +125,7 @@ class TimeStepper:
     @property
     def t(self):
         return self._t
-    
+
     @property
     def dt(self):
         return self._dt
@@ -134,12 +136,12 @@ class TimeStepper:
            :language: python
 
         Apply initial conditions
-        
+
         Args:
             u0: u at t0
             v0: du/dt at t0
             t0: start time (default: 0)
-        
+
         u0 and v0 can be:
             - Python callable -> will be evaluated at nodes
                 -> e.g. :python:`u0 = lambda x: np.zeros((dim, x.shape[1]), dtype=PETSc.ScalarType)`
@@ -153,7 +155,7 @@ class TimeStepper:
         self._tscheme.set_initial_condition(u0, v0)
         self._t = t0
 
-    def solve(self, num_steps, **kwargs): #supercharge me
+    def solve(self, num_steps, **kwargs):  # supercharge me
         raise NotImplementedError
 
 
@@ -174,7 +176,7 @@ class LinearTimeStepper(TimeStepper):
     def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', A: PETSc.Mat, b: PETSc.Vec, **kwargs):
         super().__init__(comm, timescheme, **kwargs)
 
-        if kwargs.get('diagonal', False) and type(A)==PETSc.Mat:
+        if kwargs.get('diagonal', False) and isinstance(A, PETSc.Mat):
             A = A.getDiagonal()
 
         self._A = A  # Time-independent operator
@@ -182,7 +184,7 @@ class LinearTimeStepper(TimeStepper):
         self._explicit = timescheme.explicit
         self._solver = None
 
-        if type(A) == PETSc.Vec:
+        if isinstance(A, PETSc.Vec):
             self._init_solver_diagonal(A)
         else:
             if self._explicit:
@@ -205,10 +207,10 @@ class LinearTimeStepper(TimeStepper):
         return self._explicit
 
     @property
-    def solver(self) -> PETSc.KSP:
+    def solver(self) -> Union[PETSc.KSP, DiagonalSolver]:
         return self._solver
 
-    def _init_solver_diagonal(self, A:PETSc.Vec):
+    def _init_solver_diagonal(self, A: PETSc.Vec) -> None:
         self._solver = DiagonalSolver(A)
 
     def _init_solver(self, comm: MPI.Comm, petsc_options={}):
@@ -247,10 +249,10 @@ class OneStepTimeStepper(LinearTimeStepper):
     def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', A: PETSc.Mat, b: PETSc.Vec, **kwargs):
         super().__init__(comm, timescheme, A, b, **kwargs)
         self._b_update_function = timescheme.b_update_function
-        
+
         # self._i0 = 1 for explicit schemes because solving the initial
         # value problem a0=M_inv.(F(t0)-K(u0)-C.v0) also yields u1=u(t0+dt)
-        self._i0 = 1*self._explicit
+        self._i0 = 1 * self._explicit
         self._intermediate_dt = timescheme.intermediate_dt  # non zero for generalized-alpha
 
     def solve(self, num_steps, **kwargs):
@@ -280,11 +282,11 @@ class OneStepTimeStepper(LinearTimeStepper):
         verbose = kwargs.get('verbose', 0)
 
         callfirsts = kwargs.get('callfirsts', [])
-        callbacks  = kwargs.get('callbacks',  [])
+        callbacks = kwargs.get('callbacks', [])
 
         live_plt = kwargs.get('live_plotter', None)
-        if not(live_plt is None):
-            if type(live_plt)==dict:
+        if not (live_plt is None):
+            if isinstance(live_plt, dict):
                 from elastodynamicsx.plot import live_plotter
                 u_init = self._tscheme.out_fenicsx  # assume timescheme is of type FEniCSxTimeScheme
                 live_plt = live_plotter(u_init, live_plt.pop('refresh_step', 1), **live_plt)
@@ -297,7 +299,7 @@ class OneStepTimeStepper(LinearTimeStepper):
 
         for i in tqdm(range(self._i0, num_steps)):
             self._t += self.dt
-            t_calc = self.t - self.dt*self._intermediate_dt
+            t_calc = self.t - self.dt * self._intermediate_dt
 
             if verbose >= 10:
                 PETSc.Sys.Print('Callfirsts...')

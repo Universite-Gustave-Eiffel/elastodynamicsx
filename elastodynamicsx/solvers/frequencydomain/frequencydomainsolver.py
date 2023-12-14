@@ -13,7 +13,8 @@ import numpy as np
 try:
     from tqdm.auto import tqdm
 except ModuleNotFoundError:
-    tqdm = lambda x: x
+    def tqdm(x):
+        return x
 
 
 class FrequencyDomainSolver:
@@ -83,16 +84,15 @@ class FrequencyDomainSolver:
 
     default_petsc_options = {"ksp_type": "preonly", "pc_type": "lu"}  # "pc_factor_mat_solver_type": "mumps"
 
-
     def __init__(self, comm: MPI.Comm, M: PETSc.Mat, C: PETSc.Mat, K: PETSc.Mat,
-                 b: PETSc.Vec, b_update_function: Callable=None, **kwargs):
+                 b: PETSc.Vec, b_update_function: Callable = None, **kwargs):
         self._M = M
         self._C = C
         self._K = K
         self._b = b
         self._b_update_function = b_update_function
 
-        #### ####
+        # ### ### #
         # Initialize the PETSc solver
         petsc_options = kwargs.get('petsc_options', FrequencyDomainSolver.default_petsc_options)
         self.solver = PETSc.KSP().create(comm)
@@ -110,12 +110,11 @@ class FrequencyDomainSolver:
 
         opts.prefixPop()
         self.solver.setFromOptions()
-        #### ####
-
+        # ### ### #
 
     def solve(self, omega: Union[float, np.ndarray],
-              out: PETSc.Vec=None,
-              callbacks: List[Callable]=[],
+              out: PETSc.Vec = None,
+              callbacks: List[Callable] = [],
               **kwargs) -> PETSc.Vec:
         """
         Solve the linear problem
@@ -144,16 +143,15 @@ class FrequencyDomainSolver:
         else:
             return self._solve_single_omega(omega, out)
 
-
     def _solve_single_omega(self, omega: float, out: PETSc.Vec) -> PETSc.Vec:
         # Update load vector at angular frequency 'omega'
-        if not(self._b_update_function is None):
+        if not (self._b_update_function is None):
             self._b_update_function(self._b, omega)
             # Assume self._b.ghostUpdate(...) has already been done
 
         # Update PDE matrix
         w = omega
-        A = PETSc.ScalarType(-w*w)*self._M + PETSc.ScalarType(1J*w)*self._C + self._K
+        A = PETSc.ScalarType(-w * w) * self._M + PETSc.ScalarType(1J * w) * self._C + self._K
         self.solver.setOperators(A)
 
         # Solve
@@ -163,16 +161,15 @@ class FrequencyDomainSolver:
         out.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
         return out
 
-
     def _solve_multiple_omegas(self, omegas: np.ndarray,
-                               out:PETSc.Vec,
-                               callbacks: List[Callable]=[], **kwargs) -> PETSc.Vec:
+                               out: PETSc.Vec,
+                               callbacks: List[Callable] = [], **kwargs) -> PETSc.Vec:
         # Loop on values in omegas -> _solve_single_omega
 
         live_plt = kwargs.get('live_plotter', None)
 
-        if not(live_plt is None):
-            if type(live_plt)==dict:
+        if not (live_plt is None):
+            if isinstance(live_plt, dict):
                 # from elastodynamicsx.plot import live_plotter
                 # live_plt = live_plotter(self.u, live_plt.pop('refresh_step', 1), **live_plt)
                 raise NotImplementedError
@@ -186,24 +183,20 @@ class FrequencyDomainSolver:
 
         return out
 
-
     @property
     def M(self) -> PETSc.Mat:
         """The mass matrix"""
         return self._M
-
 
     @property
     def C(self) -> PETSc.Mat:
         """The damping matrix"""
         return self._C
 
-
     @property
     def K(self) -> PETSc.Mat:
         """The stiffness matrix"""
         return self._K
-
 
     @property
     def b(self) -> PETSc.Vec:

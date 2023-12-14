@@ -4,22 +4,24 @@
 #
 # SPDX-License-Identifier: MIT
 
-#TODO: optimize SLEPc default options
+# TODO: optimize SLEPc default options
 
 import typing
 
+from mpi4py import MPI
 from petsc4py import PETSc
 from slepc4py import SLEPc
-import ufl
+
 import numpy as np
 
-from elastodynamicsx.pde import BoundaryCondition
+from dolfinx.fem import FunctionSpace
+
 from elastodynamicsx.solutions import ModalBasis
 
-#see https://slepc.upv.es/documentation/
-#    https://slepc.upv.es/documentation/current/docs/manualpages/EPS/index.html
-#    https://slepc.upv.es/documentation/current/docs/manualpages/PEP/index.html
-#    https://slepc4py.readthedocs.io/en/stable/
+# see https://slepc.upv.es/documentation/
+#     https://slepc.upv.es/documentation/current/docs/manualpages/EPS/index.html
+#     https://slepc.upv.es/documentation/current/docs/manualpages/PEP/index.html
+#     https://slepc4py.readthedocs.io/en/stable/
 
 
 class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue problem
@@ -55,46 +57,47 @@ class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue proble
           rho, lambda_, mu = 1, 2, 1
           mat = material(V, rho, lambda_, mu)
           pde = PDE(V, materials=[mat])
-          eps = EigenmodesSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=6+6)  # the first 6 resonances are rigid body motion
+          nev = 6 + 6  # the first 6 resonances are rigid body motion
+          eps = EigenmodesSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=nev)
           eps.solve()
           eps.plot(V)
           freqs = eps.getEigenfrequencies()
           print('First resonance frequencies:', freqs)
     """
 
-
-    def __init__(self, comm:'_MPI.Comm', M:PETSc.Mat, C:PETSc.Mat, K:PETSc.Mat, **kwargs):
+    def __init__(self, comm: MPI.Comm, M: PETSc.Mat, C: PETSc.Mat, K: PETSc.Mat, **kwargs):
         super().__init__()
 
-        if not(C is None):  # TODO
+        if not (C is None):  # TODO
             raise NotImplementedError
 
         #
         self.create(comm)
         self.setOperators(K, M)
         self.setProblemType(SLEPc.EPS.ProblemType.GHEP)  # GHEP = Generalized Hermitian Eigenvalue Problem
-        #self.setTolerances(tol=1e-9)
+        # self.setTolerances(tol=1e-9)
         self.setType(SLEPc.EPS.Type.KRYLOVSCHUR)  # Note that Krylov-Schur is the default solver
 
-        ### Spectral transform
+        # ## Spectral transform
         st = self.getST()
-        st.setType(SLEPc.ST.Type.SINVERT)  # SINVERT = Shift and invert. By default, Slepc computes the largest eigenvalue, while we are interested in the smallest ones
-        st.setShift( 1e-8 )  # can be set to a different value if the focus is set on another part of the spectrum
 
-        ### Number of eigenvalues to be computed
+        # SINVERT = Shift and invert. By default, Slepc computes the largest eigenvalue,
+        # while we are interested in the smallest ones
+        st.setType(SLEPc.ST.Type.SINVERT)
+        st.setShift(1e-8)  # can be set to a different value if the focus is set on another part of the spectrum
+
+        # ## Number of eigenvalues to be computed
         nev = kwargs.get('nev', 10)
         self.setDimensions(nev=nev)
 
-
     def getWn(self) -> np.ndarray:
         """The eigen angular frequencies from the computed eigenvalues"""
-        return np.array([np.sqrt(abs(self.getEigenvalue(i).real)) for i in range(self._getNout())])  # abs because rigid body motions may lead to minus zero: -0.00000
-
+        # abs because rigid body motions may lead to minus zero: -0.00000
+        return np.array([np.sqrt(abs(self.getEigenvalue(i).real)) for i in range(self._getNout())])
 
     def getEigenfrequencies(self) -> np.ndarray:
         """The eigenfrequencies from the computed eigenvalues"""
-        return self.getWn()/(2*np.pi)
-
+        return self.getWn() / (2 * np.pi)
 
     def getEigenmodes(self, which='all') -> typing.List[PETSc.Vec]:
         """
@@ -114,24 +117,22 @@ class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue proble
         """
         K, M = self.getOperators()
         indexes = _slice_array(np.arange(self._getNout()), which)
-        eigenmodes = [ K.createVecRight() for i in range(np.size(indexes)) ]
+        eigenmodes = [K.createVecRight() for i in range(np.size(indexes))]
 
         for i, eigM in zip(indexes, eigenmodes):
             self.getEigenpair(i, eigM)  # Save eigenvector in eigM
 
         return eigenmodes
 
-
-    def getModalBasis(self) -> 'elastodynamicsx.solutions.ModalBasis':
+    def getModalBasis(self) -> ModalBasis:
         return ModalBasis(self.getWn(), self.getEigenmodes())
-
 
     def getErrors(self) -> np.ndarray:
         """Returns the error estimate on the computed eigenvalues"""
-        return np.array([self.computeError(i, SLEPc.EPS.ErrorType.RELATIVE) for i in range(self._getNout())])  # Compute error for i-th eigenvalue
+        return np.array([self.computeError(i, SLEPc.EPS.ErrorType.RELATIVE)
+                         for i in range(self._getNout())])  # Compute error for i-th eigenvalue
 
-
-    def plot(self, function_space:'dolfinx.fem.function_space', which='all', **kwargs) -> None:
+    def plot(self, function_space: FunctionSpace, which='all', **kwargs) -> None:
         """
         Plots the desired modeshapes
 
@@ -142,7 +143,6 @@ class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue proble
         """
         self.getModalBasis().plot(function_space, which, **kwargs)
 
-
     def printEigenvalues(self) -> None:
         """Prints the computed eigenvalues and error estimates"""
         v = [self.getEigenvalue(i) for i in range(self._getNout())]
@@ -150,7 +150,6 @@ class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue proble
         PETSc.Sys.Print("       eigenvalue \t\t\t error ")
         for cv, ce in zip(v, e):
             PETSc.Sys.Print(cv, '\t', ce)
-
 
     def _getNout(self):
         """Returns the number of eigenpairs that can be returned. Usually equal to 'nev'."""
@@ -160,13 +159,12 @@ class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue proble
         return nout
 
 
-
 def _slice_array(a, which):
     """Not intended to be called by user"""
-    if which == 'all'    :
-        which = slice(0,None,None)
+    if which == 'all':
+        which = slice(0, None, None)
 
-    if type(which) is int:
-        which = slice(which, which+1, None)
+    if isinstance(which, int):
+        which = slice(which, which + 1, None)
 
     return a[which]
