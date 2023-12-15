@@ -81,8 +81,8 @@ class LeapFrog(FEniCSxTimeScheme):
         u, v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
 
         self._u_n = fem.Function(function_space, name="u")  # u(t)
-        self._u_nm1 = fem.Function(function_space)            # u(t-dt)
-        self._u_nm2 = fem.Function(function_space)            # u(t-2*dt)
+        self._u_nm1 = fem.Function(function_space)          # u(t-dt)
+        self._u_nm2 = fem.Function(function_space)          # u(t-2*dt)
         #
         self._u0 = self._u_nm1
         self._v0 = self._u_n

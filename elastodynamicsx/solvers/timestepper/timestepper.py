@@ -106,7 +106,7 @@ class TimeStepper:
     # ------- non-static -------
     # --------------------------
 
-    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', **kwargs):
+    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', **kwargs):  # noqa
         """
         Args:
             comm: The MPI communicator
@@ -163,7 +163,7 @@ class NonlinearTimeStepper(TimeStepper):
     """
     Base class for solving nonlinear problems using implicit time schemes. Not implemented yet.
     """
-    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', **kwargs):
+    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', **kwargs):  # noqa
         super().__init__(comm, timescheme, **kwargs)
         raise NotImplementedError
 
@@ -173,7 +173,7 @@ class LinearTimeStepper(TimeStepper):
     Base class for solving linear problems. Note that nonlinear problems formulated
     with an explicit scheme come down to linear problems; they are handled by this class.
     """
-    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', A: PETSc.Mat, b: PETSc.Vec, **kwargs):
+    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # noqa
         super().__init__(comm, timescheme, **kwargs)
 
         if kwargs.get('diagonal', False) and isinstance(A, PETSc.Mat):
@@ -246,7 +246,7 @@ class OneStepTimeStepper(LinearTimeStepper):
     Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).
     """
 
-    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', A: PETSc.Mat, b: PETSc.Vec, **kwargs):
+    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # noqa
         super().__init__(comm, timescheme, A, b, **kwargs)
         self._b_update_function = timescheme.b_update_function
 
