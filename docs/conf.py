@@ -6,8 +6,6 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-# flake8: noqa
-
 import datetime, sys, os
 
 import elastodynamicsx
