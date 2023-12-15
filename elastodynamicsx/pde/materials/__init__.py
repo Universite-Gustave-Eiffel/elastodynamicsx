@@ -24,13 +24,26 @@ a single (possibly arbitrarily space-dependent) material.
   mat = material( (function_space, cell_tags, marker), type_, *args, **kwargs)
 """
 
+# import base classes
 from .material import Material
-from .elasticmaterial import ElasticMaterial, ScalarLinearMaterial, IsotropicMaterial
+from .elasticmaterial import ElasticMaterial
+from .hyperelasticmaterials import HyperelasticMaterial
+
+# import builder
+from .dampings import damping
+
+# import submodules
+from . import isotropicmaterials
+from . import anisotropicmaterials
+from . import hyperelasticmaterials
+from . import dampings
+
+# import material classes (without including them in __all__)
+from .isotropicmaterials import ScalarLinearMaterial, IsotropicMaterial
 from .anisotropicmaterials import CubicMaterial, HexagonalMaterial, TrigonalMaterial, TetragonalMaterial, \
     OrthotropicMaterial, MonoclinicMaterial, TriclinicMaterial
-from .hyperelasticmaterial import HyperelasticMaterial, Murnaghan, DummyIsotropicMaterial, StVenantKirchhoff, \
+from .hyperelasticmaterials import Murnaghan, DummyIsotropicMaterial, StVenantKirchhoff, \
     MooneyRivlinIncompressible, MooneyRivlinCompressible
-from .damping import damping, Damping, NoDamping, RayleighDamping, all_dampings
 
 
 all_linear_materials = [ScalarLinearMaterial, IsotropicMaterial, CubicMaterial, HexagonalMaterial,
@@ -129,12 +142,6 @@ def material(functionspace_tags_marker, type_, *args, **kwargs) -> Material:
     raise TypeError('unknown material type: ' + type_)
 
 
-__all__ = ["material", "Material",
-           "ElasticMaterial", "ScalarLinearMaterial", "IsotropicMaterial",
-           "CubicMaterial", "HexagonalMaterial", "TrigonalMaterial", "TetragonalMaterial",
-           "OrthotropicMaterial", "MonoclinicMaterial", "TriclinicMaterial",
-           "HyperelasticMaterial", "Murnaghan", "DummyIsotropicMaterial", "StVenantKirchhoff",
-           "MooneyRivlinIncompressible", "MooneyRivlinCompressible",
-           "all_linear_materials", "all_nonlinear_materials", "all_materials",
-           "damping", "Damping", "NoDamping", "RayleighDamping",
-           "all_dampings"]
+__all__ = ["material", "damping",
+           "Material", "ElasticMaterial", "HyperelasticMaterial",
+           "isotropicmaterials", "anisotropicmaterials", "hyperelasticmaterials", "dampings"]

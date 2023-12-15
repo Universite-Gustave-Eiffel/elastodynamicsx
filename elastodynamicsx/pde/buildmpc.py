@@ -14,7 +14,7 @@ except ImportError:
 from .boundarycondition import BoundaryCondition
 
 
-def build_mpc(function_space, bcs):
+def _build_mpc(function_space, bcs):
     bcs_strong = BoundaryCondition.get_dirichlet_BCs(bcs)
     bcs_mpc = BoundaryCondition.get_mpc_BCs(bcs)
 

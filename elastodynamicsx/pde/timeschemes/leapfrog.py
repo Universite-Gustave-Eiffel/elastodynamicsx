@@ -13,7 +13,7 @@ import ufl
 
 from .timescheme import FEniCSxTimeScheme
 from elastodynamicsx.solvers import TimeStepper, OneStepTimeStepper
-from elastodynamicsx.pde import BoundaryCondition, PDECONFIG, build_mpc
+from elastodynamicsx.pde import BoundaryCondition, PDECONFIG, _build_mpc
 
 
 class LeapFrog(FEniCSxTimeScheme):
@@ -106,7 +106,7 @@ class LeapFrog(FEniCSxTimeScheme):
             self._L0_form -= c_(self._v0, v)
 
         # boundary conditions
-        mpc = build_mpc(function_space, bcs)
+        mpc = _build_mpc(function_space, bcs)
         dirichletbcs = BoundaryCondition.get_dirichlet_BCs(bcs)
         supportedbcs = BoundaryCondition.get_weak_BCs(bcs)
 

@@ -68,7 +68,7 @@ Getting the forms:
 """
 
 from .common import PDECONFIG
-from .buildmpc import build_mpc
+from .buildmpc import _build_mpc
 from .boundarycondition import BoundaryCondition
 from .bodyforce import BodyForce
 from .pde import PDE
@@ -78,4 +78,4 @@ from . import timeschemes
 
 
 __all__ = ["BodyForce", "BoundaryCondition", "material", "damping", "PDE", "PDECONFIG",
-           "build_mpc", "materials", "timeschemes"]
+           "_build_mpc", "materials", "timeschemes"]

@@ -19,7 +19,7 @@ except ImportError:
     warnings.warn("Can't import dolfinx_mpc. Periodic boundaries are not available", Warning)
     dolfinx_mpc = None
 
-from .buildmpc import build_mpc
+from .buildmpc import _build_mpc
 from .common import PDECONFIG
 from .boundarycondition import BoundaryCondition
 from .materials import Material
@@ -117,7 +117,7 @@ class PDE:
         if len(self._bcs_mpc) == 0:
             return
         #
-        self._mpc = build_mpc(self._function_space, self._bcs_strong + self._bcs_mpc)
+        self._mpc = _build_mpc(self._function_space, self._bcs_strong + self._bcs_mpc)
 
     def _compile_M(self) -> None:
         u, v = self._u, self._v
