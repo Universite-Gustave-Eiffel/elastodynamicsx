@@ -6,22 +6,22 @@
 
 import numpy as np
 from dolfinx.fem import FunctionSpaceBase
-from dolfinx.mesh import Mesh, locate_entities, meshtags
+from dolfinx.mesh import Mesh, locate_entities, meshtags, MeshTags
 
 from typing import Tuple, Callable, Union
 
 
-def make_facet_tags(domain: Mesh, boundaries: Tuple[Tuple[int, Callable]]) -> 'MeshTags':
+def make_facet_tags(domain: Mesh, boundaries: Tuple[Tuple[int, Callable]]) -> MeshTags:
     """Shortcut for make_tags(domain, locators, type_='boundaries')"""
     return make_tags(domain, boundaries, type_='boundaries')
 
 
-def make_cell_tags(domain: Mesh, subdomains: Tuple[Tuple[int, Callable]]) -> 'MeshTags':
+def make_cell_tags(domain: Mesh, subdomains: Tuple[Tuple[int, Callable]]) -> MeshTags:
     """Shortcut for make_tags(domain, locators, type_='domains')"""
     return make_tags(domain, subdomains, type_='domains')
 
 
-def make_tags(domain: Mesh, locators: Tuple[Tuple[int, Callable]], type_='unknown') -> 'MeshTags':
+def make_tags(domain: Mesh, locators: Tuple[Tuple[int, Callable]], type_='unknown') -> MeshTags:
     """
     Args:
         domain: A mesh
@@ -56,7 +56,7 @@ def make_tags(domain: Mesh, locators: Tuple[Tuple[int, Callable]], type_='unknow
                     (2, lambda x: x[1] >= 0.5))
           cell_tags = make_tags(domain, Omegas, 'domains')
     """
-    if   type_.lower() == 'boundaries':
+    if type_.lower() == 'boundaries':
         fdim = domain.topology.dim - 1
     elif type_.lower() == 'domains':
         fdim = domain.topology.dim
@@ -77,7 +77,9 @@ def make_tags(domain: Mesh, locators: Tuple[Tuple[int, Callable]], type_='unknow
     return loc_tags
 
 
-def get_functionspace_tags_marker(functionspace_tags_marker: Union[FunctionSpaceBase, Tuple[FunctionSpaceBase, 'MeshTags', int]]) -> Tuple[FunctionSpaceBase, 'MeshTags', int]:
+def get_functionspace_tags_marker(functionspace_tags_marker:
+                                  Union[FunctionSpaceBase, Tuple[FunctionSpaceBase, MeshTags, int]]
+                                  ) -> Tuple[FunctionSpaceBase, MeshTags, int]:
     """
     This is a convenience function for several classes/functions of other packages.
     It is not intended to be used in other context.

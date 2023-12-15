@@ -11,9 +11,9 @@ from petsc4py import PETSc
 from dolfinx import fem
 import ufl
 
-from . import FEniCSxTimeScheme
+from .timescheme import FEniCSxTimeScheme
 from elastodynamicsx.solvers import TimeStepper, OneStepTimeStepper
-from elastodynamicsx.pde import PDE, BoundaryCondition
+from elastodynamicsx.pde import BoundaryCondition, PDECONFIG, _build_mpc
 
 
 class LeapFrog(FEniCSxTimeScheme):
@@ -22,7 +22,8 @@ class LeapFrog(FEniCSxTimeScheme):
     *Leapfrog* is a special case of *Newmark-beta* methods with :math:`\\beta=0` and :math:`\gamma=0.5`
 
     Scheme:
-        | :math:`u_n`, :math:`v_n`, :math:`a_n` are the (known) displacement, velocity and acceleration at current time step
+        | :math:`u_n`, :math:`v_n`, :math:`a_n` are the (known) displacement,
+            velocity and acceleration at current time step
         | :math:`u_{n+1}` is the unknown: displacement at next time step
         | :math:`a_n = (u_{n+1} - 2 u_n + u_{n-1}) / dt^2`
         | :math:`v_n = (u_{n+1} - u_n-1) / (2 dt)`
@@ -52,7 +53,7 @@ class LeapFrog(FEniCSxTimeScheme):
         bcs: The set of boundary conditions
 
     Keyword Args:
-        jit_options: (default=PDE.default_jit_options) options for the just-in-time compiler
+        jit_options: (default=PDECONFIG.default_jit_options) options for the just-in-time compiler
 
     See:
         https://en.wikipedia.org/wiki/Leapfrog_integration
@@ -60,67 +61,66 @@ class LeapFrog(FEniCSxTimeScheme):
 
     labels = ['leapfrog', 'central-difference']
 
-
-    def build_timestepper(*args, **kwargs) -> 'TimeStepper':
+    def build_timestepper(*args, **kwargs) -> TimeStepper:
         tscheme = LeapFrog(*args, **kwargs)
         comm = tscheme.u.function_space.mesh.comm
         return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
 
-
-    def __init__(self, function_space:fem.FunctionSpace,
+    def __init__(self, function_space: fem.FunctionSpace,
                  m_: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
                  c_: Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
                  k_: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
                  L: Union[None, Callable[['ufl.TestFunction'], ufl.form.Form]],
                  dt,
-                 bcs: List[BoundaryCondition]=[],
+                 bcs: List[BoundaryCondition] = [],
                  **kwargs):
 
-        self.jit_options = kwargs.get('jit_options', PDE.default_jit_options)
-        dt_  = fem.Constant(function_space.mesh, PETSc.ScalarType(dt))
+        self.jit_options = kwargs.get('jit_options', PDECONFIG.default_jit_options)
+        dt_ = fem.Constant(function_space.mesh, PETSc.ScalarType(dt))
 
         u, v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
 
-        self._u_n   = fem.Function(function_space, name="u")  # u(t)
-        self._u_nm1 = fem.Function(function_space)            # u(t-dt)
-        self._u_nm2 = fem.Function(function_space)            # u(t-2*dt)
+        self._u_n = fem.Function(function_space, name="u")  # u(t)
+        self._u_nm1 = fem.Function(function_space)          # u(t-dt)
+        self._u_nm2 = fem.Function(function_space)          # u(t-2*dt)
         #
         self._u0 = self._u_nm1
         self._v0 = self._u_n
         self._a0 = self._u_nm2
 
         # linear and bilinear forms for mass and stiffness matrices
-        self._a = m_(u,v)
-        self._L =-dt_*dt_*k_(self._u_nm1, v) + 2*m_(self._u_nm1,v) - m_(self._u_nm2,v)
+        self._a = m_(u, v)
+        self._L = -dt_ * dt_ * k_(self._u_nm1, v) + 2 * m_(self._u_nm1, v) - m_(self._u_nm2, v)
 
-        self._m0_form = m_(u,v)
-        self._L0_form =-k_(self._u0, v)
+        self._m0_form = m_(u, v)
+        self._L0_form = -k_(self._u0, v)
 
-        if not(L is None):
-            self._L += dt_*dt_*L(v)
+        if not (L is None):
+            self._L += dt_ * dt_ * L(v)
             self._L0_form += L(v)
 
         # linear and bilinear forms for damping matrix if given
-        if not(c_ is None):
-            self._a += 0.5*dt_*c_(u, v)
-            self._L += 0.5*dt_*c_(self._u_nm2, v)
+        if not (c_ is None):
+            self._a += 0.5 * dt_ * c_(u, v)
+            self._L += 0.5 * dt_ * c_(self._u_nm2, v)
             self._L0_form -= c_(self._v0, v)
 
         # boundary conditions
-        mpc          = PDE.build_mpc(function_space, bcs)
+        mpc = _build_mpc(function_space, bcs)
         dirichletbcs = BoundaryCondition.get_dirichlet_BCs(bcs)
         supportedbcs = BoundaryCondition.get_weak_BCs(bcs)
+
         for bc in supportedbcs:
-            if   bc.type == 'neumann':
-                self._L += dt_*dt_*bc.bc(v)
+            if bc.type == 'neumann':
+                self._L += dt_ * dt_ * bc.bc(v)
                 self._L0_form += bc.bc(v)
             elif bc.type == 'robin':
-                F_bc = dt_*dt_*bc.bc(u,v)
+                F_bc = dt_ * dt_ * bc.bc(u, v)
                 self._a += ufl.lhs(F_bc)
                 self._L += ufl.rhs(F_bc)
                 self._L0_form += bc.bc(self._u0, v)
             elif bc.type == 'dashpot':
-                F_bc = 0.5*dt_*bc.bc(u-self._u_nm2, v)
+                F_bc = 0.5 * dt_ * bc.bc(u - self._u_nm2, v)
                 self._a += ufl.lhs(F_bc)
                 self._L += ufl.rhs(F_bc)
                 self._L0_form += bc.bc(self._v0, v)
@@ -129,34 +129,30 @@ class LeapFrog(FEniCSxTimeScheme):
 
         # compile forms
         bilinear_form = fem.form(self._a, jit_options=self.jit_options)
-        linear_form   = fem.form(self._L, jit_options=self.jit_options)
+        linear_form = fem.form(self._L, jit_options=self.jit_options)
         #
         super().__init__(dt, self._u_n, bilinear_form, linear_form, mpc, dirichletbcs, explicit=True, **kwargs)
-
 
     @property
     def u(self) -> fem.Function:
         """The displacement field at current time step"""
         return self._u_n
 
-
     @property
     def u_nm1(self) -> fem.Function:
         """The displacement field at previous time step"""
         return self._u_nm1
-
 
     def prepareNextIteration(self) -> None:
         """Next-time-step function, to prepare next iteration -> Call it after solving"""
         self._u_nm2.x.array[:] = self._u_nm1.x.array
         self._u_nm1.x.array[:] = self._u_n.x.array
 
-
     def initialStep(self,
                     t0,
-                    callfirsts: List[Callable]=[],
-                    callbacks: List[Callable]=[],
-                    verbose: int=0) -> None:
+                    callfirsts: List[Callable] = [],
+                    callbacks: List[Callable] = [],
+                    verbose: int = 0) -> None:
 
         # ## -------------------------------------------------
         #    --- first step: given u0 and v0, solve for a0 ---
@@ -182,7 +178,7 @@ class LeapFrog(FEniCSxTimeScheme):
         u1 = self._u_n.x.array
 
         # remember that self._u_nm1 = self._u0 -> self._u_nm1 is already at the correct value
-        u1[:] = u0 + self.dt*v0 + 1/2*self.dt**2*a0
+        u1[:] = u0 + self.dt * v0 + 0.5 * self.dt**2 * a0
         # unm1 is not needed
         # at this point: self._u_n = u1, self._u_nm1 = u0
 

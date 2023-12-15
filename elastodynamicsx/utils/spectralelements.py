@@ -19,23 +19,23 @@ from dolfinx.mesh import CellType
 # ## Elements ###
 # ## ### ###  ###
 
-_cell_type_mesh2basix = {CellType.point        : basix.CellType.point,
-                         CellType.interval     : basix.CellType.interval,
-                         CellType.triangle     : basix.CellType.triangle,
+_cell_type_mesh2basix = {CellType.point: basix.CellType.point,
+                         CellType.interval: basix.CellType.interval,
+                         CellType.triangle: basix.CellType.triangle,
                          CellType.quadrilateral: basix.CellType.quadrilateral,
-                         CellType.tetrahedron  : basix.CellType.tetrahedron,
-                         CellType.prism        : basix.CellType.prism,
-                         CellType.pyramid      : basix.CellType.pyramid,
-                         CellType.hexahedron   : basix.CellType.hexahedron
+                         CellType.tetrahedron: basix.CellType.tetrahedron,
+                         CellType.prism: basix.CellType.prism,
+                         CellType.pyramid: basix.CellType.pyramid,
+                         CellType.hexahedron: basix.CellType.hexahedron
                          }
 
 
 def _suitable_cell_type_format(cell_type):
-    if   type(cell_type) == basix.CellType:
+    if isinstance(cell_type, basix.CellType):
         return cell_type
-    elif type(cell_type) == CellType:
+    elif isinstance(cell_type, CellType):
         return _cell_type_mesh2basix[cell_type]
-    elif type(cell_type) == str:
+    elif isinstance(cell_type, str):
         return basix.cell.string_to_type(cell_type)
     else:
         raise TypeError("Unknown cell type: {0:s}".format(cell_type))
@@ -55,7 +55,7 @@ def GL_element(cell_type,
                shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
     """(discontinuous) Element defined using the Gauss-Legendre points"""
     cell_type = _suitable_cell_type_format(cell_type)
-    element   = basix.ufl.element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.gl_warped, True)
+    element = basix.ufl.element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.gl_warped, True)
     return element
 
 
@@ -64,7 +64,7 @@ def Legendre_element(cell_type,
                      shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
     """(discontinuous) Element whose basis functions are the orthonormal Legendre polynomials"""
     cell_type = _suitable_cell_type_format(cell_type)
-    element   = basix.ufl.element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.legendre, True)
+    element = basix.ufl.element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.legendre, True)
     return element
 
 
@@ -82,12 +82,12 @@ def GLL_quadrature(degree: int) -> dict:
 
 def GL_quadrature(degree: int) -> dict:
     """Returns the dolfinx quadrature rule for use with GL elements of the given degree."""
-    return {"quadrature_rule": "GL",  "quadrature_degree": 2 * degree}  # 2 * degree + 1 ?
+    return {"quadrature_rule": "GL", "quadrature_degree": 2 * degree}  # 2 * degree + 1 ?
 
 
 def Legendre_quadrature(degree: int) -> dict:
     """Returns the dolfinx quadrature rule for use with Legendre elements of the given degree."""
-    return {"quadrature_rule": "GL",  "quadrature_degree": 2 * degree}
+    return {"quadrature_rule": "GL", "quadrature_degree": 2 * degree}
 
 
 # ## ### ### ### ###
@@ -173,7 +173,7 @@ def spectral_element(name: str,
               spy_petscMatrix(M)
           plt.show()
     """
-    if   name.lower() == "gll":
+    if name.lower() == "gll":
         return GLL_element(cell_type, degree, shape)
     elif name.lower() == "gl":
         return GL_element(cell_type, degree, shape)
@@ -195,7 +195,7 @@ def spectral_quadrature(name: str, degree: int) -> dict:
     Example:
         See doc of 'spectral_element'.
     """
-    if   name.lower() == "gll":
+    if name.lower() == "gll":
         return GLL_quadrature(degree)
     elif name.lower() == "gl":
         return GL_quadrature(degree)

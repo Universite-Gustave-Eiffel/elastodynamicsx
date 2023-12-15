@@ -15,8 +15,12 @@ of the PDE.
 The recommended way to instanciate a damping law is to use the :python:`damping` function.
 """
 
-class Damping: pass
-def damping(type_:str, *args) -> Damping:
+
+class Damping:
+    pass
+
+
+def damping(type_: str, *args) -> Damping:
     """
     Builder method that instanciates the desired damping law type
 
@@ -94,29 +98,24 @@ class RayleighDamping(Damping):
         self._eta_k = eta_k
         self._material = None
 
-
     @property
     def eta_m(self):
         """Parameter of the mass-matrix part of the damping"""
         return self._eta_m
-
 
     @property
     def eta_k(self):
         """Parameter of the stiffness-matrix part of the damping"""
         return self._eta_k
 
-
     @property
     def c(self):
-        return lambda u,v: self.eta_m * self._material.m(u,v) + self.eta_k * self._material.k(u,v)
-
+        return lambda u, v: self.eta_m * self._material.m(u, v) + self.eta_k * self._material.k(u, v)
 
     @property
     def host_material(self):
         """Host material from whom the mass and stiffness matrices are copied"""
         return self._material
-
 
     def link_material(self, host_material):
         """
@@ -126,5 +125,5 @@ class RayleighDamping(Damping):
         self._material = host_material
 
 
-# ### ### ###
+# ## ### ## #
 all_dampings = [NoDamping, RayleighDamping]

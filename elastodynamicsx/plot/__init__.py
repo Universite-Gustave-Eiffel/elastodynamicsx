@@ -6,4 +6,6 @@
 
 """The *plot* module contains convenience tools for plotting"""
 
+# flake8: noqa
+
 from .plot import *

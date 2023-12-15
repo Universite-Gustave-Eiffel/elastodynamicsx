@@ -19,7 +19,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
+from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE, PDECONFIG
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import plotter
 from elastodynamicsx.utils import spectral_element, spectral_quadrature, make_facet_tags, make_cell_tags, ParallelEvaluator
@@ -31,7 +31,7 @@ from elastodynamicsx.utils import spectral_element, spectral_quadrature, make_fa
 degElement, nameElement = 4, "GLL"
 cell_type = mesh.CellType.interval
 specFE               = spectral_element(nameElement, cell_type, degElement, (2,))
-PDE.default_metadata = spectral_quadrature(nameElement, degElement)
+PDECONFIG.default_metadata = spectral_quadrature(nameElement, degElement)
 
 
 length = 10

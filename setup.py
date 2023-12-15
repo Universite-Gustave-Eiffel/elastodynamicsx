@@ -1,8 +1,10 @@
-import setuptools, subprocess
-import os
+import setuptools
+import subprocess
+# import os
 
 with open("Readme.md", "r") as fh:
     long_description = fh.read()
+
 
 class MakeTheDoc(setuptools.Command):
     description = "Generate Documentation Pages using Sphinx"
@@ -18,6 +20,7 @@ class MakeTheDoc(setuptools.Command):
         """The command to run when users invoke python setup.py doc"""
         subprocess.run(
             ['sphinx-build docs/ docs/_build'], shell=True)
+
 
 setuptools.setup(
     name='ElastodynamiCSx',
@@ -37,15 +40,14 @@ setuptools.setup(
         "Programming Language :: Python :: 3 :: Only",
         "Operating System :: Linux",
         "Operating System :: MacOS",
-        ],
+        ],  # noqa
     cmdclass={
         'doc': MakeTheDoc,  # allow user to build the doc with python setup.py doc
-        },
+        },  # noqa
     install_requires=[
-        # === "official" packages
-        'numpy', 
+        'numpy',
         'matplotlib',
         'pyvista',
-        'sphinx', 'sphinx-rtd-theme', 'myst-parser', 'nbsphinx', # to generate the sphinx doc
-        ],
+        'sphinx', 'sphinx-rtd-theme', 'myst-parser', 'nbsphinx',  # to generate the sphinx doc
+        ],  # noqa
     python_requires='>=3')

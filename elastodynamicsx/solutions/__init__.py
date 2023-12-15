@@ -6,5 +6,6 @@
 
 """The *solutions* module contains tools to access and post-process solutions"""
 
-from .modalbasis import *
+from .modalbasis import ModalBasis
 
+__all__ = ["ModalBasis"]

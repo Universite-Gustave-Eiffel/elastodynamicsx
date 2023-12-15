@@ -4,5 +4,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-from .eigenmodessolver import *
+from .eigenmodessolver import EigenmodesSolver
 
+__all__ = ["EigenmodesSolver"]
