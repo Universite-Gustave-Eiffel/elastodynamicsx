@@ -36,18 +36,18 @@ elastodynamicsx.pde.materials.anisotropicmaterials module
    :undoc-members:
    :show-inheritance:
 
-elastodynamicsx.pde.materials.hyperelasticmaterial module
----------------------------------------------------------
+elastodynamicsx.pde.materials.hyperelasticmaterials module
+----------------------------------------------------------
 
-.. automodule:: elastodynamicsx.pde.materials.hyperelasticmaterial
+.. automodule:: elastodynamicsx.pde.materials.hyperelasticmaterials
    :members:
    :undoc-members:
    :show-inheritance:
 
-elastodynamicsx.pde.materials.damping module
---------------------------------------------
+elastodynamicsx.pde.materials.dampings module
+---------------------------------------------
 
-.. automodule:: elastodynamicsx.pde.materials.damping
+.. automodule:: elastodynamicsx.pde.materials.dampings
    :members:
    :undoc-members:
    :show-inheritance:
