@@ -11,8 +11,7 @@ from petsc4py import PETSc
 from dolfinx import fem
 import ufl
 
-from .timescheme import FEniCSxTimeScheme
-from elastodynamicsx.solvers import TimeStepper, OneStepTimeStepper
+from .timeschemebase import TimeScheme, FEniCSxTimeScheme
 from elastodynamicsx.pde import BoundaryCondition, PDECONFIG, _build_mpc
 
 
@@ -60,11 +59,6 @@ class LeapFrog(FEniCSxTimeScheme):
     """
 
     labels = ['leapfrog', 'central-difference']
-
-    def build_timestepper(*args, **kwargs) -> TimeStepper:
-        tscheme = LeapFrog(*args, **kwargs)
-        comm = tscheme.u.function_space.mesh.comm
-        return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
 
     def __init__(self, function_space: fem.FunctionSpace,
                  m_: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
@@ -131,7 +125,8 @@ class LeapFrog(FEniCSxTimeScheme):
         bilinear_form = fem.form(self._a, jit_options=self.jit_options)
         linear_form = fem.form(self._L, jit_options=self.jit_options)
         #
-        super().__init__(dt, self._u_n, bilinear_form, linear_form, mpc, dirichletbcs, explicit=True, **kwargs)
+        super().__init__(dt, self._u_n, bilinear_form, linear_form, mpc, dirichletbcs,
+                         explicit=True, nbsteps=1, linear_ODE=True, **kwargs)
 
     @property
     def u(self) -> fem.Function:
@@ -170,7 +165,7 @@ class LeapFrog(FEniCSxTimeScheme):
         # u1 is directly obtained from u0, v0, a0 (explicit scheme)
         # u2 requires to solve a new system (enter the time loop)
         problem = fem.petsc.LinearProblem(self._m0_form, self._L0_form, bcs=self._bcs, u=self._a0,
-                                          petsc_options=TimeStepper.petsc_options_t0,
+                                          petsc_options=TimeScheme.petsc_options_t0,
                                           jit_options=self.jit_options)
         problem.solve()
 

@@ -24,7 +24,7 @@ List of supported schemes:
         - 'generalized-alpha'
 """
 
-from .timescheme import TimeScheme, FEniCSxTimeScheme
+from .timeschemebase import TimeScheme, FEniCSxTimeScheme
 from .leapfrog import LeapFrog
 from .newmark import GalphaNewmarkBeta, HilberHughesTaylor, NewmarkBeta, MidPoint, LinearAccelerationMethod
 
@@ -32,7 +32,31 @@ all_timeschemes_explicit = [LeapFrog]
 all_timeschemes_implicit = [GalphaNewmarkBeta, HilberHughesTaylor, NewmarkBeta, MidPoint, LinearAccelerationMethod]
 all_timeschemes = all_timeschemes_explicit + all_timeschemes_implicit
 
-__all__ = ["all_timeschemes_explicit", "all_timeschemes_implicit", "all_timeschemes",
+
+def timescheme(*args, **kwargs):
+    """
+    Builder method that instanciates the desired time scheme
+
+    Args:
+        *args: Passed to the required time scheme
+
+    Keyword Args:
+        scheme: (mandatory) String identifier of the time scheme
+        **kwargs: Passed to the required material
+
+    Returns:
+        An instance of the desired time scheme
+    """
+    scheme = kwargs.pop('scheme', 'unknown').lower()
+    for s_ in all_timeschemes:
+        if scheme in s_.labels:
+            return s_(*args, **kwargs)
+
+    raise TypeError('unknown scheme: ' + scheme)
+
+
+__all__ = ["timescheme",
+           "all_timeschemes_explicit", "all_timeschemes_implicit", "all_timeschemes",
            "TimeScheme", "FEniCSxTimeScheme",
            "LeapFrog",
            "GalphaNewmarkBeta", "HilberHughesTaylor", "NewmarkBeta", "MidPoint", "LinearAccelerationMethod"]

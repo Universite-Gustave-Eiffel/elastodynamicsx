@@ -4,11 +4,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""
-The *timestepper* module contains tools for solving time-dependent problems.
-Note that building the problem is the role of the *pde.timescheme* module.
-"""
-
 from typing import Union
 
 from mpi4py import MPI
@@ -16,6 +11,8 @@ from petsc4py import PETSc
 
 from dolfinx import fem, mesh
 import ufl
+
+from elastodynamicsx.pde.timeschemes import TimeScheme, timescheme
 
 try:
     from tqdm.auto import tqdm
@@ -51,10 +48,7 @@ class TimeStepper:
     # --------- static ---------
     # --------------------------
 
-    # PETSc options to solve a0 = M_inv.(F(t0) - C.v0 - K(u0))
-    petsc_options_t0 = {"ksp_type": "preonly", "pc_type": "lu"}
-
-    petsc_options_explicit_scheme = petsc_options_t0
+    petsc_options_explicit_scheme = {"ksp_type": "preonly", "pc_type": "lu"}
     petsc_options_implicit_scheme_linear = {"ksp_type": "preonly", "pc_type": "lu"}
     # petsc_options_implicit_scheme_nonlinear =  # TODO
 
@@ -70,15 +64,16 @@ class TimeStepper:
                 'linear-acceleration-method', 'newmark', 'hht-alpha', 'generalized-alpha'
             **kwargs: (passed to the required scheme)
         """
-        from elastodynamicsx.pde.timeschemes import all_timeschemes
+        tscheme = timescheme(*args, **kwargs)
+        comm = tscheme.u.function_space.mesh.comm
 
-        scheme = kwargs.pop('scheme', 'unknown')
-        allSchemes = all_timeschemes
-        for s_ in allSchemes:
-            if scheme.lower() in s_.labels:
-                return s_.build_timestepper(*args, **kwargs)
-
-        raise TypeError('unknown scheme: ' + scheme)
+        if tscheme.linear_ODE is True:
+            if tscheme.nbsteps == 1:
+                return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
+            else:
+                raise NotImplementedError  # TODO: multi-steps?
+        else:
+            return NonlinearTimeStepper(comm, tscheme, **kwargs)
 
     def Courant_number(domain: mesh.Mesh, c_max, dt):
         """
@@ -106,13 +101,13 @@ class TimeStepper:
     # ------- non-static -------
     # --------------------------
 
-    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', **kwargs):  # noqa
+    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme, **kwargs):  # noqa
         """
         Args:
             comm: The MPI communicator
-            timescheme: Time scheme
+            tscheme: Time scheme
         """
-        self._tscheme = timescheme
+        self._tscheme = tscheme
         self._comm: MPI.Comm = comm
         self._t = 0
         self._dt = self._tscheme.dt
@@ -163,8 +158,8 @@ class NonlinearTimeStepper(TimeStepper):
     """
     Base class for solving nonlinear problems using implicit time schemes. Not implemented yet.
     """
-    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', **kwargs):  # noqa
-        super().__init__(comm, timescheme, **kwargs)
+    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme, **kwargs):
+        super().__init__(comm, tscheme, **kwargs)
         raise NotImplementedError
 
 
@@ -173,15 +168,15 @@ class LinearTimeStepper(TimeStepper):
     Base class for solving linear problems. Note that nonlinear problems formulated
     with an explicit scheme come down to linear problems; they are handled by this class.
     """
-    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # noqa
-        super().__init__(comm, timescheme, **kwargs)
+    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme, A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # noqa
+        super().__init__(comm, tscheme, **kwargs)
 
         if kwargs.get('diagonal', False) and isinstance(A, PETSc.Mat):
             A = A.getDiagonal()
 
         self._A = A  # Time-independent operator
         self._b = b  # Time-dependent right-hand side
-        self._explicit = timescheme.explicit
+        self._explicit = tscheme.explicit
         self._solver = None
 
         if isinstance(A, PETSc.Vec):
@@ -246,14 +241,14 @@ class OneStepTimeStepper(LinearTimeStepper):
     Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).
     """
 
-    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # noqa
-        super().__init__(comm, timescheme, A, b, **kwargs)
-        self._b_update_function = timescheme.b_update_function
+    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme, A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # noqa
+        super().__init__(comm, tscheme, A, b, **kwargs)
+        self._b_update_function = tscheme.b_update_function
 
         # self._i0 = 1 for explicit schemes because solving the initial
         # value problem a0=M_inv.(F(t0)-K(u0)-C.v0) also yields u1=u(t0+dt)
         self._i0 = 1 * self._explicit
-        self._intermediate_dt = timescheme.intermediate_dt  # non zero for generalized-alpha
+        self._intermediate_dt = tscheme.intermediate_dt  # non zero for generalized-alpha
 
     def solve(self, num_steps, **kwargs):
         """

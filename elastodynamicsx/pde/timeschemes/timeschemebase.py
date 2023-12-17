@@ -19,8 +19,6 @@ except ImportError:
     dolfinx_mpc = None
     MultiPointConstraint = None
 
-from elastodynamicsx.solvers import TimeStepper
-
 
 class TimeScheme():
     """
@@ -28,22 +26,45 @@ class TimeScheme():
       :language: python
 
     Abstract base class for time schemes as needed by the :python:`TimeStepper` solvers
+
+    Args:
+        dt: Time step
+        out: Solution vector
+
+    Keyword Args:
+        explicit (mandatory): Whether the scheme is explicit or implicit
+        nbsteps (mandatory): Number of resolution steps
+        linear_ODE (default=True): Whether the resulting ODE is linear or not
+        intermediate_dt (default=0.): Time at which time-dependent terms are evaluated
     """
 
     labels: typing.List[str] = ['supercharge me']
 
-    def build_timestepper(*args, **kwargs) -> TimeStepper:  # supercharge me
-        raise NotImplementedError
+    # PETSc options to solve a0 = M_inv.(F(t0) - C.v0 - K(u0))
+    petsc_options_t0: dict = {"ksp_type": "preonly", "pc_type": "lu"}
 
     def __init__(self, dt, out: PETSc.Vec, **kwargs):
+        # args
         self._dt = dt
         self._out: PETSc.Vec = out
-        self._explicit: bool = kwargs.get('explicit', False)
+
+        # kwargs
+        self._explicit: bool = kwargs['explicit']
+        self._nbsteps: int = kwargs['nbsteps']
+        self._linear_ODE: bool = kwargs.get('linear_ODE', True)
         self._intermediate_dt: float = kwargs.get('intermediate_dt', 0.)
 
     @property
     def explicit(self) -> bool:
         return self._explicit
+
+    @property
+    def nbsteps(self) -> int:
+        return self._nbsteps
+
+    @property
+    def linear_ODE(self) -> bool:
+        return self._linear_ODE
 
     @property
     def dt(self):

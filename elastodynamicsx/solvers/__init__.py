@@ -34,6 +34,6 @@ Frequency domain:
 
 # flake8: noqa
 
-from .timestepper import *
+from .timedomain import *
 from .eigensolver import *
 from .frequencydomain import *
