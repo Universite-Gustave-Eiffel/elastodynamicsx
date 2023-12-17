@@ -79,7 +79,7 @@ def make_tags(domain: Mesh, locators: Tuple[Tuple[int, Callable]], type_='unknow
 
 def get_functionspace_tags_marker(functionspace_tags_marker:
                                   Union[FunctionSpaceBase, Tuple[FunctionSpaceBase, MeshTags, int]]
-                                  ) -> Tuple[FunctionSpaceBase, MeshTags, int]:
+                                  ) -> Tuple[FunctionSpaceBase, Union[MeshTags, None], Union[int, None]]:
     """
     This is a convenience function for several classes/functions of other packages.
     It is not intended to be used in other context.

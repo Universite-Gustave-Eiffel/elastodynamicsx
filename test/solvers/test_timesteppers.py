@@ -8,7 +8,7 @@
 
 from mpi4py import MPI
 from dolfinx import mesh, fem, default_scalar_type
-import ufl
+import ufl  # type: ignore
 
 from elastodynamicsx.pde import material, PDE
 from elastodynamicsx.solvers import TimeStepper

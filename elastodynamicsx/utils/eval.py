@@ -4,11 +4,13 @@
 #
 # SPDX-License-Identifier: MIT
 
+import typing
+
 from mpi4py import MPI
 
 import numpy as np
 from dolfinx.mesh import Mesh
-from dolfinx.cpp.geometry import determine_point_ownership
+from dolfinx.cpp.geometry import determine_point_ownership  # type: ignore
 
 
 class ParallelEvaluator:
@@ -59,7 +61,7 @@ class ParallelEvaluator:
         src_owner, dest_owner, dest_points, dest_cells = \
             determine_point_ownership(domain._cpp_object, points.T, padding)
 
-        self.comm: MPI.comm = domain.comm
+        self.comm: MPI.Comm = domain.comm
         self.points: np.ndarray = points
         self.src_owner = src_owner
         self.dest_owner = dest_owner
@@ -70,10 +72,11 @@ class ParallelEvaluator:
     def nb_points_local(self) -> int:
         return len(self.points_local)
 
-    def gather(self, eval_results: np.ndarray, root=0) -> np.ndarray:
+    def gather(self, eval_results: np.ndarray, root=0) -> typing.Union[np.ndarray, None]:
         recv_eval = self.comm.gather(eval_results, root=root)
         rank = self.comm.Get_rank()
         if rank == 0:
+            assert isinstance(recv_eval, np.ndarray)
             # concatenate
             recv_eval = np.concatenate(recv_eval, axis=0)
             # re-order
