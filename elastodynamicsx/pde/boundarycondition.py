@@ -6,11 +6,11 @@
 
 from __future__ import annotations
 
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Callable
 
 import numpy as np
-from dolfinx import fem, default_scalar_type
-import ufl
+from dolfinx import fem, mesh, default_scalar_type
+import ufl  # type: ignore
 
 from .common import PDECONFIG
 from elastodynamicsx.utils import get_functionspace_tags_marker
@@ -110,31 +110,38 @@ class BoundaryCondition:
     # ## static  ## #
     # ## ### ### ## #
 
-    def get_dirichlet_BCs(bcs: Union[Tuple[BoundaryCondition], Tuple[()]]) -> List[fem.bcs.DirichletBC]:
+    @staticmethod
+    def get_dirichlet_BCs(bcs: Union[Tuple[Union[BoundaryCondition, fem.DirichletBC]],
+                          Tuple[()]]) -> List[fem.DirichletBC]:
         """Returns the BCs of Dirichlet type in bcs"""
         out = []
         for bc in bcs:
-            if issubclass(type(bc), fem.bcs.DirichletBC):
+            if issubclass(type(bc), fem.DirichletBC):
+                assert not (isinstance(bc, BoundaryCondition))
                 out.append(bc)
-            if isinstance(bc, BoundaryCondition) and issubclass(type(bc.bc), fem.bcs.DirichletBC):
+            elif isinstance(bc, BoundaryCondition) and issubclass(type(bc.bc), fem.DirichletBC):
                 out.append(bc.bc)
         return out
 
-    def get_mpc_BCs(bcs: Union[Tuple[BoundaryCondition], Tuple[()]]) -> List[BoundaryCondition]:
+    @staticmethod
+    def get_mpc_BCs(bcs: Union[Tuple[Union[BoundaryCondition, fem.DirichletBC]],
+                    Tuple[()]]) -> List[BoundaryCondition]:
         """Returns the BCs to be built with dolfinx_mpc in bcs"""
         out = []
         for bc in bcs:
-            if bc.type == 'periodic':
+            if isinstance(bc, BoundaryCondition) and (bc.type == 'periodic'):
                 out.append(bc)
         return out
 
-    def get_weak_BCs(bcs: Union[Tuple[BoundaryCondition], Tuple[()]]) -> List[BoundaryCondition]:
+    @staticmethod
+    def get_weak_BCs(bcs: Union[Tuple[Union[BoundaryCondition, fem.DirichletBC]],
+                     Tuple[()]]) -> List[BoundaryCondition]:
         """Returns the weak BCs in bcs"""
         out = []
         for bc in bcs:
             if isinstance(bc, BoundaryCondition):
                 test_mpc = bc.type == 'periodic'
-                test_d = issubclass(type(bc.bc), fem.bcs.DirichletBC)
+                test_d = issubclass(type(bc.bc), fem.DirichletBC)
                 if not (test_mpc or test_d):
                     out.append(bc)
         return out
@@ -144,7 +151,7 @@ class BoundaryCondition:
     # ## ### ### ### ## #
 
     def __init__(self, functionspace_tags_marker, type_: str,
-                 values: Union[fem.Function, fem.Constant, np.ndarray, Tuple] = None, **kwargs):
+                 values: Union[fem.Function, fem.Constant, np.ndarray, Tuple, None] = None, **kwargs):
         #
         function_space, facet_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
 
@@ -162,8 +169,12 @@ class BoundaryCondition:
             z0s = np.array([0] * nbcomps, dtype=default_scalar_type) if nbcomps > 0 else default_scalar_type(0)
             values = fem.Constant(function_space.mesh, z0s)
 
-        self._type = type_
+        assert not (values is None)
+
+        self._type: str = type_
         self._values = values
+        self._bc: Union[fem.DirichletBC, Callable, Tuple[Union[mesh.MeshTags, None], Union[int, None], Callable]]
+
         md = kwargs.get('metadata', PDECONFIG.default_metadata)
         ds = ufl.Measure("ds",
                          domain=function_space.mesh,
@@ -171,6 +182,9 @@ class BoundaryCondition:
                          metadata=md)(marker)  # also valid if facet_tags or marker are None
 
         if type_ == "dirichlet":
+            assert not (isinstance(values, tuple))
+            assert not (facet_tags is None), "facet_tags must not be None"
+            assert not (marker is None), "marker must not be None"
             fdim = function_space.mesh.topology.dim - 1
             facets = facet_tags.find(marker)
             dofs = fem.locate_dofs_topological(function_space, fdim, facets)
@@ -210,23 +224,23 @@ class BoundaryCondition:
             assert isinstance(marker, int), "Periodic BC requires a single facet tag"
             P = np.asarray(values)
 
-            def slave_to_master_map(x):
+            def slave_to_master_map(x: np.ndarray):
                 return x + P[:, np.newaxis]
             self._bc = (facet_tags, marker, slave_to_master_map)
 
         # -- # -- # -- #
         elif type_ == 'periodic-do-not-use':  # TODO: try to calculate P from two given boundary markers
-            assert len(marker) == 2, "Periodic BC requires two facet tags"
+            assert len(marker) == 2, "Periodic BC requires two facet tags"  # type: ignore
             fdim = function_space.mesh.topology.dim - 1
-            marker_master, marker_slave = marker
+            marker_master, marker_slave = marker  # type: ignore
             # facets_master = facet_tags.find(marker_master)  # not available on dolfinx v0.4.1
-            facets_master = facet_tags.indices[facet_tags.values == marker_master]
-            facets_slave = facet_tags.indices[facet_tags.values == marker_slave]
+            facets_master = facet_tags.indices[facet_tags.values == marker_master]  # type: ignore # <- temporary
+            facets_slave = facet_tags.indices[facet_tags.values == marker_slave]  # type: ignore # <- temporary
             dofs_master = fem.locate_dofs_topological(function_space, fdim, facets_master)
             dofs_slave = fem.locate_dofs_topological(function_space, fdim, facets_slave)
             x = function_space.tabulate_dof_coordinates()
             xm, xs = x[dofs_master], x[dofs_slave]  # noqa
-            slave_to_master_map = None
+            slave_to_master_map = None  # type: ignore
             raise NotImplementedError
 
         else:

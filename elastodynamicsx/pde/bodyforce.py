@@ -6,7 +6,7 @@
 
 import typing
 
-import ufl
+import ufl  # type: ignore
 
 from .common import PDECONFIG
 from elastodynamicsx.utils import get_functionspace_tags_marker

@@ -13,7 +13,7 @@ space dimensions and number of components of the function space.
 
 from typing import Callable
 
-import ufl
+import ufl  # type: ignore
 
 
 def epsilon_vector(u):

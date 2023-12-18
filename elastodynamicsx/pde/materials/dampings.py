@@ -15,46 +15,13 @@ of the PDE.
 The recommended way to instanciate a damping law is to use the :python:`damping` function.
 """
 
-
-class Damping:
-    pass
-
-
-def damping(type_: str, *args) -> Damping:
-    """
-    Builder method that instanciates the desired damping law type
-
-    Args:
-        type_: Available options are:
-
-            - 'none'
-            - 'rayleigh'
-
-        *args: Passed to the required damping law
-
-    Returns:
-        An instance of the desired damping law
-
-    Example:
-        .. highlight:: python
-        .. code-block:: python
-
-          from elastodynamicsx.pde import damping, material
-
-          dmp = damping('none')
-          dmp = damping('rayleigh', eta_m, eta_k)
-
-          mat = material(V, 'isotropic', rho, lambda_, mu, damping=dmp)
-    """
-    for Damp in all_dampings:
-        if type_.lower() in Damp.labels:
-            return Damp(*args)
-
-    raise TypeError("Unknown damping law: {0:s}".format(type_))
+from typing import List
 
 
 class Damping():
     """Dummy base class for damping laws"""
+
+    labels: List[str]
 
     @property
     def c(self):
@@ -65,7 +32,8 @@ class Damping():
 
 class NoDamping(Damping):
     """No damping"""
-    labels = ['none']
+
+    labels: List[str] = ['none']
 
     @property
     def c(self):
@@ -86,7 +54,7 @@ class RayleighDamping(Damping):
       c(u,v) = \eta_m  m(u,v) + \eta_k  k(u,v)
     """
 
-    labels = ['rayleigh']
+    labels: List[str] = ['rayleigh']
 
     def __init__(self, eta_m, eta_k):
         """
@@ -127,3 +95,37 @@ class RayleighDamping(Damping):
 
 # ## ### ## #
 all_dampings = [NoDamping, RayleighDamping]
+
+
+def damping(type_: str, *args) -> Damping:
+    """
+    Builder method that instanciates the desired damping law type
+
+    Args:
+        type_: Available options are:
+
+            - 'none'
+            - 'rayleigh'
+
+        *args: Passed to the required damping law
+
+    Returns:
+        An instance of the desired damping law
+
+    Example:
+        .. highlight:: python
+        .. code-block:: python
+
+          from elastodynamicsx.pde import damping, material
+
+          dmp = damping('none')
+          dmp = damping('rayleigh', eta_m, eta_k)
+
+          mat = material(V, 'isotropic', rho, lambda_, mu, damping=dmp)
+    """
+    for Damp in all_dampings:
+        assert issubclass(Damp, Damping)
+        if type_.lower() in Damp.labels:
+            return Damp(*args)
+
+    raise TypeError("Unknown damping law: {0:s}".format(type_))

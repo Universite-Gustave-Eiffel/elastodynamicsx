@@ -9,7 +9,7 @@ try:
 except ImportError:
     import warnings
     warnings.warn("Can't import dolfinx_mpc. Some features are not available", Warning)
-    dolfinx_mpc = None
+    dolfinx_mpc = None  # type: ignore
 
 from .boundarycondition import BoundaryCondition
 
