@@ -15,21 +15,21 @@ import pyvista
 
 from petsc4py import PETSc
 from dolfinx import plot, fem
-from dolfinx.mesh import Mesh
+from dolfinx.mesh import Mesh, MeshTags
 
 
 # ## ------------------------------------------------------------------------- ## #
 # ## --- preliminary: auto-configure pyvista backend for jupyter notebooks --- ## #
 # ## ------------------------------------------------------------------------- ## #
 
-pyvista.global_theme.background = 'white'
-pyvista.global_theme.font.color = 'grey'
+pyvista.global_theme.background = pyvista.Color('white')
+pyvista.global_theme.font.color = pyvista.Color('grey')
 
 
 def _is_notebook() -> bool:
     # https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook/24937408
     try:
-        shell = get_ipython().__class__.__name__
+        shell = get_ipython().__class__.__name__  # type: ignore[name-defined]
         if shell == 'ZMQInteractiveShell':
             return True   # Jupyter notebook or qtconsole
         elif shell == 'TerminalInteractiveShell':
@@ -55,7 +55,7 @@ if _is_notebook():
 # ## --- define useful plotting functions --- ## #
 # ## ---------------------------------------- ## #
 
-def plot_mesh(mesh: Mesh, cell_tags=None, **kwargs) -> pyvista.Plotter:
+def plot_mesh(mesh: Mesh, cell_tags: Union[MeshTags, None] = None, **kwargs) -> pyvista.Plotter:
     """
     Plot the mesh with colored subdomains
 
@@ -164,9 +164,14 @@ def plotter(*args: Union[List[fem.Function], Mesh], **kwargs) -> pyvista.Plotter
     u1 = args[0]
 
     if isinstance(u1, Mesh):
-        return plot_mesh(*args, **kwargs)
+        msh = u1
+        assert len(args) < 3
+        mt = args[1] if len(args) == 2 else None
+        assert isinstance(mt, MeshTags) or (mt is None)
+        return plot_mesh(msh, mt, **kwargs)
 
     else:
+        assert isinstance(u1, fem.Function)
         # test whether u is scalar or vector and returns the appropriate plotter
         nbcomps = u1.function_space.element.num_sub_elements  # number of components if vector space, 0 if scalar space
 
@@ -200,8 +205,8 @@ class CustomScalarPlotter(pyvista.Plotter):
 
     def __init__(self, *all_scalars, **kwargs):
         self.grids: List[pyvista.UnstructuredGrid] = []
-        self._refresh_step = kwargs.pop('refresh_step', 1)
-        self._tsleep = kwargs.pop('sleep', 0.01)
+        self._refresh_step: int = kwargs.pop('refresh_step', 1)
+        self._tsleep: float = kwargs.pop('sleep', 0.01)
         dims = []
 
         self._trans = lambda x: x
@@ -277,8 +282,8 @@ class CustomScalarPlotter(pyvista.Plotter):
         if kwargs.get('render', True):
             self.render()
 
-    def live_plotter_update_function(self, i: int, vec: PETSc.Vec) -> None:
-        if not isinstance(vec, PETSc.Vec):
+    def live_plotter_update_function(self, i: int, vec: PETSc.Vec) -> None:  # type: ignore[name-defined]
+        if not isinstance(vec, PETSc.Vec):  # type: ignore[attr-defined]
             if issubclass(type(vec), fem.function.Function):
                 vec = vec.vector
             else:
@@ -328,8 +333,8 @@ class CustomVectorPlotter(pyvista.Plotter):
     def __init__(self, *all_vectors, **kwargs):
         ###
         self.grids: List[pyvista.UnstructuredGrid] = []
-        self._refresh_step = kwargs.pop('refresh_step', 1)
-        self._tsleep = kwargs.pop('sleep', 0.01)
+        self._refresh_step: int = kwargs.pop('refresh_step', 1)
+        self._tsleep: float = kwargs.pop('sleep', 0.01)
         dims = []
 
         self._trans = lambda x: x
@@ -437,8 +442,8 @@ class CustomVectorPlotter(pyvista.Plotter):
         if render:
             self.render()
 
-    def live_plotter_update_function(self, i: int, vec: PETSc.Vec) -> None:
-        if not isinstance(vec, PETSc.Vec):
+    def live_plotter_update_function(self, i: int, vec: PETSc.Vec) -> None:  # type: ignore[name-defined]
+        if not isinstance(vec, PETSc.Vec):  # type: ignore[attr-defined]
             if issubclass(type(vec), fem.function.Function):
                 vec = vec.vector
             else:
@@ -466,7 +471,7 @@ class CustomVectorPlotter(pyvista.Plotter):
         self.add_slider_widget(updateTStep, [timesteps[0], timesteps[-1]], **kwargs_slider)
 
 
-def spy_petscMatrix(Z: PETSc.Mat, *args, **kwargs) -> AxesImage:
+def spy_petscMatrix(Z: PETSc.Mat, *args, **kwargs) -> AxesImage:  # type: ignore[name-defined]
     """
     matplotlib.pyplot.spy with Z being a petsc4py.PETSc.Mat object
 
@@ -480,7 +485,7 @@ def spy_petscMatrix(Z: PETSc.Mat, *args, **kwargs) -> AxesImage:
     Returns:
         See doc of matplotlib.pyplot.spy
     """
-    import scipy.sparse
+    import scipy.sparse  # type: ignore
     kwargs['markersize'] = kwargs.get('markersize', 1)
     # [::-1] because:
     # ai, aj, av    = Z.getValuesCSR()
