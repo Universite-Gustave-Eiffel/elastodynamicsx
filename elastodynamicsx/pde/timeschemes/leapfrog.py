@@ -4,12 +4,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-from typing import Union, Callable, List
+from typing import Union, Callable, List, Tuple
 
 from petsc4py import PETSc
 
-from dolfinx import fem
-import ufl
+from dolfinx import fem, default_scalar_type
+import ufl  # type: ignore
 
 from .timeschemebase import TimeScheme, FEniCSxTimeScheme
 from elastodynamicsx.pde import BoundaryCondition, PDECONFIG, _build_mpc
@@ -60,17 +60,17 @@ class LeapFrog(FEniCSxTimeScheme):
 
     labels = ['leapfrog', 'central-difference']
 
-    def __init__(self, function_space: fem.FunctionSpace,
+    def __init__(self, function_space: fem.FunctionSpaceBase,
                  m_: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
                  c_: Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
                  k_: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
                  L: Union[None, Callable[['ufl.TestFunction'], ufl.form.Form]],
                  dt,
-                 bcs: List[BoundaryCondition] = [],
+                 bcs: Union[Tuple[BoundaryCondition], Tuple[()]] = (),
                  **kwargs):
 
         self.jit_options = kwargs.get('jit_options', PDECONFIG.default_jit_options)
-        dt_ = fem.Constant(function_space.mesh, PETSc.ScalarType(dt))
+        dt_ = fem.Constant(function_space.mesh, default_scalar_type(dt))
 
         u, v = ufl.TrialFunction(function_space), ufl.TestFunction(function_space)
 
@@ -154,8 +154,8 @@ class LeapFrog(FEniCSxTimeScheme):
         # ## -------------------------------------------------
         #
         if verbose >= 10:
-            PETSc.Sys.Print('Solving the initial value step')
-            PETSc.Sys.Print('Callfirsts...')
+            PETSc.Sys.Print('Solving the initial value step')  # type: ignore[attr-defined]
+            PETSc.Sys.Print('Callfirsts...')  # type: ignore[attr-defined]
 
         for callfirst in callfirsts:
             callfirst(t0)  # <- update stuff
@@ -180,7 +180,7 @@ class LeapFrog(FEniCSxTimeScheme):
         self.prepareNextIteration()
 
         if verbose >= 10:
-            PETSc.Sys.Print('Initial value problem solved, entering loop')
+            PETSc.Sys.Print('Initial value problem solved, entering loop')  # type: ignore[attr-defined]
         for callback in callbacks:
             callback(0, self._u_n.vector)  # <- store solution, plot, print, ...
         #

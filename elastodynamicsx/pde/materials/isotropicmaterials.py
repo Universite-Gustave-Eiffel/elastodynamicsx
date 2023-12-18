@@ -7,7 +7,7 @@
 import typing
 
 from dolfinx import fem, default_scalar_type
-import ufl
+import ufl  # type: ignore
 
 from .elasticmaterial import ElasticMaterial
 from elastodynamicsx.utils import get_functionspace_tags_marker

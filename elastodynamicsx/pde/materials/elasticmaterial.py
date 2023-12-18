@@ -7,7 +7,7 @@
 import typing
 
 from dolfinx import fem, default_scalar_type
-import ufl
+import ufl  # type: ignore
 import numpy as np
 
 from .material import Material
@@ -68,6 +68,7 @@ class ElasticMaterial(Material):
     ijkm[19, :] = 0, 2, 0, 1  # C56 <-> 19
     ijkm[20, :] = 0, 1, 0, 1  # C66 <-> 20
 
+    @staticmethod
     def Cij(C_21: typing.List, i: int, j: int):
         """
         Returns the :math:`C_{ij}` coefficient from the C_21 list
@@ -76,6 +77,7 @@ class ElasticMaterial(Material):
         """
         return C_21[ElasticMaterial.eq_IJ[i, j]]
 
+    @staticmethod
     def Cijkm(C_21: typing.List, i: int, j: int, k: int, m: int):
         """
         Returns the :math:`C_{ijkm}` coefficient from the C_21 list

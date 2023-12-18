@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-import typing
+from typing import List, Union, Tuple
 
 import numpy as np
 from dolfinx import fem, default_scalar_type
@@ -110,7 +110,7 @@ class BoundaryCondition:
     # ## static  ## #
     # ## ### ### ## #
 
-    def get_dirichlet_BCs(bcs: typing.Tuple[BoundaryCondition]) -> typing.List[fem.bcs.DirichletBC]:
+    def get_dirichlet_BCs(bcs: Union[Tuple[BoundaryCondition], Tuple[()]]) -> List[fem.bcs.DirichletBC]:
         """Returns the BCs of Dirichlet type in bcs"""
         out = []
         for bc in bcs:
@@ -120,7 +120,7 @@ class BoundaryCondition:
                 out.append(bc.bc)
         return out
 
-    def get_mpc_BCs(bcs: typing.Tuple[BoundaryCondition]) -> typing.List[BoundaryCondition]:
+    def get_mpc_BCs(bcs: Union[Tuple[BoundaryCondition], Tuple[()]]) -> List[BoundaryCondition]:
         """Returns the BCs to be built with dolfinx_mpc in bcs"""
         out = []
         for bc in bcs:
@@ -128,7 +128,7 @@ class BoundaryCondition:
                 out.append(bc)
         return out
 
-    def get_weak_BCs(bcs: typing.Tuple[BoundaryCondition]) -> typing.List[BoundaryCondition]:
+    def get_weak_BCs(bcs: Union[Tuple[BoundaryCondition], Tuple[()]]) -> List[BoundaryCondition]:
         """Returns the weak BCs in bcs"""
         out = []
         for bc in bcs:
@@ -144,7 +144,7 @@ class BoundaryCondition:
     # ## ### ### ### ## #
 
     def __init__(self, functionspace_tags_marker, type_: str,
-                 values: typing.Union[fem.Function, fem.Constant, np.ndarray, typing.Tuple] = None, **kwargs):
+                 values: Union[fem.Function, fem.Constant, np.ndarray, Tuple] = None, **kwargs):
         #
         function_space, facet_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
 
@@ -243,5 +243,5 @@ class BoundaryCondition:
         return self._type
 
     @property
-    def values(self) -> typing.Union[fem.Function, fem.Constant, np.ndarray, typing.Tuple]:
+    def values(self) -> Union[fem.Function, fem.Constant, np.ndarray, Tuple]:
         return self._values

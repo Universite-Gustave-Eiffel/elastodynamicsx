@@ -6,7 +6,7 @@
 
 from typing import Callable
 
-import ufl
+import ufl  # type: ignore
 
 from .material import Material
 from elastodynamicsx.utils import get_functionspace_tags_marker
