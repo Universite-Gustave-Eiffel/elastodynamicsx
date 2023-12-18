@@ -28,7 +28,7 @@ class ModalBasis():
         un: eigen modeshapes
     """
 
-    def __init__(self, wn: np.ndarray, un: typing.List[PETSc.Vec], **kwargs):
+    def __init__(self, wn: np.ndarray, un: typing.List[PETSc.Vec], **kwargs):  # type: ignore[name-defined]
         self._wn = wn
         self._un = un
 
@@ -43,11 +43,11 @@ class ModalBasis():
         return self._wn
 
     @property
-    def un(self) -> typing.List[PETSc.Vec]:
+    def un(self) -> typing.List[PETSc.Vec]:  # type: ignore[name-defined]
         """The eigen modeshapes :math:`\mathbf{u}_n`"""
         return self._un
 
-    def plot(self, function_space: fem.FunctionSpace, which='all', **kwargs) -> None:
+    def plot(self, function_space: fem.FunctionSpaceBase, which='all', **kwargs) -> None:
         """
         Plots the desired modeshapes
 
