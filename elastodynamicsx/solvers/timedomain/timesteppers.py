@@ -10,14 +10,14 @@ from mpi4py import MPI
 from petsc4py import PETSc
 
 from dolfinx import fem, mesh
-import ufl
+import ufl  # type: ignore
 
 from elastodynamicsx.pde.timeschemes import TimeScheme, timescheme
 
 try:
     from tqdm.auto import tqdm
 except ModuleNotFoundError:
-    def tqdm(x):
+    def tqdm(x):  # type: ignore[no-redef]
         return x
 
 
@@ -28,10 +28,10 @@ class DiagonalSolver:
     Args:
         A: A PETSc vector that represents a diagonal matrix
     """
-    def __init__(self, A: PETSc.Vec):
+    def __init__(self, A: PETSc.Vec):  # type: ignore
         self._A = A
 
-    def solve(self, b: PETSc.Vec, out: PETSc.Vec) -> None:
+    def solve(self, b: PETSc.Vec, out: PETSc.Vec) -> None:  # type: ignore
         """
         Solve (in-place) the linear system
         :math:`\mathbf{A} * \mathbf{out} = \mathbf{b}`
@@ -75,6 +75,7 @@ class TimeStepper:
         else:
             return NonlinearTimeStepper(comm, tscheme, **kwargs)
 
+    @staticmethod
     def Courant_number(domain: mesh.Mesh, c_max, dt):
         """
         The Courant number: :math:`C = c_{max} \, \mathrm{d}t / h`, with :math:`h` the cell diameter
@@ -101,7 +102,7 @@ class TimeStepper:
     # ------- non-static -------
     # --------------------------
 
-    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme, **kwargs):  # noqa
+    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme, **kwargs):
         """
         Args:
             comm: The MPI communicator
@@ -168,10 +169,11 @@ class LinearTimeStepper(TimeStepper):
     Base class for solving linear problems. Note that nonlinear problems formulated
     with an explicit scheme come down to linear problems; they are handled by this class.
     """
-    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme, A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # noqa
+    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme,
+                 A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # type: ignore
         super().__init__(comm, tscheme, **kwargs)
 
-        if kwargs.get('diagonal', False) and isinstance(A, PETSc.Mat):
+        if kwargs.get('diagonal', False) and isinstance(A, PETSc.Mat):  # type: ignore
             A = A.getDiagonal()
 
         self._A = A  # Time-independent operator
@@ -179,7 +181,7 @@ class LinearTimeStepper(TimeStepper):
         self._explicit = tscheme.explicit
         self._solver = None
 
-        if isinstance(A, PETSc.Vec):
+        if isinstance(A, PETSc.Vec):  # type: ignore
             self._init_solver_diagonal(A)
         else:
             if self._explicit:
@@ -190,11 +192,11 @@ class LinearTimeStepper(TimeStepper):
             self._init_solver(comm, petsc_options)
 
     @property
-    def A(self) -> Union[PETSc.Mat, PETSc.Vec]:
+    def A(self) -> Union[PETSc.Mat, PETSc.Vec]:  # type: ignore
         return self._A
 
     @property
-    def b(self) -> PETSc.Vec:
+    def b(self) -> PETSc.Vec:  # type: ignore
         return self._b
 
     @property
@@ -202,11 +204,11 @@ class LinearTimeStepper(TimeStepper):
         return self._explicit
 
     @property
-    def solver(self) -> Union[PETSc.KSP, DiagonalSolver]:
+    def solver(self) -> Union[PETSc.KSP, DiagonalSolver]:  # type: ignore
         return self._solver
 
-    def _init_solver_diagonal(self, A: PETSc.Vec) -> None:
-        self._solver = DiagonalSolver(A)
+    def _init_solver_diagonal(self, A: PETSc.Vec) -> None:  # type: ignore
+        self._solver = DiagonalSolver(A)  # type: ignore
 
     def _init_solver(self, comm: MPI.Comm, petsc_options={}):
         # see https://github.com/FEniCS/dolfinx/blob/main/python/dolfinx/fem/petsc.py
@@ -214,20 +216,20 @@ class LinearTimeStepper(TimeStepper):
         # ##   ###   ###   ###
 
         # Solver
-        self._solver = PETSc.KSP().create(comm)
-        self._solver.setOperators(self._A)
+        self._solver = PETSc.KSP().create(comm)  # type: ignore
+        self._solver.setOperators(self._A)  # type: ignore
 
         # Give PETSc solver options a unique prefix
         problem_prefix = f"dolfinx_solve_{id(self)}"
-        self._solver.setOptionsPrefix(problem_prefix)
+        self._solver.setOptionsPrefix(problem_prefix)  # type: ignore
 
         # Set PETSc options
-        opts = PETSc.Options()
+        opts = PETSc.Options()  # type: ignore
         opts.prefixPush(problem_prefix)
         for k, v in petsc_options.items():
             opts[k] = v
         opts.prefixPop()
-        self._solver.setFromOptions()
+        self._solver.setFromOptions()  # type: ignore
 
         # Set matrix and vector PETSc options
         self._A.setOptionsPrefix(problem_prefix)
@@ -241,7 +243,7 @@ class OneStepTimeStepper(LinearTimeStepper):
     Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).
     """
 
-    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme, A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # noqa
+    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme, A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # type: ignore
         super().__init__(comm, tscheme, A, b, **kwargs)
         self._b_update_function = tscheme.b_update_function
 

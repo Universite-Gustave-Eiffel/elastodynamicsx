@@ -13,7 +13,7 @@ import numpy as np
 try:
     from tqdm.auto import tqdm
 except ModuleNotFoundError:
-    def tqdm(x):
+    def tqdm(x):  # type: ignore[no-redef]
         return x
 
 
@@ -85,7 +85,7 @@ class FrequencyDomainSolver:
     default_petsc_options = {"ksp_type": "preonly", "pc_type": "lu"}  # "pc_factor_mat_solver_type": "mumps"
 
     def __init__(self, comm: MPI.Comm, M: PETSc.Mat, C: PETSc.Mat, K: PETSc.Mat, b: PETSc.Vec,  # type: ignore
-                 b_update_function: Callable = None, **kwargs):
+                 b_update_function: Union[Callable, None] = None, **kwargs):
         self._M = M
         self._C = C
         self._K = K
@@ -138,6 +138,7 @@ class FrequencyDomainSolver:
             out = self._M.createVecRight()
 
         if hasattr(omega, '__iter__'):
+            omega = np.asarray(omega)
             return self._solve_multiple_omegas(omega, out, callbacks, **kwargs)
 
         else:
