@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: MIT
 
 from .elasticmaterial import ElasticMaterial
-from elastodynamicsx.utils import get_functionspace_tags_marker
+from elastodynamicsx.utils import _get_functionspace_tags_marker
 
 
 class CubicMaterial(ElasticMaterial):
@@ -27,7 +27,7 @@ class CubicMaterial(ElasticMaterial):
     def __init__(self, functionspace_tags_marker, rho,
                  C11, C12, C44, **kwargs):
 
-        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, _, _ = _get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements > 0, 'CubicMaterial requires a vector function space'
 
         C11 = C22 = C33 = C11
@@ -61,7 +61,7 @@ class HexagonalMaterial(ElasticMaterial):
     def __init__(self, functionspace_tags_marker, rho,
                  C11, C13, C33, C44, C66, **kwargs):
 
-        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, _, _ = _get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements > 0, 'HexagonalMaterial requires a vector function space'
 
         C22 = C11
@@ -96,7 +96,7 @@ class TrigonalMaterial(ElasticMaterial):
     def __init__(self, functionspace_tags_marker, rho,
                  C11, C12, C13, C14, C25, C33, C44, **kwargs):
 
-        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, _, _ = _get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements > 0, 'TrigonalMaterial requires a vector function space'
 
         C_21 = [0] * 21
@@ -138,7 +138,7 @@ class TetragonalMaterial(ElasticMaterial):
     def __init__(self, functionspace_tags_marker, rho,
                  C11, C12, C13, C16, C33, C44, C66, **kwargs):
 
-        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, _, _ = _get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements > 0, 'TetragonalMaterial requires a vector function space'
 
         C_21 = [0] * 21
@@ -176,7 +176,7 @@ class OrthotropicMaterial(ElasticMaterial):
     def __init__(self, functionspace_tags_marker, rho,
                  C11, C12, C13, C22, C23, C33, C44, C55, C66, **kwargs):
 
-        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, _, _ = _get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements > 0, 'OrthotropicMaterial requires a vector function space'
 
         C_21 = [0] * 21
@@ -213,7 +213,7 @@ class MonoclinicMaterial(ElasticMaterial):
                  C11, C12, C13, C15, C22, C23,
                  C25, C33, C35, C44, C46, C55, C66, **kwargs):
 
-        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, _, _ = _get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements > 0, 'MonoclinicMaterial requires a vector function space'
 
         C_21 = [0] * 21
@@ -255,7 +255,7 @@ class TriclinicMaterial(ElasticMaterial):
                  C23, C24, C25, C26, C33, C34, C35,
                  C36, C44, C45, C46, C55, C56, C66, **kwargs):
 
-        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, _, _ = _get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements > 0, 'TriclinicMaterial requires a vector function space'
 
         all21Csts = (C11, C12, C13, C14, C15, C16, C22,

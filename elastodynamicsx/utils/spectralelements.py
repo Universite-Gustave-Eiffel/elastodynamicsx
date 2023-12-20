@@ -158,7 +158,8 @@ def spectral_element(name: str,
           # 2. by passing the metadata to the PDE.default_metadata, which is being used by
           # all materials / boundary conditions / bodyforces at __init__ call
 
-          PDE.default_metadata = specmd # default metadata for all forms in the pde package (materials, BCs, ...)
+          from elastodynamicsx.pde import PDECONFIG
+          PDECONFIG.default_metadata = specmd  # default for all forms in the pde package (materials, BCs, ...)
 
           mat5          = material(V, 'scalar', 1, 1)
           pde5_diag     = PDE(V, [mat5])

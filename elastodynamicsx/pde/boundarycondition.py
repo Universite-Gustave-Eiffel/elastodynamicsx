@@ -13,7 +13,7 @@ from dolfinx import fem, mesh, default_scalar_type
 import ufl  # type: ignore
 
 from .common import PDECONFIG
-from elastodynamicsx.utils import get_functionspace_tags_marker
+from elastodynamicsx.utils import _get_functionspace_tags_marker
 
 
 class BoundaryCondition:
@@ -153,7 +153,7 @@ class BoundaryCondition:
     def __init__(self, functionspace_tags_marker, type_: str,
                  values: Union[fem.Function, fem.Constant, np.ndarray, Tuple, None] = None, **kwargs):
         #
-        function_space, facet_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, facet_tags, marker = _get_functionspace_tags_marker(functionspace_tags_marker)
 
         type_ = type_.lower()
         nbcomps = function_space.element.num_sub_elements  # number of components if vector space, 0 if scalar space

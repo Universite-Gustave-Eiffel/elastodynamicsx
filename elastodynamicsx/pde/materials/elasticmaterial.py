@@ -13,7 +13,7 @@ import numpy as np
 from .material import Material
 from .kinematics import get_epsilon_function, get_epsilonVoigt_function, get_L_operators
 from .dampings import NoDamping, RayleighDamping
-from elastodynamicsx.utils import get_functionspace_tags_marker
+from elastodynamicsx.utils import _get_functionspace_tags_marker
 
 
 class ElasticMaterial(Material):
@@ -94,7 +94,7 @@ class ElasticMaterial(Material):
 
     def __init__(self, functionspace_tags_marker, rho, C_21: typing.List, **kwargs):
 
-        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, _, _ = _get_functionspace_tags_marker(functionspace_tags_marker)
         dim = function_space.mesh.geometry.dim  # space dimension
         nbcomps = function_space.num_sub_spaces  # number of components (0 for scalar)
 

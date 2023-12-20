@@ -8,7 +8,7 @@ import typing
 
 import ufl  # type: ignore
 
-from elastodynamicsx.utils import get_functionspace_tags_marker
+from elastodynamicsx.utils import _get_functionspace_tags_marker
 from elastodynamicsx.pde import PDECONFIG
 
 
@@ -49,7 +49,7 @@ class Material:
         self._rho = rho
         self._is_linear = is_linear
 
-        function_space, cell_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, cell_tags, marker = _get_functionspace_tags_marker(functionspace_tags_marker)
 
         domain = function_space.mesh
         md = kwargs.get('metadata', PDECONFIG.default_metadata)
