@@ -19,7 +19,7 @@ class MakeTheDoc(setuptools.Command):
     def run(self):
         """The command to run when users invoke python setup.py doc"""
         subprocess.run(
-            ['sphinx-build docs/ docs/_build'], shell=True)
+            ['sphinx-build docsrc docs'], shell=True)
 
 
 setuptools.setup(
