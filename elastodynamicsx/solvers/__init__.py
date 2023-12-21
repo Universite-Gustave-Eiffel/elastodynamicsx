@@ -32,8 +32,10 @@ Frequency domain:
       from elastodynamicsx.solvers import ...
 """
 
-# flake8: noqa
+from .timedomain import TimeStepper, NonlinearTimeStepper, LinearTimeStepper, OneStepTimeStepper
+from .eigensolver import EigenmodesSolver
+from .frequencydomain import FrequencyDomainSolver
 
-from .timedomain import *
-from .eigensolver import *
-from .frequencydomain import *
+__all__ = ["TimeStepper", "NonlinearTimeStepper", "LinearTimeStepper", "OneStepTimeStepper",
+           "EigenmodesSolver",
+           "FrequencyDomainSolver"]

@@ -11,7 +11,7 @@ from petsc4py import PETSc
 from dolfinx import plot, fem
 import pyvista
 
-import elastodynamicsx.plot  # ensures automatic configuration of pyvista for jupyter
+from elastodynamicsx.plot import _get_3D_array_from_nparray  # ensures automatic configuration of pyvista for jupyter
 
 
 class ModalBasis():
@@ -79,7 +79,7 @@ class ModalBasis():
         for i, eigM in zip(indexes, eigenmodes):
             nbpts = grid.number_of_points
             with eigM.localForm() as loc_eigM:  # Necessary for correct handling of ghosts in parallel
-                grid['eigenmode_' + str(i)] = elastodynamicsx.plot.get_3D_array_from_nparray(loc_eigM.array, nbpts)
+                grid['eigenmode_' + str(i)] = _get_3D_array_from_nparray(loc_eigM.array, nbpts)
 
         nbcols = int(np.ceil(np.sqrt(indexes.size)))
         nbrows = int(np.ceil(indexes.size / nbcols))

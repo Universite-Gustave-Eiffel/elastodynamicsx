@@ -361,7 +361,7 @@ class CustomVectorPlotter(pyvista.Plotter):
                 break
             topology, cell_types, geom = plot.vtk_mesh(u_.function_space)
             grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
-            u3D = get_3D_array_from_FEFunction(u_)
+            u3D = _get_3D_array_from_FEFunction(u_)
             grid["u"] = self._trans(u3D)
             grid.point_data["u_nrm"] = np.linalg.norm(u3D, axis=1)
             self.grids.append(grid)
@@ -433,7 +433,7 @@ class CustomVectorPlotter(pyvista.Plotter):
         """
         for i, (grid, u_) in enumerate(zip(self.grids, all_vectors)):
             nbpts = grid.number_of_points
-            u3D = get_3D_array_from_nparray(u_, nbpts)
+            u3D = _get_3D_array_from_nparray(u_, nbpts)
             grid["u"] = self._trans(u3D)
             #
             super().update_coordinates(grid.warp_by_vector("u", factor=self.warp_factor).points,
@@ -497,7 +497,7 @@ def spy_petscMatrix(Z: PETSc.Mat, *args, **kwargs) -> AxesImage:  # type: ignore
 # ## --- define useful util functions --- ## #
 # ## ------------------------------------ ## #
 
-def get_3D_array_from_FEFunction(u_):
+def _get_3D_array_from_FEFunction(u_):
     """Not intended to be called by user"""
     # u_ is a fem.Function
     nbcomps = max(1, u_.function_space.element.num_sub_elements)  # number of components
@@ -509,7 +509,7 @@ def get_3D_array_from_FEFunction(u_):
         return u_.x.array.reshape((nbpts, 3))
 
 
-def get_3D_array_from_nparray(u_, nbpts):
+def _get_3D_array_from_nparray(u_, nbpts):
     """Not intended to be called by user"""
     # u_ is a np.array
     nbcomps = u_.size // nbpts
