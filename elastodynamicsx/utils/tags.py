@@ -69,17 +69,17 @@ def make_tags(domain: Mesh, locators: Tuple[Tuple[int, Callable]], type_='unknow
         loc_indices.append(loc)
         loc_markers.append(np.full_like(loc, marker))
 
-    loc_indices = np.hstack(loc_indices).astype(np.int32)
-    loc_markers = np.hstack(loc_markers).astype(np.int32)
+    loc_indices = np.hstack(loc_indices).astype(np.int32)  # type: ignore[assignment]
+    loc_markers = np.hstack(loc_markers).astype(np.int32)  # type: ignore[assignment]
     sorted_loc = np.argsort(loc_indices)
     loc_tags = meshtags(domain, fdim, loc_indices[sorted_loc], loc_markers[sorted_loc])
 
     return loc_tags
 
 
-def get_functionspace_tags_marker(functionspace_tags_marker:
-                                  Union[FunctionSpaceBase, Tuple[FunctionSpaceBase, MeshTags, int]]
-                                  ) -> Tuple[FunctionSpaceBase, MeshTags, int]:
+def _get_functionspace_tags_marker(functionspace_tags_marker:
+                                   Union[FunctionSpaceBase, Tuple[FunctionSpaceBase, MeshTags, int]]
+                                   ) -> Tuple[FunctionSpaceBase, Union[MeshTags, None], Union[int, None]]:
     """
     This is a convenience function for several classes/functions of other packages.
     It is not intended to be used in other context.
@@ -88,7 +88,7 @@ def get_functionspace_tags_marker(functionspace_tags_marker:
         .. highlight:: python
         .. code-block:: python
 
-          function_space, tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
+          function_space, tags, marker = _get_functionspace_tags_marker(functionspace_tags_marker)
 
         where functionspace_tags_marker can be:
 

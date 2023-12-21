@@ -6,10 +6,10 @@
 
 from typing import Callable
 
-import ufl
+import ufl  # type: ignore
 
 from .material import Material
-from elastodynamicsx.utils import get_functionspace_tags_marker
+from elastodynamicsx.utils import _get_functionspace_tags_marker
 
 # https://bazaar.launchpad.net/~cbc-core/cbc.solve/main/view/head:/cbc/twist/material_model_base.py
 # https://bazaar.launchpad.net/~cbc-core/cbc.solve/main/view/head:/cbc/twist/material_models.py
@@ -29,7 +29,7 @@ class HyperelasticMaterial(Material):
     """
 
     def __init__(self, functionspace_tags_marker, rho, **kwargs):
-        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, _, _ = _get_functionspace_tags_marker(functionspace_tags_marker)
         nbcomps = function_space.element.num_sub_elements
 
         assert nbcomps > 0, 'HyperelasticMaterial requires a vector function space'

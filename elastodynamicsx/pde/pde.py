@@ -10,14 +10,16 @@ from petsc4py import PETSc
 import numpy as np
 
 from dolfinx import fem, default_scalar_type
-import ufl
+import ufl  # type: ignore
 
 try:
     import dolfinx_mpc
+    from dolfinx_mpc import MultiPointConstraint
 except ImportError:
     import warnings
     warnings.warn("Can't import dolfinx_mpc. Periodic boundaries are not available", Warning)
-    dolfinx_mpc = None
+    dolfinx_mpc = None  # type: ignore
+    MultiPointConstraint = None  # type: ignore
 
 from .buildmpc import _build_mpc
 from .common import PDECONFIG
@@ -45,7 +47,7 @@ class PDE:
         finalize: (default=True) call self.finalize() on build
     """
 
-    def __init__(self, function_space: fem.FunctionSpace, materials: typing.List[Material], **kwargs):
+    def __init__(self, function_space: fem.FunctionSpaceBase, materials: typing.List[Material], **kwargs):
         self._function_space = function_space
         self.materials = materials
         self.bodyforces = kwargs.get('bodyforces', [])
@@ -55,14 +57,14 @@ class PDE:
         self._v = ufl.TestFunction(function_space)
 
         # Declare stuff without building
-        self._mpc = None
-        self._m_form = None
-        self._c_form = None
-        self._k_form = None
-        self._b_form = None
-        self._k1_form = None
-        self._k2_form = None
-        self._k3_form = None
+        self._mpc: typing.Union[MultiPointConstraint, None] = None
+        self._m_form: typing.Union[fem.forms.Form, None] = None
+        self._c_form: typing.Union[fem.forms.Form, None] = None
+        self._k_form: typing.Union[fem.forms.Form, None] = None
+        self._b_form: typing.Union[fem.forms.Form, None] = None
+        self._k1_form: typing.Union[fem.forms.Form, None] = None
+        self._k2_form: typing.Union[fem.forms.Form, None] = None
+        self._k3_form: typing.Union[fem.forms.Form, None] = None
 
         # ## Sort boundary conditions
         # custom weak BSs, instances of BoundaryCondition
@@ -212,7 +214,7 @@ class PDE:
         return lambda u, v: sum([mat.m(u, v) for mat in self.materials])
 
     @property
-    def c(self) -> typing.Callable:
+    def c(self) -> typing.Union[typing.Callable, None]:
         """(bilinear) Damping form function"""
         non0dampings = [mat.c for mat in self.materials if not (mat.c is None)]
         if len(non0dampings) == 0:
@@ -256,7 +258,7 @@ class PDE:
         return lambda u, v: sum([mat.DG_numerical_flux(u, v) for mat in self.materials])
 
     @property
-    def L(self) -> typing.Callable:
+    def L(self) -> typing.Union[typing.Callable, None]:
         """Linear form function"""
         if len(self.bodyforces) == 0:
             return None
@@ -268,22 +270,22 @@ class PDE:
 # ## ### ### ### ### ### ### ## #
 
     @property
-    def m_form(self) -> fem.forms.Form:
+    def m_form(self) -> typing.Union[fem.forms.Form, None]:
         """Compiled mass bilinear form"""
         return self._m_form
 
     @property
-    def c_form(self) -> fem.forms.Form:
+    def c_form(self) -> typing.Union[fem.forms.Form, None]:
         """Compiled damping bilinear form"""
         return self._c_form
 
     @property
-    def k_form(self) -> fem.forms.Form:
+    def k_form(self) -> typing.Union[fem.forms.Form, None]:
         """Compiled stiffness bilinear form"""
         return self._k_form
 
     @property
-    def b_form(self) -> fem.forms.Form:
+    def b_form(self) -> typing.Union[fem.forms.Form, None]:
         """Compiled linear form"""
         return self._b_form
 
@@ -291,10 +293,13 @@ class PDE:
 # ## PETSc matrices and vectors  ## #
 # ## ### ### ### ### ### ### ### ## #
 
-    def M(self) -> PETSc.Mat:
+    def M(self) -> PETSc.Mat:  # type: ignore[name-defined]
         """Mass matrix"""
         if self._m_form is None:
             self._compile_M()
+
+        assert not (self._m_form is None)
+
         if self._mpc is None:
             M = fem.petsc.assemble_matrix(self._m_form, bcs=self._bcs_strong)
         else:
@@ -302,10 +307,13 @@ class PDE:
         M.assemble()
         return M
 
-    def C(self) -> PETSc.Mat:
+    def C(self) -> PETSc.Mat:  # type: ignore[name-defined]
         """Damping matrix"""
         if self._c_form is None:
             self._compile_C_K_b()
+
+        assert not (self._c_form is None)
+
         if self._mpc is None:
             C = fem.petsc.assemble_matrix(self._c_form, bcs=self._bcs_strong)
         else:
@@ -313,10 +321,13 @@ class PDE:
         C.assemble()
         return C
 
-    def K(self) -> PETSc.Mat:
+    def K(self) -> PETSc.Mat:  # type: ignore[name-defined]
         """Stiffness matrix"""
         if self._k_form is None:
             self._compile_C_K_b()
+
+        assert not (self._k_form is None)
+
         if self._mpc is None:
             K = fem.petsc.assemble_matrix(self._k_form, bcs=self._bcs_strong)
         else:
@@ -324,25 +335,31 @@ class PDE:
         K.assemble()
         return K
 
-    def b(self, omega=0) -> PETSc.Vec:
+    def b(self, omega=0) -> PETSc.Vec:  # type: ignore[name-defined]
         """Load vector"""
         b = self.init_b()
         self.update_b_frequencydomain(b, omega)
         return b
 
-    def init_b(self) -> PETSc.Vec:
+    def init_b(self) -> PETSc.Vec:  # type: ignore[name-defined]
         """Declares a zero vector compatible with the linear form"""
         if self._b_form is None:
             self._compile_C_K_b()
+
+        assert not (self._b_form is None)
+
         if self._mpc is None:
             return fem.petsc.create_vector(self._b_form)
         else:
             return dolfinx_mpc.assemble_vector(self._b_form, self._mpc)
 
-    def K1(self) -> PETSc.Mat:
+    def K1(self) -> PETSc.Mat:  # type: ignore[name-defined]
         """K1 stiffness matrix (waveguide problems)"""
         if self._k1_form is None:
             self._compile_K1_K2_K3()
+
+        assert not (self._k1_form is None)
+
         if self._mpc is None:
             K1 = fem.petsc.assemble_matrix(self._k1_form, bcs=self._bcs_strong)
         else:
@@ -350,12 +367,15 @@ class PDE:
         K1.assemble()
         return K1
 
-    def K2(self) -> PETSc.Mat:
+    def K2(self) -> PETSc.Mat:  # type: ignore[name-defined]
         """K2 stiffness matrix (waveguide problems)"""
         if self._function_space.mesh.geometry.dim == 3:  # special case: K1=K, K2=K3=0
             return None
         if self._k2_form is None:
             self._compile_K1_K2_K3()
+
+        assert not (self._k2_form is None)
+
         if self._mpc is None:
             K2 = fem.petsc.assemble_matrix(self._k2_form, bcs=self._bcs_strong)
         else:
@@ -363,12 +383,15 @@ class PDE:
         K2.assemble()
         return K2
 
-    def K3(self) -> PETSc.Mat:
+    def K3(self) -> PETSc.Mat:  # type: ignore[name-defined]
         """K3 stiffness matrix (waveguide problems)"""
         if self._function_space.mesh.geometry.dim == 3:  # special case: K1=K, K2=K3=0
             return None
         if self._k3_form is None:
             self._compile_K1_K2_K3()
+
+        assert not (self._k3_form is None)
+
         if self._mpc is None:
             K3 = fem.petsc.assemble_matrix(self._k3_form, bcs=self._bcs_strong)
         else:
@@ -382,7 +405,7 @@ class PDE:
 
     # def update_b_frequencydomain(self, b:PETSc.Vec, omega:float) -> None: #NOW SET TO EITHER METHOD BELOW IN __init__
 
-    def _update_b_frequencydomain_WO_MPC(self, b: PETSc.Vec, omega: float) -> None:
+    def _update_b_frequencydomain_WO_MPC(self, b: PETSc.Vec, omega: float) -> None:  # type: ignore[name-defined]
         """Updates the b vector (in-place) for a given angular frequency omega"""
         # set to 0
         with b.localForm() as loc_b:
@@ -396,13 +419,15 @@ class PDE:
         fem.petsc.apply_lifting(b, [self._a_form], [self._bcs_strong])
 
         # ghost
-        b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)
+        b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)  # type: ignore[attr-defined]
 
         # apply BC value
         fem.petsc.set_bc(b, self._bcs_strong)
 
-    def _update_b_frequencydomain_WITH_MPC(self, b: PETSc.Vec, omega: float) -> None:
+    def _update_b_frequencydomain_WITH_MPC(self, b: PETSc.Vec, omega: float) -> None:  # type: ignore[name-defined]
         """Updates the b vector (in-place) for a given angular frequency omega"""
+        assert not (self._mpc is None)
+
         # set to 0
         with b.localForm() as loc_b:
             loc_b.set(0)
@@ -417,7 +442,7 @@ class PDE:
         dolfinx_mpc.apply_lifting(b, [self._a_form], [self._bcs_strong], self._mpc)
 
         # ghost
-        b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)
+        b.ghostUpdate(addv=PETSc.InsertMode.ADD_VALUES, mode=PETSc.ScatterMode.REVERSE)  # type: ignore[attr-defined]
 
         # apply BC value
         fem.petsc.set_bc(b, self._bcs_strong)  # not modified by dolfinx_mpc

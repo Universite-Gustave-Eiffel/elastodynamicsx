@@ -4,23 +4,20 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""
-The *timestepper* module contains tools for solving time-dependent problems.
-Note that building the problem is the role of the *pde.timescheme* module.
-"""
-
 from typing import Union
 
 from mpi4py import MPI
 from petsc4py import PETSc
 
 from dolfinx import fem, mesh
-import ufl
+import ufl  # type: ignore
+
+from elastodynamicsx.pde.timeschemes import TimeScheme, timescheme
 
 try:
     from tqdm.auto import tqdm
 except ModuleNotFoundError:
-    def tqdm(x):
+    def tqdm(x):  # type: ignore[no-redef]
         return x
 
 
@@ -31,10 +28,10 @@ class DiagonalSolver:
     Args:
         A: A PETSc vector that represents a diagonal matrix
     """
-    def __init__(self, A: PETSc.Vec):
+    def __init__(self, A: PETSc.Vec):  # type: ignore
         self._A = A
 
-    def solve(self, b: PETSc.Vec, out: PETSc.Vec) -> None:
+    def solve(self, b: PETSc.Vec, out: PETSc.Vec) -> None:  # type: ignore
         """
         Solve (in-place) the linear system
         :math:`\mathbf{A} * \mathbf{out} = \mathbf{b}`
@@ -51,10 +48,7 @@ class TimeStepper:
     # --------- static ---------
     # --------------------------
 
-    # PETSc options to solve a0 = M_inv.(F(t0) - C.v0 - K(u0))
-    petsc_options_t0 = {"ksp_type": "preonly", "pc_type": "lu"}
-
-    petsc_options_explicit_scheme = petsc_options_t0
+    petsc_options_explicit_scheme = {"ksp_type": "preonly", "pc_type": "lu"}
     petsc_options_implicit_scheme_linear = {"ksp_type": "preonly", "pc_type": "lu"}
     # petsc_options_implicit_scheme_nonlinear =  # TODO
 
@@ -70,16 +64,18 @@ class TimeStepper:
                 'linear-acceleration-method', 'newmark', 'hht-alpha', 'generalized-alpha'
             **kwargs: (passed to the required scheme)
         """
-        from elastodynamicsx.pde.timeschemes import all_timeschemes
+        tscheme = timescheme(*args, **kwargs)
+        comm = tscheme.u.function_space.mesh.comm
 
-        scheme = kwargs.pop('scheme', 'unknown')
-        allSchemes = all_timeschemes
-        for s_ in allSchemes:
-            if scheme.lower() in s_.labels:
-                return s_.build_timestepper(*args, **kwargs)
+        if tscheme.linear_ODE is True:
+            if tscheme.nbsteps == 1:
+                return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
+            else:
+                raise NotImplementedError  # TODO: multi-steps?
+        else:
+            return NonlinearTimeStepper(comm, tscheme, **kwargs)
 
-        raise TypeError('unknown scheme: ' + scheme)
-
+    @staticmethod
     def Courant_number(domain: mesh.Mesh, c_max, dt):
         """
         The Courant number: :math:`C = c_{max} \, \mathrm{d}t / h`, with :math:`h` the cell diameter
@@ -106,13 +102,13 @@ class TimeStepper:
     # ------- non-static -------
     # --------------------------
 
-    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', **kwargs):  # noqa
+    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme, **kwargs):
         """
         Args:
             comm: The MPI communicator
-            timescheme: Time scheme
+            tscheme: Time scheme
         """
-        self._tscheme = timescheme
+        self._tscheme = tscheme
         self._comm: MPI.Comm = comm
         self._t = 0
         self._dt = self._tscheme.dt
@@ -163,8 +159,8 @@ class NonlinearTimeStepper(TimeStepper):
     """
     Base class for solving nonlinear problems using implicit time schemes. Not implemented yet.
     """
-    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', **kwargs):  # noqa
-        super().__init__(comm, timescheme, **kwargs)
+    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme, **kwargs):
+        super().__init__(comm, tscheme, **kwargs)
         raise NotImplementedError
 
 
@@ -173,18 +169,19 @@ class LinearTimeStepper(TimeStepper):
     Base class for solving linear problems. Note that nonlinear problems formulated
     with an explicit scheme come down to linear problems; they are handled by this class.
     """
-    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # noqa
-        super().__init__(comm, timescheme, **kwargs)
+    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme,
+                 A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # type: ignore
+        super().__init__(comm, tscheme, **kwargs)
 
-        if kwargs.get('diagonal', False) and isinstance(A, PETSc.Mat):
+        if kwargs.get('diagonal', False) and isinstance(A, PETSc.Mat):  # type: ignore
             A = A.getDiagonal()
 
         self._A = A  # Time-independent operator
         self._b = b  # Time-dependent right-hand side
-        self._explicit = timescheme.explicit
+        self._explicit = tscheme.explicit
         self._solver = None
 
-        if isinstance(A, PETSc.Vec):
+        if isinstance(A, PETSc.Vec):  # type: ignore
             self._init_solver_diagonal(A)
         else:
             if self._explicit:
@@ -195,11 +192,11 @@ class LinearTimeStepper(TimeStepper):
             self._init_solver(comm, petsc_options)
 
     @property
-    def A(self) -> Union[PETSc.Mat, PETSc.Vec]:
+    def A(self) -> Union[PETSc.Mat, PETSc.Vec]:  # type: ignore
         return self._A
 
     @property
-    def b(self) -> PETSc.Vec:
+    def b(self) -> PETSc.Vec:  # type: ignore
         return self._b
 
     @property
@@ -207,11 +204,11 @@ class LinearTimeStepper(TimeStepper):
         return self._explicit
 
     @property
-    def solver(self) -> Union[PETSc.KSP, DiagonalSolver]:
+    def solver(self) -> Union[PETSc.KSP, DiagonalSolver]:  # type: ignore
         return self._solver
 
-    def _init_solver_diagonal(self, A: PETSc.Vec) -> None:
-        self._solver = DiagonalSolver(A)
+    def _init_solver_diagonal(self, A: PETSc.Vec) -> None:  # type: ignore
+        self._solver = DiagonalSolver(A)  # type: ignore
 
     def _init_solver(self, comm: MPI.Comm, petsc_options={}):
         # see https://github.com/FEniCS/dolfinx/blob/main/python/dolfinx/fem/petsc.py
@@ -219,20 +216,20 @@ class LinearTimeStepper(TimeStepper):
         # ##   ###   ###   ###
 
         # Solver
-        self._solver = PETSc.KSP().create(comm)
-        self._solver.setOperators(self._A)
+        self._solver = PETSc.KSP().create(comm)  # type: ignore
+        self._solver.setOperators(self._A)  # type: ignore
 
         # Give PETSc solver options a unique prefix
         problem_prefix = f"dolfinx_solve_{id(self)}"
-        self._solver.setOptionsPrefix(problem_prefix)
+        self._solver.setOptionsPrefix(problem_prefix)  # type: ignore
 
         # Set PETSc options
-        opts = PETSc.Options()
+        opts = PETSc.Options()  # type: ignore
         opts.prefixPush(problem_prefix)
         for k, v in petsc_options.items():
             opts[k] = v
         opts.prefixPop()
-        self._solver.setFromOptions()
+        self._solver.setFromOptions()  # type: ignore
 
         # Set matrix and vector PETSc options
         self._A.setOptionsPrefix(problem_prefix)
@@ -246,14 +243,14 @@ class OneStepTimeStepper(LinearTimeStepper):
     Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).
     """
 
-    def __init__(self, comm: MPI.Comm, timescheme: 'pde.TimeScheme', A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # noqa
-        super().__init__(comm, timescheme, A, b, **kwargs)
-        self._b_update_function = timescheme.b_update_function
+    def __init__(self, comm: MPI.Comm, tscheme: TimeScheme, A: PETSc.Mat, b: PETSc.Vec, **kwargs):  # type: ignore
+        super().__init__(comm, tscheme, A, b, **kwargs)
+        self._b_update_function = tscheme.b_update_function
 
         # self._i0 = 1 for explicit schemes because solving the initial
         # value problem a0=M_inv.(F(t0)-K(u0)-C.v0) also yields u1=u(t0+dt)
         self._i0 = 1 * self._explicit
-        self._intermediate_dt = timescheme.intermediate_dt  # non zero for generalized-alpha
+        self._intermediate_dt = tscheme.intermediate_dt  # non zero for generalized-alpha
 
     def solve(self, num_steps, **kwargs):
         """

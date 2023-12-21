@@ -6,9 +6,9 @@
 
 import typing
 
-import ufl
+import ufl  # type: ignore
 
-from elastodynamicsx.utils import get_functionspace_tags_marker
+from elastodynamicsx.utils import _get_functionspace_tags_marker
 from elastodynamicsx.pde import PDECONFIG
 
 
@@ -49,7 +49,7 @@ class Material:
         self._rho = rho
         self._is_linear = is_linear
 
-        function_space, cell_tags, marker = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, cell_tags, marker = _get_functionspace_tags_marker(functionspace_tags_marker)
 
         domain = function_space.mesh
         md = kwargs.get('metadata', PDECONFIG.default_metadata)
@@ -76,7 +76,7 @@ class Material:
         return lambda u, v: self._rho * ufl.inner(u, v) * self._dx
 
     @property
-    def c(self) -> typing.Callable:
+    def c(self) -> typing.Union[typing.Callable, None]:
         """(bilinear) damping form function"""
         return None
 
@@ -88,6 +88,24 @@ class Material:
     @property
     def k_CG(self) -> typing.Callable:
         """Stiffness form function for a Continuous Galerkin formulation"""
+        print("supercharge me")
+        raise NotImplementedError
+
+    @property
+    def k1_CG(self) -> typing.Callable:
+        """K1 stiffness form function for a Continuous Galerkin formulation (waveguides)"""
+        print("supercharge me")
+        raise NotImplementedError
+
+    @property
+    def k2_CG(self) -> typing.Callable:
+        """K2 stiffness form function for a Continuous Galerkin formulation (waveguides)"""
+        print("supercharge me")
+        raise NotImplementedError
+
+    @property
+    def k3_CG(self) -> typing.Callable:
+        """K3 stiffness form function for a Continuous Galerkin formulation (waveguides)"""
         print("supercharge me")
         raise NotImplementedError
 

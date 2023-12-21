@@ -136,6 +136,7 @@ def material(functionspace_tags_marker, type_, *args, **kwargs) -> Material:
           mat = material( function_space, 'mooney-rivlin-incomp', rho, C1, C2)
     """
     for Mat in all_materials:
+        assert issubclass(Mat, Material)
         if type_.lower() in Mat.labels:
             return Mat(functionspace_tags_marker, *args, **kwargs)
     #

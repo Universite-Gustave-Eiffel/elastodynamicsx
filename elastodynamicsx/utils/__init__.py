@@ -6,8 +6,10 @@
 
 """The *utils* module contains various tools that do not fit into the other packages"""
 
-# flake8: noqa
+from .tags import make_facet_tags, make_cell_tags, make_tags, _get_functionspace_tags_marker
+from .eval import ParallelEvaluator
+from .spectralelements import spectral_element, spectral_quadrature
 
-from .tags import *
-from .eval import *
-from .spectralelements import *
+__all__ = ["make_facet_tags", "make_cell_tags", "make_tags", "_get_functionspace_tags_marker",
+           "ParallelEvaluator",
+           "spectral_element", "spectral_quadrature"]

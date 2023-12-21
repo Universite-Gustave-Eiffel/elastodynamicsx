@@ -13,7 +13,7 @@ import numpy as np
 try:
     from tqdm.auto import tqdm
 except ModuleNotFoundError:
-    def tqdm(x):
+    def tqdm(x):  # type: ignore[no-redef]
         return x
 
 
@@ -84,8 +84,8 @@ class FrequencyDomainSolver:
 
     default_petsc_options = {"ksp_type": "preonly", "pc_type": "lu"}  # "pc_factor_mat_solver_type": "mumps"
 
-    def __init__(self, comm: MPI.Comm, M: PETSc.Mat, C: PETSc.Mat, K: PETSc.Mat,
-                 b: PETSc.Vec, b_update_function: Callable = None, **kwargs):
+    def __init__(self, comm: MPI.Comm, M: PETSc.Mat, C: PETSc.Mat, K: PETSc.Mat, b: PETSc.Vec,  # type: ignore
+                 b_update_function: Union[Callable, None] = None, **kwargs):
         self._M = M
         self._C = C
         self._K = K
@@ -95,14 +95,14 @@ class FrequencyDomainSolver:
         # ### ### #
         # Initialize the PETSc solver
         petsc_options = kwargs.get('petsc_options', FrequencyDomainSolver.default_petsc_options)
-        self.solver = PETSc.KSP().create(comm)
+        self.solver = PETSc.KSP().create(comm)  # type: ignore
 
         # Give PETSc solver options a unique prefix
         problem_prefix = f"dolfinx_solve_{id(self)}"
         self.solver.setOptionsPrefix(problem_prefix)
 
         # Set PETSc options
-        opts = PETSc.Options()
+        opts = PETSc.Options()  # type: ignore
         opts.prefixPush(problem_prefix)
 
         for k, v in petsc_options.items():
@@ -113,9 +113,9 @@ class FrequencyDomainSolver:
         # ### ### #
 
     def solve(self, omega: Union[float, np.ndarray],
-              out: PETSc.Vec = None,
+              out: PETSc.Vec = None,  # type: ignore
               callbacks: List[Callable] = [],
-              **kwargs) -> PETSc.Vec:
+              **kwargs) -> PETSc.Vec:  # type: ignore
         """
         Solve the linear problem
 
@@ -138,12 +138,13 @@ class FrequencyDomainSolver:
             out = self._M.createVecRight()
 
         if hasattr(omega, '__iter__'):
+            omega = np.asarray(omega)
             return self._solve_multiple_omegas(omega, out, callbacks, **kwargs)
 
         else:
             return self._solve_single_omega(omega, out)
 
-    def _solve_single_omega(self, omega: float, out: PETSc.Vec) -> PETSc.Vec:
+    def _solve_single_omega(self, omega: float, out: PETSc.Vec) -> PETSc.Vec:  # type: ignore
         # Update load vector at angular frequency 'omega'
         if not (self._b_update_function is None):
             self._b_update_function(self._b, omega)
@@ -151,19 +152,21 @@ class FrequencyDomainSolver:
 
         # Update PDE matrix
         w = omega
-        A = PETSc.ScalarType(-w * w) * self._M + PETSc.ScalarType(1J * w) * self._C + self._K
+        A = PETSc.ScalarType(-w * w) * self._M + PETSc.ScalarType(1J * w) * self._C + self._K  # type: ignore
         self.solver.setOperators(A)
 
         # Solve
         self.solver.solve(self._b, out)
 
         # Update the ghosts in the solution
-        out.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)
+        out.ghostUpdate(addv=PETSc.InsertMode.INSERT, mode=PETSc.ScatterMode.FORWARD)  # type: ignore
         return out
 
     def _solve_multiple_omegas(self, omegas: np.ndarray,
-                               out: PETSc.Vec,
-                               callbacks: List[Callable] = [], **kwargs) -> PETSc.Vec:
+                               out: PETSc.Vec,  # type: ignore
+                               callbacks: List[Callable] = [], **kwargs) \
+            -> PETSc.Vec:  # type: ignore
+
         # Loop on values in omegas -> _solve_single_omega
 
         live_plt = kwargs.get('live_plotter', None)
@@ -184,21 +187,21 @@ class FrequencyDomainSolver:
         return out
 
     @property
-    def M(self) -> PETSc.Mat:
+    def M(self) -> PETSc.Mat:  # type: ignore
         """The mass matrix"""
         return self._M
 
     @property
-    def C(self) -> PETSc.Mat:
+    def C(self) -> PETSc.Mat:  # type: ignore
         """The damping matrix"""
         return self._C
 
     @property
-    def K(self) -> PETSc.Mat:
+    def K(self) -> PETSc.Mat:  # type: ignore
         """The stiffness matrix"""
         return self._K
 
     @property
-    def b(self) -> PETSc.Vec:
+    def b(self) -> PETSc.Vec:  # type: ignore
         """The load vector"""
         return self._b

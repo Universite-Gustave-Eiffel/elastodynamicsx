@@ -7,10 +7,10 @@
 import typing
 
 from dolfinx import fem, default_scalar_type
-import ufl
+import ufl  # type: ignore
 
 from .elasticmaterial import ElasticMaterial
-from elastodynamicsx.utils import get_functionspace_tags_marker
+from elastodynamicsx.utils import _get_functionspace_tags_marker
 
 
 class ScalarLinearMaterial(ElasticMaterial):
@@ -29,7 +29,7 @@ class ScalarLinearMaterial(ElasticMaterial):
     labels = ['scalar', '2d-sh', 'fluid']
 
     def __init__(self, functionspace_tags_marker, rho, mu, **kwargs):
-        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, _, _ = _get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements == 0, 'ScalarLinearMaterial requires a scalar function space'
 
         C11 = C22 = C33 = mu
@@ -147,7 +147,7 @@ class IsotropicMaterial(ElasticMaterial):
 
     def __init__(self, functionspace_tags_marker, rho, lambda_, mu, **kwargs):
 
-        function_space, _, _ = get_functionspace_tags_marker(functionspace_tags_marker)
+        function_space, _, _ = _get_functionspace_tags_marker(functionspace_tags_marker)
         assert function_space.element.num_sub_elements > 0, 'IsotropicMaterial requires a vector function space'
 
         C11 = C22 = C33 = lambda_ + 2 * mu

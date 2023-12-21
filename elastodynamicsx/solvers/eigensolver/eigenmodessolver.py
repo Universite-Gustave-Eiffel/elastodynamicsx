@@ -10,11 +10,11 @@ import typing
 
 from mpi4py import MPI
 from petsc4py import PETSc
-from slepc4py import SLEPc
+from slepc4py import SLEPc  # type: ignore
 
 import numpy as np
 
-from dolfinx.fem import FunctionSpace
+from dolfinx.fem import FunctionSpaceBase
 
 from elastodynamicsx.solutions import ModalBasis
 
@@ -65,7 +65,7 @@ class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue proble
           print('First resonance frequencies:', freqs)
     """
 
-    def __init__(self, comm: MPI.Comm, M: PETSc.Mat, C: PETSc.Mat, K: PETSc.Mat, **kwargs):
+    def __init__(self, comm: MPI.Comm, M: PETSc.Mat, C: PETSc.Mat, K: PETSc.Mat, **kwargs):  # type: ignore
         super().__init__()
 
         if not (C is None):  # TODO
@@ -99,7 +99,8 @@ class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue proble
         """The eigenfrequencies from the computed eigenvalues"""
         return self.getWn() / (2 * np.pi)
 
-    def getEigenmodes(self, which='all') -> typing.List[PETSc.Vec]:
+    def getEigenmodes(self, which='all') \
+            -> typing.List[PETSc.Vec]:  # type: ignore
         """
         Returns the desired modeshapes
 
@@ -132,7 +133,7 @@ class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue proble
         return np.array([self.computeError(i, SLEPc.EPS.ErrorType.RELATIVE)
                          for i in range(self._getNout())])  # Compute error for i-th eigenvalue
 
-    def plot(self, function_space: FunctionSpace, which='all', **kwargs) -> None:
+    def plot(self, function_space: FunctionSpaceBase, which='all', **kwargs) -> None:
         """
         Plots the desired modeshapes
 
@@ -147,9 +148,9 @@ class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue proble
         """Prints the computed eigenvalues and error estimates"""
         v = [self.getEigenvalue(i) for i in range(self._getNout())]
         e = self.getErrors()
-        PETSc.Sys.Print("       eigenvalue \t\t\t error ")
+        PETSc.Sys.Print("       eigenvalue \t\t\t error ")  # type: ignore
         for cv, ce in zip(v, e):
-            PETSc.Sys.Print(cv, '\t', ce)
+            PETSc.Sys.Print(cv, '\t', ce)  # type: ignore
 
     def _getNout(self):
         """Returns the number of eigenpairs that can be returned. Usually equal to 'nev'."""
