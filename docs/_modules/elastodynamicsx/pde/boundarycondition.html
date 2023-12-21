@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>elastodynamicsx.pde.boundarycondition &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ElastodynamiCSx
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html">ElastodynamiCSx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#build-problems">Build problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#solve-problems">Solve problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#post-process-solutions">Post process solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#dependencies">Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../readme_link.html#packages-required-for-the-examples">Packages required for the examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../readme_link.html#optional-packages">Optional packages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../readme_link.html#option-1-with-fenicsx-binaries-installed">Option 1: With FEniCSx binaries installed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../readme_link.html#option-2-inside-a-fenicsx-docker-image">Option 2: Inside a FEniCSx Docker image</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#useful-links">Useful links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/examples_index.html">Demos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../demos/examples_section1.html"><strong>Time domain</strong>, wave equation; high order (spectral) elements &amp; <strong>explicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section1_files.html">weq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section1_files.html#weq-2d-psv-fullspace-py">weq_2D-PSV_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section1_files.html#weq-2d-psv-halfspace-lamb-komatitschvilotte-bssa1998-py">weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section1_files.html#weqnl-1d-psv-murnaghan-pwave-py">weqnl_1D-PSV_Murnaghan_Pwave.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../demos/examples_section2.html"><strong>Time domain</strong>, structural dynamics; low order elements &amp; <strong>implicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section2_files.html">tdsdyn_3D_ElasticBeam.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../demos/examples_section3.html"><strong>Frequency domain</strong>, wave equation (Helmoltz equation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section3_files.html">freq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section3_files.html#freq-2d-psv-fullspace-py">freq_2D-PSV_FullSpace.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../demos/examples_section4.html"><strong>Eigenmodes</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section4_files.html">eigs_3D_ElasticBeam.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section4_files.html#eigs-3d-aluminumcube-py">eigs_3D_AluminumCube.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../demos/examples_section5.html"><strong>Guided waves</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/api_index.html">API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/elastodynamicsx.plot.html">elastodynamicsx.plot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.plot.html#module-elastodynamicsx.plot">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.plot.html#module-elastodynamicsx.plot.plot">elastodynamicsx.plot.plot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/elastodynamicsx.solutions.html">elastodynamicsx.solutions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solutions.html#module-elastodynamicsx.solutions">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solutions.html#module-elastodynamicsx.solutions.modalbasis">elastodynamicsx.solutions.modalbasis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html">elastodynamicsx.solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.eval">elastodynamicsx.utils.eval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.spectralelements">elastodynamicsx.utils.spectralelements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.tags">elastodynamicsx.utils.tags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ElastodynamiCSx</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">elastodynamicsx.pde.boundarycondition</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for elastodynamicsx.pde.boundarycondition</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2023 Pierric Mora</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ElastodynamiCSx</span>
+<span class="c1">#</span>
+<span class="c1"># SPDX-License-Identifier: MIT</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">dolfinx</span> <span class="kn">import</span> <span class="n">fem</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">default_scalar_type</span>
+<span class="kn">import</span> <span class="nn">ufl</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">PDECONFIG</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.utils</span> <span class="kn">import</span> <span class="n">_get_functionspace_tags_marker</span>
+
+
+<div class="viewcode-block" id="BoundaryCondition">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.BoundaryCondition">[docs]</a>
+<span class="k">class</span> <span class="nc">BoundaryCondition</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Representation of a variety of boundary conditions (BCs)</span>
+
+<span class="sd">    Possible BCs are:</span>
+<span class="sd">        &#39;Free&#39;, &#39;Clamp&#39;</span>
+<span class="sd">        &#39;Dirichlet&#39;, &#39;Neumann&#39;, &#39;Robin&#39;</span>
+<span class="sd">        &#39;Periodic&#39;</span>
+<span class="sd">        &#39;Dashpot&#39;</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        functionspace_tags_marker: The function space, facet tags and marker(s) where the BC is applied</span>
+<span class="sd">        type_: String identifier of the BC</span>
+<span class="sd">        values: The value(s) defining the BC, as ufl-compatible object(s)</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        metadata: dict, compiler-specific parameters, passed to ufl.Measure(..., metadata=metadata)</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        General:</span>
+
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">          # Imposes u = u_D on boundary n°1</span>
+<span class="sd">          u_D = fem.Constant(V.mesh, [0.2,1.3])</span>
+<span class="sd">          bc = BoundaryCondition((V, facet_tags, 1), &#39;Dirichlet&#39;, u_D)</span>
+
+<span class="sd">          # Imposes sigma(u).n = T_N on boundary n°1</span>
+<span class="sd">          T_N = fem.Function(V)</span>
+<span class="sd">          T_N.interpolate(fancy_function)</span>
+<span class="sd">          bc = BoundaryCondition((V, facet_tags, 1), &#39;Neumann&#39;, T_N)</span>
+
+<span class="sd">          # Imposes sigma(u).n = r * (u - s) on boundary n°1</span>
+<span class="sd">          r = ufl.as_matrix([[1,2],[3,4]])</span>
+<span class="sd">          s = ufl.as_vector([0,1])</span>
+<span class="sd">          bc = BoundaryCondition((V, facet_tags, 1), &#39;Robin&#39;, (r, s))</span>
+
+<span class="sd">        Free or Clamp, on one or several tags:</span>
+
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">          # Imposes sigma(u).n=0 on boundary n°1</span>
+<span class="sd">          bc = BoundaryCondition((V, facet_tags, 1), &#39;Free&#39;)</span>
+
+<span class="sd">          # Imposes u=0 on boundaries n°1 and 2</span>
+<span class="sd">          bc = BoundaryCondition((V, facet_tags, (1,2)), &#39;Clamp&#39;)</span>
+
+<span class="sd">          # Apply BC to all boundaries when facet_tags and marker are not specified</span>
+<span class="sd">          # or set to None</span>
+<span class="sd">          bc = BoundaryCondition(V, &#39;Clamp&#39;)</span>
+
+<span class="sd">        Periodic:</span>
+
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">          # Given:   x(2) = x(1) - P</span>
+<span class="sd">          # Imposes: u(2) = u(1)</span>
+<span class="sd">          # Where: x(i) are the coordinates on boundaries n°1,2</span>
+<span class="sd">          #        P is a constant (translation) vector from slave to master</span>
+<span class="sd">          #        u(i) is the field on boundaries n°1,2</span>
+<span class="sd">          # Note that boundary n°2 is slave</span>
+
+<span class="sd">          Px, Py, Pz = length, 0, 0 #for x-periodic, and tag=left</span>
+<span class="sd">          Px, Py, Pz = 0, height, 0 #for y-periodic, and tag=bottom</span>
+<span class="sd">          Px, Py, Pz = 0, 0, depth  #for z-periodic, and tag=back</span>
+<span class="sd">          P  = [Px,Py,Pz]</span>
+<span class="sd">          bc = BoundaryCondition((V, facet_tags, 2), &#39;Periodic&#39;, P)</span>
+
+<span class="sd">        BCs involving the velocity:</span>
+
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">          # (for a scalar function_space)</span>
+<span class="sd">          # Imposes sigma(u).n = z * v on boundary n°1, with v=du/dt. Usually z=rho*c</span>
+<span class="sd">          bc = BoundaryCondition((V, facet_tags, 1), &#39;Dashpot&#39;, z)</span>
+
+<span class="sd">          # (for a vector function_space)</span>
+<span class="sd">          # Imposes sigma(u).n = z_N * v_N + z_T * v_T on boundary n°1,</span>
+<span class="sd">          # with v = du/dt, v_N = (v.n) n, v_T = v - v_N</span>
+<span class="sd">          # Usually z_N = rho * c_L and z_T = rho * c_S</span>
+<span class="sd">          bc = BoundaryCondition((V, facet_tags, 1), &#39;Dashpot&#39;, (z_N, z_T))</span>
+
+<span class="sd">    Adapted from:</span>
+<span class="sd">        https://jsdokken.com/dolfinx-tutorial/chapter3/robin_neumann_dirichlet.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># ## ### ### ## #</span>
+    <span class="c1"># ## static  ## #</span>
+    <span class="c1"># ## ### ### ## #</span>
+
+<div class="viewcode-block" id="BoundaryCondition.get_dirichlet_BCs">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.BoundaryCondition.get_dirichlet_BCs">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_dirichlet_BCs</span><span class="p">(</span><span class="n">bcs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">BoundaryCondition</span><span class="p">,</span> <span class="n">fem</span><span class="o">.</span><span class="n">DirichletBC</span><span class="p">]],</span>
+                          <span class="n">Tuple</span><span class="p">[()]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">DirichletBC</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the BCs of Dirichlet type in bcs&quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bcs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">bc</span><span class="p">),</span> <span class="n">fem</span><span class="o">.</span><span class="n">DirichletBC</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span> <span class="n">BoundaryCondition</span><span class="p">))</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span> <span class="n">BoundaryCondition</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">bc</span><span class="o">.</span><span class="n">bc</span><span class="p">),</span> <span class="n">fem</span><span class="o">.</span><span class="n">DirichletBC</span><span class="p">):</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bc</span><span class="o">.</span><span class="n">bc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="BoundaryCondition.get_mpc_BCs">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.BoundaryCondition.get_mpc_BCs">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_mpc_BCs</span><span class="p">(</span><span class="n">bcs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">BoundaryCondition</span><span class="p">,</span> <span class="n">fem</span><span class="o">.</span><span class="n">DirichletBC</span><span class="p">]],</span>
+                    <span class="n">Tuple</span><span class="p">[()]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">BoundaryCondition</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the BCs to be built with dolfinx_mpc in bcs&quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bcs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span> <span class="n">BoundaryCondition</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;periodic&#39;</span><span class="p">):</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="BoundaryCondition.get_weak_BCs">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.BoundaryCondition.get_weak_BCs">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_weak_BCs</span><span class="p">(</span><span class="n">bcs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">BoundaryCondition</span><span class="p">,</span> <span class="n">fem</span><span class="o">.</span><span class="n">DirichletBC</span><span class="p">]],</span>
+                     <span class="n">Tuple</span><span class="p">[()]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">BoundaryCondition</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the weak BCs in bcs&quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bcs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span> <span class="n">BoundaryCondition</span><span class="p">):</span>
+                <span class="n">test_mpc</span> <span class="o">=</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;periodic&#39;</span>
+                <span class="n">test_d</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">bc</span><span class="o">.</span><span class="n">bc</span><span class="p">),</span> <span class="n">fem</span><span class="o">.</span><span class="n">DirichletBC</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">test_mpc</span> <span class="ow">or</span> <span class="n">test_d</span><span class="p">):</span>
+                    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+    <span class="c1"># ## ### ### ### ## #</span>
+    <span class="c1"># ## non-static  ## #</span>
+    <span class="c1"># ## ### ### ### ## #</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">Function</span><span class="p">,</span> <span class="n">fem</span><span class="o">.</span><span class="n">Constant</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1">#</span>
+        <span class="n">function_space</span><span class="p">,</span> <span class="n">facet_tags</span><span class="p">,</span> <span class="n">marker</span> <span class="o">=</span> <span class="n">_get_functionspace_tags_marker</span><span class="p">(</span><span class="n">functionspace_tags_marker</span><span class="p">)</span>
+
+        <span class="n">type_</span> <span class="o">=</span> <span class="n">type_</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">nbcomps</span> <span class="o">=</span> <span class="n">function_space</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">num_sub_elements</span>  <span class="c1"># number of components if vector space, 0 if scalar space</span>
+
+        <span class="c1"># shortcuts: Free-&gt;Neumann with value=0; Clamp-&gt;Dirichlet with value=0</span>
+        <span class="k">if</span> <span class="n">type_</span> <span class="o">==</span> <span class="s2">&quot;free&quot;</span><span class="p">:</span>
+            <span class="n">type_</span> <span class="o">=</span> <span class="s2">&quot;neumann&quot;</span>
+            <span class="n">z0s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">nbcomps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">default_scalar_type</span><span class="p">)</span> <span class="k">if</span> <span class="n">nbcomps</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">default_scalar_type</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">z0s</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">type_</span> <span class="o">==</span> <span class="s2">&quot;clamp&quot;</span><span class="p">:</span>
+            <span class="n">type_</span> <span class="o">=</span> <span class="s2">&quot;dirichlet&quot;</span>
+            <span class="n">z0s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">nbcomps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">default_scalar_type</span><span class="p">)</span> <span class="k">if</span> <span class="n">nbcomps</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">default_scalar_type</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">z0s</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">type_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bc</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">DirichletBC</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">MeshTags</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">Callable</span><span class="p">]]</span>
+
+        <span class="n">md</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="n">PDECONFIG</span><span class="o">.</span><span class="n">default_metadata</span><span class="p">)</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;ds&quot;</span><span class="p">,</span>
+                         <span class="n">domain</span><span class="o">=</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span>
+                         <span class="n">subdomain_data</span><span class="o">=</span><span class="n">facet_tags</span><span class="p">,</span>
+                         <span class="n">metadata</span><span class="o">=</span><span class="n">md</span><span class="p">)(</span><span class="n">marker</span><span class="p">)</span>  <span class="c1"># also valid if facet_tags or marker are None</span>
+
+        <span class="k">if</span> <span class="n">type_</span> <span class="o">==</span> <span class="s2">&quot;dirichlet&quot;</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">facet_tags</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">&quot;facet_tags must not be None&quot;</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">marker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">&quot;marker must not be None&quot;</span>
+            <span class="n">fdim</span> <span class="o">=</span> <span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">dim</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">facets</span> <span class="o">=</span> <span class="n">facet_tags</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">marker</span><span class="p">)</span>
+            <span class="n">dofs</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">locate_dofs_topological</span><span class="p">(</span><span class="n">function_space</span><span class="p">,</span> <span class="n">fdim</span><span class="p">,</span> <span class="n">facets</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bc</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">dirichletbc</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">dofs</span><span class="p">,</span> <span class="n">function_space</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">type_</span> <span class="o">==</span> <span class="s2">&quot;neumann&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">ds</span>  <span class="c1"># Linear form</span>
+
+        <span class="k">elif</span> <span class="n">type_</span> <span class="o">==</span> <span class="s2">&quot;robin&quot;</span><span class="p">:</span>
+            <span class="n">r_</span><span class="p">,</span> <span class="n">s_</span> <span class="o">=</span> <span class="n">values</span>
+            <span class="k">if</span> <span class="n">nbcomps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">r_</span><span class="p">,</span> <span class="n">s_</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(</span><span class="n">r_</span><span class="p">),</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_vector</span><span class="p">(</span><span class="n">s_</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">r_</span> <span class="o">*</span> <span class="p">(</span><span class="n">u</span> <span class="o">-</span> <span class="n">s_</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">ds</span>  <span class="c1"># Bilinear form</span>
+
+        <span class="k">elif</span> <span class="n">type_</span> <span class="o">==</span> <span class="s1">&#39;dashpot&#39;</span><span class="p">:</span>
+            <span class="c1"># scalar function space</span>
+            <span class="k">if</span> <span class="n">nbcomps</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Bilinear form, to be applied on du/dt</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u_t</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">values</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">u_t</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">ds</span>
+
+            <span class="c1"># vector function space</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># Bilinear form, to be applied on du/dt</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_bc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u_t</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="p">((</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">u_t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                                               <span class="o">+</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">u_t</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">ds</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">n</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">FacetNormal</span><span class="p">(</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>
+                    <span class="n">dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">nbcomps</span> <span class="o">&gt;</span> <span class="n">dim</span><span class="p">:</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_vector</span><span class="p">([</span><span class="n">n</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nbcomps</span> <span class="o">-</span> <span class="n">dim</span><span class="p">)])</span>
+                    <span class="c1"># Bilinear form, to be applied on du/dt</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_bc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u_t</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="p">((</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u_t</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                                               <span class="o">+</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">u_t</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">ds</span>
+
+        <span class="k">elif</span> <span class="n">type_</span> <span class="o">==</span> <span class="s1">&#39;periodic&#39;</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">marker</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s2">&quot;Periodic BC requires a single facet tag&quot;</span>
+            <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">slave_to_master_map</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">P</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bc</span> <span class="o">=</span> <span class="p">(</span><span class="n">facet_tags</span><span class="p">,</span> <span class="n">marker</span><span class="p">,</span> <span class="n">slave_to_master_map</span><span class="p">)</span>
+
+        <span class="c1"># -- # -- # -- #</span>
+        <span class="k">elif</span> <span class="n">type_</span> <span class="o">==</span> <span class="s1">&#39;periodic-do-not-use&#39;</span><span class="p">:</span>  <span class="c1"># TODO: try to calculate P from two given boundary markers</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">marker</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Periodic BC requires two facet tags&quot;</span>  <span class="c1"># type: ignore</span>
+            <span class="n">fdim</span> <span class="o">=</span> <span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">dim</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">marker_master</span><span class="p">,</span> <span class="n">marker_slave</span> <span class="o">=</span> <span class="n">marker</span>  <span class="c1"># type: ignore</span>
+            <span class="c1"># facets_master = facet_tags.find(marker_master)  # not available on dolfinx v0.4.1</span>
+            <span class="n">facets_master</span> <span class="o">=</span> <span class="n">facet_tags</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">facet_tags</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="n">marker_master</span><span class="p">]</span>  <span class="c1"># type: ignore # &lt;- temporary</span>
+            <span class="n">facets_slave</span> <span class="o">=</span> <span class="n">facet_tags</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">facet_tags</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="n">marker_slave</span><span class="p">]</span>  <span class="c1"># type: ignore # &lt;- temporary</span>
+            <span class="n">dofs_master</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">locate_dofs_topological</span><span class="p">(</span><span class="n">function_space</span><span class="p">,</span> <span class="n">fdim</span><span class="p">,</span> <span class="n">facets_master</span><span class="p">)</span>
+            <span class="n">dofs_slave</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">locate_dofs_topological</span><span class="p">(</span><span class="n">function_space</span><span class="p">,</span> <span class="n">fdim</span><span class="p">,</span> <span class="n">facets_slave</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">function_space</span><span class="o">.</span><span class="n">tabulate_dof_coordinates</span><span class="p">()</span>
+            <span class="n">xm</span><span class="p">,</span> <span class="n">xs</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">dofs_master</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">dofs_slave</span><span class="p">]</span>  <span class="c1"># noqa</span>
+            <span class="n">slave_to_master_map</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Unknown boundary condition: </span><span class="si">{0:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">type_</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The boundary condition&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bc</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The string identifier of the BC&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">Function</span><span class="p">,</span> <span class="n">fem</span><span class="o">.</span><span class="n">Constant</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Pierric Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

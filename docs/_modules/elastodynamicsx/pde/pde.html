@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>elastodynamicsx.pde.pde &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ElastodynamiCSx
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html">ElastodynamiCSx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#build-problems">Build problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#solve-problems">Solve problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#post-process-solutions">Post process solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#dependencies">Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../readme_link.html#packages-required-for-the-examples">Packages required for the examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../readme_link.html#optional-packages">Optional packages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../readme_link.html#option-1-with-fenicsx-binaries-installed">Option 1: With FEniCSx binaries installed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../readme_link.html#option-2-inside-a-fenicsx-docker-image">Option 2: Inside a FEniCSx Docker image</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../readme_link.html#useful-links">Useful links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/examples_index.html">Demos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../demos/examples_section1.html"><strong>Time domain</strong>, wave equation; high order (spectral) elements &amp; <strong>explicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section1_files.html">weq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section1_files.html#weq-2d-psv-fullspace-py">weq_2D-PSV_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section1_files.html#weq-2d-psv-halfspace-lamb-komatitschvilotte-bssa1998-py">weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section1_files.html#weqnl-1d-psv-murnaghan-pwave-py">weqnl_1D-PSV_Murnaghan_Pwave.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../demos/examples_section2.html"><strong>Time domain</strong>, structural dynamics; low order elements &amp; <strong>implicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section2_files.html">tdsdyn_3D_ElasticBeam.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../demos/examples_section3.html"><strong>Frequency domain</strong>, wave equation (Helmoltz equation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section3_files.html">freq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section3_files.html#freq-2d-psv-fullspace-py">freq_2D-PSV_FullSpace.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../demos/examples_section4.html"><strong>Eigenmodes</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section4_files.html">eigs_3D_ElasticBeam.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../demos/examples_section4_files.html#eigs-3d-aluminumcube-py">eigs_3D_AluminumCube.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../demos/examples_section5.html"><strong>Guided waves</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/api_index.html">API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/elastodynamicsx.plot.html">elastodynamicsx.plot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.plot.html#module-elastodynamicsx.plot">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.plot.html#module-elastodynamicsx.plot.plot">elastodynamicsx.plot.plot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/elastodynamicsx.solutions.html">elastodynamicsx.solutions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solutions.html#module-elastodynamicsx.solutions">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solutions.html#module-elastodynamicsx.solutions.modalbasis">elastodynamicsx.solutions.modalbasis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html">elastodynamicsx.solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.eval">elastodynamicsx.utils.eval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.spectralelements">elastodynamicsx.utils.spectralelements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.tags">elastodynamicsx.utils.tags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ElastodynamiCSx</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">elastodynamicsx.pde.pde</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for elastodynamicsx.pde.pde</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2023 Pierric Mora</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ElastodynamiCSx</span>
+<span class="c1">#</span>
+<span class="c1"># SPDX-License-Identifier: MIT</span>
+
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">petsc4py</span> <span class="kn">import</span> <span class="n">PETSc</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">dolfinx</span> <span class="kn">import</span> <span class="n">fem</span><span class="p">,</span> <span class="n">default_scalar_type</span>
+<span class="kn">import</span> <span class="nn">ufl</span>  <span class="c1"># type: ignore</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">dolfinx_mpc</span>
+    <span class="kn">from</span> <span class="nn">dolfinx_mpc</span> <span class="kn">import</span> <span class="n">MultiPointConstraint</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">warnings</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Can&#39;t import dolfinx_mpc. Periodic boundaries are not available&quot;</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">)</span>
+    <span class="n">dolfinx_mpc</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+    <span class="n">MultiPointConstraint</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">.buildmpc</span> <span class="kn">import</span> <span class="n">_build_mpc</span>
+<span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">PDECONFIG</span>
+<span class="kn">from</span> <span class="nn">.boundarycondition</span> <span class="kn">import</span> <span class="n">BoundaryCondition</span>
+<span class="kn">from</span> <span class="nn">.materials</span> <span class="kn">import</span> <span class="n">Material</span>
+
+
+<div class="viewcode-block" id="PDE">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE">[docs]</a>
+<span class="k">class</span> <span class="nc">PDE</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Representation of a PDE of the kind:</span>
+
+<span class="sd">        M*a + C*v + K(u) = b</span>
+<span class="sd">        + Boundary conditions</span>
+
+<span class="sd">    as an assembly of materials, forces and bcs defined over different subdomains.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        functions_space</span>
+<span class="sd">        materials: a list of pde.Material instances</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        bodyforces: (default=[]) a list of pde.BodyForce instances</span>
+<span class="sd">        bcs: (default=[]) a list of fem.DirichletBCMetaClass and/or pde.BoundaryCondition instances</span>
+<span class="sd">        jit_options: (default=PDECONFIG.default_jit_options) options for the just-in-time compiler</span>
+<span class="sd">        finalize: (default=True) call self.finalize() on build</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_space</span><span class="p">:</span> <span class="n">fem</span><span class="o">.</span><span class="n">FunctionSpaceBase</span><span class="p">,</span> <span class="n">materials</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Material</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span> <span class="o">=</span> <span class="n">function_space</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">materials</span> <span class="o">=</span> <span class="n">materials</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bodyforces</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;bodyforces&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bcs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;bcs&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;jit_options&#39;</span><span class="p">,</span> <span class="n">PDECONFIG</span><span class="o">.</span><span class="n">default_jit_options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_u</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">TrialFunction</span><span class="p">(</span><span class="n">function_space</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">TestFunction</span><span class="p">(</span><span class="n">function_space</span><span class="p">)</span>
+
+        <span class="c1"># Declare stuff without building</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">MultiPointConstraint</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_m_form</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_c_form</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_k_form</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_b_form</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_k1_form</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_k2_form</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_k3_form</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># ## Sort boundary conditions</span>
+        <span class="c1"># custom weak BSs, instances of BoundaryCondition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_weak</span> <span class="o">=</span> <span class="n">BoundaryCondition</span><span class="o">.</span><span class="n">get_weak_BCs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">)</span>
+        <span class="c1"># dolfinx.fem.DirichletBCMetaClass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span> <span class="o">=</span> <span class="n">BoundaryCondition</span><span class="o">.</span><span class="n">get_dirichlet_BCs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">)</span>
+        <span class="c1"># instances of BoundaryCondition used to add multi-point constraints</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_mpc</span> <span class="o">=</span> <span class="n">BoundaryCondition</span><span class="o">.</span><span class="n">get_mpc_BCs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">)</span>
+        <span class="c1"># new_list = filter(lambda v: v not in b, a)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_omega_ufl</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">default_scalar_type</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="c1"># Finalize the PDE (compile, ...). Optionnally this can be done</span>
+        <span class="c1"># manually later on by passing kwargs[&#39;finalize&#39;]=False</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;finalize&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_linear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">mat</span><span class="o">.</span><span class="n">is_linear</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">materials</span><span class="p">]))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mpc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span>
+
+<span class="c1"># ## ### ### ### ### ### ### ### ### ## #</span>
+<span class="c1"># ## Finalize the PDE (compile, ...) ## #</span>
+<span class="c1"># ## ### ### ### ### ### ### ### ### ## #</span>
+
+<div class="viewcode-block" id="PDE.finalize">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.finalize">[docs]</a>
+    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finalize dolfinx-mpc objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_build_mpc</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_b_frequencydomain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_b_frequencydomain_WO_MPC</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_b_frequencydomain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_b_frequencydomain_WITH_MPC</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_linear</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;linear PDE&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;non-linear PDE&#39;</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_build_mpc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Required for handling multi-point constraints (e.g. periodic BC)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dolfinx_mpc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># if import error</span>
+            <span class="k">return</span>
+        <span class="c1">#</span>
+        <span class="c1"># if there is no need to use MPC. Note that MPC slows down the runs even if</span>
+        <span class="c1"># there is no constraint -&gt; better avoid using it if not needed</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_mpc</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="c1">#</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="o">=</span> <span class="n">_build_mpc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_mpc</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_compile_M</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_u</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_m_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_compile_C_K_b</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Required for frequency domain or eigenvalue problems&quot;&quot;&quot;</span>
+        <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_u</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span>
+
+        <span class="n">zero</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">default_scalar_type</span><span class="p">(</span><span class="mf">0.</span><span class="p">))</span>
+        <span class="n">vzero</span> <span class="o">=</span> <span class="n">zero</span>
+        <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">ufl_function_space</span><span class="p">()</span><span class="o">.</span><span class="n">num_sub_spaces</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># VectorFunctionSpace</span>
+            <span class="n">vzero</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">default_scalar_type</span><span class="p">([</span><span class="mf">0.</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
+
+        <span class="c1"># Interior</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+        <span class="c1"># Retrieve the integral measures in k to build compatible default zero forms &#39;c&#39; and &#39;L&#39;</span>
+        <span class="n">measures</span> <span class="o">=</span> <span class="p">[</span><span class="n">ufl</span><span class="o">.</span><span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;dx&quot;</span><span class="p">,</span>
+                                <span class="n">domain</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span>
+                                <span class="n">subdomain_data</span><span class="o">=</span><span class="n">cint</span><span class="o">.</span><span class="n">subdomain_data</span><span class="p">(),</span>
+                                <span class="n">metadata</span><span class="o">=</span><span class="n">cint</span><span class="o">.</span><span class="n">metadata</span><span class="p">())(</span><span class="n">cint</span><span class="o">.</span><span class="n">subdomain_id</span><span class="p">())</span> <span class="k">for</span> <span class="n">cint</span> <span class="ow">in</span> <span class="n">k</span><span class="o">.</span><span class="n">integrals</span><span class="p">()]</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="nb">sum</span><span class="p">([</span><span class="n">zero</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span> <span class="k">for</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">measures</span><span class="p">])</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="nb">sum</span><span class="p">([</span><span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">vzero</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span> <span class="k">for</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">measures</span><span class="p">])</span>
+
+        <span class="c1"># Boundaries</span>
+        <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_weak</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;neumann&#39;</span><span class="p">:</span>
+                <span class="n">L</span> <span class="o">+=</span> <span class="n">bc</span><span class="o">.</span><span class="n">bc</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;robin&#39;</span><span class="p">:</span>
+                <span class="n">F_bc</span> <span class="o">=</span> <span class="n">bc</span><span class="o">.</span><span class="n">bc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                <span class="n">k</span> <span class="o">+=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">lhs</span><span class="p">(</span><span class="n">F_bc</span><span class="p">)</span>
+                <span class="n">L</span> <span class="o">+=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">rhs</span><span class="p">(</span><span class="n">F_bc</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;dashpot&#39;</span><span class="p">:</span>
+                <span class="n">c</span> <span class="o">+=</span> <span class="n">bc</span><span class="o">.</span><span class="n">bc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Unsupported boundary condition </span><span class="si">{0:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bc</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_c_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_k_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_b_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>
+
+        <span class="c1"># Executes the following only if using complex numbers</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">default_scalar_type</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">complexfloating</span><span class="p">):</span>
+            <span class="c1"># #Mat_lhs = -w*w*_M_ + 1J*w*_C_ + _K_</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_omega_ufl</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_a_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="o">-</span><span class="n">w</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="n">J</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">c</span> <span class="o">+</span> <span class="n">k</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_compile_K1_K2_K3</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Required for waveguide problems&quot;&quot;&quot;</span>
+        <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_u</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">basix_element</span><span class="o">.</span><span class="n">discontinuous</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">,</span> \
+            <span class="s1">&#39;K1, K2, K3 are not implemented for a DG formulation&#39;</span>
+
+        <span class="c1"># Interior</span>
+        <span class="n">k1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k1</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">k2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k2</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">k3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k3</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+        <span class="c1"># Boundaries</span>
+        <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_weak</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;neumann&#39;</span><span class="p">:</span>
+                <span class="k">pass</span>  <span class="c1"># ignores</span>
+            <span class="k">elif</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;robin&#39;</span><span class="p">:</span>
+                <span class="c1"># F_bc = bc.bc(u, v)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Robin BC: TODO&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+                <span class="c1"># k += ufl.lhs(F_bc)  # TODO</span>
+                <span class="c1"># L += ufl.rhs(F_bc)  # ignores right hand side</span>
+            <span class="k">elif</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;dashpot&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Dashpot BC: TODO&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+                <span class="c1"># c += bc.bc(u,v)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Unsupported boundary condition </span><span class="si">{0:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bc</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_k1_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_k2_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">k2</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_k3_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">k3</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>
+
+<span class="c1"># ## ### ### ### ### ### ### ### ### ### ## #</span>
+<span class="c1"># ## Linear and bilinear form functions  ## #</span>
+<span class="c1"># ## ### ### ### ### ### ### ### ### ### ## #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bilinear) Mass form function&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="n">mat</span><span class="o">.</span><span class="n">m</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">materials</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">c</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bilinear) Damping form function&quot;&quot;&quot;</span>
+        <span class="n">non0dampings</span> <span class="o">=</span> <span class="p">[</span><span class="n">mat</span><span class="o">.</span><span class="n">c</span> <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">materials</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">mat</span><span class="o">.</span><span class="n">c</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">non0dampings</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="n">c</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">non0dampings</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bilinear) Stiffness form function&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="n">mat</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">materials</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k1</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bilinear) k1 stiffness form function (waveguide problems)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="n">mat</span><span class="o">.</span><span class="n">k1_CG</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">materials</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k2</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bilinear) k2 stiffness form function (waveguide problems)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="n">mat</span><span class="o">.</span><span class="n">k2_CG</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">materials</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k3</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bilinear) k3 stiffness form function (waveguide problems)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="n">mat</span><span class="o">.</span><span class="n">k3_CG</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">materials</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k_CG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bilinear) Stiffness form function (Continuous Galerkin)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="n">mat</span><span class="o">.</span><span class="n">k_CG</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">materials</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k_DG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bilinear) Stiffness form function (Discontinuous Galerkin)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="n">mat</span><span class="o">.</span><span class="n">k_DG</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">materials</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">DG_numerical_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bilinear) Numerical flux form function (Disontinuous Galerkin)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="n">mat</span><span class="o">.</span><span class="n">DG_numerical_flux</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">materials</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">L</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Linear form function&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bodyforces</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="n">f</span><span class="o">.</span><span class="n">L</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bodyforces</span><span class="p">])</span>
+
+<span class="c1"># ## ### ### ### ### ### ### ## #</span>
+<span class="c1"># ## Compiled dolfinx forms  ## #</span>
+<span class="c1"># ## ### ### ### ### ### ### ## #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">m_form</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compiled mass bilinear form&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_form</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">c_form</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compiled damping bilinear form&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c_form</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k_form</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compiled stiffness bilinear form&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k_form</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">b_form</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compiled linear form&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_form</span>
+
+<span class="c1"># ## ### ### ### ### ### ### ### ## #</span>
+<span class="c1"># ## PETSc matrices and vectors  ## #</span>
+<span class="c1"># ## ### ### ### ### ### ### ### ## #</span>
+
+<div class="viewcode-block" id="PDE.M">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.M">[docs]</a>
+    <span class="k">def</span> <span class="nf">M</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Mat</span><span class="p">:</span>  <span class="c1"># type: ignore[name-defined]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mass matrix&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compile_M</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_m_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_m_form</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="n">dolfinx_mpc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_m_form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+        <span class="n">M</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">M</span></div>
+
+
+<div class="viewcode-block" id="PDE.C">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.C">[docs]</a>
+    <span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Mat</span><span class="p">:</span>  <span class="c1"># type: ignore[name-defined]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Damping matrix&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compile_C_K_b</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_c_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_c_form</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="n">dolfinx_mpc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_c_form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">C</span></div>
+
+
+<div class="viewcode-block" id="PDE.K">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K">[docs]</a>
+    <span class="k">def</span> <span class="nf">K</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Mat</span><span class="p">:</span>  <span class="c1"># type: ignore[name-defined]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stiffness matrix&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compile_C_K_b</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">K</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k_form</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">K</span> <span class="o">=</span> <span class="n">dolfinx_mpc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k_form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+        <span class="n">K</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">K</span></div>
+
+
+<div class="viewcode-block" id="PDE.b">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.b">[docs]</a>
+    <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Vec</span><span class="p">:</span>  <span class="c1"># type: ignore[name-defined]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load vector&quot;&quot;&quot;</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_b</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_b_frequencydomain</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">omega</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">b</span></div>
+
+
+<div class="viewcode-block" id="PDE.init_b">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.init_b">[docs]</a>
+    <span class="k">def</span> <span class="nf">init_b</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Vec</span><span class="p">:</span>  <span class="c1"># type: ignore[name-defined]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Declares a zero vector compatible with the linear form&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compile_C_K_b</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_b_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">create_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_b_form</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">dolfinx_mpc</span><span class="o">.</span><span class="n">assemble_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_b_form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PDE.K1">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K1">[docs]</a>
+    <span class="k">def</span> <span class="nf">K1</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Mat</span><span class="p">:</span>  <span class="c1"># type: ignore[name-defined]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;K1 stiffness matrix (waveguide problems)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k1_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compile_K1_K2_K3</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k1_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">K1</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k1_form</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">K1</span> <span class="o">=</span> <span class="n">dolfinx_mpc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k1_form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+        <span class="n">K1</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">K1</span></div>
+
+
+<div class="viewcode-block" id="PDE.K2">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K2">[docs]</a>
+    <span class="k">def</span> <span class="nf">K2</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Mat</span><span class="p">:</span>  <span class="c1"># type: ignore[name-defined]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;K2 stiffness matrix (waveguide problems)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># special case: K1=K, K2=K3=0</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k2_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compile_K1_K2_K3</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k2_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">K2</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k2_form</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">K2</span> <span class="o">=</span> <span class="n">dolfinx_mpc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k2_form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+        <span class="n">K2</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">K2</span></div>
+
+
+<div class="viewcode-block" id="PDE.K3">
+<a class="viewcode-back" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K3">[docs]</a>
+    <span class="k">def</span> <span class="nf">K3</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Mat</span><span class="p">:</span>  <span class="c1"># type: ignore[name-defined]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;K3 stiffness matrix (waveguide problems)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># special case: K1=K, K2=K3=0</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k3_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compile_K1_K2_K3</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k3_form</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">K3</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k3_form</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">K3</span> <span class="o">=</span> <span class="n">dolfinx_mpc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k3_form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+        <span class="n">K3</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">K3</span></div>
+
+
+<span class="c1"># ## ### ### ### ###  ## #</span>
+<span class="c1"># ## Update functions ## #</span>
+<span class="c1"># ## ### ### ### ###  ## #</span>
+
+    <span class="c1"># def update_b_frequencydomain(self, b:PETSc.Vec, omega:float) -&gt; None: #NOW SET TO EITHER METHOD BELOW IN __init__</span>
+
+    <span class="k">def</span> <span class="nf">_update_b_frequencydomain_WO_MPC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Vec</span><span class="p">,</span> <span class="n">omega</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[name-defined]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the b vector (in-place) for a given angular frequency omega&quot;&quot;&quot;</span>
+        <span class="c1"># set to 0</span>
+        <span class="k">with</span> <span class="n">b</span><span class="o">.</span><span class="n">localForm</span><span class="p">()</span> <span class="k">as</span> <span class="n">loc_b</span><span class="p">:</span>
+            <span class="n">loc_b</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># fill with values</span>
+        <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">assemble_vector</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_form</span><span class="p">)</span>
+
+        <span class="c1"># BC modifyier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_omega_ufl</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">omega</span>
+        <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">apply_lifting</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_a_form</span><span class="p">],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">])</span>
+
+        <span class="c1"># ghost</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">ghostUpdate</span><span class="p">(</span><span class="n">addv</span><span class="o">=</span><span class="n">PETSc</span><span class="o">.</span><span class="n">InsertMode</span><span class="o">.</span><span class="n">ADD_VALUES</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">PETSc</span><span class="o">.</span><span class="n">ScatterMode</span><span class="o">.</span><span class="n">REVERSE</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
+
+        <span class="c1"># apply BC value</span>
+        <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">set_bc</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_b_frequencydomain_WITH_MPC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Vec</span><span class="p">,</span> <span class="n">omega</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[name-defined]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the b vector (in-place) for a given angular frequency omega&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># set to 0</span>
+        <span class="k">with</span> <span class="n">b</span><span class="o">.</span><span class="n">localForm</span><span class="p">()</span> <span class="k">as</span> <span class="n">loc_b</span><span class="p">:</span>
+            <span class="n">loc_b</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># fill with values</span>
+        <span class="c1"># fem.petsc.assemble_vector(b, self.b_form)</span>
+        <span class="n">dolfinx_mpc</span><span class="o">.</span><span class="n">assemble_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b_form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+        <span class="c1"># BC modifyier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_omega_ufl</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">omega</span>
+        <span class="c1"># fem.petsc.apply_lifting(b, [self._a_form], [self._bcs_strong])</span>
+        <span class="n">dolfinx_mpc</span><span class="o">.</span><span class="n">apply_lifting</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_a_form</span><span class="p">],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span><span class="p">)</span>
+
+        <span class="c1"># ghost</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">ghostUpdate</span><span class="p">(</span><span class="n">addv</span><span class="o">=</span><span class="n">PETSc</span><span class="o">.</span><span class="n">InsertMode</span><span class="o">.</span><span class="n">ADD_VALUES</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">PETSc</span><span class="o">.</span><span class="n">ScatterMode</span><span class="o">.</span><span class="n">REVERSE</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
+
+        <span class="c1"># apply BC value</span>
+        <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">set_bc</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">)</span>  <span class="c1"># not modified by dolfinx_mpc</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Pierric Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

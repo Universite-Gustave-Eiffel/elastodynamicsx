@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>elastodynamicsx.utils &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="elastodynamicsx.solvers.timestepper" href="elastodynamicsx.solvers.timestepper.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ElastodynamiCSx
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme_link.html">ElastodynamiCSx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#build-problems">Build problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#solve-problems">Solve problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#post-process-solutions">Post process solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#dependencies">Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#packages-required-for-the-examples">Packages required for the examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#optional-packages">Optional packages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#option-1-with-fenicsx-binaries-installed">Option 1: With FEniCSx binaries installed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#option-2-inside-a-fenicsx-docker-image">Option 2: Inside a FEniCSx Docker image</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#useful-links">Useful links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/examples_index.html">Demos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section1.html"><strong>Time domain</strong>, wave equation; high order (spectral) elements &amp; <strong>explicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html">weq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html#weq-2d-psv-fullspace-py">weq_2D-PSV_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html#weq-2d-psv-halfspace-lamb-komatitschvilotte-bssa1998-py">weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html#weqnl-1d-psv-murnaghan-pwave-py">weqnl_1D-PSV_Murnaghan_Pwave.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section2.html"><strong>Time domain</strong>, structural dynamics; low order elements &amp; <strong>implicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section2_files.html">tdsdyn_3D_ElasticBeam.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section3.html"><strong>Frequency domain</strong>, wave equation (Helmoltz equation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section3_files.html">freq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section3_files.html#freq-2d-psv-fullspace-py">freq_2D-PSV_FullSpace.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section4.html"><strong>Eigenmodes</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section4_files.html">eigs_3D_ElasticBeam.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section4_files.html#eigs-3d-aluminumcube-py">eigs_3D_AluminumCube.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section5.html"><strong>Guided waves</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="api_index.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.plot.html">elastodynamicsx.plot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.plot.html#module-elastodynamicsx.plot">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.plot.html#module-elastodynamicsx.plot.plot">elastodynamicsx.plot.plot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.solutions.html">elastodynamicsx.solutions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solutions.html#module-elastodynamicsx.solutions">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solutions.html#module-elastodynamicsx.solutions.modalbasis">elastodynamicsx.solutions.modalbasis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.solvers.html">elastodynamicsx.solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">elastodynamicsx.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-elastodynamicsx.utils">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-elastodynamicsx.utils.eval">elastodynamicsx.utils.eval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-elastodynamicsx.utils.spectralelements">elastodynamicsx.utils.spectralelements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-elastodynamicsx.utils.tags">elastodynamicsx.utils.tags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ElastodynamiCSx</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="api_index.html">API reference</a></li>
+      <li class="breadcrumb-item active">elastodynamicsx.utils</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/elastodynamicsx.utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="elastodynamicsx-utils">
+<h1>elastodynamicsx.utils<a class="headerlink" href="#elastodynamicsx-utils" title="Link to this heading"></a></h1>
+<section id="module-elastodynamicsx.utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-elastodynamicsx.utils" title="Link to this heading"></a></h2>
+<p>The <em>utils</em> module contains various tools that do not fit into the other packages</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.make_facet_tags">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.</span></span><span class="sig-name descname"><span class="pre">make_facet_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundaries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MeshTags</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/tags.html#make_facet_tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.make_facet_tags" title="Link to this definition"></a></dt>
+<dd><p>Shortcut for make_tags(domain, locators, type_=’boundaries’)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.make_cell_tags">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.</span></span><span class="sig-name descname"><span class="pre">make_cell_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subdomains</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MeshTags</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/tags.html#make_cell_tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.make_cell_tags" title="Link to this definition"></a></dt>
+<dd><p>Shortcut for make_tags(domain, locators, type_=’domains’)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.make_tags">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.</span></span><span class="sig-name descname"><span class="pre">make_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unknown'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MeshTags</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/tags.html#make_tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.make_tags" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>domain</strong> – A mesh</p></li>
+<li><p><strong>locators</strong> – A tuple of tuples of the type (tag, fn), where:
+tag: is an int to be assigned to the cells or facets
+fn: is a boolean function that take ‘x’ as argument</p></li>
+<li><p><strong>type</strong> – either ‘domains’ or ‘boundaries’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A MeshTags object (dolfinx.mesh)</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Adapted from:</dt><dd><p><a class="reference external" href="https://jsdokken.com/dolfinx-tutorial/chapter3/robin_neumann_dirichlet.html">https://jsdokken.com/dolfinx-tutorial/chapter3/robin_neumann_dirichlet.html</a></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="kn">from</span> <span class="nn">dolfinx.mesh</span> <span class="kn">import</span> <span class="n">create_unit_square</span>
+<span class="c1">#</span>
+<span class="n">domain</span> <span class="o">=</span> <span class="n">create_unit_square</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="n">boundaries</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)),</span>
+              <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)),</span>
+              <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)),</span>
+              <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="n">facet_tags</span> <span class="o">=</span> <span class="n">make_tags</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">boundaries</span><span class="p">,</span> <span class="s1">&#39;boundaries&#39;</span><span class="p">)</span>
+
+<span class="n">Omegas</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">0.5</span><span class="p">),</span>
+          <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.5</span><span class="p">))</span>
+<span class="n">cell_tags</span> <span class="o">=</span> <span class="n">make_tags</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">Omegas</span><span class="p">,</span> <span class="s1">&#39;domains&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.ParallelEvaluator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.</span></span><span class="sig-name descname"><span class="pre">ParallelEvaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/utils/eval.html#ParallelEvaluator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.ParallelEvaluator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Convenience class to evaluate functions (fem.Function) when the mesh is
+distributed over several processes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>domain</strong> – a distributed mesh (MPI.COMM_WORLD)</p></li>
+<li><p><strong>points</strong> – shape=(3, nbpts). Should be defined either for all processes,
+or for the proc no 0. Does not support ‘points’ being scattered on
+several processes.</p></li>
+<li><p><strong>padding</strong> – close-to-zero parameter used in dolfinx.cpp.geometry.determine_point_ownership</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define some output points</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+
+<span class="c1"># Initialize the evaluator</span>
+<span class="n">paraEval</span> <span class="o">=</span> <span class="n">ParallelEvaluator</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+
+<span class="c1"># Perform function evaluations</span>
+<span class="n">u_eval_local</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">paraEval</span><span class="o">.</span><span class="n">points_local</span><span class="p">,</span> <span class="n">paraEval</span><span class="o">.</span><span class="n">cells_local</span><span class="p">)</span>
+
+<span class="c1"># Gather all procs</span>
+<span class="n">u_eval</span> <span class="o">=</span> <span class="n">paraEval</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">u_eval_local</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Do something, e.g. export to file</span>
+<span class="k">if</span> <span class="n">domain</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savez</span><span class="p">(</span><span class="s1">&#39;u_eval.npz&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">points</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u_eval</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>Adapted from:</dt><dd><p><a class="reference external" href="https://github.com/jorgensd/dolfinx-tutorial/issues/116">https://github.com/jorgensd/dolfinx-tutorial/issues/116</a></p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.ParallelEvaluator.nb_points_local">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nb_points_local</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#elastodynamicsx.utils.ParallelEvaluator.nb_points_local" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.ParallelEvaluator.gather">
+<span class="sig-name descname"><span class="pre">gather</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eval_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/eval.html#ParallelEvaluator.gather"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.ParallelEvaluator.gather" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.spectral_element">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.</span></span><span class="sig-name descname"><span class="pre">spectral_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">_BasixElement</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/spectralelements.html#spectral_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.spectral_element" title="Link to this definition"></a></dt>
+<dd><p>A spectral element that can be used in a dolfinx.fem.FunctionSpace</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – One of (“GLL”, “GL”, “Legendre”)</p></li>
+<li><p><strong>cell_type</strong> – Elements can be defined from any type, but diagonal mass matrices
+can only be obtained using GLL / GL quadratures that require cell types
+interval (1D) / quadrilateral (2D) / hexahedron (3D)</p></li>
+<li><p><strong>degree</strong> – The maximum degree of basis functions</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="kn">from</span> <span class="nn">dolfinx</span> <span class="kn">import</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">fem</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.utils</span> <span class="kn">import</span> <span class="n">spectral_element</span><span class="p">,</span> <span class="n">spectral_quadrature</span>
+<span class="c1">#</span>
+<span class="n">degree</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">specFE</span> <span class="o">=</span> <span class="n">spectral_element</span><span class="p">(</span><span class="s2">&quot;GLL&quot;</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">quadrilateral</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span>
+<span class="n">specmd</span> <span class="o">=</span> <span class="n">spectral_quadrature</span><span class="p">(</span><span class="s2">&quot;GLL&quot;</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span>
+<span class="n">domain</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">create_unit_square</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>
+                                 <span class="n">cell_type</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">quadrilateral</span><span class="p">)</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">FunctionSpace</span><span class="p">(</span> <span class="n">domain</span><span class="p">,</span> <span class="n">specFE</span> <span class="p">)</span>
+
+<span class="c1">#######</span>
+<span class="c1"># Compile mass matrices using pure fenicsx code</span>
+<span class="kn">import</span> <span class="nn">ufl</span>
+<span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">TrialFunction</span><span class="p">(</span><span class="n">V</span><span class="p">),</span> <span class="n">ufl</span><span class="o">.</span><span class="n">TestFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+<span class="c1"># here we do not specify quadrature information -&gt; non-diagonal mass matrix</span>
+<span class="n">a1_non_diag</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span>
+<span class="n">M1_non_diag</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="n">a1_non_diag</span><span class="p">)</span>
+<span class="n">M1_non_diag</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+
+<span class="c1"># here we specify the quadrature metadata -&gt; the matrix becomes diagonal</span>
+<span class="n">a2_diag</span>     <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">specmd</span><span class="p">))</span>
+<span class="n">M2_diag</span>     <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="n">a2_diag</span><span class="p">)</span>
+<span class="n">M2_diag</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+
+<span class="c1">#######</span>
+<span class="c1"># Compile mass matrices using elastodynamicsx.pde classes</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.pde</span> <span class="kn">import</span> <span class="n">PDE</span><span class="p">,</span> <span class="n">material</span>
+
+<span class="c1"># here we do not specify quadrature information -&gt; non-diagonal mass matrix</span>
+<span class="n">mat3</span>          <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="s1">&#39;scalar&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">pde3_non_diag</span> <span class="o">=</span> <span class="n">PDE</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="p">[</span><span class="n">mat3</span><span class="p">])</span>
+<span class="n">M3_non_diag</span>   <span class="o">=</span> <span class="n">pde3_non_diag</span><span class="o">.</span><span class="n">M</span><span class="p">()</span>
+
+<span class="c1"># elastodynamicsx offers two ways to specify the quadrature metadata</span>
+
+<span class="c1"># 1. by passing the metadata as kwargs to each material / boundary condition / bodyforce</span>
+
+<span class="n">mat4</span>          <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="s1">&#39;scalar&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">specmd</span><span class="p">)</span>
+<span class="n">pde4_diag</span>     <span class="o">=</span> <span class="n">PDE</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="p">[</span><span class="n">mat4</span><span class="p">])</span>
+<span class="n">M4_diag</span>       <span class="o">=</span> <span class="n">pde4_diag</span><span class="o">.</span><span class="n">M</span><span class="p">()</span>
+
+<span class="c1"># 2. by passing the metadata to the PDE.default_metadata, which is being used by</span>
+<span class="c1"># all materials / boundary conditions / bodyforces at __init__ call</span>
+
+<span class="kn">from</span> <span class="nn">elastodynamicsx.pde</span> <span class="kn">import</span> <span class="n">PDECONFIG</span>
+<span class="n">PDECONFIG</span><span class="o">.</span><span class="n">default_metadata</span> <span class="o">=</span> <span class="n">specmd</span>  <span class="c1"># default for all forms in the pde package (materials, BCs, ...)</span>
+
+<span class="n">mat5</span>          <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="s1">&#39;scalar&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">pde5_diag</span>     <span class="o">=</span> <span class="n">PDE</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="p">[</span><span class="n">mat5</span><span class="p">])</span>
+<span class="n">M5_diag</span>       <span class="o">=</span> <span class="n">pde5_diag</span><span class="o">.</span><span class="n">M</span><span class="p">()</span>
+
+<span class="c1"># spy mass matrices</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.plot</span> <span class="kn">import</span> <span class="n">spy_petscMatrix</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">M</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="n">M1_non_diag</span><span class="p">,</span> <span class="n">M2_diag</span><span class="p">,</span> <span class="n">M3_non_diag</span><span class="p">,</span> <span class="n">M4_diag</span><span class="p">,</span> <span class="n">M5_diag</span><span class="p">]):</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;M&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">spy_petscMatrix</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.spectral_quadrature">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.</span></span><span class="sig-name descname"><span class="pre">spectral_quadrature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/spectralelements.html#spectral_quadrature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.spectral_quadrature" title="Link to this definition"></a></dt>
+<dd><p>A quadrature metadata to build diagonal mass matrices when used with
+corresponding spectral elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – One of (“GLL”, “GL”, “Legendre”)</p></li>
+<li><p><strong>degree</strong> – The maximum degree of basis functions</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>See doc of ‘spectral_element’.</p>
+</dd></dl>
+
+</section>
+<section id="module-elastodynamicsx.utils.eval">
+<span id="elastodynamicsx-utils-eval"></span><h2>elastodynamicsx.utils.eval<a class="headerlink" href="#module-elastodynamicsx.utils.eval" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.eval.ParallelEvaluator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.eval.</span></span><span class="sig-name descname"><span class="pre">ParallelEvaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/utils/eval.html#ParallelEvaluator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.eval.ParallelEvaluator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Convenience class to evaluate functions (fem.Function) when the mesh is
+distributed over several processes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>domain</strong> – a distributed mesh (MPI.COMM_WORLD)</p></li>
+<li><p><strong>points</strong> – shape=(3, nbpts). Should be defined either for all processes,
+or for the proc no 0. Does not support ‘points’ being scattered on
+several processes.</p></li>
+<li><p><strong>padding</strong> – close-to-zero parameter used in dolfinx.cpp.geometry.determine_point_ownership</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define some output points</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+
+<span class="c1"># Initialize the evaluator</span>
+<span class="n">paraEval</span> <span class="o">=</span> <span class="n">ParallelEvaluator</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+
+<span class="c1"># Perform function evaluations</span>
+<span class="n">u_eval_local</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">paraEval</span><span class="o">.</span><span class="n">points_local</span><span class="p">,</span> <span class="n">paraEval</span><span class="o">.</span><span class="n">cells_local</span><span class="p">)</span>
+
+<span class="c1"># Gather all procs</span>
+<span class="n">u_eval</span> <span class="o">=</span> <span class="n">paraEval</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">u_eval_local</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Do something, e.g. export to file</span>
+<span class="k">if</span> <span class="n">domain</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savez</span><span class="p">(</span><span class="s1">&#39;u_eval.npz&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">points</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u_eval</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>Adapted from:</dt><dd><p><a class="reference external" href="https://github.com/jorgensd/dolfinx-tutorial/issues/116">https://github.com/jorgensd/dolfinx-tutorial/issues/116</a></p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.eval.ParallelEvaluator.nb_points_local">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nb_points_local</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#elastodynamicsx.utils.eval.ParallelEvaluator.nb_points_local" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.eval.ParallelEvaluator.gather">
+<span class="sig-name descname"><span class="pre">gather</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eval_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/eval.html#ParallelEvaluator.gather"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.eval.ParallelEvaluator.gather" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-elastodynamicsx.utils.spectralelements">
+<span id="elastodynamicsx-utils-spectralelements"></span><h2>elastodynamicsx.utils.spectralelements<a class="headerlink" href="#module-elastodynamicsx.utils.spectralelements" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.spectralelements.GLL_element">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.spectralelements.</span></span><span class="sig-name descname"><span class="pre">GLL_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">_BasixElement</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/spectralelements.html#GLL_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.spectralelements.GLL_element" title="Link to this definition"></a></dt>
+<dd><p>Element defined using the Gauss-Lobatto-Legendre points</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.spectralelements.GL_element">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.spectralelements.</span></span><span class="sig-name descname"><span class="pre">GL_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">_BasixElement</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/spectralelements.html#GL_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.spectralelements.GL_element" title="Link to this definition"></a></dt>
+<dd><p>(discontinuous) Element defined using the Gauss-Legendre points</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.spectralelements.Legendre_element">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.spectralelements.</span></span><span class="sig-name descname"><span class="pre">Legendre_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">_BasixElement</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/spectralelements.html#Legendre_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.spectralelements.Legendre_element" title="Link to this definition"></a></dt>
+<dd><p>(discontinuous) Element whose basis functions are the orthonormal Legendre polynomials</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.spectralelements.GLL_quadrature">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.spectralelements.</span></span><span class="sig-name descname"><span class="pre">GLL_quadrature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/spectralelements.html#GLL_quadrature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.spectralelements.GLL_quadrature" title="Link to this definition"></a></dt>
+<dd><p>Returns the dolfinx quadrature rule for use with GLL elements of the given degree.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.spectralelements.GL_quadrature">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.spectralelements.</span></span><span class="sig-name descname"><span class="pre">GL_quadrature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/spectralelements.html#GL_quadrature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.spectralelements.GL_quadrature" title="Link to this definition"></a></dt>
+<dd><p>Returns the dolfinx quadrature rule for use with GL elements of the given degree.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.spectralelements.Legendre_quadrature">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.spectralelements.</span></span><span class="sig-name descname"><span class="pre">Legendre_quadrature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/spectralelements.html#Legendre_quadrature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.spectralelements.Legendre_quadrature" title="Link to this definition"></a></dt>
+<dd><p>Returns the dolfinx quadrature rule for use with Legendre elements of the given degree.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.spectralelements.spectral_element">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.spectralelements.</span></span><span class="sig-name descname"><span class="pre">spectral_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">_BasixElement</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/spectralelements.html#spectral_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.spectralelements.spectral_element" title="Link to this definition"></a></dt>
+<dd><p>A spectral element that can be used in a dolfinx.fem.FunctionSpace</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – One of (“GLL”, “GL”, “Legendre”)</p></li>
+<li><p><strong>cell_type</strong> – Elements can be defined from any type, but diagonal mass matrices
+can only be obtained using GLL / GL quadratures that require cell types
+interval (1D) / quadrilateral (2D) / hexahedron (3D)</p></li>
+<li><p><strong>degree</strong> – The maximum degree of basis functions</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="kn">from</span> <span class="nn">dolfinx</span> <span class="kn">import</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">fem</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.utils</span> <span class="kn">import</span> <span class="n">spectral_element</span><span class="p">,</span> <span class="n">spectral_quadrature</span>
+<span class="c1">#</span>
+<span class="n">degree</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">specFE</span> <span class="o">=</span> <span class="n">spectral_element</span><span class="p">(</span><span class="s2">&quot;GLL&quot;</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">quadrilateral</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span>
+<span class="n">specmd</span> <span class="o">=</span> <span class="n">spectral_quadrature</span><span class="p">(</span><span class="s2">&quot;GLL&quot;</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span>
+<span class="n">domain</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">create_unit_square</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>
+                                 <span class="n">cell_type</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">CellType</span><span class="o">.</span><span class="n">quadrilateral</span><span class="p">)</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">FunctionSpace</span><span class="p">(</span> <span class="n">domain</span><span class="p">,</span> <span class="n">specFE</span> <span class="p">)</span>
+
+<span class="c1">#######</span>
+<span class="c1"># Compile mass matrices using pure fenicsx code</span>
+<span class="kn">import</span> <span class="nn">ufl</span>
+<span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">TrialFunction</span><span class="p">(</span><span class="n">V</span><span class="p">),</span> <span class="n">ufl</span><span class="o">.</span><span class="n">TestFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+<span class="c1"># here we do not specify quadrature information -&gt; non-diagonal mass matrix</span>
+<span class="n">a1_non_diag</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span>
+<span class="n">M1_non_diag</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="n">a1_non_diag</span><span class="p">)</span>
+<span class="n">M1_non_diag</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+
+<span class="c1"># here we specify the quadrature metadata -&gt; the matrix becomes diagonal</span>
+<span class="n">a2_diag</span>     <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">specmd</span><span class="p">))</span>
+<span class="n">M2_diag</span>     <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">petsc</span><span class="o">.</span><span class="n">assemble_matrix</span><span class="p">(</span><span class="n">a2_diag</span><span class="p">)</span>
+<span class="n">M2_diag</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+
+<span class="c1">#######</span>
+<span class="c1"># Compile mass matrices using elastodynamicsx.pde classes</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.pde</span> <span class="kn">import</span> <span class="n">PDE</span><span class="p">,</span> <span class="n">material</span>
+
+<span class="c1"># here we do not specify quadrature information -&gt; non-diagonal mass matrix</span>
+<span class="n">mat3</span>          <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="s1">&#39;scalar&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">pde3_non_diag</span> <span class="o">=</span> <span class="n">PDE</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="p">[</span><span class="n">mat3</span><span class="p">])</span>
+<span class="n">M3_non_diag</span>   <span class="o">=</span> <span class="n">pde3_non_diag</span><span class="o">.</span><span class="n">M</span><span class="p">()</span>
+
+<span class="c1"># elastodynamicsx offers two ways to specify the quadrature metadata</span>
+
+<span class="c1"># 1. by passing the metadata as kwargs to each material / boundary condition / bodyforce</span>
+
+<span class="n">mat4</span>          <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="s1">&#39;scalar&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">specmd</span><span class="p">)</span>
+<span class="n">pde4_diag</span>     <span class="o">=</span> <span class="n">PDE</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="p">[</span><span class="n">mat4</span><span class="p">])</span>
+<span class="n">M4_diag</span>       <span class="o">=</span> <span class="n">pde4_diag</span><span class="o">.</span><span class="n">M</span><span class="p">()</span>
+
+<span class="c1"># 2. by passing the metadata to the PDE.default_metadata, which is being used by</span>
+<span class="c1"># all materials / boundary conditions / bodyforces at __init__ call</span>
+
+<span class="kn">from</span> <span class="nn">elastodynamicsx.pde</span> <span class="kn">import</span> <span class="n">PDECONFIG</span>
+<span class="n">PDECONFIG</span><span class="o">.</span><span class="n">default_metadata</span> <span class="o">=</span> <span class="n">specmd</span>  <span class="c1"># default for all forms in the pde package (materials, BCs, ...)</span>
+
+<span class="n">mat5</span>          <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="s1">&#39;scalar&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">pde5_diag</span>     <span class="o">=</span> <span class="n">PDE</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="p">[</span><span class="n">mat5</span><span class="p">])</span>
+<span class="n">M5_diag</span>       <span class="o">=</span> <span class="n">pde5_diag</span><span class="o">.</span><span class="n">M</span><span class="p">()</span>
+
+<span class="c1"># spy mass matrices</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.plot</span> <span class="kn">import</span> <span class="n">spy_petscMatrix</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">M</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="n">M1_non_diag</span><span class="p">,</span> <span class="n">M2_diag</span><span class="p">,</span> <span class="n">M3_non_diag</span><span class="p">,</span> <span class="n">M4_diag</span><span class="p">,</span> <span class="n">M5_diag</span><span class="p">]):</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;M&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">spy_petscMatrix</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.spectralelements.spectral_quadrature">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.spectralelements.</span></span><span class="sig-name descname"><span class="pre">spectral_quadrature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/spectralelements.html#spectral_quadrature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.spectralelements.spectral_quadrature" title="Link to this definition"></a></dt>
+<dd><p>A quadrature metadata to build diagonal mass matrices when used with
+corresponding spectral elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – One of (“GLL”, “GL”, “Legendre”)</p></li>
+<li><p><strong>degree</strong> – The maximum degree of basis functions</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>See doc of ‘spectral_element’.</p>
+</dd></dl>
+
+</section>
+<section id="module-elastodynamicsx.utils.tags">
+<span id="elastodynamicsx-utils-tags"></span><h2>elastodynamicsx.utils.tags<a class="headerlink" href="#module-elastodynamicsx.utils.tags" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.tags.make_facet_tags">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.tags.</span></span><span class="sig-name descname"><span class="pre">make_facet_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundaries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MeshTags</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/tags.html#make_facet_tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.tags.make_facet_tags" title="Link to this definition"></a></dt>
+<dd><p>Shortcut for make_tags(domain, locators, type_=’boundaries’)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.tags.make_cell_tags">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.tags.</span></span><span class="sig-name descname"><span class="pre">make_cell_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subdomains</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MeshTags</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/tags.html#make_cell_tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.tags.make_cell_tags" title="Link to this definition"></a></dt>
+<dd><p>Shortcut for make_tags(domain, locators, type_=’domains’)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.utils.tags.make_tags">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.utils.tags.</span></span><span class="sig-name descname"><span class="pre">make_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unknown'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MeshTags</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/utils/tags.html#make_tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.utils.tags.make_tags" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>domain</strong> – A mesh</p></li>
+<li><p><strong>locators</strong> – A tuple of tuples of the type (tag, fn), where:
+tag: is an int to be assigned to the cells or facets
+fn: is a boolean function that take ‘x’ as argument</p></li>
+<li><p><strong>type</strong> – either ‘domains’ or ‘boundaries’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A MeshTags object (dolfinx.mesh)</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Adapted from:</dt><dd><p><a class="reference external" href="https://jsdokken.com/dolfinx-tutorial/chapter3/robin_neumann_dirichlet.html">https://jsdokken.com/dolfinx-tutorial/chapter3/robin_neumann_dirichlet.html</a></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="kn">from</span> <span class="nn">dolfinx.mesh</span> <span class="kn">import</span> <span class="n">create_unit_square</span>
+<span class="c1">#</span>
+<span class="n">domain</span> <span class="o">=</span> <span class="n">create_unit_square</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="n">boundaries</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)),</span>
+              <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)),</span>
+              <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)),</span>
+              <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="n">facet_tags</span> <span class="o">=</span> <span class="n">make_tags</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">boundaries</span><span class="p">,</span> <span class="s1">&#39;boundaries&#39;</span><span class="p">)</span>
+
+<span class="n">Omegas</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">0.5</span><span class="p">),</span>
+          <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.5</span><span class="p">))</span>
+<span class="n">cell_tags</span> <span class="o">=</span> <span class="n">make_tags</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">Omegas</span><span class="p">,</span> <span class="s1">&#39;domains&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="elastodynamicsx.solvers.timestepper.html" class="btn btn-neutral float-left" title="elastodynamicsx.solvers.timestepper" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Pierric Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

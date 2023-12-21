@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>elastodynamicsx.pde.timeschemes &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="elastodynamicsx.plot" href="elastodynamicsx.plot.html" />
+    <link rel="prev" title="elastodynamicsx.pde.materials package" href="elastodynamicsx.pde.materials.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ElastodynamiCSx
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme_link.html">ElastodynamiCSx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#build-problems">Build problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#solve-problems">Solve problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#post-process-solutions">Post process solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#dependencies">Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#packages-required-for-the-examples">Packages required for the examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#optional-packages">Optional packages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#option-1-with-fenicsx-binaries-installed">Option 1: With FEniCSx binaries installed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#option-2-inside-a-fenicsx-docker-image">Option 2: Inside a FEniCSx Docker image</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#useful-links">Useful links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/examples_index.html">Demos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section1.html"><strong>Time domain</strong>, wave equation; high order (spectral) elements &amp; <strong>explicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html">weq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html#weq-2d-psv-fullspace-py">weq_2D-PSV_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html#weq-2d-psv-halfspace-lamb-komatitschvilotte-bssa1998-py">weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html#weqnl-1d-psv-murnaghan-pwave-py">weqnl_1D-PSV_Murnaghan_Pwave.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section2.html"><strong>Time domain</strong>, structural dynamics; low order elements &amp; <strong>implicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section2_files.html">tdsdyn_3D_ElasticBeam.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section3.html"><strong>Frequency domain</strong>, wave equation (Helmoltz equation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section3_files.html">freq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section3_files.html#freq-2d-psv-fullspace-py">freq_2D-PSV_FullSpace.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section4.html"><strong>Eigenmodes</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section4_files.html">eigs_3D_ElasticBeam.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section4_files.html#eigs-3d-aluminumcube-py">eigs_3D_AluminumCube.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section5.html"><strong>Guided waves</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="api_index.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.plot.html">elastodynamicsx.plot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.plot.html#module-elastodynamicsx.plot">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.plot.html#module-elastodynamicsx.plot.plot">elastodynamicsx.plot.plot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.solutions.html">elastodynamicsx.solutions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solutions.html#module-elastodynamicsx.solutions">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solutions.html#module-elastodynamicsx.solutions.modalbasis">elastodynamicsx.solutions.modalbasis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.solvers.html">elastodynamicsx.solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils.eval">elastodynamicsx.utils.eval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils.spectralelements">elastodynamicsx.utils.spectralelements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils.tags">elastodynamicsx.utils.tags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ElastodynamiCSx</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="api_index.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="elastodynamicsx.pde.html">elastodynamicsx.pde</a></li>
+      <li class="breadcrumb-item active">elastodynamicsx.pde.timeschemes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/elastodynamicsx.pde.timeschemes.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="elastodynamicsx-pde-timeschemes">
+<h1>elastodynamicsx.pde.timeschemes<a class="headerlink" href="#elastodynamicsx-pde-timeschemes" title="Link to this heading"></a></h1>
+<section id="module-elastodynamicsx.pde.timeschemes">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-elastodynamicsx.pde.timeschemes" title="Link to this heading"></a></h2>
+<p>The <em>timeschemes</em> module contains tools to construct the weak form of a time-dependent
+problem. Several implicit and explicit schemes are supported. The preferred way to use
+this module is however through the <code class="code highlight python docutils literal highlight-python"><span class="n">elastodynamicsx</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">timestepper</span></code> function.</p>
+<dl class="simple">
+<dt>List of supported schemes:</dt><dd><dl class="simple">
+<dt>Explicit schemes:</dt><dd><ul class="simple">
+<li><p>‘leapfrog’</p></li>
+</ul>
+</dd>
+<dt>Implicit schemes:</dt><dd><ul class="simple">
+<li><p>‘midpoint’</p></li>
+<li><p>‘linear-acceleration-method’</p></li>
+<li><p>‘newmark’</p></li>
+<li><p>‘hht-alpha’</p></li>
+<li><p>‘generalized-alpha’</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.timescheme">
+<span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.</span></span><span class="sig-name descname"><span class="pre">timescheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes.html#timescheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.timescheme" title="Link to this definition"></a></dt>
+<dd><p>Builder method that instanciates the desired time scheme</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – Passed to the required time scheme</p>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>scheme</strong> – (mandatory) String identifier of the time scheme</p></li>
+<li><p><strong>**kwargs</strong> – Passed to the required material</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An instance of the desired time scheme</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.</span></span><span class="sig-name descname"><span class="pre">TimeScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Vec</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/timeschemebase.html#TimeScheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Abstract base class for time schemes as needed by the <code class="code highlight python docutils literal highlight-python"><span class="n">TimeStepper</span></code> solvers</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dt</strong> – Time step</p></li>
+<li><p><strong>out</strong> – Solution vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>explicit</strong> (<em>mandatory</em>) – Whether the scheme is explicit or implicit</p></li>
+<li><p><strong>nbsteps</strong> (<em>mandatory</em>) – Number of resolution steps</p></li>
+<li><p><strong>linear_ODE</strong> (<em>default=True</em>) – Whether the resulting ODE is linear or not</p></li>
+<li><p><strong>intermediate_dt</strong> (<em>default=0.</em>) – Time at which time-dependent terms are evaluated</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['supercharge</span> <span class="pre">me']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme.petsc_options_t0">
+<span class="sig-name descname"><span class="pre">petsc_options_t0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'ksp_type':</span> <span class="pre">'preonly',</span> <span class="pre">'pc_type':</span> <span class="pre">'lu'}</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme.petsc_options_t0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme.explicit">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">explicit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme.explicit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme.nbsteps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nbsteps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme.nbsteps" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme.linear_ODE">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linear_ODE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme.linear_ODE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme.dt">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme.dt" title="Link to this definition"></a></dt>
+<dd><p>The time step</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme.intermediate_dt">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">intermediate_dt</span></span><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme.intermediate_dt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme.out">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">out</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Vec</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme.out" title="Link to this definition"></a></dt>
+<dd><p>The solution vector</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme.b_update_function">
+<span class="sig-name descname"><span class="pre">b_update_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/timeschemebase.html#TimeScheme.b_update_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme.b_update_function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme.prepareNextIteration">
+<span class="sig-name descname"><span class="pre">prepareNextIteration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/timeschemebase.html#TimeScheme.prepareNextIteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme.prepareNextIteration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme.set_initial_condition">
+<span class="sig-name descname"><span class="pre">set_initial_condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/timeschemebase.html#TimeScheme.set_initial_condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme.set_initial_condition" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.TimeScheme.initialStep">
+<span class="sig-name descname"><span class="pre">initialStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callfirsts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/timeschemebase.html#TimeScheme.initialStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.TimeScheme.initialStep" title="Link to this definition"></a></dt>
+<dd><p>Specific to the initial value step</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.</span></span><span class="sig-name descname"><span class="pre">FEniCSxTimeScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bilinear_form</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Form</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear_form</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Form</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiPointConstraint</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bcs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/timeschemebase.html#FEniCSxTimeScheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.TimeScheme" title="elastodynamicsx.pde.timeschemes.timeschemebase.TimeScheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeScheme</span></code></a></p>
+<p>Abstract base class based on FEniCSx’s form language</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.out_fenicsx">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">out_fenicsx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Function</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.out_fenicsx" title="Link to this definition"></a></dt>
+<dd><p>The solution vector</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.A">
+<span class="sig-name descname"><span class="pre">A</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mat</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/timeschemebase.html#FEniCSxTimeScheme.A"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.A" title="Link to this definition"></a></dt>
+<dd><p>The time-independent matrix (bilinear form)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.init_b">
+<span class="sig-name descname"><span class="pre">init_b</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Vec</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/timeschemebase.html#FEniCSxTimeScheme.init_b"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.init_b" title="Link to this definition"></a></dt>
+<dd><p>Declares a zero vector compatible with the linear form</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.b_update_function">
+<span class="sig-name descname"><span class="pre">b_update_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/timeschemebase.html#FEniCSxTimeScheme.b_update_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.b_update_function" title="Link to this definition"></a></dt>
+<dd><p>Updates the b vector (in-place) for a given time t</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.set_initial_condition">
+<span class="sig-name descname"><span class="pre">set_initial_condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/timeschemebase.html#FEniCSxTimeScheme.set_initial_condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.set_initial_condition" title="Link to this definition"></a></dt>
+<dd><p>Apply initial conditions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u0</strong> – u at t0</p></li>
+<li><p><strong>v0</strong> – <p>du/dt at t0</p>
+<p>u0 and v0 can be:</p>
+<ul>
+<li><dl class="simple">
+<dt>Python Callable -&gt; interpolated at nodes</dt><dd><p>-&gt; e.g. <code class="code highlight python docutils literal highlight-python"><span class="n">u0</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">domain</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">PETSc</span><span class="o">.</span><span class="n">ScalarType</span><span class="p">)</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>scalar (<code class="code highlight python docutils literal highlight-python"><span class="nb">int</span></code>, <code class="code highlight python docutils literal highlight-python"><span class="nb">float</span></code>, <code class="code highlight python docutils literal highlight-python"><span class="nb">complex</span></code>, <code class="code highlight python docutils literal highlight-python"><span class="n">PETSc</span><span class="o">.</span><span class="n">ScalarType</span></code>)</dt><dd><p>-&gt; e.g. <code class="code highlight python docutils literal highlight-python"><span class="n">u0</span> <span class="o">=</span> <span class="mi">0</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>array (<code class="code highlight python docutils literal highlight-python"><span class="nb">list</span></code>, <code class="code highlight python docutils literal highlight-python"><span class="nb">tuple</span></code>, <code class="code highlight python docutils literal highlight-python"><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span></code>)</dt><dd><p>-&gt; e.g. <code class="code highlight python docutils literal highlight-python"><span class="n">u0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="code highlight python docutils literal highlight-python"><span class="n">fem</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">Function</span></code> or <code class="code highlight python docutils literal highlight-python"><span class="n">fem</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">Constant</span></code></dt><dd><p>-&gt; e.g. <code class="code highlight python docutils literal highlight-python"><span class="n">u0</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span></code></p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.LeapFrog">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.</span></span><span class="sig-name descname"><span class="pre">LeapFrog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FunctionSpaceBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TrialFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TrialFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TrialFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bcs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition.BoundaryCondition" title="elastodynamicsx.pde.boundarycondition.BoundaryCondition"><span class="pre">BoundaryCondition</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/leapfrog.html#LeapFrog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.LeapFrog" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme" title="elastodynamicsx.pde.timeschemes.timeschemebase.FEniCSxTimeScheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEniCSxTimeScheme</span></code></a></p>
+<p>Implementation of the <em>Leapfrog</em> time-stepping scheme, or <em>Explicit central difference scheme</em>.
+<em>Leapfrog</em> is a special case of <em>Newmark-beta</em> methods with <span class="math notranslate nohighlight">\(\beta=0\)</span> and <span class="math notranslate nohighlight">\(\gamma=0.5\)</span></p>
+<dl>
+<dt>Scheme:</dt><dd><div class="line-block">
+<div class="line"><span class="math notranslate nohighlight">\(u_n\)</span>, <span class="math notranslate nohighlight">\(v_n\)</span>, <span class="math notranslate nohighlight">\(a_n\)</span> are the (known) displacement,
+velocity and acceleration at current time step</div>
+<div class="line"><span class="math notranslate nohighlight">\(u_{n+1}\)</span> is the unknown: displacement at next time step</div>
+<div class="line"><span class="math notranslate nohighlight">\(a_n = (u_{n+1} - 2 u_n + u_{n-1}) / dt^2\)</span></div>
+<div class="line"><span class="math notranslate nohighlight">\(v_n = (u_{n+1} - u_n-1) / (2 dt)\)</span></div>
+</div>
+</dd>
+<dt>Implicit / explicit?</dt><dd><p>Explicit</p>
+</dd>
+<dt>Accuracy:</dt><dd><p>Second-order</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function_space</strong> – The Finite Element functionnal space</p></li>
+<li><p><strong>m</strong> – <p>The mass form. Usually:</p>
+<p><code class="code highlight python docutils literal highlight-python"><span class="n">m</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">rho</span><span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span></code></p>
+</p></li>
+<li><p><strong>c</strong> (<em>optional</em><em>, </em><em>ignored if None</em>) – <p>The damping form. E.g. for Rayleigh damping:</p>
+<p><code class="code highlight python docutils literal highlight-python"><span class="n">c</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">eta_m</span> <span class="o">*</span> <span class="n">m</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">eta_k</span> <span class="o">*</span> <span class="n">k</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span></code></p>
+</p></li>
+<li><p><strong>k</strong> – <p>The stiffness form. Usually:</p>
+<p><code class="code highlight python docutils literal highlight-python"><span class="n">k</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">sigma</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">epsilon</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span></code></p>
+</p></li>
+<li><p><strong>L</strong> (<em>optional</em><em>, </em><em>ignored if None</em>) – Linear form</p></li>
+<li><p><strong>dt</strong> – Time step</p></li>
+<li><p><strong>bcs</strong> – The set of boundary conditions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>jit_options</strong> – (default=PDECONFIG.default_jit_options) options for the just-in-time compiler</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>See:</dt><dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Leapfrog_integration">https://en.wikipedia.org/wiki/Leapfrog_integration</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.LeapFrog.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['leapfrog',</span> <span class="pre">'central-difference']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.LeapFrog.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.LeapFrog.u">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">u</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Function</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.LeapFrog.u" title="Link to this definition"></a></dt>
+<dd><p>The displacement field at current time step</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.LeapFrog.u_nm1">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">u_nm1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Function</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.LeapFrog.u_nm1" title="Link to this definition"></a></dt>
+<dd><p>The displacement field at previous time step</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.LeapFrog.prepareNextIteration">
+<span class="sig-name descname"><span class="pre">prepareNextIteration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/leapfrog.html#LeapFrog.prepareNextIteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.LeapFrog.prepareNextIteration" title="Link to this definition"></a></dt>
+<dd><p>Next-time-step function, to prepare next iteration -&gt; Call it after solving</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.LeapFrog.initialStep">
+<span class="sig-name descname"><span class="pre">initialStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callfirsts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/leapfrog.html#LeapFrog.initialStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.LeapFrog.initialStep" title="Link to this definition"></a></dt>
+<dd><p>Specific to the initial value step</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.</span></span><span class="sig-name descname"><span class="pre">GalphaNewmarkBeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FunctionSpaceBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TrialFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TrialFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TrialFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bcs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition.BoundaryCondition" title="elastodynamicsx.pde.boundarycondition.BoundaryCondition"><span class="pre">BoundaryCondition</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#GalphaNewmarkBeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme" title="elastodynamicsx.pde.timeschemes.timeschemebase.FEniCSxTimeScheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEniCSxTimeScheme</span></code></a></p>
+<p>Implementation of the ‘g-a-newmark’ (<em>Generalized-alpha Newmark</em>) time-stepping scheme,
+for <span class="math notranslate nohighlight">\(\beta&gt;0\)</span>. The special case <span class="math notranslate nohighlight">\(\beta=0\)</span> is implemented in the <code class="code highlight python docutils literal highlight-python"><span class="n">LeapFrog</span></code> class.</p>
+<dl class="simple">
+<dt>Implicit / explicit?</dt><dd><p>Implicit</p>
+</dd>
+<dt>Accuracy:</dt><dd><p>First or second order, depending on parameters</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function_space</strong> – The Finite Element functionnal space</p></li>
+<li><p><strong>m</strong> – <p>The mass form. Usually:</p>
+<p><code class="code highlight python docutils literal highlight-python"><span class="n">m</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">rho</span><span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span></code></p>
+</p></li>
+<li><p><strong>c</strong> (<em>optional</em><em>, </em><em>ignored if None</em>) – <p>The damping form. E.g. for Rayleigh damping:</p>
+<p><code class="code highlight python docutils literal highlight-python"><span class="n">c</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">eta_m</span> <span class="o">*</span> <span class="n">m</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">eta_k</span> <span class="o">*</span> <span class="n">k</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span></code></p>
+</p></li>
+<li><p><strong>k</strong> – <p>The stiffness form. Usually:</p>
+<p><code class="code highlight python docutils literal highlight-python"><span class="n">k</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">sigma</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">epsilon</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span></code></p>
+</p></li>
+<li><p><strong>L</strong> (<em>optional</em><em>, </em><em>ignored if None</em>) – Linear form</p></li>
+<li><p><strong>dt</strong> – Time step</p></li>
+<li><p><strong>bcs</strong> – The set of boundary conditions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>rho_inf</strong> (<em>default = 0.75</em>) – Spectral radius in the high frequency limit.
+Bounds: (1/2,1). Setting <strong>rho_inf</strong> is the preferred way of defining the scheme.</p></li>
+<li><p><strong>alpha_m</strong> (<em>default =</em><em> (</em><em>2*rho_inf-1</em><em>)</em><em>/</em><em>(</em><em>rho_inf+1</em><em>)</em>) – Unconditionnal stability
+if <span class="math notranslate nohighlight">\(-1 \leq \alpha_m \leq \alpha_f \leq 0.5\)</span></p></li>
+<li><p><strong>alpha_f</strong> (<em>default = rho_inf/</em><em>(</em><em>rho_inf+1</em><em>)</em>) – Unconditionnal stability
+if <span class="math notranslate nohighlight">\(-1 \leq \alpha_m \leq \alpha_f \leq 0.5\)</span></p></li>
+<li><p><strong>gamma</strong> (<em>default = 1/2 - alpha_m + alpha_f</em>) – Default value ensures second-order accuracy.
+Other values give first-order accuracy</p></li>
+<li><p><strong>beta</strong> (<em>default = 1/4*</em><em>(</em><em>gamma+1/2</em><em>)</em><em>**2</em>) – Unconditionnal stability
+if <span class="math notranslate nohighlight">\(\beta \geq 0.25 + 0.5 (\alpha_f - \alpha_m)\)</span></p></li>
+<li><p><strong>jit_options</strong> (<em>default=PDECONFIG.default_jit_options</em>) – Options for the just-in-time compiler</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Reference:</dt><dd><p>J. Chung and G. M. Hulbert, “A time integration algorithm for structural
+dynamics with improved numerical dissipation: The generalized-α method,”
+J. Appl. Mech. 60(2), 371–375 (1993).</p>
+</dd>
+<dt>Adapted from:</dt><dd><p><a class="reference external" href="https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html">https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['g-a-newmark',</span> <span class="pre">'generalized-alpha']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta.u">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">u</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Function</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta.u" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta.v">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Function</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta.v" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta.a">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">a</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Function</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta.a" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta.prepareNextIteration">
+<span class="sig-name descname"><span class="pre">prepareNextIteration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#GalphaNewmarkBeta.prepareNextIteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta.prepareNextIteration" title="Link to this definition"></a></dt>
+<dd><p>Next-time-step function, to prepare next iteration -&gt; Call it after solving</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta.initialStep">
+<span class="sig-name descname"><span class="pre">initialStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callfirsts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#GalphaNewmarkBeta.initialStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.GalphaNewmarkBeta.initialStep" title="Link to this definition"></a></dt>
+<dd><p>Specific to the initial value step</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.HilberHughesTaylor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.</span></span><span class="sig-name descname"><span class="pre">HilberHughesTaylor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#HilberHughesTaylor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.HilberHughesTaylor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta" title="elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">GalphaNewmarkBeta</span></code></a></p>
+<p>Implementation of the <em>Hilber-Hughes-Taylor</em> or <em>alpha-Newmark</em> time-stepping scheme.
+<em>HHT</em> is a special case of the <em>Generalized-alpha</em> scheme (<span class="math notranslate nohighlight">\(\alpha_m=0\)</span> and <span class="math notranslate nohighlight">\(\alpha_f=\alpha\)</span>).</p>
+<p><strong>(!)</strong> The definition of the <span class="math notranslate nohighlight">\(\alpha\)</span> parameter is different
+from that in the original article. Here: <span class="math notranslate nohighlight">\(\alpha = -\alpha_{HHT}\)</span></p>
+<dl class="simple">
+<dt>Implicit / explicit?</dt><dd><p>Implicit</p>
+</dd>
+<dt>Accuracy:</dt><dd><p>First or second order, depending on parameters</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – See GalphaNewmarkBeta</p>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>rho_inf</strong> (<em>default = 0.9</em>) – Spectral radius in the high frequency limit. Bounds: (1/2,1).
+Setting <strong>rho_inf</strong> is the preferred way of defining the scheme.</p></li>
+<li><p><strong>alpha</strong> (<em>default =</em><em> (</em><em>1-rho_inf</em><em>)</em><em>/</em><em>(</em><em>1+rho_inf</em><em>)</em>) – Set to e.g. 0.05 or sqrt(2) for low or moderate dissipation</p></li>
+<li><p><strong>gamma</strong> (<em>default = 1/2 + alpha</em>) – Default value ensures second-order accuracy.
+Other values give first-order accuracy</p></li>
+<li><p><strong>beta</strong> (<em>default = 1/4*</em><em>(</em><em>gamma+1/2</em><em>)</em><em>**2</em>) – Unconditionnal stability if <span class="math notranslate nohighlight">\(\beta \geq 0.25 + 0.5 \alpha\)</span></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Reference:</dt><dd><p>H. M. Hilber, T. J. R. Hughes, and R. L. Taylor,
+“Improved Numerical Dissipation for Time Integration Algorithms in Structural Dynamics”,
+Earthquake Engineering and Structural Dynamics, vol. 5, pp. 283–292, 1977.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.HilberHughesTaylor.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['hilber-hughes-taylor',</span> <span class="pre">'hht',</span> <span class="pre">'hht-alpha']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.HilberHughesTaylor.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.NewmarkBeta">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.</span></span><span class="sig-name descname"><span class="pre">NewmarkBeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#NewmarkBeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.NewmarkBeta" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta" title="elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">GalphaNewmarkBeta</span></code></a></p>
+<p>Implementation of the <em>Newmark</em> or <em>Newmark-beta</em> time-stepping scheme, for <span class="math notranslate nohighlight">\(\beta&gt;0\)</span>.
+The special case <span class="math notranslate nohighlight">\(\beta=0\)</span> is implemented in the <code class="code highlight python docutils literal highlight-python"><span class="n">LeapFrog</span></code> class.
+<em>Newmark-beta</em> is a special case of the <em>Generalized-alpha</em> scheme (<span class="math notranslate nohighlight">\(\alpha_m=\alpha_f=0\)</span>).</p>
+<dl class="simple">
+<dt>Implicit / explicit?</dt><dd><p>Implicit</p>
+</dd>
+<dt>Accuracy:</dt><dd><p>First-order unless <span class="math notranslate nohighlight">\(gamma=1/2\)</span> (second-order)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – See GalphaNewmarkBeta</p>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>gamma</strong> (<em>default = 1/2</em>) – Default value ensures second-order accuracy.
+Other values give first-order accuracy</p></li>
+<li><p><strong>beta</strong> (<em>default = 1/4*</em><em>(</em><em>gamma+1/2</em><em>)</em><em>**2</em>) – Unconditionnal stability if <span class="math notranslate nohighlight">\(\beta \geq 0.25\)</span></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>See:</dt><dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Newmark-beta_method">https://en.wikipedia.org/wiki/Newmark-beta_method</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.NewmarkBeta.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['newmark',</span> <span class="pre">'newmark-beta']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.NewmarkBeta.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.MidPoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.</span></span><span class="sig-name descname"><span class="pre">MidPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#MidPoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.MidPoint" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta" title="elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewmarkBeta</span></code></a></p>
+<p>Implementation of the <em>Midpoint</em> time-stepping scheme, or <em>Average Acceleration Method</em>.
+<em>Midpoint</em> is a special case of <em>Newmark-beta</em> methods with <span class="math notranslate nohighlight">\(\beta=1/4\)</span> and <span class="math notranslate nohighlight">\(\gamma=1/2\)</span>
+and is unconditionally stable.</p>
+<dl class="simple">
+<dt>Implicit / explicit?</dt><dd><p>Implicit</p>
+</dd>
+<dt>Accuracy:</dt><dd><p>Second-order</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – See GalphaNewmarkBeta</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>See:</dt><dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Midpoint_method">https://en.wikipedia.org/wiki/Midpoint_method</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.MidPoint.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['midpoint',</span> <span class="pre">'average-acceleration-method',</span> <span class="pre">'aam']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.MidPoint.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.LinearAccelerationMethod">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.</span></span><span class="sig-name descname"><span class="pre">LinearAccelerationMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#LinearAccelerationMethod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.LinearAccelerationMethod" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta" title="elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewmarkBeta</span></code></a></p>
+<p>Implementation <em>Linear Acceleration Method</em> time-stepping scheme.
+It is a special case of <em>Newmark-beta</em> methods with <span class="math notranslate nohighlight">\(\beta=1/6\)</span> and <span class="math notranslate nohighlight">\(\gamma=1/2\)</span>
+and is unconditionally stable.</p>
+<dl class="simple">
+<dt>Implicit / explicit?</dt><dd><p>Implicit</p>
+</dd>
+<dt>Accuracy:</dt><dd><p>Second-order</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – See GalphaNewmarkBeta</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.LinearAccelerationMethod.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['linear-acceleration-method',</span> <span class="pre">'lam']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.LinearAccelerationMethod.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-elastodynamicsx.pde.timeschemes.leapfrog">
+<span id="elastodynamicsx-pde-timeschemes-leapfrog"></span><h2>elastodynamicsx.pde.timeschemes.leapfrog<a class="headerlink" href="#module-elastodynamicsx.pde.timeschemes.leapfrog" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.leapfrog.LeapFrog">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.leapfrog.</span></span><span class="sig-name descname"><span class="pre">LeapFrog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FunctionSpaceBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TrialFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TrialFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TrialFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bcs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition.BoundaryCondition" title="elastodynamicsx.pde.boundarycondition.BoundaryCondition"><span class="pre">BoundaryCondition</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/leapfrog.html#LeapFrog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.leapfrog.LeapFrog" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme" title="elastodynamicsx.pde.timeschemes.timeschemebase.FEniCSxTimeScheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEniCSxTimeScheme</span></code></a></p>
+<p>Implementation of the <em>Leapfrog</em> time-stepping scheme, or <em>Explicit central difference scheme</em>.
+<em>Leapfrog</em> is a special case of <em>Newmark-beta</em> methods with <span class="math notranslate nohighlight">\(\beta=0\)</span> and <span class="math notranslate nohighlight">\(\gamma=0.5\)</span></p>
+<dl>
+<dt>Scheme:</dt><dd><div class="line-block">
+<div class="line"><span class="math notranslate nohighlight">\(u_n\)</span>, <span class="math notranslate nohighlight">\(v_n\)</span>, <span class="math notranslate nohighlight">\(a_n\)</span> are the (known) displacement,
+velocity and acceleration at current time step</div>
+<div class="line"><span class="math notranslate nohighlight">\(u_{n+1}\)</span> is the unknown: displacement at next time step</div>
+<div class="line"><span class="math notranslate nohighlight">\(a_n = (u_{n+1} - 2 u_n + u_{n-1}) / dt^2\)</span></div>
+<div class="line"><span class="math notranslate nohighlight">\(v_n = (u_{n+1} - u_n-1) / (2 dt)\)</span></div>
+</div>
+</dd>
+<dt>Implicit / explicit?</dt><dd><p>Explicit</p>
+</dd>
+<dt>Accuracy:</dt><dd><p>Second-order</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function_space</strong> – The Finite Element functionnal space</p></li>
+<li><p><strong>m</strong> – <p>The mass form. Usually:</p>
+<p><code class="code highlight python docutils literal highlight-python"><span class="n">m</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">rho</span><span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span></code></p>
+</p></li>
+<li><p><strong>c</strong> (<em>optional</em><em>, </em><em>ignored if None</em>) – <p>The damping form. E.g. for Rayleigh damping:</p>
+<p><code class="code highlight python docutils literal highlight-python"><span class="n">c</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">eta_m</span> <span class="o">*</span> <span class="n">m</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">eta_k</span> <span class="o">*</span> <span class="n">k</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span></code></p>
+</p></li>
+<li><p><strong>k</strong> – <p>The stiffness form. Usually:</p>
+<p><code class="code highlight python docutils literal highlight-python"><span class="n">k</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">sigma</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">epsilon</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span></code></p>
+</p></li>
+<li><p><strong>L</strong> (<em>optional</em><em>, </em><em>ignored if None</em>) – Linear form</p></li>
+<li><p><strong>dt</strong> – Time step</p></li>
+<li><p><strong>bcs</strong> – The set of boundary conditions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>jit_options</strong> – (default=PDECONFIG.default_jit_options) options for the just-in-time compiler</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>See:</dt><dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Leapfrog_integration">https://en.wikipedia.org/wiki/Leapfrog_integration</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.leapfrog.LeapFrog.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['leapfrog',</span> <span class="pre">'central-difference']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.leapfrog.LeapFrog.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.leapfrog.LeapFrog.u">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">u</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Function</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.leapfrog.LeapFrog.u" title="Link to this definition"></a></dt>
+<dd><p>The displacement field at current time step</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.leapfrog.LeapFrog.u_nm1">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">u_nm1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Function</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.leapfrog.LeapFrog.u_nm1" title="Link to this definition"></a></dt>
+<dd><p>The displacement field at previous time step</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.leapfrog.LeapFrog.prepareNextIteration">
+<span class="sig-name descname"><span class="pre">prepareNextIteration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/leapfrog.html#LeapFrog.prepareNextIteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.leapfrog.LeapFrog.prepareNextIteration" title="Link to this definition"></a></dt>
+<dd><p>Next-time-step function, to prepare next iteration -&gt; Call it after solving</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.leapfrog.LeapFrog.initialStep">
+<span class="sig-name descname"><span class="pre">initialStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callfirsts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/leapfrog.html#LeapFrog.initialStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.leapfrog.LeapFrog.initialStep" title="Link to this definition"></a></dt>
+<dd><p>Specific to the initial value step</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-elastodynamicsx.pde.timeschemes.newmark">
+<span id="elastodynamicsx-pde-timeschemes-newmark"></span><h2>elastodynamicsx.pde.timeschemes.newmark<a class="headerlink" href="#module-elastodynamicsx.pde.timeschemes.newmark" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.newmark.</span></span><span class="sig-name descname"><span class="pre">GalphaNewmarkBeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FunctionSpaceBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TrialFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TrialFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TrialFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">TestFunction</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Form</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bcs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition.BoundaryCondition" title="elastodynamicsx.pde.boundarycondition.BoundaryCondition"><span class="pre">BoundaryCondition</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#GalphaNewmarkBeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme" title="elastodynamicsx.pde.timeschemes.timeschemebase.FEniCSxTimeScheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEniCSxTimeScheme</span></code></a></p>
+<p>Implementation of the ‘g-a-newmark’ (<em>Generalized-alpha Newmark</em>) time-stepping scheme,
+for <span class="math notranslate nohighlight">\(\beta&gt;0\)</span>. The special case <span class="math notranslate nohighlight">\(\beta=0\)</span> is implemented in the <code class="code highlight python docutils literal highlight-python"><span class="n">LeapFrog</span></code> class.</p>
+<dl class="simple">
+<dt>Implicit / explicit?</dt><dd><p>Implicit</p>
+</dd>
+<dt>Accuracy:</dt><dd><p>First or second order, depending on parameters</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function_space</strong> – The Finite Element functionnal space</p></li>
+<li><p><strong>m</strong> – <p>The mass form. Usually:</p>
+<p><code class="code highlight python docutils literal highlight-python"><span class="n">m</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">rho</span><span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span></code></p>
+</p></li>
+<li><p><strong>c</strong> (<em>optional</em><em>, </em><em>ignored if None</em>) – <p>The damping form. E.g. for Rayleigh damping:</p>
+<p><code class="code highlight python docutils literal highlight-python"><span class="n">c</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">eta_m</span> <span class="o">*</span> <span class="n">m</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">eta_k</span> <span class="o">*</span> <span class="n">k</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span></code></p>
+</p></li>
+<li><p><strong>k</strong> – <p>The stiffness form. Usually:</p>
+<p><code class="code highlight python docutils literal highlight-python"><span class="n">k</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">sigma</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">epsilon</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span></code></p>
+</p></li>
+<li><p><strong>L</strong> (<em>optional</em><em>, </em><em>ignored if None</em>) – Linear form</p></li>
+<li><p><strong>dt</strong> – Time step</p></li>
+<li><p><strong>bcs</strong> – The set of boundary conditions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>rho_inf</strong> (<em>default = 0.75</em>) – Spectral radius in the high frequency limit.
+Bounds: (1/2,1). Setting <strong>rho_inf</strong> is the preferred way of defining the scheme.</p></li>
+<li><p><strong>alpha_m</strong> (<em>default =</em><em> (</em><em>2*rho_inf-1</em><em>)</em><em>/</em><em>(</em><em>rho_inf+1</em><em>)</em>) – Unconditionnal stability
+if <span class="math notranslate nohighlight">\(-1 \leq \alpha_m \leq \alpha_f \leq 0.5\)</span></p></li>
+<li><p><strong>alpha_f</strong> (<em>default = rho_inf/</em><em>(</em><em>rho_inf+1</em><em>)</em>) – Unconditionnal stability
+if <span class="math notranslate nohighlight">\(-1 \leq \alpha_m \leq \alpha_f \leq 0.5\)</span></p></li>
+<li><p><strong>gamma</strong> (<em>default = 1/2 - alpha_m + alpha_f</em>) – Default value ensures second-order accuracy.
+Other values give first-order accuracy</p></li>
+<li><p><strong>beta</strong> (<em>default = 1/4*</em><em>(</em><em>gamma+1/2</em><em>)</em><em>**2</em>) – Unconditionnal stability
+if <span class="math notranslate nohighlight">\(\beta \geq 0.25 + 0.5 (\alpha_f - \alpha_m)\)</span></p></li>
+<li><p><strong>jit_options</strong> (<em>default=PDECONFIG.default_jit_options</em>) – Options for the just-in-time compiler</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Reference:</dt><dd><p>J. Chung and G. M. Hulbert, “A time integration algorithm for structural
+dynamics with improved numerical dissipation: The generalized-α method,”
+J. Appl. Mech. 60(2), 371–375 (1993).</p>
+</dd>
+<dt>Adapted from:</dt><dd><p><a class="reference external" href="https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html">https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['g-a-newmark',</span> <span class="pre">'generalized-alpha']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.u">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">u</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Function</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.u" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.v">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Function</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.v" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.a">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">a</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Function</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.a" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.prepareNextIteration">
+<span class="sig-name descname"><span class="pre">prepareNextIteration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#GalphaNewmarkBeta.prepareNextIteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.prepareNextIteration" title="Link to this definition"></a></dt>
+<dd><p>Next-time-step function, to prepare next iteration -&gt; Call it after solving</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.initialStep">
+<span class="sig-name descname"><span class="pre">initialStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callfirsts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#GalphaNewmarkBeta.initialStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.initialStep" title="Link to this definition"></a></dt>
+<dd><p>Specific to the initial value step</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.HilberHughesTaylor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.newmark.</span></span><span class="sig-name descname"><span class="pre">HilberHughesTaylor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#HilberHughesTaylor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.HilberHughesTaylor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta" title="elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">GalphaNewmarkBeta</span></code></a></p>
+<p>Implementation of the <em>Hilber-Hughes-Taylor</em> or <em>alpha-Newmark</em> time-stepping scheme.
+<em>HHT</em> is a special case of the <em>Generalized-alpha</em> scheme (<span class="math notranslate nohighlight">\(\alpha_m=0\)</span> and <span class="math notranslate nohighlight">\(\alpha_f=\alpha\)</span>).</p>
+<p><strong>(!)</strong> The definition of the <span class="math notranslate nohighlight">\(\alpha\)</span> parameter is different
+from that in the original article. Here: <span class="math notranslate nohighlight">\(\alpha = -\alpha_{HHT}\)</span></p>
+<dl class="simple">
+<dt>Implicit / explicit?</dt><dd><p>Implicit</p>
+</dd>
+<dt>Accuracy:</dt><dd><p>First or second order, depending on parameters</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – See GalphaNewmarkBeta</p>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>rho_inf</strong> (<em>default = 0.9</em>) – Spectral radius in the high frequency limit. Bounds: (1/2,1).
+Setting <strong>rho_inf</strong> is the preferred way of defining the scheme.</p></li>
+<li><p><strong>alpha</strong> (<em>default =</em><em> (</em><em>1-rho_inf</em><em>)</em><em>/</em><em>(</em><em>1+rho_inf</em><em>)</em>) – Set to e.g. 0.05 or sqrt(2) for low or moderate dissipation</p></li>
+<li><p><strong>gamma</strong> (<em>default = 1/2 + alpha</em>) – Default value ensures second-order accuracy.
+Other values give first-order accuracy</p></li>
+<li><p><strong>beta</strong> (<em>default = 1/4*</em><em>(</em><em>gamma+1/2</em><em>)</em><em>**2</em>) – Unconditionnal stability if <span class="math notranslate nohighlight">\(\beta \geq 0.25 + 0.5 \alpha\)</span></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Reference:</dt><dd><p>H. M. Hilber, T. J. R. Hughes, and R. L. Taylor,
+“Improved Numerical Dissipation for Time Integration Algorithms in Structural Dynamics”,
+Earthquake Engineering and Structural Dynamics, vol. 5, pp. 283–292, 1977.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.HilberHughesTaylor.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['hilber-hughes-taylor',</span> <span class="pre">'hht',</span> <span class="pre">'hht-alpha']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.HilberHughesTaylor.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.newmark.</span></span><span class="sig-name descname"><span class="pre">NewmarkBeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#NewmarkBeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta" title="elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">GalphaNewmarkBeta</span></code></a></p>
+<p>Implementation of the <em>Newmark</em> or <em>Newmark-beta</em> time-stepping scheme, for <span class="math notranslate nohighlight">\(\beta&gt;0\)</span>.
+The special case <span class="math notranslate nohighlight">\(\beta=0\)</span> is implemented in the <code class="code highlight python docutils literal highlight-python"><span class="n">LeapFrog</span></code> class.
+<em>Newmark-beta</em> is a special case of the <em>Generalized-alpha</em> scheme (<span class="math notranslate nohighlight">\(\alpha_m=\alpha_f=0\)</span>).</p>
+<dl class="simple">
+<dt>Implicit / explicit?</dt><dd><p>Implicit</p>
+</dd>
+<dt>Accuracy:</dt><dd><p>First-order unless <span class="math notranslate nohighlight">\(gamma=1/2\)</span> (second-order)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – See GalphaNewmarkBeta</p>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>gamma</strong> (<em>default = 1/2</em>) – Default value ensures second-order accuracy.
+Other values give first-order accuracy</p></li>
+<li><p><strong>beta</strong> (<em>default = 1/4*</em><em>(</em><em>gamma+1/2</em><em>)</em><em>**2</em>) – Unconditionnal stability if <span class="math notranslate nohighlight">\(\beta \geq 0.25\)</span></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>See:</dt><dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Newmark-beta_method">https://en.wikipedia.org/wiki/Newmark-beta_method</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['newmark',</span> <span class="pre">'newmark-beta']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.MidPoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.newmark.</span></span><span class="sig-name descname"><span class="pre">MidPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#MidPoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.MidPoint" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta" title="elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewmarkBeta</span></code></a></p>
+<p>Implementation of the <em>Midpoint</em> time-stepping scheme, or <em>Average Acceleration Method</em>.
+<em>Midpoint</em> is a special case of <em>Newmark-beta</em> methods with <span class="math notranslate nohighlight">\(\beta=1/4\)</span> and <span class="math notranslate nohighlight">\(\gamma=1/2\)</span>
+and is unconditionally stable.</p>
+<dl class="simple">
+<dt>Implicit / explicit?</dt><dd><p>Implicit</p>
+</dd>
+<dt>Accuracy:</dt><dd><p>Second-order</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – See GalphaNewmarkBeta</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>See:</dt><dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Midpoint_method">https://en.wikipedia.org/wiki/Midpoint_method</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.MidPoint.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['midpoint',</span> <span class="pre">'average-acceleration-method',</span> <span class="pre">'aam']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.MidPoint.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.LinearAccelerationMethod">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.timeschemes.newmark.</span></span><span class="sig-name descname"><span class="pre">LinearAccelerationMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/timeschemes/newmark.html#LinearAccelerationMethod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.LinearAccelerationMethod" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta" title="elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewmarkBeta</span></code></a></p>
+<p>Implementation <em>Linear Acceleration Method</em> time-stepping scheme.
+It is a special case of <em>Newmark-beta</em> methods with <span class="math notranslate nohighlight">\(\beta=1/6\)</span> and <span class="math notranslate nohighlight">\(\gamma=1/2\)</span>
+and is unconditionally stable.</p>
+<dl class="simple">
+<dt>Implicit / explicit?</dt><dd><p>Implicit</p>
+</dd>
+<dt>Accuracy:</dt><dd><p>Second-order</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – See GalphaNewmarkBeta</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.timeschemes.newmark.LinearAccelerationMethod.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['linear-acceleration-method',</span> <span class="pre">'lam']</span></em><a class="headerlink" href="#elastodynamicsx.pde.timeschemes.newmark.LinearAccelerationMethod.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-elastodynamicsx.pde.timeschemes.timescheme">
+<span id="elastodynamicsx-pde-timeschemes-timescheme"></span><h2>elastodynamicsx.pde.timeschemes.timescheme<a class="headerlink" href="#module-elastodynamicsx.pde.timeschemes.timescheme" title="Link to this heading"></a></h2>
+<p>Builder method that instanciates the desired time scheme</p>
+<dl class="field-list simple">
+<dt class="field-odd">param *args<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Passed to the required time scheme</p>
+</dd>
+<dt class="field-even">keyword scheme<span class="colon">:</span></dt>
+<dd class="field-even"><p>(mandatory) String identifier of the time scheme</p>
+</dd>
+<dt class="field-odd">keyword **kwargs<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Passed to the required material</p>
+</dd>
+<dt class="field-even">returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An instance of the desired time scheme</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="elastodynamicsx.pde.materials.html" class="btn btn-neutral float-left" title="elastodynamicsx.pde.materials package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="elastodynamicsx.plot.html" class="btn btn-neutral float-right" title="elastodynamicsx.plot" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Pierric Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
