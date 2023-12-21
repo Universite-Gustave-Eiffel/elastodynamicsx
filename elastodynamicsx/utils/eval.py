@@ -76,9 +76,10 @@ class ParallelEvaluator:
         recv_eval = self.comm.gather(eval_results, root=root)
         rank = self.comm.Get_rank()
         if rank == 0:
-            assert isinstance(recv_eval, np.ndarray)
+            assert not (recv_eval is None)
             # concatenate
             recv_eval = np.concatenate(recv_eval, axis=0)
+            assert isinstance(recv_eval, np.ndarray), type(recv_eval)
             # re-order
             recv_indx = np.argsort(np.asarray(self.src_owner) + np.linspace(0, 0.1, num=len(self.src_owner)))
             out_eval = np.empty(recv_eval.shape, dtype=recv_eval.dtype)
