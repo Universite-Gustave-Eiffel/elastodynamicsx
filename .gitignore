@@ -60,7 +60,8 @@ coverage.xml
 .hypothesis/
 
 # Sphinx documentation
-docs/_build/
+# Ignore the html pages only in the main branch, TODO: un-ignore in the pages branch
+/docs/
 
 # PyBuilder
 target/
@@ -74,3 +75,4 @@ target/
 
 .code-workspace
 /examples/protonerrors.log
+
