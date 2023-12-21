@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>elastodynamicsx.pde.materials.material &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ElastodynamiCSx
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../readme_link.html">ElastodynamiCSx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#build-problems">Build problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#solve-problems">Solve problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#post-process-solutions">Post process solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#dependencies">Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../readme_link.html#packages-required-for-the-examples">Packages required for the examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../readme_link.html#optional-packages">Optional packages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../readme_link.html#option-1-with-fenicsx-binaries-installed">Option 1: With FEniCSx binaries installed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../readme_link.html#option-2-inside-a-fenicsx-docker-image">Option 2: Inside a FEniCSx Docker image</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#useful-links">Useful links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../demos/examples_index.html">Demos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section1.html"><strong>Time domain</strong>, wave equation; high order (spectral) elements &amp; <strong>explicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section1_files.html">weq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section1_files.html#weq-2d-psv-fullspace-py">weq_2D-PSV_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section1_files.html#weq-2d-psv-halfspace-lamb-komatitschvilotte-bssa1998-py">weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section1_files.html#weqnl-1d-psv-murnaghan-pwave-py">weqnl_1D-PSV_Murnaghan_Pwave.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section2.html"><strong>Time domain</strong>, structural dynamics; low order elements &amp; <strong>implicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section2_files.html">tdsdyn_3D_ElasticBeam.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section3.html"><strong>Frequency domain</strong>, wave equation (Helmoltz equation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section3_files.html">freq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section3_files.html#freq-2d-psv-fullspace-py">freq_2D-PSV_FullSpace.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section4.html"><strong>Eigenmodes</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section4_files.html">eigs_3D_ElasticBeam.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section4_files.html#eigs-3d-aluminumcube-py">eigs_3D_AluminumCube.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section5.html"><strong>Guided waves</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/api_index.html">API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.plot.html">elastodynamicsx.plot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.plot.html#module-elastodynamicsx.plot">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.plot.html#module-elastodynamicsx.plot.plot">elastodynamicsx.plot.plot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.solutions.html">elastodynamicsx.solutions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solutions.html#module-elastodynamicsx.solutions">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solutions.html#module-elastodynamicsx.solutions.modalbasis">elastodynamicsx.solutions.modalbasis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html">elastodynamicsx.solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.eval">elastodynamicsx.utils.eval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.spectralelements">elastodynamicsx.utils.spectralelements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.tags">elastodynamicsx.utils.tags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ElastodynamiCSx</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../materials.html">elastodynamicsx.pde.materials</a></li>
+      <li class="breadcrumb-item active">elastodynamicsx.pde.materials.material</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for elastodynamicsx.pde.materials.material</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2023 Pierric Mora</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ElastodynamiCSx</span>
+<span class="c1">#</span>
+<span class="c1"># SPDX-License-Identifier: MIT</span>
+
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">import</span> <span class="nn">ufl</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">elastodynamicsx.utils</span> <span class="kn">import</span> <span class="n">_get_functionspace_tags_marker</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.pde</span> <span class="kn">import</span> <span class="n">PDECONFIG</span>
+
+
+<div class="viewcode-block" id="Material">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material">[docs]</a>
+<span class="k">class</span> <span class="nc">Material</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    .. role:: python(code)</span>
+<span class="sd">       :language: python</span>
+
+<span class="sd">    Base class for a representation of a material law.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        functionspace_tags_marker: Available possibilities are:</span>
+
+<span class="sd">            - :python:`(function_space, cell_tags, marker)`: meaning application of</span>
+<span class="sd">                the material in the cells whose tag correspond to marker</span>
+<span class="sd">            - :python:`function_space`: in this case :python:`cell_tags=None`</span>
+<span class="sd">                and :python:`marker=None`, meaning application of the material in the entire domain</span>
+
+<span class="sd">        rho: Density</span>
+<span class="sd">        is_linear: True for linear, False for hyperelastic</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        metadata: (default=None) The metadata used by the ufl measures (dx, dS).</span>
+<span class="sd">            If set to :python:`None`, uses the :python:`PDECONFIG.default_metadata`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># ## --------------------------</span>
+    <span class="c1"># ## --------- static ---------</span>
+    <span class="c1"># ## --------------------------</span>
+
+    <span class="n">labels</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+    <span class="c1"># ## --------------------------</span>
+    <span class="c1"># ## ------- non-static -------</span>
+    <span class="c1"># ## --------------------------</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">is_linear</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rho</span> <span class="o">=</span> <span class="n">rho</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_linear</span> <span class="o">=</span> <span class="n">is_linear</span>
+
+        <span class="n">function_space</span><span class="p">,</span> <span class="n">cell_tags</span><span class="p">,</span> <span class="n">marker</span> <span class="o">=</span> <span class="n">_get_functionspace_tags_marker</span><span class="p">(</span><span class="n">functionspace_tags_marker</span><span class="p">)</span>
+
+        <span class="n">domain</span> <span class="o">=</span> <span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span>
+        <span class="n">md</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="n">PDECONFIG</span><span class="o">.</span><span class="n">default_metadata</span><span class="p">)</span>
+        <span class="c1"># also valid if cell_tags or marker are None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;dx&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">subdomain_data</span><span class="o">=</span><span class="n">cell_tags</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">md</span><span class="p">)(</span><span class="n">marker</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dS</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;dS&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">subdomain_data</span><span class="o">=</span><span class="n">cell_tags</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">md</span><span class="p">)(</span><span class="n">marker</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span> <span class="o">=</span> <span class="n">function_space</span>
+
+        <span class="n">e</span> <span class="o">=</span> <span class="n">function_space</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">basix_element</span>
+        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">discontinuous</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>  <span class="c1"># True for discontinuous Galerkin</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Material: Using discontinuous elements -&gt; DG formulation&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_DG</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># print(&#39;Material: Using continuous elements -&gt; CG formulation&#39;)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_CG</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_linear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_linear</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bilinear) mass form function&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rho</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">c</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bilinear) damping form function&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bilinear) Stiffness form function&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k_CG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stiffness form function for a Continuous Galerkin formulation&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;supercharge me&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k1_CG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;K1 stiffness form function for a Continuous Galerkin formulation (waveguides)&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;supercharge me&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k2_CG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;K2 stiffness form function for a Continuous Galerkin formulation (waveguides)&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;supercharge me&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k3_CG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;K3 stiffness form function for a Continuous Galerkin formulation (waveguides)&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;supercharge me&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k_DG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stiffness form function for a Disontinuous Galerkin formulation&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;supercharge me&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">DG_numerical_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numerical flux for a Disontinuous Galerkin formulation&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;supercharge me&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rho</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Density&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rho</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Pierric Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

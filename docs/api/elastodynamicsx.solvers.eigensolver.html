@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>elastodynamicsx.solvers.eigensolver &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="elastodynamicsx.solvers.frequencydomain" href="elastodynamicsx.solvers.frequencydomain.html" />
+    <link rel="prev" title="elastodynamicsx.solvers" href="elastodynamicsx.solvers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ElastodynamiCSx
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme_link.html">ElastodynamiCSx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#build-problems">Build problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#solve-problems">Solve problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#post-process-solutions">Post process solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#dependencies">Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#packages-required-for-the-examples">Packages required for the examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#optional-packages">Optional packages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#option-1-with-fenicsx-binaries-installed">Option 1: With FEniCSx binaries installed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#option-2-inside-a-fenicsx-docker-image">Option 2: Inside a FEniCSx Docker image</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#useful-links">Useful links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/examples_index.html">Demos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section1.html"><strong>Time domain</strong>, wave equation; high order (spectral) elements &amp; <strong>explicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html">weq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html#weq-2d-psv-fullspace-py">weq_2D-PSV_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html#weq-2d-psv-halfspace-lamb-komatitschvilotte-bssa1998-py">weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html#weqnl-1d-psv-murnaghan-pwave-py">weqnl_1D-PSV_Murnaghan_Pwave.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section2.html"><strong>Time domain</strong>, structural dynamics; low order elements &amp; <strong>implicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section2_files.html">tdsdyn_3D_ElasticBeam.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section3.html"><strong>Frequency domain</strong>, wave equation (Helmoltz equation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section3_files.html">freq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section3_files.html#freq-2d-psv-fullspace-py">freq_2D-PSV_FullSpace.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section4.html"><strong>Eigenmodes</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section4_files.html">eigs_3D_ElasticBeam.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section4_files.html#eigs-3d-aluminumcube-py">eigs_3D_AluminumCube.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section5.html"><strong>Guided waves</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="api_index.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.plot.html">elastodynamicsx.plot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.plot.html#module-elastodynamicsx.plot">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.plot.html#module-elastodynamicsx.plot.plot">elastodynamicsx.plot.plot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.solutions.html">elastodynamicsx.solutions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solutions.html#module-elastodynamicsx.solutions">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solutions.html#module-elastodynamicsx.solutions.modalbasis">elastodynamicsx.solutions.modalbasis</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="elastodynamicsx.solvers.html">elastodynamicsx.solvers</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils.eval">elastodynamicsx.utils.eval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils.spectralelements">elastodynamicsx.utils.spectralelements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils.tags">elastodynamicsx.utils.tags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ElastodynamiCSx</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="api_index.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="elastodynamicsx.solvers.html">elastodynamicsx.solvers</a></li>
+      <li class="breadcrumb-item active">elastodynamicsx.solvers.eigensolver</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/elastodynamicsx.solvers.eigensolver.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="elastodynamicsx-solvers-eigensolver">
+<h1>elastodynamicsx.solvers.eigensolver<a class="headerlink" href="#elastodynamicsx-solvers-eigensolver" title="Link to this heading"></a></h1>
+<section id="module-elastodynamicsx.solvers.eigensolver">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-elastodynamicsx.solvers.eigensolver" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.EigenmodesSolver">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.solvers.eigensolver.</span></span><span class="sig-name descname"><span class="pre">EigenmodesSolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Comm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mat</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.EigenmodesSolver" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EPS</span></code></p>
+<p>Convenience class inhereted from SLEPc.EPS, with methods and
+default parameters that are relevant for computing the resonances
+of an elastic component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>comm</strong> – The MPI communicator</p></li>
+<li><p><strong>M</strong> – The mass matrix</p></li>
+<li><p><strong>C</strong> – The damping matrix. C=None means no dissipation. C!=None is not supported yet.</p></li>
+<li><p><strong>K</strong> – The stiffness matrix</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>nev</strong> – The number of eigenvalues to be computed</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ###</span>
+<span class="c1"># Free resonances of an elastic cube</span>
+<span class="c1"># ###</span>
+<span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="kn">from</span> <span class="nn">dolfinx</span> <span class="kn">import</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">fem</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.solvers</span> <span class="kn">import</span> <span class="n">EigenmodesSolver</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.pde</span> <span class="kn">import</span> <span class="n">material</span><span class="p">,</span> <span class="n">PDE</span>
+
+<span class="n">domain</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">create_box</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">])</span>
+<span class="n">V</span>      <span class="o">=</span> <span class="n">dolfinx</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">VectorFunctionSpace</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;CG&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">rho</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">,</span> <span class="n">mu</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span>
+<span class="n">mat</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">,</span> <span class="n">mu</span><span class="p">)</span>
+<span class="n">pde</span> <span class="o">=</span> <span class="n">PDE</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">materials</span><span class="o">=</span><span class="p">[</span><span class="n">mat</span><span class="p">])</span>
+<span class="n">nev</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">+</span> <span class="mi">6</span>  <span class="c1"># the first 6 resonances are rigid body motion</span>
+<span class="n">eps</span> <span class="o">=</span> <span class="n">EigenmodesSolver</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">comm</span><span class="p">,</span> <span class="n">pde</span><span class="o">.</span><span class="n">M</span><span class="p">(),</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pde</span><span class="o">.</span><span class="n">K</span><span class="p">(),</span> <span class="n">nev</span><span class="o">=</span><span class="n">nev</span><span class="p">)</span>
+<span class="n">eps</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="n">eps</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+<span class="n">freqs</span> <span class="o">=</span> <span class="n">eps</span><span class="o">.</span><span class="n">getEigenfrequencies</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;First resonance frequencies:&#39;</span><span class="p">,</span> <span class="n">freqs</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.EigenmodesSolver.getWn">
+<span class="sig-name descname"><span class="pre">getWn</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.getWn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.EigenmodesSolver.getWn" title="Link to this definition"></a></dt>
+<dd><p>The eigen angular frequencies from the computed eigenvalues</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.EigenmodesSolver.getEigenfrequencies">
+<span class="sig-name descname"><span class="pre">getEigenfrequencies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.getEigenfrequencies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.EigenmodesSolver.getEigenfrequencies" title="Link to this definition"></a></dt>
+<dd><p>The eigenfrequencies from the computed eigenvalues</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.EigenmodesSolver.getEigenmodes">
+<span class="sig-name descname"><span class="pre">getEigenmodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">which</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Vec</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.getEigenmodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.EigenmodesSolver.getEigenmodes" title="Link to this definition"></a></dt>
+<dd><p>Returns the desired modeshapes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>which</strong> – ‘all’, or an integer, or a list of integers, or a slice object</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">getEigenmodes</span><span class="p">()</span>   <span class="c1"># returns all computed eigenmodes</span>
+<span class="n">getEigenmodes</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># returns mode number 4</span>
+<span class="n">getEigenmodes</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>  <span class="c1"># returns modes number 4 and 6</span>
+<span class="n">getEigenmodes</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>  <span class="c1"># returns even modes</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.EigenmodesSolver.getModalBasis">
+<span class="sig-name descname"><span class="pre">getModalBasis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="elastodynamicsx.solutions.html#elastodynamicsx.solutions.modalbasis.ModalBasis" title="elastodynamicsx.solutions.modalbasis.ModalBasis"><span class="pre">ModalBasis</span></a></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.getModalBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.EigenmodesSolver.getModalBasis" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.EigenmodesSolver.getErrors">
+<span class="sig-name descname"><span class="pre">getErrors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.getErrors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.EigenmodesSolver.getErrors" title="Link to this definition"></a></dt>
+<dd><p>Returns the error estimate on the computed eigenvalues</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.EigenmodesSolver.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FunctionSpaceBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">which</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.EigenmodesSolver.plot" title="Link to this definition"></a></dt>
+<dd><p>Plots the desired modeshapes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function_space</strong> – The underlying function space</p></li>
+<li><p><strong>which</strong> – ‘all’, or an integer, or a list of integers, or a slice object
+-&gt; the same as for getEigenmodes</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.EigenmodesSolver.printEigenvalues">
+<span class="sig-name descname"><span class="pre">printEigenvalues</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.printEigenvalues"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.EigenmodesSolver.printEigenvalues" title="Link to this definition"></a></dt>
+<dd><p>Prints the computed eigenvalues and error estimates</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-elastodynamicsx.solvers.eigensolver.eigenmodessolver">
+<span id="elastodynamicsx-solvers-eigensolver-eigenmodessolver"></span><h2>elastodynamicsx.solvers.eigensolver.eigenmodessolver<a class="headerlink" href="#module-elastodynamicsx.solvers.eigensolver.eigenmodessolver" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.solvers.eigensolver.eigenmodessolver.</span></span><span class="sig-name descname"><span class="pre">EigenmodesSolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Comm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mat</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EPS</span></code></p>
+<p>Convenience class inhereted from SLEPc.EPS, with methods and
+default parameters that are relevant for computing the resonances
+of an elastic component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>comm</strong> – The MPI communicator</p></li>
+<li><p><strong>M</strong> – The mass matrix</p></li>
+<li><p><strong>C</strong> – The damping matrix. C=None means no dissipation. C!=None is not supported yet.</p></li>
+<li><p><strong>K</strong> – The stiffness matrix</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>nev</strong> – The number of eigenvalues to be computed</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ###</span>
+<span class="c1"># Free resonances of an elastic cube</span>
+<span class="c1"># ###</span>
+<span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="kn">from</span> <span class="nn">dolfinx</span> <span class="kn">import</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">fem</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.solvers</span> <span class="kn">import</span> <span class="n">EigenmodesSolver</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.pde</span> <span class="kn">import</span> <span class="n">material</span><span class="p">,</span> <span class="n">PDE</span>
+
+<span class="n">domain</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">create_box</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">])</span>
+<span class="n">V</span>      <span class="o">=</span> <span class="n">dolfinx</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">VectorFunctionSpace</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;CG&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">rho</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">,</span> <span class="n">mu</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span>
+<span class="n">mat</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">,</span> <span class="n">mu</span><span class="p">)</span>
+<span class="n">pde</span> <span class="o">=</span> <span class="n">PDE</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">materials</span><span class="o">=</span><span class="p">[</span><span class="n">mat</span><span class="p">])</span>
+<span class="n">nev</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">+</span> <span class="mi">6</span>  <span class="c1"># the first 6 resonances are rigid body motion</span>
+<span class="n">eps</span> <span class="o">=</span> <span class="n">EigenmodesSolver</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">comm</span><span class="p">,</span> <span class="n">pde</span><span class="o">.</span><span class="n">M</span><span class="p">(),</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pde</span><span class="o">.</span><span class="n">K</span><span class="p">(),</span> <span class="n">nev</span><span class="o">=</span><span class="n">nev</span><span class="p">)</span>
+<span class="n">eps</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="n">eps</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+<span class="n">freqs</span> <span class="o">=</span> <span class="n">eps</span><span class="o">.</span><span class="n">getEigenfrequencies</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;First resonance frequencies:&#39;</span><span class="p">,</span> <span class="n">freqs</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.getWn">
+<span class="sig-name descname"><span class="pre">getWn</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.getWn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.getWn" title="Link to this definition"></a></dt>
+<dd><p>The eigen angular frequencies from the computed eigenvalues</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.getEigenfrequencies">
+<span class="sig-name descname"><span class="pre">getEigenfrequencies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.getEigenfrequencies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.getEigenfrequencies" title="Link to this definition"></a></dt>
+<dd><p>The eigenfrequencies from the computed eigenvalues</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.getEigenmodes">
+<span class="sig-name descname"><span class="pre">getEigenmodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">which</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Vec</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.getEigenmodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.getEigenmodes" title="Link to this definition"></a></dt>
+<dd><p>Returns the desired modeshapes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>which</strong> – ‘all’, or an integer, or a list of integers, or a slice object</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">getEigenmodes</span><span class="p">()</span>   <span class="c1"># returns all computed eigenmodes</span>
+<span class="n">getEigenmodes</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># returns mode number 4</span>
+<span class="n">getEigenmodes</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>  <span class="c1"># returns modes number 4 and 6</span>
+<span class="n">getEigenmodes</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>  <span class="c1"># returns even modes</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.getModalBasis">
+<span class="sig-name descname"><span class="pre">getModalBasis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="elastodynamicsx.solutions.html#elastodynamicsx.solutions.modalbasis.ModalBasis" title="elastodynamicsx.solutions.modalbasis.ModalBasis"><span class="pre">ModalBasis</span></a></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.getModalBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.getModalBasis" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.getErrors">
+<span class="sig-name descname"><span class="pre">getErrors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.getErrors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.getErrors" title="Link to this definition"></a></dt>
+<dd><p>Returns the error estimate on the computed eigenvalues</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FunctionSpaceBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">which</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.plot" title="Link to this definition"></a></dt>
+<dd><p>Plots the desired modeshapes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function_space</strong> – The underlying function space</p></li>
+<li><p><strong>which</strong> – ‘all’, or an integer, or a list of integers, or a slice object
+-&gt; the same as for getEigenmodes</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.printEigenvalues">
+<span class="sig-name descname"><span class="pre">printEigenvalues</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/eigensolver/eigenmodessolver.html#EigenmodesSolver.printEigenvalues"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.eigensolver.eigenmodessolver.EigenmodesSolver.printEigenvalues" title="Link to this definition"></a></dt>
+<dd><p>Prints the computed eigenvalues and error estimates</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="elastodynamicsx.solvers.html" class="btn btn-neutral float-left" title="elastodynamicsx.solvers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="elastodynamicsx.solvers.frequencydomain.html" class="btn btn-neutral float-right" title="elastodynamicsx.solvers.frequencydomain" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Pierric Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

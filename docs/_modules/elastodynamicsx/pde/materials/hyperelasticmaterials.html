@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>elastodynamicsx.pde.materials.hyperelasticmaterials &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ElastodynamiCSx
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../readme_link.html">ElastodynamiCSx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#build-problems">Build problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#solve-problems">Solve problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#post-process-solutions">Post process solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#dependencies">Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../readme_link.html#packages-required-for-the-examples">Packages required for the examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../readme_link.html#optional-packages">Optional packages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../readme_link.html#option-1-with-fenicsx-binaries-installed">Option 1: With FEniCSx binaries installed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../readme_link.html#option-2-inside-a-fenicsx-docker-image">Option 2: Inside a FEniCSx Docker image</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#useful-links">Useful links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../demos/examples_index.html">Demos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section1.html"><strong>Time domain</strong>, wave equation; high order (spectral) elements &amp; <strong>explicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section1_files.html">weq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section1_files.html#weq-2d-psv-fullspace-py">weq_2D-PSV_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section1_files.html#weq-2d-psv-halfspace-lamb-komatitschvilotte-bssa1998-py">weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section1_files.html#weqnl-1d-psv-murnaghan-pwave-py">weqnl_1D-PSV_Murnaghan_Pwave.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section2.html"><strong>Time domain</strong>, structural dynamics; low order elements &amp; <strong>implicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section2_files.html">tdsdyn_3D_ElasticBeam.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section3.html"><strong>Frequency domain</strong>, wave equation (Helmoltz equation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section3_files.html">freq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section3_files.html#freq-2d-psv-fullspace-py">freq_2D-PSV_FullSpace.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section4.html"><strong>Eigenmodes</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section4_files.html">eigs_3D_ElasticBeam.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section4_files.html#eigs-3d-aluminumcube-py">eigs_3D_AluminumCube.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section5.html"><strong>Guided waves</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/api_index.html">API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.plot.html">elastodynamicsx.plot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.plot.html#module-elastodynamicsx.plot">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.plot.html#module-elastodynamicsx.plot.plot">elastodynamicsx.plot.plot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.solutions.html">elastodynamicsx.solutions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solutions.html#module-elastodynamicsx.solutions">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solutions.html#module-elastodynamicsx.solutions.modalbasis">elastodynamicsx.solutions.modalbasis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html">elastodynamicsx.solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.eval">elastodynamicsx.utils.eval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.spectralelements">elastodynamicsx.utils.spectralelements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.tags">elastodynamicsx.utils.tags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ElastodynamiCSx</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../materials.html">elastodynamicsx.pde.materials</a></li>
+      <li class="breadcrumb-item active">elastodynamicsx.pde.materials.hyperelasticmaterials</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for elastodynamicsx.pde.materials.hyperelasticmaterials</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2023 Pierric Mora</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ElastodynamiCSx</span>
+<span class="c1">#</span>
+<span class="c1"># SPDX-License-Identifier: MIT</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
+
+<span class="kn">import</span> <span class="nn">ufl</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">.material</span> <span class="kn">import</span> <span class="n">Material</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.utils</span> <span class="kn">import</span> <span class="n">_get_functionspace_tags_marker</span>
+
+<span class="c1"># https://bazaar.launchpad.net/~cbc-core/cbc.solve/main/view/head:/cbc/twist/material_model_base.py</span>
+<span class="c1"># https://bazaar.launchpad.net/~cbc-core/cbc.solve/main/view/head:/cbc/twist/material_models.py</span>
+
+
+<div class="viewcode-block" id="HyperelasticMaterial">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.HyperelasticMaterial">[docs]</a>
+<span class="k">class</span> <span class="nc">HyperelasticMaterial</span><span class="p">(</span><span class="n">Material</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for hyperelastic materials</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        functionspace_tags_marker: See Material</span>
+<span class="sd">        rho: Density</span>
+<span class="sd">        sigma: Stress function</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        **kwargs: see Material</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">function_space</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_get_functionspace_tags_marker</span><span class="p">(</span><span class="n">functionspace_tags_marker</span><span class="p">)</span>
+        <span class="n">nbcomps</span> <span class="o">=</span> <span class="n">function_space</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">num_sub_elements</span>
+
+        <span class="k">assert</span> <span class="n">nbcomps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;HyperelasticMaterial requires a vector function space&#39;</span>
+
+        <span class="n">dim</span> <span class="o">=</span> <span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">dim</span>
+        <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># 1D</span>
+            <span class="k">if</span> <span class="n">nbcomps</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Grad</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">([[</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dx</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">dx</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Grad</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">([[</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dx</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">dx</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">dx</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Grad</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">is_linear</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HyperelasticMaterial.P">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.HyperelasticMaterial.P">[docs]</a>
+    <span class="k">def</span> <span class="nf">P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;First Piola-Kirchhoff stress&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;supercharge me&quot;</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k_CG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stiffness form function for a Continuous Galerkin formulation&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k_DG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;**(Not implemented)** Stiffness form function for a Discontinuous Galerkin formulation&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">DG_numerical_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;**(Not implemented)** Numerical flux for a Disontinuous Galerkin formulation&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+
+<div class="viewcode-block" id="Murnaghan">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Murnaghan">[docs]</a>
+<span class="k">class</span> <span class="nc">Murnaghan</span><span class="p">(</span><span class="n">HyperelasticMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Murnaghan&#39;s model</span>
+
+<span class="sd">    Strain energy density:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">          W = \\frac{\lambda}{2} \mathrm{tr}(\mathbf{E})^2 + \mu \mathrm{tr}(\mathbf{E}^2)</span>
+<span class="sd">              + \\frac{A}{3} \mathrm{tr}(\mathbf{E}^3)</span>
+<span class="sd">              + B \mathrm{tr}(\mathbf{E}) \mathrm{tr}(\mathbf{E}^2)</span>
+<span class="sd">              + \\frac{C}{3} \mathrm{tr}(\mathbf{E})^3</span>
+
+<span class="sd">        with: :math:`l=B+C`, :math:`m=\\frac{1}{2}A+B`, :math:`n=A`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        functionspace_tags_marker: See Material</span>
+<span class="sd">        rho: Density</span>
+<span class="sd">        lambda_: Lame&#39;s first parameter</span>
+<span class="sd">        mu: Lame&#39;s second parameter (shear modulus)</span>
+<span class="sd">        l, m, n: Murnaghan&#39;s third order elastic constant</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        **kwargs: Passed to HyperelasticMaterial</span>
+
+<span class="sd">    See:</span>
+<span class="sd">        https://en.wikipedia.org/wiki/Acoustoelastic_effect</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;murnaghan&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">l_</span><span class="p">,</span> <span class="n">m_</span><span class="p">,</span> <span class="n">n_</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lambda</span> <span class="o">=</span> <span class="n">lambda_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mu</span> <span class="o">=</span> <span class="n">mu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_l</span> <span class="o">=</span> <span class="n">l_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">=</span> <span class="n">m_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">=</span> <span class="n">n_</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Murnaghan.P">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Murnaghan.P">[docs]</a>
+    <span class="k">def</span> <span class="nf">P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;First Piola-Kirchhoff stress&quot;&quot;&quot;</span>
+        <span class="c1"># Number of components</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+        <span class="c1"># Identity tensor</span>
+        <span class="n">Id</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">Identity</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+
+        <span class="c1"># Deformation gradient</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">Id</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
+
+        <span class="c1"># Right Cauchy-Green tensor</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span>
+
+        <span class="n">E</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">C</span> <span class="o">-</span> <span class="n">Id</span><span class="p">))</span>
+
+        <span class="c1"># convert Murnaghan&#39;s constants into Landau &amp; Lifshitz constants</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_l</span> <span class="o">-</span> <span class="n">B</span>
+
+        <span class="c1"># Strain-energy function</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lambda</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">E</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mu</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">E</span> <span class="o">*</span> <span class="n">E</span><span class="p">)</span> \
+            <span class="o">+</span> <span class="n">C</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">E</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="n">B</span> <span class="o">*</span> <span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">E</span> <span class="o">*</span> <span class="n">E</span><span class="p">))</span> <span class="o">+</span> <span class="n">A</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">E</span> <span class="o">*</span> <span class="n">E</span> <span class="o">*</span> <span class="n">E</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">F</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">E</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Z_N</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;**(WARNING, infinitesimal strain asymptotics)** P-wave mechanical impedance :math:`\\rho c_L`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rho</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lambda</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mu</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Z_T</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;**(WARNING, infinitesimal strain asymptotics)** S-wave mechanical impedance :math:`\\rho c_S`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rho</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mu</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="DummyIsotropicMaterial">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.DummyIsotropicMaterial">[docs]</a>
+<span class="k">class</span> <span class="nc">DummyIsotropicMaterial</span><span class="p">(</span><span class="n">HyperelasticMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A dummy implementation of an isotropic linear elastic material</span>
+<span class="sd">    based on a HyperelasticMaterial</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        functionspace_tags_marker: See Material</span>
+<span class="sd">        rho: Density</span>
+<span class="sd">        lambda_: Lame&#39;s first parameter</span>
+<span class="sd">        mu: Lame&#39;s second parameter (shear modulus)</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        **kwargs: Passed to HyperelasticMaterial</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dummy-isotropic&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lambda</span> <span class="o">=</span> <span class="n">lambda_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mu</span> <span class="o">=</span> <span class="n">mu</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DummyIsotropicMaterial.P">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.DummyIsotropicMaterial.P">[docs]</a>
+    <span class="k">def</span> <span class="nf">P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Infinitesimal stress function; NOT the first Piola-Kirchhoff stress&quot;&quot;&quot;</span>
+        <span class="c1"># Infinitesimal strain</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">+</span> <span class="n">ufl</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>  <span class="c1"># TODO: not valid for 1D</span>
+
+        <span class="c1"># Strain-energy function</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lambda</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mu</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">e</span> <span class="o">*</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Z_N</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;P-wave mechanical impedance :math:`\\rho c_L`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rho</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lambda</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mu</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Z_T</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;S-wave mechanical impedance :math:`\\rho c_S`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rho</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mu</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="StVenantKirchhoff">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.StVenantKirchhoff">[docs]</a>
+<span class="k">class</span> <span class="nc">StVenantKirchhoff</span><span class="p">(</span><span class="n">HyperelasticMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Saint Venant-Kirchhoff model</span>
+
+<span class="sd">    Strain energy density:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">          W = \\frac{\lambda}{2} \mathrm{tr}(\mathbf{E})^2 + \mu \mathrm{tr}(\mathbf{E}^2)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        functionspace_tags_marker: See Material</span>
+<span class="sd">        rho: Density</span>
+<span class="sd">        lambda_: Lame&#39;s first parameter</span>
+<span class="sd">        mu: Lame&#39;s second parameter (shear modulus)</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        **kwargs: Passed to HyperelasticMaterial</span>
+
+<span class="sd">    See:</span>
+<span class="sd">        https://en.wikipedia.org/wiki/Hyperelastic_material</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;stvenant-kirchhoff&#39;</span><span class="p">,</span> <span class="s1">&#39;saintvenant-kirchhoff&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lambda</span> <span class="o">=</span> <span class="n">lambda_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mu</span> <span class="o">=</span> <span class="n">mu</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="StVenantKirchhoff.P">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.StVenantKirchhoff.P">[docs]</a>
+    <span class="k">def</span> <span class="nf">P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;First Piola-Kirchhoff stress&quot;&quot;&quot;</span>
+        <span class="c1"># Number of components</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+        <span class="c1"># Identity tensor</span>
+        <span class="n">Id</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">Identity</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+
+        <span class="c1"># Deformation gradient</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">Id</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
+
+        <span class="c1"># Right Cauchy-Green tensor</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span>
+
+        <span class="n">E</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">C</span> <span class="o">-</span> <span class="n">Id</span><span class="p">))</span>
+
+        <span class="c1"># Strain-energy function</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lambda</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">E</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mu</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">E</span> <span class="o">*</span> <span class="n">E</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">F</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">E</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Z_N</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;**(WARNING, infinitesimal strain asymptotics)** P-wave mechanical impedance :math:`\\rho c_L`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rho</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lambda</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mu</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Z_T</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;**(WARNING, infinitesimal strain asymptotics)** S-wave mechanical impedance :math:`\\rho c_S`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rho</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mu</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="MooneyRivlinIncompressible">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.MooneyRivlinIncompressible">[docs]</a>
+<span class="k">class</span> <span class="nc">MooneyRivlinIncompressible</span><span class="p">(</span><span class="n">HyperelasticMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mooney-Rivlin model for an incompressible solid</span>
+
+<span class="sd">    Strain energy density:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">          W = C_1 (\overline{I}_1 - 3) + C_2 (\overline{I}_2 - 3)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        functionspace_tags_marker: See Material</span>
+<span class="sd">        rho: Density</span>
+<span class="sd">        C1: first parameter</span>
+<span class="sd">        C2: second parameter</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        **kwargs: Passed to HyperelasticMaterial</span>
+
+<span class="sd">    See:</span>
+<span class="sd">        https://en.wikipedia.org/wiki/Mooney%E2%80%93Rivlin_solid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mooney-rivlin-incomp&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">C1</span><span class="p">,</span> <span class="n">C2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_C1</span> <span class="o">=</span> <span class="n">C1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_C2</span> <span class="o">=</span> <span class="n">C2</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MooneyRivlinIncompressible.P">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.MooneyRivlinIncompressible.P">[docs]</a>
+    <span class="k">def</span> <span class="nf">P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;First Piola-Kirchhoff stress&quot;&quot;&quot;</span>
+        <span class="c1"># Number of components</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;The MooneyRivlinIncompressible class is only defined for 3D&#39;</span>
+
+        <span class="c1"># Identity tensor</span>
+        <span class="n">Id</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">Identity</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+
+        <span class="c1"># Deformation gradient</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">Id</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
+
+        <span class="c1"># Right Cauchy-Green tensor</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span>
+
+        <span class="c1"># Invariants</span>
+        <span class="n">I1</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+        <span class="n">I2</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">C</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">C</span> <span class="o">*</span> <span class="n">C</span><span class="p">))</span>
+        <span class="c1"># I3 = ufl.det(C)</span>
+
+        <span class="c1"># Strain-energy function</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C1</span> <span class="o">*</span> <span class="p">(</span><span class="n">I1</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C2</span> <span class="o">*</span> <span class="p">(</span><span class="n">I2</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">F</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C2</span></div>
+
+
+
+<div class="viewcode-block" id="MooneyRivlinCompressible">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.MooneyRivlinCompressible">[docs]</a>
+<span class="k">class</span> <span class="nc">MooneyRivlinCompressible</span><span class="p">(</span><span class="n">HyperelasticMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mooney-Rivlin model for a compressible solid</span>
+
+<span class="sd">    Strain energy density:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">          W = C_{10} (\overline{I}_1 - 3) + C_{01} (\overline{I}_2 - 3) + \\frac{1}{D_1} (J - 1)^2</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        functionspace_tags_marker: See Material</span>
+<span class="sd">        rho: Density</span>
+<span class="sd">        C10: First parameter</span>
+<span class="sd">        C01: Second parameter</span>
+<span class="sd">        D1: Third parameter</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        **kwargs: Passed to HyperelasticMaterial</span>
+
+<span class="sd">    See:</span>
+<span class="sd">        https://en.wikipedia.org/wiki/Mooney%E2%80%93Rivlin_solid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mooney-rivlin-comp&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">C10</span><span class="p">,</span> <span class="n">C01</span><span class="p">,</span> <span class="n">D1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_C10</span> <span class="o">=</span> <span class="n">C10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_C01</span> <span class="o">=</span> <span class="n">C01</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_D1</span> <span class="o">=</span> <span class="n">D1</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MooneyRivlinCompressible.P">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.MooneyRivlinCompressible.P">[docs]</a>
+    <span class="k">def</span> <span class="nf">P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;First Piola-Kirchhoff stress&quot;&quot;&quot;</span>
+        <span class="c1"># Number of components</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+        <span class="c1"># assert d==3, &#39;The MooneyRivlinIncompressible class is only defined for 3D&#39;</span>
+
+        <span class="c1"># Identity tensor</span>
+        <span class="n">Id</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">Identity</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+
+        <span class="c1"># Deformation gradient</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">Id</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
+
+        <span class="c1"># Jacobian</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">F</span><span class="p">))</span>
+
+        <span class="c1"># Right Cauchy-Green tensor</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span>
+
+        <span class="c1"># Isochoric C</span>
+        <span class="n">Cb</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">J</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">2.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">C</span><span class="p">)</span>
+
+        <span class="c1"># Invariants</span>
+        <span class="n">I1bar</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">Cb</span><span class="p">)</span>
+        <span class="n">I2bar</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">Cb</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">ufl</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="n">Cb</span> <span class="o">*</span> <span class="n">Cb</span><span class="p">))</span>
+
+        <span class="c1"># Strain-energy function</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C10</span> <span class="o">*</span> <span class="p">(</span><span class="n">I1bar</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C01</span> <span class="o">*</span> <span class="p">(</span><span class="n">I2bar</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_D1</span> <span class="o">*</span> <span class="p">(</span><span class="n">J</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">J</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">F</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C2</span></div>
+
+
+
+<span class="c1"># Finite-strain kinematics</span>
+<span class="c1"># see: https://bazaar.launchpad.net/~cbc-core/cbc.solve/main/view/head:/cbc/twist/kinematics.py</span>
+<span class="c1">#      https://jsdokken.com/dolfinx-tutorial/chapter2/hyperelasticity.html</span>
+
+
+<span class="c1"># Lagrangian finite strain tensor, or Green-Lagrangian strain tensor</span>
+<div class="viewcode-block" id="GreenLagrangeStrain">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.GreenLagrangeStrain">[docs]</a>
+<span class="k">def</span> <span class="nf">GreenLagrangeStrain</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
+    <span class="c1"># Number of components</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+    <span class="c1"># Identity tensor</span>
+    <span class="n">Id</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">Identity</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+
+    <span class="c1"># Deformation gradient</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">Id</span> <span class="o">+</span> <span class="n">ufl</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>  <span class="c1"># self.Grad</span>
+
+    <span class="c1"># Right Cauchy-Green tensor</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">F</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">C</span> <span class="o">-</span> <span class="n">Id</span><span class="p">))</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Pierric Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

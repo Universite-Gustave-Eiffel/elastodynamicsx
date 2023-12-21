@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>elastodynamicsx.pde.materials.elasticmaterial &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ElastodynamiCSx
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../readme_link.html">ElastodynamiCSx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#build-problems">Build problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#solve-problems">Solve problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#post-process-solutions">Post process solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#dependencies">Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../readme_link.html#packages-required-for-the-examples">Packages required for the examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../readme_link.html#optional-packages">Optional packages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../readme_link.html#option-1-with-fenicsx-binaries-installed">Option 1: With FEniCSx binaries installed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../readme_link.html#option-2-inside-a-fenicsx-docker-image">Option 2: Inside a FEniCSx Docker image</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../readme_link.html#useful-links">Useful links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../demos/examples_index.html">Demos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section1.html"><strong>Time domain</strong>, wave equation; high order (spectral) elements &amp; <strong>explicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section1_files.html">weq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section1_files.html#weq-2d-psv-fullspace-py">weq_2D-PSV_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section1_files.html#weq-2d-psv-halfspace-lamb-komatitschvilotte-bssa1998-py">weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section1_files.html#weqnl-1d-psv-murnaghan-pwave-py">weqnl_1D-PSV_Murnaghan_Pwave.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section2.html"><strong>Time domain</strong>, structural dynamics; low order elements &amp; <strong>implicit</strong> time scheme</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section2_files.html">tdsdyn_3D_ElasticBeam.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section3.html"><strong>Frequency domain</strong>, wave equation (Helmoltz equation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section3_files.html">freq_2D-SH_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section3_files.html#freq-2d-psv-fullspace-py">freq_2D-PSV_FullSpace.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section4.html"><strong>Eigenmodes</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section4_files.html">eigs_3D_ElasticBeam.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../demos/examples_section4_files.html#eigs-3d-aluminumcube-py">eigs_3D_AluminumCube.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../demos/examples_section5.html"><strong>Guided waves</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/api_index.html">API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.plot.html">elastodynamicsx.plot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.plot.html#module-elastodynamicsx.plot">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.plot.html#module-elastodynamicsx.plot.plot">elastodynamicsx.plot.plot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.solutions.html">elastodynamicsx.solutions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solutions.html#module-elastodynamicsx.solutions">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solutions.html#module-elastodynamicsx.solutions.modalbasis">elastodynamicsx.solutions.modalbasis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html">elastodynamicsx.solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.eval">elastodynamicsx.utils.eval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.spectralelements">elastodynamicsx.utils.spectralelements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html#module-elastodynamicsx.utils.tags">elastodynamicsx.utils.tags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ElastodynamiCSx</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../materials.html">elastodynamicsx.pde.materials</a></li>
+      <li class="breadcrumb-item active">elastodynamicsx.pde.materials.elasticmaterial</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for elastodynamicsx.pde.materials.elasticmaterial</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2023 Pierric Mora</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ElastodynamiCSx</span>
+<span class="c1">#</span>
+<span class="c1"># SPDX-License-Identifier: MIT</span>
+
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">dolfinx</span> <span class="kn">import</span> <span class="n">fem</span><span class="p">,</span> <span class="n">default_scalar_type</span>
+<span class="kn">import</span> <span class="nn">ufl</span>  <span class="c1"># type: ignore</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.material</span> <span class="kn">import</span> <span class="n">Material</span>
+<span class="kn">from</span> <span class="nn">.kinematics</span> <span class="kn">import</span> <span class="n">get_epsilon_function</span><span class="p">,</span> <span class="n">get_epsilonVoigt_function</span><span class="p">,</span> <span class="n">get_L_operators</span>
+<span class="kn">from</span> <span class="nn">.dampings</span> <span class="kn">import</span> <span class="n">NoDamping</span><span class="p">,</span> <span class="n">RayleighDamping</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.utils</span> <span class="kn">import</span> <span class="n">_get_functionspace_tags_marker</span>
+
+
+<div class="viewcode-block" id="ElasticMaterial">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial">[docs]</a>
+<span class="k">class</span> <span class="nc">ElasticMaterial</span><span class="p">(</span><span class="n">Material</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for linear elastic materials, supporting full anisotropy</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        functionspace_tags_marker: See Material</span>
+<span class="sd">        rho: Density</span>
+<span class="sd">        C_21: list of the 21 independent elastic constants</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        damping: (default=NoDamping()) An instance of a subclass of Damping</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># ## ### ### ## #</span>
+    <span class="c1"># ## static  ## #</span>
+    <span class="c1"># ## ### ### ## #</span>
+
+    <span class="n">eq_IJ</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+
+    <span class="c1"># fill eq_IJ</span>
+    <span class="n">_cpt</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">_j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span> <span class="o">-</span> <span class="n">_i</span><span class="p">):</span>
+            <span class="n">eq_IJ</span><span class="p">[</span><span class="n">_i</span><span class="p">,</span> <span class="n">_i</span> <span class="o">+</span> <span class="n">_j</span><span class="p">]</span> <span class="o">=</span> <span class="n">_cpt</span>
+            <span class="n">_cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">_j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">_i</span><span class="p">):</span>
+            <span class="n">eq_IJ</span><span class="p">[</span><span class="n">_i</span><span class="p">,</span> <span class="n">_j</span><span class="p">]</span> <span class="o">=</span> <span class="n">eq_IJ</span><span class="p">[</span><span class="n">_j</span><span class="p">,</span> <span class="n">_i</span><span class="p">]</span>
+
+    <span class="n">ijkm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">21</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>  <span class="c1"># C11 &lt;-&gt; 0</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>  <span class="c1"># C12 &lt;-&gt; 1</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span>  <span class="c1"># C13 &lt;-&gt; 2</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>  <span class="c1"># C14 &lt;-&gt; 3</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span>  <span class="c1"># C15 &lt;-&gt; 4</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>  <span class="c1"># C16 &lt;-&gt; 5</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>  <span class="c1"># C22 &lt;-&gt; 6</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span>  <span class="c1"># C23 &lt;-&gt; 7</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>  <span class="c1"># C24 &lt;-&gt; 8</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span>  <span class="c1"># C25 &lt;-&gt; 9</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>  <span class="c1"># C26 &lt;-&gt; 10</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span>  <span class="c1"># C33 &lt;-&gt; 11</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>  <span class="c1"># C34 &lt;-&gt; 12</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span>  <span class="c1"># C35 &lt;-&gt; 13</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>  <span class="c1"># C36 &lt;-&gt; 14</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>  <span class="c1"># C44 &lt;-&gt; 15</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span>  <span class="c1"># C45 &lt;-&gt; 16</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>  <span class="c1"># C46 &lt;-&gt; 17</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span>  <span class="c1"># C55 &lt;-&gt; 18</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">19</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>  <span class="c1"># C56 &lt;-&gt; 19</span>
+    <span class="n">ijkm</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>  <span class="c1"># C66 &lt;-&gt; 20</span>
+
+<div class="viewcode-block" id="ElasticMaterial.Cij">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.Cij">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">Cij</span><span class="p">(</span><span class="n">C_21</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the :math:`C_{ij}` coefficient from the C_21 list</span>
+
+<span class="sd">        i, j = 0..5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">C_21</span><span class="p">[</span><span class="n">ElasticMaterial</span><span class="o">.</span><span class="n">eq_IJ</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]]</span></div>
+
+
+<div class="viewcode-block" id="ElasticMaterial.Cijkm">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.Cijkm">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">Cijkm</span><span class="p">(</span><span class="n">C_21</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the :math:`C_{ijkm}` coefficient from the C_21 list</span>
+
+<span class="sd">        i, j, k, m = 0..2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ij</span> <span class="o">=</span> <span class="n">i</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span> <span class="k">else</span> <span class="mi">6</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="n">j</span>
+        <span class="n">km</span> <span class="o">=</span> <span class="n">k</span> <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">m</span> <span class="k">else</span> <span class="mi">6</span> <span class="o">-</span> <span class="n">k</span> <span class="o">-</span> <span class="n">m</span>
+        <span class="k">return</span> <span class="n">ElasticMaterial</span><span class="o">.</span><span class="n">Cij</span><span class="p">(</span><span class="n">C_21</span><span class="p">,</span> <span class="n">ij</span><span class="p">,</span> <span class="n">km</span><span class="p">)</span></div>
+
+
+    <span class="c1"># ## ### ### ### ## #</span>
+    <span class="c1"># ## non-static  ## #</span>
+    <span class="c1"># ## ### ### ### ## #</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">C_21</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">function_space</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_get_functionspace_tags_marker</span><span class="p">(</span><span class="n">functionspace_tags_marker</span><span class="p">)</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">dim</span>  <span class="c1"># space dimension</span>
+        <span class="n">nbcomps</span> <span class="o">=</span> <span class="n">function_space</span><span class="o">.</span><span class="n">num_sub_spaces</span>  <span class="c1"># number of components (0 for scalar)</span>
+
+        <span class="c1"># Cij coefficients, in (6x6) or (3x3x3x3) representations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span> <span class="o">=</span> <span class="n">C_21</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Cij_6x6</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">([[</span><span class="n">ElasticMaterial</span><span class="o">.</span><span class="n">Cij</span><span class="p">(</span><span class="n">C_21</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Cijkm_3x3x3x3</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">([[[[</span><span class="n">ElasticMaterial</span><span class="o">.</span><span class="n">Cijkm</span><span class="p">(</span><span class="n">C_21</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+                                             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)])</span>
+
+        <span class="c1"># TODO: rotate with Euler angles</span>
+
+        <span class="c1"># Cij coefficients, in (3x3) or (2x2x2x2) representations if nbcomps == 2</span>
+        <span class="k">if</span> <span class="n">nbcomps</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># Cij -&gt; 3x3 matrix; Cijkm -&gt; 2x2x2x2 tensor</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Cij</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">_Cij_6x6</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Cijkm</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">([[[[</span><span class="bp">self</span><span class="o">.</span><span class="n">_Cijkm_3x3x3x3</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+                                          <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Cij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Cij_6x6</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Cijkm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Cijkm_3x3x3x3</span>
+
+        <span class="c1"># ###</span>
+        <span class="c1"># Kinematics</span>
+        <span class="c1"># Strain operator, matrix representation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_epsilon</span> <span class="o">=</span> <span class="n">get_epsilon_function</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">nbcomps</span><span class="p">)</span>
+
+        <span class="c1"># Strain operator, Voigt representation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_epsilonVoigt</span> <span class="o">=</span> <span class="n">get_epsilonVoigt_function</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">nbcomps</span><span class="p">)</span>
+
+        <span class="c1"># L operators (waveguides): Lxy and Ls for 2D cross sections, Lx and Ls for 1D cross sections</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_L_crosssection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_L_onaxis</span> <span class="o">=</span> <span class="n">get_L_operators</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">nbcomps</span><span class="p">)</span>
+        <span class="c1"># ###</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_DGvariant</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;DGvariant&#39;</span><span class="p">,</span> <span class="s1">&#39;SIPG&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_damping</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;damping&#39;</span><span class="p">,</span> <span class="n">NoDamping</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_damping</span><span class="p">,</span> <span class="n">RayleighDamping</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_damping</span><span class="o">.</span><span class="n">host_material</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_damping</span><span class="o">.</span><span class="n">link_material</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">functionspace_tags_marker</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">is_linear</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># ## ### ### ### ### ## #</span>
+    <span class="c1"># ## Stress, strain  ## #</span>
+    <span class="c1"># ## ### ### ### ### ## #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">epsilon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Strain function (matrix representation) :math:`\\boldsymbol{\epsilon}(\mathbf{u})`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epsilon</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">epsilonVoigt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Strain function (Voigt representation) :math:`\\boldsymbol{\epsilon}(\mathbf{u})`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epsilonVoigt</span>
+
+<div class="viewcode-block" id="ElasticMaterial.sigma">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.sigma">[docs]</a>
+    <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stress function (matrix representation) :math:`\\boldsymbol{\sigma}(\mathbf{u})`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Cijkm</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epsilon</span><span class="p">(</span><span class="n">u</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ElasticMaterial.sigmaVoigt">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.sigmaVoigt">[docs]</a>
+    <span class="k">def</span> <span class="nf">sigmaVoigt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stress function (Voigt representation) :math:`\\boldsymbol{\sigma}(\mathbf{u})`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Cij</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epsilonVoigt</span><span class="p">(</span><span class="n">u</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ElasticMaterial.sigma_n">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.sigma_n">[docs]</a>
+    <span class="k">def</span> <span class="nf">sigma_n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stress in the &#39;n&#39; direction :math:`\\boldsymbol{\sigma}(\mathbf{u}) \cdot \mathbf{n}`&quot;&quot;&quot;</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">sig</span><span class="o">.</span><span class="n">ufl_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">col</span> <span class="o">&gt;</span> <span class="n">dim</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_vector</span><span class="p">([</span><span class="n">n</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">col</span> <span class="o">-</span> <span class="n">dim</span><span class="p">)])</span>
+
+        <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ElasticMaterial.diamond">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.diamond">[docs]</a>
+    <span class="k">def</span> <span class="nf">diamond</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the diamond product of vectors v1 and v2.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :math:`\mathbf{d}`, such as :math:`d_{jk} = C_{ijkm}  v_{1,i}  v_{2,m}`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">v1</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_vector</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
+        <span class="n">v2</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_vector</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Cijkm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="n">v1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">v2</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span></div>
+
+
+    <span class="c1"># ## ### ### ### ### ### ### ### ## #</span>
+    <span class="c1"># ## Damping and stiffness forms ## #</span>
+    <span class="c1"># ## ### ### ### ### ### ### ### ## #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">c</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Damping form function&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_damping</span><span class="o">.</span><span class="n">c</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k_CG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stiffness form function for a Continuous Galerkin formulation&quot;&quot;&quot;</span>
+        <span class="c1"># return lambda u, v: ufl.inner(self.sigma(u), self.epsilon(v)) * self._dx</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigmaVoigt</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epsilonVoigt</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k1_CG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Cij</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_L_crosssection</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_L_crosssection</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span>
+
+    <span class="c1"># @property</span>
+    <span class="c1"># def k2_CG(self) -&gt; typing.Callable:  # This is K2 - K2.T</span>
+    <span class="c1">#     return lambda u, v: ( ufl.inner(self._Cij * self._L_onaxis(u), self._L_crosssection(v)) \</span>
+    <span class="c1">#         - ufl.inner(self._L_crosssection(u), self._Cij * self._L_onaxis(v)) )* self._dx</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k2_CG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Cij</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_L_onaxis</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_L_crosssection</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k3_CG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Cij</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_L_onaxis</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_L_onaxis</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span>
+
+    <span class="c1"># ## ### ### ### ### ### ### ### ### ### ## #</span>
+    <span class="c1"># ## Discontinuous Galerkin formulation  ## #</span>
+    <span class="c1"># ## ### ### ### ### ### ### ### ### ### ## #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k_DG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stiffness form function for a Discontinuous Galerkin formulation&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_CG</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">DG_numerical_flux</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ElasticMaterial.select_DG_numerical_flux">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.select_DG_numerical_flux">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_DG_numerical_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variant</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;SIPG&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">variant</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;SIPG&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">DG_numerical_flux_SIPG</span>
+        <span class="k">elif</span> <span class="n">variant</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;NIPG&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">DG_numerical_flux_NIPG</span>
+        <span class="k">elif</span> <span class="n">variant</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;IIPG&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">DG_numerical_flux_IIPG</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Unknown DG variant &#39;</span> <span class="o">+</span> <span class="n">variant</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">DG_numerical_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numerical flux for a Disontinuous Galerkin formulation&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">DG_numerical_flux_SIPG</span>
+
+<div class="viewcode-block" id="ElasticMaterial.DG_SIPG_regularization_parameter">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.DG_SIPG_regularization_parameter">[docs]</a>
+    <span class="k">def</span> <span class="nf">DG_SIPG_regularization_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">fem</span><span class="o">.</span><span class="n">Constant</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Regularization parameter for the Symmetric Interior Penalty Galerkin methods (SIPG)&quot;&quot;&quot;</span>
+        <span class="n">degree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span><span class="o">.</span><span class="n">ufl_element</span><span class="p">()</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span>
+        <span class="c1"># +1 otherwise blows with elements of degree 1</span>
+        <span class="n">gamma</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">default_scalar_type</span><span class="p">(</span><span class="n">degree</span> <span class="o">*</span> <span class="p">(</span><span class="n">degree</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># gamma = fem.Constant(self._function_space.mesh, default_scalar_type(160))</span>
+        <span class="n">P_mod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">P_modulus</span>
+        <span class="n">R_</span> <span class="o">=</span> <span class="n">gamma</span> <span class="o">*</span> <span class="n">P_mod</span>
+        <span class="k">return</span> <span class="n">R_</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">DG_numerical_flux_SIPG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+        <span class="n">inner</span><span class="p">,</span> <span class="n">avg</span><span class="p">,</span> <span class="n">jump</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">,</span> <span class="n">ufl</span><span class="o">.</span><span class="n">avg</span><span class="p">,</span> <span class="n">ufl</span><span class="o">.</span><span class="n">jump</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">FacetNormal</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">MinCellEdgeLength</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>  <span class="c1"># works!</span>
+        <span class="n">h_avg</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">h</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">R_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DG_SIPG_regularization_parameter</span><span class="p">()</span>
+        <span class="n">dS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dS</span>
+        <span class="n">sig_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_n</span>
+
+        <span class="k">def</span> <span class="nf">k_int_facets</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">inner</span><span class="p">(</span><span class="n">avg</span><span class="p">(</span><span class="n">sig_n</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">n</span><span class="p">)),</span> <span class="n">jump</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">dS</span> \
+                <span class="o">-</span> <span class="n">inner</span><span class="p">(</span><span class="n">jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">avg</span><span class="p">(</span><span class="n">sig_n</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">n</span><span class="p">)))</span> <span class="o">*</span> <span class="n">dS</span> \
+                <span class="o">+</span> <span class="n">R_</span> <span class="o">/</span> <span class="n">h_avg</span> <span class="o">*</span> <span class="n">inner</span><span class="p">(</span><span class="n">jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">jump</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">dS</span>
+
+        <span class="k">return</span> <span class="n">k_int_facets</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">DG_numerical_flux_NIPG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;WARNING, instable for elasticity&quot;&quot;&quot;</span>
+        <span class="n">inner</span><span class="p">,</span> <span class="n">avg</span><span class="p">,</span> <span class="n">jump</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">,</span> <span class="n">ufl</span><span class="o">.</span><span class="n">avg</span><span class="p">,</span> <span class="n">ufl</span><span class="o">.</span><span class="n">jump</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">FacetNormal</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">MinCellEdgeLength</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>  <span class="c1"># works!</span>
+        <span class="n">h_avg</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">h</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">R_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DG_SIPG_regularization_parameter</span><span class="p">()</span>
+        <span class="n">dS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dS</span>
+        <span class="n">sig_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_n</span>
+
+        <span class="k">def</span> <span class="nf">k_int_facets</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">inner</span><span class="p">(</span><span class="n">avg</span><span class="p">(</span><span class="n">sig_n</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">n</span><span class="p">)),</span> <span class="n">jump</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">dS</span> \
+                <span class="o">+</span> <span class="n">inner</span><span class="p">(</span><span class="n">jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">avg</span><span class="p">(</span><span class="n">sig_n</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">n</span><span class="p">)))</span> <span class="o">*</span> <span class="n">dS</span> \
+                <span class="o">+</span> <span class="n">R_</span> <span class="o">/</span> <span class="n">h_avg</span> <span class="o">*</span> <span class="n">inner</span><span class="p">(</span><span class="n">jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">jump</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">dS</span>
+
+        <span class="k">return</span> <span class="n">k_int_facets</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">DG_numerical_flux_IIPG</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;WARNING, instable for elasticity&quot;&quot;&quot;</span>
+        <span class="n">inner</span><span class="p">,</span> <span class="n">avg</span><span class="p">,</span> <span class="n">jump</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">,</span> <span class="n">ufl</span><span class="o">.</span><span class="n">avg</span><span class="p">,</span> <span class="n">ufl</span><span class="o">.</span><span class="n">jump</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">FacetNormal</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">MinCellEdgeLength</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>  <span class="c1"># works!</span>
+        <span class="n">h_avg</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">h</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">R_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DG_SIPG_regularization_parameter</span><span class="p">()</span>
+        <span class="n">dS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dS</span>
+        <span class="n">sig_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_n</span>
+
+        <span class="k">def</span> <span class="nf">k_int_facets</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">inner</span><span class="p">(</span><span class="n">avg</span><span class="p">(</span><span class="n">sig_n</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">n</span><span class="p">)),</span> <span class="n">jump</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">dS</span> \
+                <span class="o">+</span> <span class="n">R_</span> <span class="o">/</span> <span class="n">h_avg</span> <span class="o">*</span> <span class="n">inner</span><span class="p">(</span><span class="n">jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">jump</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">dS</span>
+
+        <span class="k">return</span> <span class="n">k_int_facets</span>
+
+    <span class="c1"># ## ### ### ### ### ### ## #</span>
+    <span class="c1"># ## material constants  ## #</span>
+    <span class="c1"># ## ### ### ### ### ### ## #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">P_modulus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        P-wave modulus</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">            - :math:`\\rho c_{max}^2` where :math:`c_{max}` is the highest wave velocity</span>
+<span class="sd">            - :math:`\lambda + 2 \mu` for isotropic materials</span>
+<span class="sd">            - :math:`\mu` for scalar materials</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;ElasticMaterial::P_modulus -&gt; supercharge me&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ElasticMaterial.Cij_xyz_frame">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.Cij_xyz_frame">[docs]</a>
+    <span class="k">def</span> <span class="nf">Cij_xyz_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cij stiffness constant in the (xyz) coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Cij_6x6</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ElasticMaterial.Cijkm_xyz_frame">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.Cijkm_xyz_frame">[docs]</a>
+    <span class="k">def</span> <span class="nf">Cijkm_xyz_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cijkm stiffness constant in the (xyz) coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Cijkm_3x3x3x3</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ElasticMaterial.Cij_mat_frame">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.Cij_mat_frame">[docs]</a>
+    <span class="k">def</span> <span class="nf">Cij_mat_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cij stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ElasticMaterial</span><span class="o">.</span><span class="n">Cij</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ElasticMaterial.Cijkm_mat_frame">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.Cijkm_mat_frame">[docs]</a>
+    <span class="k">def</span> <span class="nf">Cijkm_mat_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cijkm stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ElasticMaterial</span><span class="o">.</span><span class="n">Cijkm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C11</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C11 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C12</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C12 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C13</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C13 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C14</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C14 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C15</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C15 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C16</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C16 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C22</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C22 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C23</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C23 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C24</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C24 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C25</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C25 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C26</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C26 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C33</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C33 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C34</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C34 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C35</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C35 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C36</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C36 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">14</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C44</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C44 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C45</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C45 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C46</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C46 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">17</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C55</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C55 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">18</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C56</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C56 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">19</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C66</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;C66 stiffness constant in the material coordinate frame&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C_21</span><span class="p">[</span><span class="mi">20</span><span class="p">]</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Pierric Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -60,8 +60,8 @@ coverage.xml
 .hypothesis/
 
 # Sphinx documentation
-# Ignore the html pages only in the main branch, TODO: un-ignore in the pages branch
-/docs/
+# Ignore the html pages only in the main branch, NOT IGNORED ON PAGES 
+# /docs/
 
 # PyBuilder
 target/
