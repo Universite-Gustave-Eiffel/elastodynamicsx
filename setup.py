@@ -22,6 +22,24 @@ class MakeTheDoc(setuptools.Command):
             ['sphinx-build docsrc docs'], shell=True)
 
 
+class SafetyChecks(setuptools.Command):
+    description = "Run all tests (flake8, mypy, pytest)"
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        """The command to run when users invoke python setup.py doc"""
+        subprocess.run(
+            ['echo "\n\t##########\n\t-> running flake8..." && flake8 && '
+             + 'echo "\n\t##########\n\t-> running mypy..." && mypy test/ && mypy elastodynamicsx/ && '
+             + 'echo "\n\t##########\n\t-> running pytest..." && pytest'], shell=True)
+
+
 setuptools.setup(
     name='ElastodynamiCSx',
     author="Pierric Mora",
@@ -43,6 +61,7 @@ setuptools.setup(
         ],  # noqa
     cmdclass={
         'doc': MakeTheDoc,  # allow user to build the doc with python setup.py doc
+        'tests': SafetyChecks,  # allow user to run all tests with python setup.py test
         },  # noqa
     install_requires=[
         'numpy',
