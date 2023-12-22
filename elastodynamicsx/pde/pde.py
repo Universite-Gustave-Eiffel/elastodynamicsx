@@ -23,7 +23,7 @@ except ImportError:
 
 from .buildmpc import _build_mpc
 from .common import PDECONFIG
-from .boundarycondition import BoundaryCondition
+from .boundaryconditions import BoundaryCondition
 from .materials import Material
 
 

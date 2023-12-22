@@ -11,7 +11,7 @@ except ImportError:
     warnings.warn("Can't import dolfinx_mpc. Some features are not available", Warning)
     dolfinx_mpc = None  # type: ignore
 
-from .boundarycondition import BoundaryCondition
+from .boundaryconditions import BoundaryCondition
 
 
 def _build_mpc(function_space, bcs):

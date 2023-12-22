@@ -69,7 +69,7 @@ Getting the forms:
 
 from .common import PDECONFIG
 from .buildmpc import _build_mpc
-from .boundarycondition import BoundaryCondition
+from .boundaryconditions import BoundaryCondition
 from .bodyforce import BodyForce
 from .pde import PDE
 from .materials import material, damping
