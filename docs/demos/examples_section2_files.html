@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tdsdyn_3D_ElasticBeam.py &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+  <title>tdsdyn_3D_ElasticBeam.py &mdash; ElastodynamiCSx 0.2.2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -13,7 +13,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../_static/documentation_options.js?v=000c92bf"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -36,7 +36,7 @@
             ElastodynamiCSx
           </a>
               <div class="version">
-                0.2.1
+                0.2.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -94,7 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api/elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundaryconditions">elastodynamicsx.pde.boundaryconditions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../api/elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../api/elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
@@ -114,7 +114,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../api/elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timedomain">elastodynamicsx.solvers.timedomain</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api/elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
@@ -171,7 +171,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-<span class="kn">from</span> <span class="nn">elastodynamicsx.pde</span> <span class="kn">import</span> <span class="n">material</span><span class="p">,</span> <span class="n">BodyForce</span><span class="p">,</span> <span class="n">BoundaryCondition</span><span class="p">,</span> <span class="n">PDE</span><span class="p">,</span> <span class="n">damping</span>
+<span class="kn">from</span> <span class="nn">elastodynamicsx.pde</span> <span class="kn">import</span> <span class="n">material</span><span class="p">,</span> <span class="n">BodyForce</span><span class="p">,</span> <span class="n">boundarycondition</span><span class="p">,</span> <span class="n">PDE</span><span class="p">,</span> <span class="n">damping</span>
 <span class="kn">from</span> <span class="nn">elastodynamicsx.solvers</span> <span class="kn">import</span> <span class="n">TimeStepper</span>
 <span class="kn">from</span> <span class="nn">elastodynamicsx.utils</span> <span class="kn">import</span> <span class="n">make_facet_tags</span><span class="p">,</span> <span class="n">ParallelEvaluator</span>
 
@@ -203,8 +203,8 @@
 <span class="c1">#                 Boundary conditions</span>
 <span class="c1"># -----------------------------------------------------</span>
 <span class="n">T_N</span>  <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">PETSc</span><span class="o">.</span><span class="n">ScalarType</span><span class="p">))</span>  <span class="c1"># normal traction (Neumann boundary condition)</span>
-<span class="n">bc_l</span> <span class="o">=</span> <span class="n">BoundaryCondition</span><span class="p">((</span><span class="n">V</span><span class="p">,</span> <span class="n">facet_tags</span><span class="p">,</span> <span class="n">tag_left</span> <span class="p">),</span> <span class="s1">&#39;Clamp&#39;</span><span class="p">)</span>
-<span class="n">bc_r</span> <span class="o">=</span> <span class="n">BoundaryCondition</span><span class="p">((</span><span class="n">V</span><span class="p">,</span> <span class="n">facet_tags</span><span class="p">,</span> <span class="n">tag_right</span><span class="p">),</span> <span class="s1">&#39;Neumann&#39;</span><span class="p">,</span> <span class="n">T_N</span><span class="p">)</span>
+<span class="n">bc_l</span> <span class="o">=</span> <span class="n">boundarycondition</span><span class="p">((</span><span class="n">V</span><span class="p">,</span> <span class="n">facet_tags</span><span class="p">,</span> <span class="n">tag_left</span> <span class="p">),</span> <span class="s1">&#39;Clamp&#39;</span><span class="p">)</span>
+<span class="n">bc_r</span> <span class="o">=</span> <span class="n">boundarycondition</span><span class="p">((</span><span class="n">V</span><span class="p">,</span> <span class="n">facet_tags</span><span class="p">,</span> <span class="n">tag_right</span><span class="p">),</span> <span class="s1">&#39;Neumann&#39;</span><span class="p">,</span> <span class="n">T_N</span><span class="p">)</span>
 <span class="n">bcs</span>  <span class="o">=</span> <span class="p">[</span><span class="n">bc_l</span><span class="p">,</span> <span class="n">bc_r</span><span class="p">]</span>
 <span class="c1">#</span>
 <span class="c1"># -----------------------------------------------------</span>

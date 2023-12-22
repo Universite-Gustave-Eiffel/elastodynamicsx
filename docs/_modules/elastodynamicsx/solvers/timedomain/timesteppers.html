@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>elastodynamicsx.solvers.timedomain.timesteppers &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+  <title>elastodynamicsx.solvers.timedomain.timesteppers &mdash; ElastodynamiCSx 0.2.2 documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,7 +12,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../../../../_static/documentation_options.js?v=000c92bf"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -33,7 +33,7 @@
             ElastodynamiCSx
           </a>
               <div class="version">
-                0.2.1
+                0.2.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -91,7 +91,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundaryconditions">elastodynamicsx.pde.boundaryconditions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
@@ -111,7 +111,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timedomain">elastodynamicsx.solvers.timedomain</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../api/elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
@@ -173,6 +173,8 @@
         <span class="k">return</span> <span class="n">x</span>
 
 
+<div class="viewcode-block" id="DiagonalSolver">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.DiagonalSolver">[docs]</a>
 <span class="k">class</span> <span class="nc">DiagonalSolver</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A solver with a diagonal left hand side</span>
@@ -183,16 +185,20 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">:</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Vec</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_A</span> <span class="o">=</span> <span class="n">A</span>
 
+<div class="viewcode-block" id="DiagonalSolver.solve">
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.DiagonalSolver.solve">[docs]</a>
     <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Vec</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="n">PETSc</span><span class="o">.</span><span class="n">Vec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Solve (in-place) the linear system</span>
 <span class="sd">        :math:`\mathbf{A} * \mathbf{out} = \mathbf{b}`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">setArray</span><span class="p">(</span><span class="n">b</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_A</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">setArray</span><span class="p">(</span><span class="n">b</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_A</span><span class="p">)</span></div>
+</div>
+
 
 
 <div class="viewcode-block" id="TimeStepper">
-<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper">[docs]</a>
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.TimeStepper">[docs]</a>
 <span class="k">class</span> <span class="nc">TimeStepper</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for solving time-dependent problems.</span>
@@ -207,7 +213,7 @@
     <span class="c1"># petsc_options_implicit_scheme_nonlinear =  # TODO</span>
 
 <div class="viewcode-block" id="TimeStepper.build">
-<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.build">[docs]</a>
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.TimeStepper.build">[docs]</a>
     <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convenience static method that instanciates the required time-stepping scheme</span>
@@ -233,7 +239,7 @@
 
 
 <div class="viewcode-block" id="TimeStepper.Courant_number">
-<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.Courant_number">[docs]</a>
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.TimeStepper.Courant_number">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">Courant_number</span><span class="p">(</span><span class="n">domain</span><span class="p">:</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">c_max</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -287,7 +293,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span>
 
 <div class="viewcode-block" id="TimeStepper.set_initial_condition">
-<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.set_initial_condition">[docs]</a>
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.TimeStepper.set_initial_condition">[docs]</a>
     <span class="k">def</span> <span class="nf">set_initial_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u0</span><span class="p">,</span> <span class="n">v0</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. role:: python(code)</span>
@@ -315,7 +321,7 @@
 
 
 <div class="viewcode-block" id="TimeStepper.solve">
-<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.solve">[docs]</a>
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.TimeStepper.solve">[docs]</a>
     <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># supercharge me</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 </div>
@@ -323,7 +329,7 @@
 
 
 <div class="viewcode-block" id="NonlinearTimeStepper">
-<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.NonlinearTimeStepper">[docs]</a>
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.NonlinearTimeStepper">[docs]</a>
 <span class="k">class</span> <span class="nc">NonlinearTimeStepper</span><span class="p">(</span><span class="n">TimeStepper</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for solving nonlinear problems using implicit time schemes. Not implemented yet.</span>
@@ -335,7 +341,7 @@
 
 
 <div class="viewcode-block" id="LinearTimeStepper">
-<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.LinearTimeStepper">[docs]</a>
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.LinearTimeStepper">[docs]</a>
 <span class="k">class</span> <span class="nc">LinearTimeStepper</span><span class="p">(</span><span class="n">TimeStepper</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for solving linear problems. Note that nonlinear problems formulated</span>
@@ -412,7 +418,7 @@
 
 
 <div class="viewcode-block" id="OneStepTimeStepper">
-<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.OneStepTimeStepper">[docs]</a>
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.OneStepTimeStepper">[docs]</a>
 <span class="k">class</span> <span class="nc">OneStepTimeStepper</span><span class="p">(</span><span class="n">LinearTimeStepper</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).</span>
@@ -428,7 +434,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_intermediate_dt</span> <span class="o">=</span> <span class="n">tscheme</span><span class="o">.</span><span class="n">intermediate_dt</span>  <span class="c1"># non zero for generalized-alpha</span>
 
 <div class="viewcode-block" id="OneStepTimeStepper.solve">
-<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.OneStepTimeStepper.solve">[docs]</a>
+<a class="viewcode-back" href="../../../../api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.OneStepTimeStepper.solve">[docs]</a>
     <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. role:: python(code)</span>

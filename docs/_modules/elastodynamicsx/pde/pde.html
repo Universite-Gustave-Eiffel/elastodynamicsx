@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>elastodynamicsx.pde.pde &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+  <title>elastodynamicsx.pde.pde &mdash; ElastodynamiCSx 0.2.2 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,7 +12,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../../../_static/documentation_options.js?v=000c92bf"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -33,7 +33,7 @@
             ElastodynamiCSx
           </a>
               <div class="version">
-                0.2.1
+                0.2.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -91,7 +91,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundaryconditions">elastodynamicsx.pde.boundaryconditions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
@@ -111,7 +111,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timedomain">elastodynamicsx.solvers.timedomain</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
@@ -175,7 +175,7 @@
 
 <span class="kn">from</span> <span class="nn">.buildmpc</span> <span class="kn">import</span> <span class="n">_build_mpc</span>
 <span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">PDECONFIG</span>
-<span class="kn">from</span> <span class="nn">.boundarycondition</span> <span class="kn">import</span> <span class="n">BoundaryCondition</span>
+<span class="kn">from</span> <span class="nn">.boundaryconditions</span> <span class="kn">import</span> <span class="n">get_dirichlet_BCs</span><span class="p">,</span> <span class="n">get_mpc_BCs</span><span class="p">,</span> <span class="n">get_weak_BCs</span><span class="p">,</span> <span class="n">BCWeakBase</span><span class="p">,</span> <span class="n">BCMPCBase</span>
 <span class="kn">from</span> <span class="nn">.materials</span> <span class="kn">import</span> <span class="n">Material</span>
 
 
@@ -196,12 +196,12 @@
 
 <span class="sd">    Keyword Args:</span>
 <span class="sd">        bodyforces: (default=[]) a list of pde.BodyForce instances</span>
-<span class="sd">        bcs: (default=[]) a list of fem.DirichletBCMetaClass and/or pde.BoundaryCondition instances</span>
+<span class="sd">        bcs: (default=[]) a list of fem.DirichletBCMetaClass and/or pde.BoundaryConditionBase instances</span>
 <span class="sd">        jit_options: (default=PDECONFIG.default_jit_options) options for the just-in-time compiler</span>
 <span class="sd">        finalize: (default=True) call self.finalize() on build</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_space</span><span class="p">:</span> <span class="n">fem</span><span class="o">.</span><span class="n">FunctionSpaceBase</span><span class="p">,</span> <span class="n">materials</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Material</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_space</span><span class="p">:</span> <span class="n">fem</span><span class="o">.</span><span class="n">FunctionSpaceBase</span><span class="p">,</span> <span class="n">materials</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">Material</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span> <span class="o">=</span> <span class="n">function_space</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">materials</span> <span class="o">=</span> <span class="n">materials</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bodyforces</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;bodyforces&#39;</span><span class="p">,</span> <span class="p">[])</span>
@@ -221,13 +221,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_k3_form</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># ## Sort boundary conditions</span>
-        <span class="c1"># custom weak BSs, instances of BoundaryCondition</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_weak</span> <span class="o">=</span> <span class="n">BoundaryCondition</span><span class="o">.</span><span class="n">get_weak_BCs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">)</span>
-        <span class="c1"># dolfinx.fem.DirichletBCMetaClass</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span> <span class="o">=</span> <span class="n">BoundaryCondition</span><span class="o">.</span><span class="n">get_dirichlet_BCs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">)</span>
-        <span class="c1"># instances of BoundaryCondition used to add multi-point constraints</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_mpc</span> <span class="o">=</span> <span class="n">BoundaryCondition</span><span class="o">.</span><span class="n">get_mpc_BCs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">)</span>
-        <span class="c1"># new_list = filter(lambda v: v not in b, a)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_weak</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">BCWeakBase</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_weak_BCs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">DirichletBC</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_dirichlet_BCs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_mpc</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">BCMPCBase</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_mpc_BCs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_omega_ufl</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">default_scalar_type</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 
@@ -276,7 +272,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_mpc</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="c1">#</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="o">=</span> <span class="n">_build_mpc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_function_space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_mpc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="o">=</span> <span class="n">_build_mpc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs_strong</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_mpc</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_compile_M</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_u</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span>
@@ -305,17 +301,9 @@
         <span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="nb">sum</span><span class="p">([</span><span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">vzero</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span> <span class="k">for</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">measures</span><span class="p">])</span>
 
         <span class="c1"># Boundaries</span>
-        <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_weak</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;neumann&#39;</span><span class="p">:</span>
-                <span class="n">L</span> <span class="o">+=</span> <span class="n">bc</span><span class="o">.</span><span class="n">bc</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;robin&#39;</span><span class="p">:</span>
-                <span class="n">F_bc</span> <span class="o">=</span> <span class="n">bc</span><span class="o">.</span><span class="n">bc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-                <span class="n">k</span> <span class="o">+=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">lhs</span><span class="p">(</span><span class="n">F_bc</span><span class="p">)</span>
-                <span class="n">L</span> <span class="o">+=</span> <span class="n">ufl</span><span class="o">.</span><span class="n">rhs</span><span class="p">(</span><span class="n">F_bc</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;dashpot&#39;</span><span class="p">:</span>
-                <span class="n">c</span> <span class="o">+=</span> <span class="n">bc</span><span class="o">.</span><span class="n">bc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Unsupported boundary condition </span><span class="si">{0:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bc</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
+        <span class="n">c</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">c</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_weak</span><span class="p">]))</span>
+        <span class="n">k</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_weak</span><span class="p">]))</span>
+        <span class="n">L</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">L</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_weak</span><span class="p">]))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_c_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_k_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>
@@ -340,22 +328,8 @@
         <span class="n">k2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k2</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
         <span class="n">k3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k3</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 
-        <span class="c1"># Boundaries</span>
-        <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_weak</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;neumann&#39;</span><span class="p">:</span>
-                <span class="k">pass</span>  <span class="c1"># ignores</span>
-            <span class="k">elif</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;robin&#39;</span><span class="p">:</span>
-                <span class="c1"># F_bc = bc.bc(u, v)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Robin BC: TODO&#39;</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
-                <span class="c1"># k += ufl.lhs(F_bc)  # TODO</span>
-                <span class="c1"># L += ufl.rhs(F_bc)  # ignores right hand side</span>
-            <span class="k">elif</span> <span class="n">bc</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;dashpot&#39;</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Dashpot BC: TODO&#39;</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
-                <span class="c1"># c += bc.bc(u,v)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Unsupported boundary condition </span><span class="si">{0:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bc</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">c</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_weak</span><span class="p">])),</span> <span class="s1">&#39;c!=0 not yet implemented for waveguides&#39;</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">c</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs_weak</span><span class="p">])),</span> <span class="s1">&#39;k!=0 not yet implemented for waveguides&#39;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_k1_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_k2_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="n">k2</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>

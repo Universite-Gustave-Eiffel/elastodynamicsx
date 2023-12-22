@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>elastodynamicsx.solvers &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+  <title>elastodynamicsx.solvers &mdash; ElastodynamiCSx 0.2.2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -13,7 +13,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../_static/documentation_options.js?v=000c92bf"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -38,7 +38,7 @@
             ElastodynamiCSx
           </a>
               <div class="version">
-                0.2.1
+                0.2.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -96,7 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundaryconditions">elastodynamicsx.pde.boundaryconditions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
 <li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
 <li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
@@ -116,7 +116,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-elastodynamicsx.solvers">Module contents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#elastodynamicsx-solvers-timedomain">elastodynamicsx.solvers.timedomain</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
@@ -290,75 +290,6 @@
 <dt class="sig sig-object py" id="elastodynamicsx.solvers.TimeStepper.solve">
 <span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/timedomain/timesteppers.html#TimeStepper.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.TimeStepper.solve" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="elastodynamicsx.solvers.NonlinearTimeStepper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.solvers.</span></span><span class="sig-name descname"><span class="pre">NonlinearTimeStepper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Comm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tscheme</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme" title="elastodynamicsx.pde.timeschemes.timeschemebase.TimeScheme"><span class="pre">TimeScheme</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/timedomain/timesteppers.html#NonlinearTimeStepper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.NonlinearTimeStepper" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.solvers.TimeStepper" title="elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></p>
-<p>Base class for solving nonlinear problems using implicit time schemes. Not implemented yet.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="elastodynamicsx.solvers.LinearTimeStepper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.solvers.</span></span><span class="sig-name descname"><span class="pre">LinearTimeStepper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Comm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tscheme</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme" title="elastodynamicsx.pde.timeschemes.timeschemebase.TimeScheme"><span class="pre">TimeScheme</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Vec</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/timedomain/timesteppers.html#LinearTimeStepper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.LinearTimeStepper" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.solvers.TimeStepper" title="elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></p>
-<p>Base class for solving linear problems. Note that nonlinear problems formulated
-with an explicit scheme come down to linear problems; they are handled by this class.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.solvers.LinearTimeStepper.A">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">A</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Mat</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Vec</span></em><a class="headerlink" href="#elastodynamicsx.solvers.LinearTimeStepper.A" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.solvers.LinearTimeStepper.b">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Vec</span></em><a class="headerlink" href="#elastodynamicsx.solvers.LinearTimeStepper.b" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.solvers.LinearTimeStepper.explicit">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">explicit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#elastodynamicsx.solvers.LinearTimeStepper.explicit" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.solvers.LinearTimeStepper.solver">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solver</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">KSP</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">DiagonalSolver</span></em><a class="headerlink" href="#elastodynamicsx.solvers.LinearTimeStepper.solver" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="elastodynamicsx.solvers.OneStepTimeStepper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.solvers.</span></span><span class="sig-name descname"><span class="pre">OneStepTimeStepper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Comm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tscheme</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme" title="elastodynamicsx.pde.timeschemes.timeschemebase.TimeScheme"><span class="pre">TimeScheme</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Vec</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/timedomain/timesteppers.html#OneStepTimeStepper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.OneStepTimeStepper" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.solvers.LinearTimeStepper" title="elastodynamicsx.solvers.timedomain.timesteppers.LinearTimeStepper"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearTimeStepper</span></code></a></p>
-<p>Base class for solving time-dependent problems with one-step algorithms (e.g. Newmark-beta methods).</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="elastodynamicsx.solvers.OneStepTimeStepper.solve">
-<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/solvers/timedomain/timesteppers.html#OneStepTimeStepper.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.solvers.OneStepTimeStepper.solve" title="Link to this definition"></a></dt>
-<dd><p>Run the loop on time steps</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>num_steps</strong> – number of time steps to integrate</p>
-</dd>
-<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>callfirsts</strong> – (default=[]) list of functions to be called at the beginning
-of each iteration (before solving). For instance: update a source term.
-Each callfirst if of the form: cf = lambda t: do_something
-where t is the time at which to evaluate the sources</p></li>
-<li><p><strong>callbacks</strong> – (detault=[]) similar to callfirsts, but the callbacks are called
-at the end of each iteration (after solving). For instance: store/save, plot, print, …
-Each callback is of the form <code class="code highlight python docutils literal highlight-python"><span class="n">cb</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="o">-&gt;</span> <span class="n">do_something</span><span class="p">()</span></code>
-where <code class="code highlight python docutils literal highlight-python"><span class="n">i</span></code> is the iteration index and <code class="code highlight python docutils literal highlight-python"><span class="n">out</span></code> is the PETSc.Vec
-vector just solved for</p></li>
-<li><p><strong>live_plotter</strong> – a plotter object that can refresh through
-a live_plotter.live_plotter_update_function(i, out) function</p></li>
-<li><p><strong>verbose</strong> – (default=0) Verbosity level. &gt;9 means an info msg before each step</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
 
 </dd></dl>
 
@@ -620,7 +551,6 @@ a live_plotter.live_plotter_update_function(i, out) function</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.solvers.frequencydomain.html#module-elastodynamicsx.solvers.frequencydomain.frequencydomainsolver">elastodynamicsx.solvers.frequencydomain.frequencydomainsolver</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.frequencydomain.html#elastodynamicsx.solvers.frequencydomain.frequencydomainsolver.tqdm"><code class="docutils literal notranslate"><span class="pre">tqdm()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.frequencydomain.html#elastodynamicsx.solvers.frequencydomain.frequencydomainsolver.FrequencyDomainSolver"><code class="docutils literal notranslate"><span class="pre">FrequencyDomainSolver</span></code></a></li>
 </ul>
 </li>
@@ -629,13 +559,26 @@ a live_plotter.live_plotter_update_function(i, out) function</p>
 </ul>
 </div>
 </section>
-<section id="elastodynamicsx-solvers-timestepper">
-<h2>elastodynamicsx.solvers.timestepper<a class="headerlink" href="#elastodynamicsx-solvers-timestepper" title="Link to this heading"></a></h2>
+<section id="elastodynamicsx-solvers-timedomain">
+<h2>elastodynamicsx.solvers.timedomain<a class="headerlink" href="#elastodynamicsx-solvers-timedomain" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="elastodynamicsx.solvers.timestepper.html">elastodynamicsx.solvers.timestepper</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.solvers.timestepper.html#module-elastodynamicsx.solvers.timestepper">Module contents</a></li>
-<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.solvers.timestepper.html#elastodynamicsx-solvers-timestepper-timestepper">elastodynamicsx.solvers.timestepper.timestepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html">elastodynamicsx.solvers.timedomain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html#module-elastodynamicsx.solvers.timedomain">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.TimeStepper"><code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.NonlinearTimeStepper"><code class="docutils literal notranslate"><span class="pre">NonlinearTimeStepper</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.LinearTimeStepper"><code class="docutils literal notranslate"><span class="pre">LinearTimeStepper</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.OneStepTimeStepper"><code class="docutils literal notranslate"><span class="pre">OneStepTimeStepper</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html#module-elastodynamicsx.solvers.timedomain.timesteppers">elastodynamicsx.solvers.timestepper.timestepper</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.DiagonalSolver"><code class="docutils literal notranslate"><span class="pre">DiagonalSolver</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper"><code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.NonlinearTimeStepper"><code class="docutils literal notranslate"><span class="pre">NonlinearTimeStepper</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.LinearTimeStepper"><code class="docutils literal notranslate"><span class="pre">LinearTimeStepper</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.OneStepTimeStepper"><code class="docutils literal notranslate"><span class="pre">OneStepTimeStepper</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

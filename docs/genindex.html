@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; ElastodynamiCSx 0.2.1 documentation</title>
+  <title>Index &mdash; ElastodynamiCSx 0.2.2 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,7 +12,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=37f418d5"></script>
+        <script src="_static/documentation_options.js?v=000c92bf"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -33,7 +33,7 @@
             ElastodynamiCSx
           </a>
               <div class="version">
-                0.2.1
+                0.2.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -91,7 +91,7 @@
 <li class="toctree-l2"><a class="reference internal" href="api/elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundaryconditions">elastodynamicsx.pde.boundaryconditions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
@@ -111,7 +111,7 @@
 <li class="toctree-l3"><a class="reference internal" href="api/elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timestepper">elastodynamicsx.solvers.timestepper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/elastodynamicsx.solvers.html#elastodynamicsx-solvers-timedomain">elastodynamicsx.solvers.timedomain</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="api/elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
@@ -185,12 +185,16 @@
         <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta.a">(elastodynamicsx.pde.timeschemes.newmark.GalphaNewmarkBeta property)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.LinearTimeStepper.A">A (elastodynamicsx.solvers.LinearTimeStepper property)</a>
+      <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.LinearTimeStepper.A">A (elastodynamicsx.solvers.timedomain.LinearTimeStepper property)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.LinearTimeStepper.A">(elastodynamicsx.solvers.timedomain.timesteppers.LinearTimeStepper property)</a>
 </li>
-      <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.A">A() (elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme method)</a>
-</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.A">A() (elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme method)</a>
+</li>
       <li><a href="api/elastodynamicsx.plot.html#elastodynamicsx.plot.CustomScalarPlotter.add_time_browser">add_time_browser() (elastodynamicsx.plot.CustomScalarPlotter method)</a>
 
       <ul>
@@ -214,7 +218,9 @@
 </li>
         <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.FrequencyDomainSolver.b">(elastodynamicsx.solvers.FrequencyDomainSolver property)</a>
 </li>
-        <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.LinearTimeStepper.b">(elastodynamicsx.solvers.LinearTimeStepper property)</a>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.LinearTimeStepper.b">(elastodynamicsx.solvers.timedomain.LinearTimeStepper property)</a>
+</li>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.LinearTimeStepper.b">(elastodynamicsx.solvers.timedomain.timesteppers.LinearTimeStepper property)</a>
 </li>
       </ul></li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.b">b() (elastodynamicsx.pde.PDE method)</a>
@@ -229,34 +235,58 @@
         <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.b_form">(elastodynamicsx.pde.pde.PDE property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.b_update_function">b_update_function() (elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme method)</a>
 
       <ul>
         <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme.b_update_function">(elastodynamicsx.pde.timeschemes.TimeScheme method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.BoundaryCondition.bc">bc (elastodynamicsx.pde.BoundaryCondition property)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition.BoundaryCondition.bc">(elastodynamicsx.pde.boundarycondition.BoundaryCondition property)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase.bc">bc (elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase property)</a>
 </li>
-      </ul></li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCClamp">BCClamp (class in elastodynamicsx.pde.boundaryconditions)</a>
+</li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDashpot">BCDashpot (class in elastodynamicsx.pde.boundaryconditions)</a>
+</li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDirichlet">BCDirichlet (class in elastodynamicsx.pde.boundaryconditions)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCFree">BCFree (class in elastodynamicsx.pde.boundaryconditions)</a>
+</li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCMPCBase">BCMPCBase (class in elastodynamicsx.pde.boundaryconditions)</a>
+</li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCNeumann">BCNeumann (class in elastodynamicsx.pde.boundaryconditions)</a>
+</li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCPeriodic">BCPeriodic (class in elastodynamicsx.pde.boundaryconditions)</a>
+</li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin">BCRobin (class in elastodynamicsx.pde.boundaryconditions)</a>
+</li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCStrongBase">BCStrongBase (class in elastodynamicsx.pde.boundaryconditions)</a>
+</li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCWeakBase">BCWeakBase (class in elastodynamicsx.pde.boundaryconditions)</a>
+</li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.BodyForce">BodyForce (class in elastodynamicsx.pde)</a>
 
       <ul>
         <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.bodyforce.BodyForce">(class in elastodynamicsx.pde.bodyforce)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.BoundaryCondition">BoundaryCondition (class in elastodynamicsx.pde)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition">boundarycondition() (in module elastodynamicsx.pde)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition.BoundaryCondition">(class in elastodynamicsx.pde.boundarycondition)</a>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.boundarycondition">(in module elastodynamicsx.pde.boundaryconditions)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.build">build() (elastodynamicsx.solvers.TimeStepper method)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase">BoundaryConditionBase (class in elastodynamicsx.pde.boundaryconditions)</a>
 </li>
+      <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.TimeStepper.build">build() (elastodynamicsx.solvers.timedomain.TimeStepper method)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper.build">(elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.build">(elastodynamicsx.solvers.TimeStepper method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -289,6 +319,12 @@
         <li><a href="api/elastodynamicsx.solvers.frequencydomain.html#elastodynamicsx.solvers.frequencydomain.frequencydomainsolver.FrequencyDomainSolver.C">(elastodynamicsx.solvers.frequencydomain.frequencydomainsolver.FrequencyDomainSolver property)</a>
 </li>
         <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.FrequencyDomainSolver.C">(elastodynamicsx.solvers.FrequencyDomainSolver property)</a>
+</li>
+      </ul></li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDashpot.c">c() (elastodynamicsx.pde.boundaryconditions.BCDashpot method)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCWeakBase.c">(elastodynamicsx.pde.boundaryconditions.BCWeakBase method)</a>
 </li>
       </ul></li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.C">C() (elastodynamicsx.pde.PDE method)</a>
@@ -479,8 +515,14 @@
         <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.Cijkm_xyz_frame">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.Courant_number">Courant_number() (elastodynamicsx.solvers.TimeStepper static method)</a>
+      <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.TimeStepper.Courant_number">Courant_number() (elastodynamicsx.solvers.timedomain.TimeStepper static method)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper.Courant_number">(elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper static method)</a>
 </li>
+        <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.Courant_number">(elastodynamicsx.solvers.TimeStepper static method)</a>
+</li>
+      </ul></li>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.anisotropicmaterials.CubicMaterial">CubicMaterial (class in elastodynamicsx.pde.materials.anisotropicmaterials)</a>
 </li>
       <li><a href="api/elastodynamicsx.plot.html#elastodynamicsx.plot.CustomScalarPlotter">CustomScalarPlotter (class in elastodynamicsx.plot)</a>
@@ -577,15 +619,23 @@
         <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.DG_SIPG_regularization_parameter">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial method)</a>
 </li>
       </ul></li>
+      <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.DiagonalSolver">DiagonalSolver (class in elastodynamicsx.solvers.timedomain.timesteppers)</a>
+</li>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.diamond">diamond() (elastodynamicsx.pde.materials.ElasticMaterial method)</a>
 
       <ul>
         <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.diamond">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial method)</a>
 </li>
       </ul></li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCWeakBase.ds">ds (elastodynamicsx.pde.boundaryconditions.BCWeakBase property)</a>
+</li>
       <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme.dt">dt (elastodynamicsx.pde.timeschemes.TimeScheme property)</a>
 
       <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.TimeStepper.dt">(elastodynamicsx.solvers.timedomain.TimeStepper property)</a>
+</li>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper.dt">(elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper property)</a>
+</li>
         <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.dt">(elastodynamicsx.solvers.TimeStepper property)</a>
 </li>
       </ul></li>
@@ -626,10 +676,10 @@
 </li>
       </ul></li>
       <li>
-    elastodynamicsx.pde.boundarycondition
+    elastodynamicsx.pde.boundaryconditions
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">module</a>
+        <li><a href="api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundaryconditions">module</a>
 </li>
       </ul></li>
       <li>
@@ -723,8 +773,6 @@
         <li><a href="api/elastodynamicsx.plot.html#module-elastodynamicsx.plot">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     elastodynamicsx.plot.plot
 
@@ -732,6 +780,8 @@
         <li><a href="api/elastodynamicsx.plot.html#module-elastodynamicsx.plot.plot">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     elastodynamicsx.solutions
 
@@ -782,10 +832,17 @@
 </li>
       </ul></li>
       <li>
-    elastodynamicsx.solvers.timestepper
+    elastodynamicsx.solvers.timedomain
 
       <ul>
-        <li><a href="api/elastodynamicsx.solvers.timestepper.html#module-elastodynamicsx.solvers.timestepper">module</a>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#module-elastodynamicsx.solvers.timedomain">module</a>
+</li>
+      </ul></li>
+      <li>
+    elastodynamicsx.solvers.timedomain.timesteppers
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#module-elastodynamicsx.solvers.timedomain.timesteppers">module</a>
 </li>
       </ul></li>
       <li>
@@ -845,7 +902,9 @@
       <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme.explicit">explicit (elastodynamicsx.pde.timeschemes.TimeScheme property)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.LinearTimeStepper.explicit">(elastodynamicsx.solvers.LinearTimeStepper property)</a>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.LinearTimeStepper.explicit">(elastodynamicsx.solvers.timedomain.LinearTimeStepper property)</a>
+</li>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.LinearTimeStepper.explicit">(elastodynamicsx.solvers.timedomain.timesteppers.LinearTimeStepper property)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -854,6 +913,8 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase.facet_tags">facet_tags (elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase property)</a>
+</li>
       <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme">FEniCSxTimeScheme (class in elastodynamicsx.pde.timeschemes)</a>
 </li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.finalize">finalize() (elastodynamicsx.pde.PDE method)</a>
@@ -878,6 +939,8 @@
         <li><a href="api/elastodynamicsx.solvers.frequencydomain.html#elastodynamicsx.solvers.frequencydomain.frequencydomainsolver.FrequencyDomainSolver">(class in elastodynamicsx.solvers.frequencydomain.frequencydomainsolver)</a>
 </li>
       </ul></li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase.function_space">function_space (elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase property)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -896,30 +959,18 @@
         <li><a href="api/elastodynamicsx.utils.html#elastodynamicsx.utils.ParallelEvaluator.gather">(elastodynamicsx.utils.ParallelEvaluator method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.BoundaryCondition.get_dirichlet_BCs">get_dirichlet_BCs() (elastodynamicsx.pde.BoundaryCondition static method)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition.BoundaryCondition.get_dirichlet_BCs">(elastodynamicsx.pde.boundarycondition.BoundaryCondition static method)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.get_dirichlet_BCs">get_dirichlet_BCs() (in module elastodynamicsx.pde.boundaryconditions)</a>
 </li>
-      </ul></li>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.kinematics.get_epsilon_function">get_epsilon_function() (in module elastodynamicsx.pde.materials.kinematics)</a>
 </li>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.kinematics.get_epsilonVoigt_function">get_epsilonVoigt_function() (in module elastodynamicsx.pde.materials.kinematics)</a>
 </li>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.kinematics.get_L_operators">get_L_operators() (in module elastodynamicsx.pde.materials.kinematics)</a>
 </li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.BoundaryCondition.get_mpc_BCs">get_mpc_BCs() (elastodynamicsx.pde.BoundaryCondition static method)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition.BoundaryCondition.get_mpc_BCs">(elastodynamicsx.pde.boundarycondition.BoundaryCondition static method)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.get_mpc_BCs">get_mpc_BCs() (in module elastodynamicsx.pde.boundaryconditions)</a>
 </li>
-      </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.BoundaryCondition.get_weak_BCs">get_weak_BCs() (elastodynamicsx.pde.BoundaryCondition static method)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition.BoundaryCondition.get_weak_BCs">(elastodynamicsx.pde.boundarycondition.BoundaryCondition static method)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.get_weak_BCs">get_weak_BCs() (in module elastodynamicsx.pde.boundaryconditions)</a>
 </li>
-      </ul></li>
       <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.EigenmodesSolver.getEigenfrequencies">getEigenfrequencies() (elastodynamicsx.solvers.EigenmodesSolver method)</a>
 
       <ul>
@@ -1072,6 +1123,12 @@
         <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.FrequencyDomainSolver.K">(elastodynamicsx.solvers.FrequencyDomainSolver property)</a>
 </li>
       </ul></li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin.k">k() (elastodynamicsx.pde.boundaryconditions.BCRobin method)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCWeakBase.k">(elastodynamicsx.pde.boundaryconditions.BCWeakBase method)</a>
+</li>
+      </ul></li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K">K() (elastodynamicsx.pde.PDE method)</a>
 
       <ul>
@@ -1204,9 +1261,35 @@
         <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.L">(elastodynamicsx.pde.pde.PDE property)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.anisotropicmaterials.CubicMaterial.labels">labels (elastodynamicsx.pde.materials.anisotropicmaterials.CubicMaterial attribute)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCFree.L">L() (elastodynamicsx.pde.boundaryconditions.BCFree method)</a>
 
       <ul>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCNeumann.L">(elastodynamicsx.pde.boundaryconditions.BCNeumann method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin.L">(elastodynamicsx.pde.boundaryconditions.BCRobin method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCWeakBase.L">(elastodynamicsx.pde.boundaryconditions.BCWeakBase method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCClamp.labels">labels (elastodynamicsx.pde.boundaryconditions.BCClamp attribute)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDashpot.labels">(elastodynamicsx.pde.boundaryconditions.BCDashpot attribute)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDirichlet.labels">(elastodynamicsx.pde.boundaryconditions.BCDirichlet attribute)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCFree.labels">(elastodynamicsx.pde.boundaryconditions.BCFree attribute)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCNeumann.labels">(elastodynamicsx.pde.boundaryconditions.BCNeumann attribute)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCPeriodic.labels">(elastodynamicsx.pde.boundaryconditions.BCPeriodic attribute)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin.labels">(elastodynamicsx.pde.boundaryconditions.BCRobin attribute)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase.labels">(elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase attribute)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.anisotropicmaterials.CubicMaterial.labels">(elastodynamicsx.pde.materials.anisotropicmaterials.CubicMaterial attribute)</a>
+</li>
         <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.anisotropicmaterials.HexagonalMaterial.labels">(elastodynamicsx.pde.materials.anisotropicmaterials.HexagonalMaterial attribute)</a>
 </li>
         <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.anisotropicmaterials.MonoclinicMaterial.labels">(elastodynamicsx.pde.materials.anisotropicmaterials.MonoclinicMaterial attribute)</a>
@@ -1288,8 +1371,12 @@
         <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.newmark.LinearAccelerationMethod">(class in elastodynamicsx.pde.timeschemes.newmark)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.LinearTimeStepper">LinearTimeStepper (class in elastodynamicsx.solvers)</a>
+      <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.LinearTimeStepper">LinearTimeStepper (class in elastodynamicsx.solvers.timedomain)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.LinearTimeStepper">(class in elastodynamicsx.solvers.timedomain.timesteppers)</a>
 </li>
+      </ul></li>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.dampings.RayleighDamping.link_material">link_material() (elastodynamicsx.pde.materials.dampings.RayleighDamping method)</a>
 </li>
       <li><a href="api/elastodynamicsx.plot.html#elastodynamicsx.plot.live_plotter">live_plotter() (in module elastodynamicsx.plot)</a>
@@ -1362,6 +1449,8 @@
         <li><a href="api/elastodynamicsx.utils.html#elastodynamicsx.utils.tags.make_tags">(in module elastodynamicsx.utils.tags)</a>
 </li>
       </ul></li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase.marker">marker (elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase property)</a>
+</li>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material">Material (class in elastodynamicsx.pde.materials)</a>
 
       <ul>
@@ -1394,7 +1483,7 @@
 </li>
         <li><a href="api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a>
 </li>
-        <li><a href="api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundarycondition">elastodynamicsx.pde.boundarycondition</a>
+        <li><a href="api/elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundaryconditions">elastodynamicsx.pde.boundaryconditions</a>
 </li>
         <li><a href="api/elastodynamicsx.pde.materials.html#module-elastodynamicsx.pde.materials">elastodynamicsx.pde.materials</a>
 </li>
@@ -1438,7 +1527,9 @@
 </li>
         <li><a href="api/elastodynamicsx.solvers.frequencydomain.html#module-elastodynamicsx.solvers.frequencydomain.frequencydomainsolver">elastodynamicsx.solvers.frequencydomain.frequencydomainsolver</a>
 </li>
-        <li><a href="api/elastodynamicsx.solvers.timestepper.html#module-elastodynamicsx.solvers.timestepper">elastodynamicsx.solvers.timestepper</a>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#module-elastodynamicsx.solvers.timedomain">elastodynamicsx.solvers.timedomain</a>
+</li>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#module-elastodynamicsx.solvers.timedomain.timesteppers">elastodynamicsx.solvers.timedomain.timesteppers</a>
 </li>
         <li><a href="api/elastodynamicsx.utils.html#module-elastodynamicsx.utils">elastodynamicsx.utils</a>
 </li>
@@ -1479,30 +1570,38 @@
       </ul></li>
       <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme.nbsteps">nbsteps (elastodynamicsx.pde.timeschemes.TimeScheme property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.NewmarkBeta">NewmarkBeta (class in elastodynamicsx.pde.timeschemes)</a>
 
       <ul>
         <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.newmark.NewmarkBeta">(class in elastodynamicsx.pde.timeschemes.newmark)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.dampings.NoDamping">NoDamping (class in elastodynamicsx.pde.materials.dampings)</a>
 </li>
-      <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.NonlinearTimeStepper">NonlinearTimeStepper (class in elastodynamicsx.solvers)</a>
+      <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.NonlinearTimeStepper">NonlinearTimeStepper (class in elastodynamicsx.solvers.timedomain)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.NonlinearTimeStepper">(class in elastodynamicsx.solvers.timedomain.timesteppers)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.OneStepTimeStepper">OneStepTimeStepper (class in elastodynamicsx.solvers)</a>
+      <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.OneStepTimeStepper">OneStepTimeStepper (class in elastodynamicsx.solvers.timedomain)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.OneStepTimeStepper">(class in elastodynamicsx.solvers.timedomain.timesteppers)</a>
 </li>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.anisotropicmaterials.OrthotropicMaterial">OrthotropicMaterial (class in elastodynamicsx.pde.materials.anisotropicmaterials)</a>
-</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.anisotropicmaterials.OrthotropicMaterial">OrthotropicMaterial (class in elastodynamicsx.pde.materials.anisotropicmaterials)</a>
+</li>
       <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme.out">out (elastodynamicsx.pde.timeschemes.TimeScheme property)</a>
 </li>
       <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme.out_fenicsx">out_fenicsx (elastodynamicsx.pde.timeschemes.FEniCSxTimeScheme property)</a>
@@ -1549,14 +1648,26 @@
       </ul></li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDECONFIG">PDECONFIG (class in elastodynamicsx.pde)</a>
 </li>
-      <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.petsc_options_explicit_scheme">petsc_options_explicit_scheme (elastodynamicsx.solvers.TimeStepper attribute)</a>
+      <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.TimeStepper.petsc_options_explicit_scheme">petsc_options_explicit_scheme (elastodynamicsx.solvers.timedomain.TimeStepper attribute)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper.petsc_options_explicit_scheme">(elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper attribute)</a>
 </li>
-      <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.petsc_options_implicit_scheme_linear">petsc_options_implicit_scheme_linear (elastodynamicsx.solvers.TimeStepper attribute)</a>
+        <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.petsc_options_explicit_scheme">(elastodynamicsx.solvers.TimeStepper attribute)</a>
 </li>
-      <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme.petsc_options_t0">petsc_options_t0 (elastodynamicsx.pde.timeschemes.TimeScheme attribute)</a>
+      </ul></li>
+      <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.TimeStepper.petsc_options_implicit_scheme_linear">petsc_options_implicit_scheme_linear (elastodynamicsx.solvers.timedomain.TimeStepper attribute)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper.petsc_options_implicit_scheme_linear">(elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper attribute)</a>
 </li>
+        <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.petsc_options_implicit_scheme_linear">(elastodynamicsx.solvers.TimeStepper attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme.petsc_options_t0">petsc_options_t0 (elastodynamicsx.pde.timeschemes.TimeScheme attribute)</a>
+</li>
       <li><a href="api/elastodynamicsx.solutions.html#elastodynamicsx.solutions.ModalBasis.plot">plot() (elastodynamicsx.solutions.ModalBasis method)</a>
 
       <ul>
@@ -1634,6 +1745,10 @@
       <ul>
         <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme.set_initial_condition">(elastodynamicsx.pde.timeschemes.TimeScheme method)</a>
 </li>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.TimeStepper.set_initial_condition">(elastodynamicsx.solvers.timedomain.TimeStepper method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper.set_initial_condition">(elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper method)</a>
+</li>
         <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.set_initial_condition">(elastodynamicsx.solvers.TimeStepper method)</a>
 </li>
       </ul></li>
@@ -1662,15 +1777,27 @@
 </li>
         <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.FrequencyDomainSolver.solve">(elastodynamicsx.solvers.FrequencyDomainSolver method)</a>
 </li>
-        <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.OneStepTimeStepper.solve">(elastodynamicsx.solvers.OneStepTimeStepper method)</a>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.OneStepTimeStepper.solve">(elastodynamicsx.solvers.timedomain.OneStepTimeStepper method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.TimeStepper.solve">(elastodynamicsx.solvers.timedomain.TimeStepper method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.DiagonalSolver.solve">(elastodynamicsx.solvers.timedomain.timesteppers.DiagonalSolver method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.OneStepTimeStepper.solve">(elastodynamicsx.solvers.timedomain.timesteppers.OneStepTimeStepper method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper.solve">(elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper method)</a>
 </li>
         <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.solve">(elastodynamicsx.solvers.TimeStepper method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.LinearTimeStepper.solver">solver (elastodynamicsx.solvers.LinearTimeStepper property)</a>
+      <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.LinearTimeStepper.solver">solver (elastodynamicsx.solvers.timedomain.LinearTimeStepper property)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.LinearTimeStepper.solver">(elastodynamicsx.solvers.timedomain.timesteppers.LinearTimeStepper property)</a>
 </li>
+      </ul></li>
       <li><a href="api/elastodynamicsx.utils.html#elastodynamicsx.utils.spectral_element">spectral_element() (in module elastodynamicsx.utils)</a>
 
       <ul>
@@ -1697,32 +1824,42 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.t">t (elastodynamicsx.solvers.TimeStepper property)</a>
+      <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.TimeStepper.t">t (elastodynamicsx.solvers.timedomain.TimeStepper property)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper.t">(elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper property)</a>
 </li>
+        <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.t">(elastodynamicsx.solvers.TimeStepper property)</a>
+</li>
+      </ul></li>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.anisotropicmaterials.TetragonalMaterial">TetragonalMaterial (class in elastodynamicsx.pde.materials.anisotropicmaterials)</a>
 </li>
       <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme">TimeScheme (class in elastodynamicsx.pde.timeschemes)</a>
 </li>
-      <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.timescheme">timescheme (elastodynamicsx.solvers.TimeStepper property)</a>
+      <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.TimeStepper.timescheme">timescheme (elastodynamicsx.solvers.timedomain.TimeStepper property)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper.timescheme">(elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper property)</a>
 </li>
-      <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.timescheme">timescheme() (in module elastodynamicsx.pde.timeschemes)</a>
+        <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper.timescheme">(elastodynamicsx.solvers.TimeStepper property)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.timescheme">timescheme() (in module elastodynamicsx.pde.timeschemes)</a>
+</li>
       <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper">TimeStepper (class in elastodynamicsx.solvers)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.TimeStepper">(class in elastodynamicsx.solvers.timedomain)</a>
 </li>
-      <li><a href="api/elastodynamicsx.solvers.frequencydomain.html#elastodynamicsx.solvers.frequencydomain.frequencydomainsolver.tqdm">tqdm() (in module elastodynamicsx.solvers.frequencydomain.frequencydomainsolver)</a>
+        <li><a href="api/elastodynamicsx.solvers.timedomain.html#elastodynamicsx.solvers.timedomain.timesteppers.TimeStepper">(class in elastodynamicsx.solvers.timedomain.timesteppers)</a>
 </li>
+      </ul></li>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.anisotropicmaterials.TriclinicMaterial">TriclinicMaterial (class in elastodynamicsx.pde.materials.anisotropicmaterials)</a>
 </li>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.anisotropicmaterials.TrigonalMaterial">TrigonalMaterial (class in elastodynamicsx.pde.materials.anisotropicmaterials)</a>
 </li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.BoundaryCondition.type">type (elastodynamicsx.pde.BoundaryCondition property)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition.BoundaryCondition.type">(elastodynamicsx.pde.boundarycondition.BoundaryCondition property)</a>
-</li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1782,15 +1919,19 @@
       <ul>
         <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.bodyforce.BodyForce.value">(elastodynamicsx.pde.bodyforce.BodyForce property)</a>
 </li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDirichlet.value">(elastodynamicsx.pde.boundaryconditions.BCDirichlet property)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCNeumann.value">(elastodynamicsx.pde.boundaryconditions.BCNeumann property)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.BoundaryCondition.values">values (elastodynamicsx.pde.BoundaryCondition property)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition.BoundaryCondition.values">(elastodynamicsx.pde.boundarycondition.BoundaryCondition property)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin.value1">value1 (elastodynamicsx.pde.boundaryconditions.BCRobin property)</a>
 </li>
-      </ul></li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin.value2">value2 (elastodynamicsx.pde.boundaryconditions.BCRobin property)</a>
+</li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDashpot.values">values (elastodynamicsx.pde.boundaryconditions.BCDashpot property)</a>
+</li>
   </ul></td>
 </tr></table>
 
