@@ -25,10 +25,10 @@ elastodynamicsx.solvers.frequencydomain
 
    elastodynamicsx.solvers.frequencydomain
 
-elastodynamicsx.solvers.timestepper
------------------------------------
+elastodynamicsx.solvers.timedomain
+----------------------------------
 
 .. toctree::
    :maxdepth: 3
 
-   elastodynamicsx.solvers.timestepper
+   elastodynamicsx.solvers.timedomain

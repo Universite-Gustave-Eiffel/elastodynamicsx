@@ -12,7 +12,8 @@ from dolfinx import fem
 import ufl  # type: ignore
 
 from .timeschemebase import TimeScheme, FEniCSxTimeScheme
-from elastodynamicsx.pde import BoundaryCondition, PDECONFIG, _build_mpc
+from elastodynamicsx.pde import PDECONFIG, _build_mpc
+from elastodynamicsx.pde.boundaryconditions import BoundaryConditionBase, get_dirichlet_BCs, get_weak_BCs
 
 
 class GalphaNewmarkBeta(FEniCSxTimeScheme):
@@ -81,7 +82,7 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
                  k_: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
                  L: Union[None, Callable[['ufl.TestFunction'], ufl.form.Form]],
                  dt,
-                 bcs: Union[Tuple[BoundaryCondition], Tuple[()]] = (), **kwargs):
+                 bcs: Union[Tuple[BoundaryConditionBase], Tuple[()]] = (), **kwargs):
 
         linear_ODE = kwargs.pop('linear', True)
         if linear_ODE is False:
@@ -147,28 +148,28 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
             self._L0_form -= c_(self._v0, v)
 
         # boundary conditions
-        mpc = _build_mpc(function_space, bcs)
-        dirichletbcs = BoundaryCondition.get_dirichlet_BCs(bcs)
-        supportedbcs = BoundaryCondition.get_weak_BCs(bcs)
+        mpc = _build_mpc(bcs)
+        dirichletbcs = get_dirichlet_BCs(bcs)
+        weak_BCs = get_weak_BCs(bcs)
 
-        for bc in supportedbcs:
-            if bc.type == 'neumann':
-                self._L += dt_ * dt_ * bc.bc(v)
-                self._L0_form += bc.bc(v)
-            elif bc.type == 'robin':
-                F_bc = dt_ * dt_ * bc.bc(u, v)
-                self._a += ufl.lhs(F_bc)
-                self._L += ufl.rhs(F_bc)
-                self._L0_form += bc.bc(self._u0, v)
-            elif bc.type == 'dashpot':
-                d1, d2, d3 = dt * gamma / beta, dt**2 * (1 - gamma / beta), dt**3 * (1 - gamma / beta / 2)
-                #
-                F_bc = bc.bc(d1 * u - d1 * self._u_nm1 + d2 * self._v_nm1 + d3 * self._a_nm1, v)
-                self._a += ufl.lhs(F_bc)
-                self._L += ufl.rhs(F_bc)
-                self._L0_form += bc.bc(self._v0, v)
-            else:
-                raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
+        # damping term, BC
+        d1 = dt * gamma / beta
+        d2 = dt**2 * (1 - gamma / beta)
+        d3 = dt**3 * (1 - gamma / beta / 2)
+        u_c = d1 * self._u_nm1 - d2 * self._v_nm1 - d3 * self._a_nm1
+        self._a += d1 * sum(filter(None, [bc.c(u, v) for bc in weak_BCs]))
+        self._L += sum(filter(None, [bc.c(u_c, v) for bc in weak_BCs]))
+
+        # stiffness term, BC
+        self._a += dt_ * dt_ * sum(filter(None, [bc.k(u, v) for bc in weak_BCs]))
+
+        # load term, BC
+        self._L += dt_ * dt_ * sum(filter(None, [bc.L(v) for bc in weak_BCs]))
+
+        # initial value rhs, BC
+        self._L0_form += sum(filter(None, [bc.c(self._v0, v) for bc in weak_BCs]))
+        self._L0_form += sum(filter(None, [bc.k(self._u0, v) for bc in weak_BCs]))
+        self._L0_form += sum(filter(None, [bc.L(v) for bc in weak_BCs]))
 
         # compile forms
         bilinear_form = fem.form(self._a, jit_options=self.jit_options)

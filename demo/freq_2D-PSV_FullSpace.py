@@ -19,7 +19,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE
+from elastodynamicsx.pde import material, BodyForce, boundarycondition, PDE
 from elastodynamicsx.solvers import FrequencyDomainSolver
 from elastodynamicsx.plot import plotter, live_plotter
 from elastodynamicsx.utils import make_facet_tags, make_cell_tags, ParallelEvaluator
@@ -69,7 +69,7 @@ materials = [mat]
 #                 Boundary conditions
 # -----------------------------------------------------
 Z_N, Z_T = mat.Z_N, mat.Z_T  # P and S mechanical impedances
-bc  = BoundaryCondition((V, facet_tags, all_tags), 'Dashpot', (Z_N, Z_T))
+bc  = boundarycondition((V, facet_tags, all_tags), 'Dashpot', Z_N, Z_T)
 bcs = [bc]
 #
 # -----------------------------------------------------

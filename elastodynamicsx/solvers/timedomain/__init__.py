@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-The *timesteppers* module contains tools for solving time-dependent problems.
+The *timedomain* module contains tools for solving time-dependent problems.
 Note that building the problem is the role of the *pde.timescheme* module.
 """
 

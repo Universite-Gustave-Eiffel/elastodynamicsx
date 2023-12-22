@@ -12,7 +12,7 @@ from mpi4py import MPI
 from petsc4py import PETSc
 import numpy as np
 
-from elastodynamicsx.pde import material, BoundaryCondition, PDE
+from elastodynamicsx.pde import material, boundarycondition, PDE
 from elastodynamicsx.solvers import EigenmodesSolver
 from elastodynamicsx.utils import make_facet_tags
 
@@ -45,7 +45,7 @@ V = fem.FunctionSpace(domain, ("Lagrange", 2, (domain.geometry.dim,)))
 # -----------------------------------------------------
 #                 Boundary condition
 # -----------------------------------------------------
-bc_l = BoundaryCondition((V, facet_tags, tag_left), 'Clamp')
+bc_l = boundarycondition((V, facet_tags, tag_left), 'Clamp')
 bcs  = [bc_l]
 #
 # -----------------------------------------------------

@@ -1,10 +1,10 @@
-elastodynamicsx.solvers.timestepper
-===================================
+elastodynamicsx.solvers.timedomain
+==================================
 
 Module contents
 ---------------
 
-.. automodule:: elastodynamicsx.solvers.timestepper
+.. automodule:: elastodynamicsx.solvers.timedomain
    :members:
    :undoc-members:
    :show-inheritance:
@@ -12,7 +12,7 @@ Module contents
 elastodynamicsx.solvers.timestepper.timestepper
 -----------------------------------------------
 
-.. automodule:: elastodynamicsx.solvers.timestepper.timestepper
+.. automodule:: elastodynamicsx.solvers.timedomain.timesteppers
    :members:
    :undoc-members:
    :show-inheritance:
