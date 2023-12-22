@@ -19,7 +19,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE, PDECONFIG
+from elastodynamicsx.pde import material, BodyForce, boundarycondition, PDE, PDECONFIG
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import plotter
 from elastodynamicsx.utils import spectral_element, spectral_quadrature, make_facet_tags, make_cell_tags, ParallelEvaluator
@@ -70,8 +70,8 @@ materials = [mat]
 # -----------------------------------------------------
 T_N      = fem.Constant(domain, default_scalar_type([0,0]))  # normal traction (Neumann boundary condition)
 Z_N, Z_T = mat.Z_N, mat.Z_T  # P and S mechanical impedances
-bc_l  = BoundaryCondition((V, facet_tags, tag_left  ), 'Neumann', T_N)
-bc_rl = BoundaryCondition((V, facet_tags, (tag_left,tag_right) ), 'Dashpot', (Z_N, Z_T))
+bc_l  = boundarycondition((V, facet_tags, tag_left  ), 'Neumann', T_N)
+bc_rl = boundarycondition((V, facet_tags, (tag_left,tag_right) ), 'Dashpot', Z_N, Z_T)
 bcs = [bc_l, bc_rl]
 #
 # -----------------------------------------------------
@@ -82,9 +82,9 @@ bcs = [bc_l, bc_rl]
 # -----------------------------------------------------
 ### -> Time function
 #
-f0 = 1     # central frequency of the source
-T0 = 1/f0  # period
-d0 = 5*T0  # duration of source
+f0 = 1       # central frequency of the source
+T0 = 1 / f0  # period
+d0 = 5 * T0  # duration of source
 #
 def src_t(t):  # source(t): Sine x Hann window
     window = np.sin(np.pi*t/d0)**2 * (t<d0) * (t>0)  # Hann window

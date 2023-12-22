@@ -32,10 +32,10 @@ Frequency domain:
       from elastodynamicsx.solvers import ...
 """
 
-from .timedomain import TimeStepper, NonlinearTimeStepper, LinearTimeStepper, OneStepTimeStepper
+from .timedomain import TimeStepper
 from .eigensolver import EigenmodesSolver
 from .frequencydomain import FrequencyDomainSolver
 
-__all__ = ["TimeStepper", "NonlinearTimeStepper", "LinearTimeStepper", "OneStepTimeStepper",
+__all__ = ["TimeStepper",
            "EigenmodesSolver",
            "FrequencyDomainSolver"]
