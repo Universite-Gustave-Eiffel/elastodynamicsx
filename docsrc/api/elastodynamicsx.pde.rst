@@ -17,10 +17,10 @@ elastodynamicsx.pde.bodyforce
    :undoc-members:
    :show-inheritance:
 
-elastodynamicsx.pde.boundarycondition
--------------------------------------
+elastodynamicsx.pde.boundaryconditions
+--------------------------------------
 
-.. automodule:: elastodynamicsx.pde.boundarycondition
+.. automodule:: elastodynamicsx.pde.boundaryconditions
    :members:
    :undoc-members:
    :show-inheritance:
