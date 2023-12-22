@@ -61,7 +61,7 @@ setuptools.setup(
         ],  # noqa
     cmdclass={
         'doc': MakeTheDoc,  # allow user to build the doc with python setup.py doc
-        'tests': SafetyChecks,  # allow user to build the doc with python setup.py test
+        'tests': SafetyChecks,  # allow user to run all tests with python setup.py test
         },  # noqa
     install_requires=[
         'numpy',
