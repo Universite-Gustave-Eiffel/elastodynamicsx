@@ -13,7 +13,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE, damping
+from elastodynamicsx.pde import material, BodyForce, boundarycondition, PDE, damping
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.utils import make_facet_tags, ParallelEvaluator
 
@@ -45,8 +45,8 @@ V = fem.FunctionSpace(domain, ("Lagrange", 1, (domain.geometry.dim,)))
 #                 Boundary conditions
 # -----------------------------------------------------
 T_N  = fem.Constant(domain, np.array([0]*3, dtype=PETSc.ScalarType))  # normal traction (Neumann boundary condition)
-bc_l = BoundaryCondition((V, facet_tags, tag_left ), 'Clamp')
-bc_r = BoundaryCondition((V, facet_tags, tag_right), 'Neumann', T_N)
+bc_l = boundarycondition((V, facet_tags, tag_left ), 'Clamp')
+bc_r = boundarycondition((V, facet_tags, tag_right), 'Neumann', T_N)
 bcs  = [bc_l, bc_r]
 #
 # -----------------------------------------------------

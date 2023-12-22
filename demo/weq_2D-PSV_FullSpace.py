@@ -19,7 +19,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde import material, BodyForce, BoundaryCondition, PDE, PDECONFIG
+from elastodynamicsx.pde import material, BodyForce, boundarycondition, PDE, PDECONFIG
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot import plotter
 from elastodynamicsx.utils import spectral_element, spectral_quadrature, make_facet_tags, make_cell_tags, ParallelEvaluator
@@ -70,10 +70,10 @@ materials = [mat]
 #                 Boundary conditions
 # -----------------------------------------------------
 Z_N, Z_T = mat.Z_N, mat.Z_T  # P and S mechanical impedances
-bc_l = BoundaryCondition((V, facet_tags, tag_left  ), 'Dashpot', (Z_N, Z_T))
-bc_r = BoundaryCondition((V, facet_tags, tag_right ), 'Dashpot', (Z_N, Z_T))
-bc_b = BoundaryCondition((V, facet_tags, tag_bottom), 'Dashpot', (Z_N, Z_T))
-bc_t = BoundaryCondition((V, facet_tags, tag_top   ), 'Dashpot', (Z_N, Z_T))
+bc_l = boundarycondition((V, facet_tags, tag_left  ), 'Dashpot', Z_N, Z_T)
+bc_r = boundarycondition((V, facet_tags, tag_right ), 'Dashpot', Z_N, Z_T)
+bc_b = boundarycondition((V, facet_tags, tag_bottom), 'Dashpot', Z_N, Z_T)
+bc_t = boundarycondition((V, facet_tags, tag_top   ), 'Dashpot', Z_N, Z_T)
 bcs = [bc_l, bc_r, bc_b, bc_t]
 #
 # -----------------------------------------------------

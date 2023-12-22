@@ -23,7 +23,7 @@ except ImportError:
 
 from .buildmpc import _build_mpc
 from .common import PDECONFIG
-from .boundaryconditions import BoundaryCondition
+from .boundaryconditions import get_dirichlet_BCs, get_mpc_BCs, get_weak_BCs, BCWeakBase, BCMPCBase
 from .materials import Material
 
 
@@ -42,12 +42,12 @@ class PDE:
 
     Keyword Args:
         bodyforces: (default=[]) a list of pde.BodyForce instances
-        bcs: (default=[]) a list of fem.DirichletBCMetaClass and/or pde.BoundaryCondition instances
+        bcs: (default=[]) a list of fem.DirichletBCMetaClass and/or pde.BoundaryConditionBase instances
         jit_options: (default=PDECONFIG.default_jit_options) options for the just-in-time compiler
         finalize: (default=True) call self.finalize() on build
     """
 
-    def __init__(self, function_space: fem.FunctionSpaceBase, materials: typing.List[Material], **kwargs):
+    def __init__(self, function_space: fem.FunctionSpaceBase, materials: typing.Iterable[Material], **kwargs):
         self._function_space = function_space
         self.materials = materials
         self.bodyforces = kwargs.get('bodyforces', [])
@@ -67,13 +67,9 @@ class PDE:
         self._k3_form: typing.Union[fem.forms.Form, None] = None
 
         # ## Sort boundary conditions
-        # custom weak BSs, instances of BoundaryCondition
-        self._bcs_weak = BoundaryCondition.get_weak_BCs(self.bcs)
-        # dolfinx.fem.DirichletBCMetaClass
-        self._bcs_strong = BoundaryCondition.get_dirichlet_BCs(self.bcs)
-        # instances of BoundaryCondition used to add multi-point constraints
-        self._bcs_mpc = BoundaryCondition.get_mpc_BCs(self.bcs)
-        # new_list = filter(lambda v: v not in b, a)
+        self._bcs_weak: typing.List[BCWeakBase] = get_weak_BCs(self.bcs)
+        self._bcs_strong: typing.List[fem.DirichletBC] = get_dirichlet_BCs(self.bcs)
+        self._bcs_mpc: typing.List[BCMPCBase] = get_mpc_BCs(self.bcs)
 
         self._omega_ufl = fem.Constant(function_space.mesh, default_scalar_type(0))
 
@@ -119,7 +115,7 @@ class PDE:
         if len(self._bcs_mpc) == 0:
             return
         #
-        self._mpc = _build_mpc(self._function_space, self._bcs_strong + self._bcs_mpc)
+        self._mpc = _build_mpc(self._bcs_strong + self._bcs_mpc)
 
     def _compile_M(self) -> None:
         u, v = self._u, self._v
@@ -148,17 +144,9 @@ class PDE:
         L = self.L(v) if not (self.L is None) else sum([ufl.inner(vzero, v) * dx for dx in measures])
 
         # Boundaries
-        for bc in self._bcs_weak:
-            if bc.type == 'neumann':
-                L += bc.bc(v)
-            elif bc.type == 'robin':
-                F_bc = bc.bc(u, v)
-                k += ufl.lhs(F_bc)
-                L += ufl.rhs(F_bc)
-            elif bc.type == 'dashpot':
-                c += bc.bc(u, v)
-            else:
-                raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
+        c += sum(filter(None, [bc.c(u, v) for bc in self._bcs_weak]))
+        k += sum(filter(None, [bc.k(u, v) for bc in self._bcs_weak]))
+        L += sum(filter(None, [bc.L(v) for bc in self._bcs_weak]))
 
         self._c_form = fem.form(c, jit_options=self.jit_options)
         self._k_form = fem.form(k, jit_options=self.jit_options)
@@ -183,22 +171,8 @@ class PDE:
         k2 = self.k2(u, v)
         k3 = self.k3(u, v)
 
-        # Boundaries
-        for bc in self._bcs_weak:
-            if bc.type == 'neumann':
-                pass  # ignores
-            elif bc.type == 'robin':
-                # F_bc = bc.bc(u, v)
-                print('Robin BC: TODO')
-                raise NotImplementedError
-                # k += ufl.lhs(F_bc)  # TODO
-                # L += ufl.rhs(F_bc)  # ignores right hand side
-            elif bc.type == 'dashpot':
-                print('Dashpot BC: TODO')
-                raise NotImplementedError
-                # c += bc.bc(u,v)
-            else:
-                raise TypeError("Unsupported boundary condition {0:s}".format(bc.type))
+        assert not any(filter(None, [bc.c(u, v) for bc in self._bcs_weak])), 'c!=0 not yet implemented for waveguides'
+        assert not any(filter(None, [bc.c(u, v) for bc in self._bcs_weak])), 'k!=0 not yet implemented for waveguides'
 
         self._k1_form = fem.form(k1, jit_options=self.jit_options)
         self._k2_form = fem.form(k2, jit_options=self.jit_options)

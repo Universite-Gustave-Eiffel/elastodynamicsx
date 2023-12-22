@@ -24,7 +24,7 @@ import ufl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from elastodynamicsx.pde     import material, BoundaryCondition, PDE, PDECONFIG
+from elastodynamicsx.pde     import material, boundarycondition, PDE, PDECONFIG
 from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot    import plotter
 from elastodynamicsx.utils   import spectral_element, spectral_quadrature, ParallelEvaluator
@@ -88,8 +88,8 @@ materials = [mat]
 # -----------------------------------------------------
 Z_N, Z_T = mat.Z_N, mat.Z_T   # P and S mechanical impedances
 T_N    = fem.Function(V)      # Normal traction (Neumann boundary condition)
-bc_top = BoundaryCondition((V, facet_tags, tagBdFree), 'Neumann', T_N)
-bc_int = BoundaryCondition((V, facet_tags, tagBdInt), 'Dashpot', (Z_N, Z_T))  # Absorbing BC on the artificial boundaries
+bc_top = boundarycondition((V, facet_tags, tagBdFree), 'Neumann', T_N)
+bc_int = boundarycondition((V, facet_tags, tagBdInt), 'Dashpot', Z_N, Z_T)  # Absorbing BC on the artificial boundaries
 bcs = [bc_int, bc_top]
 #
 # -----------------------------------------------------
