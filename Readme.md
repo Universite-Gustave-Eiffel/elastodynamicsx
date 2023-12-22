@@ -1,3 +1,5 @@
+[![Generic badge](https://github.com/Universite-Gustave-Eiffel/elastodynamicsx/actions/workflows/pages/pages-build-deployment/badge.svg)](https://universite-gustave-eiffel.github.io/elastodynamicsx/)	
+
 # ElastodynamiCSx 
 ElastodynamiCSx is dedicated to the numerical modeling of wave propagation in solids using the [FEniCSx](https://fenicsproject.org/) Finite Elements library. It deals with the following PDE:
 
