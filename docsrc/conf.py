@@ -40,6 +40,8 @@ language = "en"
 
 extensions = ["sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc",
               'sphinx.ext.mathjax', 'sphinx.ext.ifconfig', 'sphinx.ext.napoleon',
+              'sphinx_tabs.tabs',
+              'jupyter_sphinx',
               "myst_parser",
               'nbsphinx']
 

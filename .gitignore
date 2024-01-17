@@ -47,6 +47,7 @@ wheels/
 .installed.cfg
 *.egg
 docs/_build/
+jupyter_execute/
 
 # Unit test / coverage reports
 htmlcov/

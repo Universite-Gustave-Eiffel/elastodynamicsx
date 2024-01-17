@@ -67,6 +67,6 @@ setuptools.setup(
         'numpy',
         'matplotlib',
         'pyvista',
-        'sphinx', 'sphinx-rtd-theme', 'myst-parser', 'nbsphinx',  # to generate the sphinx doc
+        'sphinx', 'sphinx-rtd-theme', 'myst-parser', 'nbsphinx', 'sphinx-tabs', 'jupyter-sphinx',  # for sphinx doc
         ],  # noqa
     python_requires='>=3')
