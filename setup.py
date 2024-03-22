@@ -66,7 +66,7 @@ setuptools.setup(
     install_requires=[
         'numpy',
         'matplotlib',
-        'pyvista',
+        'pyvista', 'trame', 'trame-vtk', 'trame-vuetify',
         'sphinx', 'sphinx-rtd-theme', 'myst-parser', 'nbsphinx', 'sphinx-tabs', 'jupyter-sphinx',  # for sphinx doc
         ],  # noqa
     python_requires='>=3')

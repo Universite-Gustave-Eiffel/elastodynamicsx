@@ -41,14 +41,10 @@ def _is_notebook() -> bool:
 
 
 if _is_notebook():
-    # This "ipyvtklink" backend supports almost every pyvista feature.
-    # However, it is run on server, leading to great lags
-    # "pythreejs" or "ipygany" blow the kernel when update_scalar is called
-    # In the (near?) future consider using "panel" (no slider or update_scalar at the moment),
-    # or itkwidgets, which seems great and fastly growing
-    DEFAULT_JUPYTER_BACKEND = "ipyvtklink"
-    pyvista.set_jupyter_backend(DEFAULT_JUPYTER_BACKEND)
-    pyvista.start_xvfb()  # required by ipyvtklink
+    # DEFAULT_JUPYTER_BACKEND = "ipyvtklink"
+    # pyvista.set_jupyter_backend(DEFAULT_JUPYTER_BACKEND)
+    # pyvista.start_xvfb()  # required by ipyvtklink
+    pass
 
 
 # ## ---------------------------------------- ## #
