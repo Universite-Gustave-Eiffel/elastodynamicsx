@@ -274,7 +274,7 @@ class CustomScalarPlotter(pyvista.Plotter):
     def update_scalars(self, *all_scalars, **kwargs):
         """Calls pyvista.Plotter.update_scalars for all subplots"""
         for i, (grid, u_) in enumerate(zip(self.grids, all_scalars)):
-            super().update_scalars(self._trans(u_), mesh=grid, render=False)
+            grid['u'] = self._trans(u_)
         if kwargs.get('render', True):
             self.render()
 
@@ -431,10 +431,8 @@ class CustomVectorPlotter(pyvista.Plotter):
             nbpts = grid.number_of_points
             u3D = _get_3D_array_from_nparray(u_, nbpts)
             grid["u"] = self._trans(u3D)
-            #
-            super().update_coordinates(grid.warp_by_vector("u", factor=self.warp_factor).points,
-                                       mesh=grid.warped, render=False)
-            super().update_scalars(np.linalg.norm(u3D, axis=1), mesh=grid.warped, render=False)
+            grid.warped.points = grid.warp_by_vector("u", factor=self.warp_factor).points
+            grid.warped["u_nrm"] = np.linalg.norm(u3D, axis=1)
         if render:
             self.render()
 
