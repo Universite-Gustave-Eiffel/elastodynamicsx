@@ -1,80 +1,84 @@
-"""
-Eigenmodes
+# # Eigenmodes
+#
+# ## Free resonances of an aluminum cube, compared against literature data
 
-Free resonances of an aluminum cube, compared against litterature data
+# +
+import numpy as np
 
-Data from: Ogi, H., Sato, K., Asada, T., & Hirao, M. (2002). Complete mode
-identification for resonance ultrasound spectroscopy. The Journal of the
-Acoustical Society of America, 112(6), 2553-2557.
-"""
-
-from dolfinx import mesh, fem
+from dolfinx import mesh, fem, default_scalar_type
 from mpi4py import MPI
 from petsc4py import PETSc
-import numpy as np
 
 from elastodynamicsx.pde import material, PDE
 from elastodynamicsx.solvers import EigenmodesSolver
+# -
 
-# -----------------------------------------------------
-#                     FE domain
-# -----------------------------------------------------
-L1, L2, L3 = 11.92, 10.93, 9.86  # millimeters
+# ### FE domain
 
-Nx = Ny = Nz = 6
-
+# +
+L1, L2, L3 = 11.92, 10.93, 9.86  # Lengths, in millimeters
+Nx = Ny = Nz = 6  # Nb of elts.
 extent = [[0., 0., 0.], [L1, L2, L3]]
 domain = mesh.create_box(MPI.COMM_WORLD, extent, [Nx, Ny, Nz])
-#
+
 V = fem.FunctionSpace(domain, ("Lagrange", 2, (domain.geometry.dim,)))
+# -
+
+# ### Define the material law
+# Material:
+# - Aluminum
+# - isotropic elasticity
 #
-# -----------------------------------------------------
+# Units:
+# - $\rho$ in g/cm3
+# - $C_{ij}$ in GPa
+# - -> frequencies in MHz
 
-
-# -----------------------------------------------------
-#                 Material parameters
-# -----------------------------------------------------
-rho, C11, C44 = 2.788, 109.26, 26.72  # Aluminum. rho in g/cm3, Cij in GPa -> freq. in MHz
-lambda_ = C11 - 2*C44
+# +
+rho, C11, C44 = 2.788, 109.26, 26.72
+lambda_ = C11 - 2 * C44
 mu      = C44
-rho     = fem.Constant(domain, PETSc.ScalarType(rho))
-lambda_ = fem.Constant(domain, PETSc.ScalarType(lambda_))
-mu      = fem.Constant(domain, PETSc.ScalarType(mu))
+rho     = fem.Constant(domain, default_scalar_type(rho))
+lambda_ = fem.Constant(domain, default_scalar_type(lambda_))
+mu      = fem.Constant(domain, default_scalar_type(mu))
 
-material = material(V, 'isotropic', rho, lambda_, mu)
-#
-# -----------------------------------------------------
+aluminum = material(V, 'isotropic', rho, lambda_, mu)
+# -
 
+# ### Assemble the PDE
 
-# -----------------------------------------------------
-#                       Solve
-# -----------------------------------------------------
-### PDE
-pde = PDE(V, materials=[material])
+pde = PDE(V, materials=[aluminum])
 
-### Initialize the solver
-eps = EigenmodesSolver(V.mesh.comm, pde.M(), None, pde.K(), nev=20)
+# ### Solve
 
-### Run the big calculation!
+# ## Initialize the solver; prepare to solve for 20 eigenvalues
+M = pde.M()  # mass matrix (PETSc)
+C = None  # None to ensure no damping
+K = pde.K()  # stiffness matrix (PETSc)
+eps = EigenmodesSolver(V.mesh.comm, M, C, K, nev=20)
+
+# ## Run the big calculation!
 eps.solve()
-### End of big calc.
+# ## End of big calc.
 
-### Get the result
+# +
+# ## Get the result
 # eps.printEigenvalues()
 eigenfreqs = eps.getEigenfrequencies()
 # eigenmodes = eps.getEigenmodes()
+
 eps.plot(V, slice(6,6+9), wireframe=True, factor=30)  # Avoid the first 6 rigid body modes
-#
-# -----------------------------------------------------
+# -
 
 
+# ### Compare with literature values
 # -----------------------------------------------------
-#            Compare with litterature values
-# -----------------------------------------------------
-# Data from: Ogi, H., Sato, K., Asada, T., & Hirao, M. (2002). Complete mode
-# identification for resonance ultrasound spectroscopy. The Journal of the
-# Acoustical Society of America, 112(6), 2553-2557.
+# Data from:  
+# &emsp; Ogi, H., Sato, K., Asada, T., & Hirao, M. (2002). Complete mode
+# identification for resonance ultrasound spectroscopy. *The Journal of the
+# Acoustical Society of America*, 112(6), 2553-2557.
 
+# +
 freqs_OgiEtAl_exp  = np.array([116.716, 143.783, 158.081, 166.5  , 169.523, 177.846, 183.875, 186.047,
                                190.341, 197.386, 201.133, 207.386, 209.836, 214.753, 223.548, 231.266,
                                233.538, 234.717, 250.98 , 251.256, 252.742, 256.122, 257.595, 258.118,
@@ -93,7 +97,3 @@ print('Eigenfrequencies: comparison with litterature values')
 print('  FE   \tOgi et al, calc.\t Ogi et al, exp. \t(kHz)')
 for fFE, fOgi_calc, fOgi_exp in zip(eigenfreqs[6:]*1e3, freqs_OgiEtAl_calc, freqs_OgiEtAl_exp):  # *1e3 to convert MHz into kHz
     print(str(round(fFE, 3)) +"\t     "+ str(round(fOgi_calc, 3)) +"\t\t     "+ str(round(fOgi_exp, 3)))
-#
-# -----------------------------------------------------
-
-
