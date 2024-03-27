@@ -5,3 +5,4 @@ exclude =
     demo
     conf.py
     jupyter_execute
+    venv
