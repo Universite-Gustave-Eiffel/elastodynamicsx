@@ -8,13 +8,6 @@ ElastodynamiCSx documentation
 
 ElastodynamiCSx is a Python library dedicated to the numerical modeling of wave propagation in solids using the `FEniCSx <https://fenicsproject.org/>`_ Finite Elements library. It is a third-party project, not part of the Fenics project.
 
-ElastodynamiCSx deals with the following PDE:
-
-.. math::
-  \mathbf{M}\mathbf{a} + \mathbf{C}\mathbf{v} + \mathbf{K}(\mathbf{u}) = \mathbf{b},
-
-where :math:`\mathbf{u}`, :math:`\mathbf{v}=\partial_t \mathbf{u}`, :math:`\mathbf{a}=\partial_t^2\mathbf{u}` are the displacement, velocity and acceleration fields, :math:`\mathbf{M}`, :math:`\mathbf{C}` and :math:`\mathbf{K}` are the mass, damping and stiffness forms, and :math:`\mathbf{b}` is an applied force. For time domain problems :math:`\mathbf{K}` may be a non-linear function of :math:`\mathbf{u}`.
-
 The library provides a high level interface to build and solve common problems in a few lines code.
 
 .. toctree::
@@ -22,7 +15,7 @@ The library provides a high level interface to build and solve common problems i
    :caption: Learning ElastodynamiCSx
 
    gettingstarted/getting_index
-   demos/examples_index
+   demos/_ln_demo/README
    api/api_index
 
 .. toctree::

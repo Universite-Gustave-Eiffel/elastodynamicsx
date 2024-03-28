@@ -10,6 +10,11 @@ import datetime, sys, os
 
 import elastodynamicsx
 
+# from shutil import copytree, ignore_patterns
+
+# copytree('../demo/', 'demos/_cp_demo/', ignore=ignore_patterns('*.ipynb*', '*.npz', '__pycache__'), dirs_exist_ok=True)
+
+
 sys.path.insert(0, os.path.abspath('..'))
 
 
@@ -44,6 +49,10 @@ extensions = ["sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc",
               'jupyter_sphinx',
               "myst_parser",
               'nbsphinx']
+
+nbsphinx_custom_formats = {
+    '.py': ['jupytext.reads', {'fmt': 'py:light'}],
+}
 
 # myst-parser is used to manage (readme) markdown file
 # ref : https://myst-parser.readthedocs.io/en/latest/syntax/optional.html
@@ -87,7 +96,6 @@ html_theme_options = {
     # Toc options
     'collapse_navigation': False,
     'sticky_navigation': True,
-    'navigation_depth': 3,
     'includehidden': True,
     'titles_only': False
     }
