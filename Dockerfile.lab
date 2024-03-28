@@ -8,7 +8,7 @@ COPY ./demo /root/demo/
 
 # Install elastodynamicsx and optional dependencies
 RUN pip3 install . &&\
-    pip3 install tqdm pyvista ipygany pythreejs ipyvtklink --upgrade &&\
+    pip3 install tqdm pyvista[trame] --upgrade &&\
     rm -rf /tmp/*
 
 
