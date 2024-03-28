@@ -1,6 +1,22 @@
-# # Time-domain (implicit) -- Wave equation
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.15.2
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
+# # Lamb's problem: Response of a half space to a source on its surface
 #
-# ## Lamb's problem: response of a half space to a source on its surface.
+# - Time-domain, explicit scheme, Spectral elements
+# - 2D
+# - Impedance absorbing boundary conditions
 #
 # After [1], Fig. 1:  
 # &emsp;[1] Komatitsch, D., & Vilotte, J. P. (1998). *The spectral element method: an efficient tool to simulate the seismic response of 2D and 3D geological structures.* Bulletin of the seismological society of America, 88(2), 368-392.
@@ -150,6 +166,7 @@ courant_number = TimeStepper.Courant_number(V.mesh, cmax, dt)  # Courant number
 PETSc.Sys.Print(f'CFL condition: Courant number = {courant_number:.2f}')
 
 #  Time integration
+#     diagonal=True assumes the left hand side operator is indeed diagonal
 tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog', diagonal=True)
 
 # Set the initial values

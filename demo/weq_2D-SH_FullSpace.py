@@ -1,7 +1,24 @@
-# # Time-domain (implicit) -- Wave equation
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.15.2
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
+# # Shear Horizontal (SH) elastic waves in an unbounded solid
 #
-# ## Propagation of SH elastic waves in a 2D, homogeneous isotropic solid,
-# and comparison with an analytical solution.
+# - Time-domain, explicit scheme, Spectral elements
+# - 2D
+# - Scalar medium
+# - Impedance absorbing boundary conditions
+# - Comparison with an analytical solution
 
 
 # +
@@ -18,7 +35,7 @@ from elastodynamicsx.solvers import TimeStepper
 from elastodynamicsx.plot    import plotter
 from elastodynamicsx.utils   import spectral_element, spectral_quadrature, make_facet_tags, make_cell_tags, ParallelEvaluator
 
-from analyticalsolutions     import u_2D_SH_rt, int_Fraunhofer_2D
+from analyticalsolutions import u_2D_SH_rt, int_Fraunhofer_2D
 # -
 
 # ### Set up a Spectral Element Method

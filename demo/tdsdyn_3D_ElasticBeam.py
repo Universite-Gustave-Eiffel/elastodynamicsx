@@ -1,10 +1,27 @@
-# # Time-domain (explicit) -- Structural dynamics
-#
-# ## Vibration of a beam clamped at one end.
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.15.2
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
+# # Vibration of a beam clamped at one end
 # The beam is increasingly loaded at its other end, and then suddenly released.
 #
-# adapted from (legacy Fenics):  
-# &emsp; https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html
+# - Time-domain, implicit scheme
+# - 3D
+# - Rayleigh damping
+#
+# This example is adapted from (legacy Fenics):  
+# &emsp; https://comet-fenics.readthedocs.io/en/latest/demo/elastodynamics/demo_elastodynamics.py.html  
+# where extensive explanations are given. Here we show how `elastodynamicsx` can be used to reproduce it.
 
 # +
 import numpy as np

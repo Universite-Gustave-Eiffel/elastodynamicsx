@@ -1,7 +1,23 @@
-# # Frequency-domain -- Helmoltz equation
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.15.2
+#   kernelspec:
+#     display_name: Python 3 (DOLFINx complex)
+#     language: python
+#     name: python3-complex
+# ---
+
+# # Harmonic P and SV elastic waves in an unbounded solid
 #
-# ## Propagation of P and SV elastic waves in a 2D, homogeneous isotropic solid,
-# and comparison with an analytical solution.
+# - Frequency-domain -- Helmoltz equation
+# - 2D
+# - Impedance absorbing boundary conditions
+# - Comparison with an analytical solution
 
 # +
 import numpy as np

@@ -1,9 +1,26 @@
-# # Eigenmodes
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.15.2
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
+# # Resonances of a beam clamped at one end
 #
-# ## Free resonances of a beam clamped at one end, compared against beam theory
+# - Eigenmodes
+# - 3D
+# - Comparison with beam theory
 #
 # This example is adapted from (legacy Fenics):  
-# &emsp; https://comet-fenics.readthedocs.io/en/latest/demo/modal_analysis_dynamics/cantilever_modal.html
+# &emsp; https://comet-fenics.readthedocs.io/en/latest/demo/modal_analysis_dynamics/cantilever_modal.html  
+# where extensive explanations are given. Here we show how `elastodynamicsx` can be used to reproduce it.
 #
 # It is also inspired from (Fenicsx):  
 # &emsp; https://mikics.github.io/gsoc-jupyterbook/chapter3/demo_half_loaded_waveguide.html
@@ -27,8 +44,8 @@ L_, B_, H_ = 20., 0.5, 1.  # Lengths
 
 # Nb of elts.
 Nx = 20
-Ny = int(B_/L_*Nx)+1
-Nz = int(H_/L_*Nx)+1
+Ny = int(B_/L_ * Nx) + 1
+Nz = int(H_/L_ * Nx) + 1
 
 extent = [[0., 0., 0.], [L_, B_, H_]]
 
