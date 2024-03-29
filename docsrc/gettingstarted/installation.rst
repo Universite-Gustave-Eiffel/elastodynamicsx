@@ -41,13 +41,9 @@ Because it can still be somewhat tricky to install ``fenicsx``, the package prov
             # Open the URL printed on screen beginning with http://127.0.0.1:8888/?token...
             # The examples are in /root/demo; the shared folder is in /root/shared
 
-        The backend that has been configured by default is the ``ipyvtklink`` one. It has the advantage of being almost fully compatible with the examples. However, as the rendering is performed on the server, the display suffers great lag. Other options are `described here <https://docs.pyvista.org/user-guide/jupyter/index.html>`_. For instance, when live-plotting a ``TimeStepper.solve()`` call, only the first and last images will be seen.
-
 
 
     .. tab:: Use within a shell
-
-        For the shell case the container is given the right to display graphics. The solution adopted to avoid MIT-SHM errors due to sharing host display :0 is to disable IPC namespacing with --ipc=host. It is `given here <https://github.com/jessfraz/dockerfiles/issues/359>`_, although described as not totally satisfactory because of isolation loss. Other more advanced solutions are also given in there.
 
         Clone the repository and build a docker image called 'elastodynamicsx:latest':
 
@@ -77,6 +73,7 @@ Because it can still be somewhat tricky to install ``fenicsx``, the package prov
             # Test
             python3 demo/weq_2D-SH_FullSpace.py
 
+        Note that the container must be given the right to display graphics. The solution adopted here to avoid MIT-SHM errors due to sharing host display :0 is to disable IPC namespacing with --ipc=host. It is `given here <https://github.com/jessfraz/dockerfiles/issues/359>`_, although described as not totally satisfactory because of isolation loss. Other more advanced solutions are also given in there.
 
 
 Dependencies
@@ -94,12 +91,11 @@ Dependencies
 
 * `DOLFINx-MPC <https://github.com/jorgensd/dolfinx_mpc>`_ v0.7.0.post1. This dependency is optional (periodic BCs).
 
-| **Packages required for the examples:**
-| numpy
-| matplotlib
-| pyvista
-| ipyvtklink (configured pyvista backend in jupyter lab)
+* ``numpy``
+
+* ``pyvista`` and ``matplotlib`` for 3D/2D plots
+
 
 | **Optional packages:**
-| tqdm (progress bar for loops)
+| ``tqdm`` (progress bar for loops)
 
