@@ -7,6 +7,10 @@
   <title>elastodynamicsx.pde.timeschemes &mdash; ElastodynamiCSx 0.2.2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/jupyter-sphinx.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/thebelab.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -16,6 +20,11 @@
         <script src="../_static/documentation_options.js?v=000c92bf"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/thebelab-helper.js"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=35a8b989"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -48,86 +57,269 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../readme_link.html">ElastodynamiCSx</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#build-problems">Build problems</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#solve-problems">Solve problems</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#post-process-solutions">Post process solutions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#dependencies">Dependencies</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#packages-required-for-the-examples">Packages required for the examples</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#optional-packages">Optional packages</a></li>
+              <p class="caption" role="heading"><span class="caption-text">Using ElastodynamiCSx</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/installation.html#dependencies">Dependencies</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#installation">Installation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#option-1-with-fenicsx-binaries-installed">Option 1: With FEniCSx binaries installed</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../readme_link.html#option-2-inside-a-fenicsx-docker-image">Option 2: Inside a FEniCSx Docker image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/overview.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/overview.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/overview.html#build-problems">Build problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/overview.html#solve-problems">Solve problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/overview.html#post-process-solutions">Post-process solutions</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#examples">Examples</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../readme_link.html#useful-links">Useful links</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/_ln_demo/README.html">Demos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../demos/_ln_demo/README.html#time-domain">Time domain</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_FullSpace.html">P and SV elastic waves in an unbounded solid</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_FullSpace.html#Set-up-a-Spectral-Element-Method">Set up a Spectral Element Method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_FullSpace.html#FE-domain">FE domain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_FullSpace.html#Define-the-material-law">Define the material law</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_FullSpace.html#Boundary-conditions">Boundary conditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_FullSpace.html#Source-term-(body-force)">Source term (body force)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_FullSpace.html#Assemble-the-PDE">Assemble the PDE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_FullSpace.html#Time-scheme">Time scheme</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_FullSpace.html#Define-outputs">Define outputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_FullSpace.html#Solve">Solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_FullSpace.html#Post-processing">Post-processing</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../demos/examples_index.html">Demos</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section1.html"><strong>Time domain</strong>, wave equation; high order (spectral) elements &amp; <strong>explicit</strong> time scheme</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html">weq_2D-SH_FullSpace.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html#weq-2d-psv-fullspace-py">weq_2D-PSV_FullSpace.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html#weq-2d-psv-halfspace-lamb-komatitschvilotte-bssa1998-py">weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section1_files.html#weqnl-1d-psv-murnaghan-pwave-py">weqnl_1D-PSV_Murnaghan_Pwave.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.html">Lamb’s problem: Response of a half space to a source on its surface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.html#Set-up-a-Spectral-Element-Method">Set up a Spectral Element Method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.html#FE-domain">FE domain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.html#Define-a-material-law">Define a material law</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.html#Boundary-conditions">Boundary conditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.html#Assemble-the-PDE">Assemble the PDE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.html#Time-scheme">Time scheme</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.html#Define-outputs">Define outputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.html#Solve">Solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.html#Post-processing">Post-processing</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section2.html"><strong>Time domain</strong>, structural dynamics; low order elements &amp; <strong>implicit</strong> time scheme</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section2_files.html">tdsdyn_3D_ElasticBeam.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/_ln_demo/weq_2D-SH_FullSpace.html">Shear Horizontal (SH) elastic waves in an unbounded solid</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-SH_FullSpace.html#Set-up-a-Spectral-Element-Method">Set up a Spectral Element Method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-SH_FullSpace.html#FE-domain">FE domain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-SH_FullSpace.html#Define-the-material-law">Define the material law</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-SH_FullSpace.html#Boundary-conditions">Boundary conditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-SH_FullSpace.html#Source-term-(body-force)">Source term (body force)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-SH_FullSpace.html#Assemble-the-PDE">Assemble the PDE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-SH_FullSpace.html#Time-scheme">Time scheme</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-SH_FullSpace.html#Define-outputs">Define outputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-SH_FullSpace.html#Solve">Solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weq_2D-SH_FullSpace.html#Post-processing">Post-processing</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section3.html"><strong>Frequency domain</strong>, wave equation (Helmoltz equation)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section3_files.html">freq_2D-SH_FullSpace.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section3_files.html#freq-2d-psv-fullspace-py">freq_2D-PSV_FullSpace.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/_ln_demo/weqnl_1D-PSV_Murnaghan_Pwave.html">Self-interaction of a P wave in a 1D nonlinear elastic medium</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weqnl_1D-PSV_Murnaghan_Pwave.html#Set-up-a-Spectral-Element-Method">Set up a Spectral Element Method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weqnl_1D-PSV_Murnaghan_Pwave.html#FE-domain">FE domain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weqnl_1D-PSV_Murnaghan_Pwave.html#Define-the-material-law">Define the material law</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weqnl_1D-PSV_Murnaghan_Pwave.html#Boundary-conditions">Boundary conditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weqnl_1D-PSV_Murnaghan_Pwave.html#Assemble-the-PDE">Assemble the PDE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weqnl_1D-PSV_Murnaghan_Pwave.html#Time-scheme">Time scheme</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weqnl_1D-PSV_Murnaghan_Pwave.html#Define-outputs">Define outputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weqnl_1D-PSV_Murnaghan_Pwave.html#Solve">Solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/weqnl_1D-PSV_Murnaghan_Pwave.html#Post-processing">Post-processing</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section4.html"><strong>Eigenmodes</strong></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section4_files.html">eigs_3D_ElasticBeam.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../demos/examples_section4_files.html#eigs-3d-aluminumcube-py">eigs_3D_AluminumCube.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/_ln_demo/tdsdyn_3D_ElasticBeam.html">Vibration of a beam clamped at one end</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/tdsdyn_3D_ElasticBeam.html#FE-domain">FE domain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/tdsdyn_3D_ElasticBeam.html#Boundary-conditions">Boundary conditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/tdsdyn_3D_ElasticBeam.html#Define-the-material-law">Define the material law</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/tdsdyn_3D_ElasticBeam.html#Assemble-the-PDE">Assemble the PDE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/tdsdyn_3D_ElasticBeam.html#Time-scheme">Time scheme</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/tdsdyn_3D_ElasticBeam.html#Define-outputs">Define outputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/tdsdyn_3D_ElasticBeam.html#Solve">Solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/tdsdyn_3D_ElasticBeam.html#Post-processing">Post-processing</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../demos/examples_section5.html"><strong>Guided waves</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/_ln_demo/README.html#frequency-domain-helmoltz-equation">Frequency domain – Helmoltz equation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/_ln_demo/freq_2D-PSV_FullSpace.html">Harmonic P and SV elastic waves in an unbounded solid</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-PSV_FullSpace.html#FE-domain">FE domain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-PSV_FullSpace.html#Define-the-material-law">Define the material law</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-PSV_FullSpace.html#Boundary-conditions">Boundary conditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-PSV_FullSpace.html#Source-term-(body-force)">Source term (body force)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-PSV_FullSpace.html#Assemble-the-PDE">Assemble the PDE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-PSV_FullSpace.html#Solve">Solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-PSV_FullSpace.html#Post-processing">Post-processing</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/_ln_demo/freq_2D-SH_FullSpace.html">Harmonic SH elastic waves in an unbounded solid</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-SH_FullSpace.html#FE-domain">FE domain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-SH_FullSpace.html#Define-the-material-law">Define the material law</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-SH_FullSpace.html#Boundary-conditions">Boundary conditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-SH_FullSpace.html#Source-term-(body-force)">Source term (body force)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-SH_FullSpace.html#Assemble-the-PDE">Assemble the PDE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-SH_FullSpace.html#Solve">Solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/freq_2D-SH_FullSpace.html#Post-processing">Post-processing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/_ln_demo/README.html#eigenmodes">Eigenmodes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../demos/_ln_demo/eigs_3D_AluminumCube.html">Resonances of an aluminum cube</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/eigs_3D_AluminumCube.html#FE-domain">FE domain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/eigs_3D_AluminumCube.html#Define-the-material-law">Define the material law</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/eigs_3D_AluminumCube.html#Assemble-the-PDE">Assemble the PDE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/eigs_3D_AluminumCube.html#Solve">Solve</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../demos/_ln_demo/eigs_3D_ElasticBeam.html">Resonances of a beam clamped at one end</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/eigs_3D_ElasticBeam.html#FE-domain">FE domain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/eigs_3D_ElasticBeam.html#Boundary-condition">Boundary condition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/eigs_3D_ElasticBeam.html#Define-the-material-law">Define the material law</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/eigs_3D_ElasticBeam.html#Assemble-the-PDE">Assemble the PDE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/eigs_3D_ElasticBeam.html#Solve">Solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../demos/_ln_demo/eigs_3D_ElasticBeam.html#Compare-with-beam-theory">Compare with beam theory</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../demos/_ln_demo/README.html#guided-waves">Guided waves</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="api_index.html">API reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="elastodynamicsx.pde.html">elastodynamicsx.pde</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundaryconditions">elastodynamicsx.pde.boundaryconditions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde">Module contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.BodyForce"><code class="docutils literal notranslate"><span class="pre">BodyForce</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundarycondition"><code class="docutils literal notranslate"><span class="pre">boundarycondition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.material"><code class="docutils literal notranslate"><span class="pre">material()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.damping"><code class="docutils literal notranslate"><span class="pre">damping()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.PDE"><code class="docutils literal notranslate"><span class="pre">PDE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.PDECONFIG"><code class="docutils literal notranslate"><span class="pre">PDECONFIG</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.bodyforce">elastodynamicsx.pde.bodyforce</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.bodyforce.BodyForce"><code class="docutils literal notranslate"><span class="pre">BodyForce</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.boundaryconditions">elastodynamicsx.pde.boundaryconditions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase"><code class="docutils literal notranslate"><span class="pre">BoundaryConditionBase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCStrongBase"><code class="docutils literal notranslate"><span class="pre">BCStrongBase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCMPCBase"><code class="docutils literal notranslate"><span class="pre">BCMPCBase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCWeakBase"><code class="docutils literal notranslate"><span class="pre">BCWeakBase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDirichlet"><code class="docutils literal notranslate"><span class="pre">BCDirichlet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCClamp"><code class="docutils literal notranslate"><span class="pre">BCClamp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCNeumann"><code class="docutils literal notranslate"><span class="pre">BCNeumann</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCFree"><code class="docutils literal notranslate"><span class="pre">BCFree</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin"><code class="docutils literal notranslate"><span class="pre">BCRobin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDashpot"><code class="docutils literal notranslate"><span class="pre">BCDashpot</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCPeriodic"><code class="docutils literal notranslate"><span class="pre">BCPeriodic</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.get_dirichlet_BCs"><code class="docutils literal notranslate"><span class="pre">get_dirichlet_BCs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.get_mpc_BCs"><code class="docutils literal notranslate"><span class="pre">get_mpc_BCs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.get_weak_BCs"><code class="docutils literal notranslate"><span class="pre">get_weak_BCs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.boundarycondition"><code class="docutils literal notranslate"><span class="pre">boundarycondition()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx-pde-materials">elastodynamicsx.pde.materials</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.materials.html">elastodynamicsx.pde.materials package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.pde.html#module-elastodynamicsx.pde.pde">elastodynamicsx.pde.pde</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE"><code class="docutils literal notranslate"><span class="pre">PDE</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="elastodynamicsx.pde.html#elastodynamicsx-pde-timeschemes">elastodynamicsx.pde.timeschemes</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">elastodynamicsx.pde.timeschemes</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.plot.html">elastodynamicsx.plot</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.plot.html#module-elastodynamicsx.plot">Module contents</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.plot.html#module-elastodynamicsx.plot.plot">elastodynamicsx.plot.plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.plot.html#module-elastodynamicsx.plot">Module contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.plot.html#elastodynamicsx.plot.live_plotter"><code class="docutils literal notranslate"><span class="pre">live_plotter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.plot.html#elastodynamicsx.plot.plot_mesh"><code class="docutils literal notranslate"><span class="pre">plot_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.plot.html#elastodynamicsx.plot.plotter"><code class="docutils literal notranslate"><span class="pre">plotter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.plot.html#elastodynamicsx.plot.CustomScalarPlotter"><code class="docutils literal notranslate"><span class="pre">CustomScalarPlotter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.plot.html#elastodynamicsx.plot.CustomVectorPlotter"><code class="docutils literal notranslate"><span class="pre">CustomVectorPlotter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.plot.html#elastodynamicsx.plot.spy_petscMatrix"><code class="docutils literal notranslate"><span class="pre">spy_petscMatrix()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.plot.html#module-elastodynamicsx.plot.plot">elastodynamicsx.plot.plot</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.plot.html#elastodynamicsx.plot.plot.plot_mesh"><code class="docutils literal notranslate"><span class="pre">plot_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.plot.html#elastodynamicsx.plot.plot.live_plotter"><code class="docutils literal notranslate"><span class="pre">live_plotter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.plot.html#elastodynamicsx.plot.plot.plotter"><code class="docutils literal notranslate"><span class="pre">plotter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.plot.html#elastodynamicsx.plot.plot.CustomScalarPlotter"><code class="docutils literal notranslate"><span class="pre">CustomScalarPlotter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.plot.html#elastodynamicsx.plot.plot.CustomVectorPlotter"><code class="docutils literal notranslate"><span class="pre">CustomVectorPlotter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.plot.html#elastodynamicsx.plot.plot.spy_petscMatrix"><code class="docutils literal notranslate"><span class="pre">spy_petscMatrix()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.solutions.html">elastodynamicsx.solutions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solutions.html#module-elastodynamicsx.solutions">Module contents</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solutions.html#module-elastodynamicsx.solutions.modalbasis">elastodynamicsx.solutions.modalbasis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solutions.html#module-elastodynamicsx.solutions">Module contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.solutions.html#elastodynamicsx.solutions.ModalBasis"><code class="docutils literal notranslate"><span class="pre">ModalBasis</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solutions.html#module-elastodynamicsx.solutions.modalbasis">elastodynamicsx.solutions.modalbasis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.solutions.html#elastodynamicsx.solutions.modalbasis.ModalBasis"><code class="docutils literal notranslate"><span class="pre">ModalBasis</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.solvers.html">elastodynamicsx.solvers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-timedomain">elastodynamicsx.solvers.timedomain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#module-elastodynamicsx.solvers">Module contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx.solvers.TimeStepper"><code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx.solvers.EigenmodesSolver"><code class="docutils literal notranslate"><span class="pre">EigenmodesSolver</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx.solvers.FrequencyDomainSolver"><code class="docutils literal notranslate"><span class="pre">FrequencyDomainSolver</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-eigensolver">elastodynamicsx.solvers.eigensolver</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.solvers.eigensolver.html">elastodynamicsx.solvers.eigensolver</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-frequencydomain">elastodynamicsx.solvers.frequencydomain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.solvers.frequencydomain.html">elastodynamicsx.solvers.frequencydomain</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.solvers.html#elastodynamicsx-solvers-timedomain">elastodynamicsx.solvers.timedomain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.solvers.timedomain.html">elastodynamicsx.solvers.timedomain</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="elastodynamicsx.utils.html">elastodynamicsx.utils</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils">Module contents</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils.eval">elastodynamicsx.utils.eval</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils.spectralelements">elastodynamicsx.utils.spectralelements</a></li>
-<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils.tags">elastodynamicsx.utils.tags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils">Module contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.make_facet_tags"><code class="docutils literal notranslate"><span class="pre">make_facet_tags()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.make_cell_tags"><code class="docutils literal notranslate"><span class="pre">make_cell_tags()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.make_tags"><code class="docutils literal notranslate"><span class="pre">make_tags()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.ParallelEvaluator"><code class="docutils literal notranslate"><span class="pre">ParallelEvaluator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.spectral_element"><code class="docutils literal notranslate"><span class="pre">spectral_element()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.spectral_quadrature"><code class="docutils literal notranslate"><span class="pre">spectral_quadrature()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils.eval">elastodynamicsx.utils.eval</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.eval.ParallelEvaluator"><code class="docutils literal notranslate"><span class="pre">ParallelEvaluator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils.spectralelements">elastodynamicsx.utils.spectralelements</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.spectralelements.GLL_element"><code class="docutils literal notranslate"><span class="pre">GLL_element()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.spectralelements.GL_element"><code class="docutils literal notranslate"><span class="pre">GL_element()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.spectralelements.Legendre_element"><code class="docutils literal notranslate"><span class="pre">Legendre_element()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.spectralelements.GLL_quadrature"><code class="docutils literal notranslate"><span class="pre">GLL_quadrature()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.spectralelements.GL_quadrature"><code class="docutils literal notranslate"><span class="pre">GL_quadrature()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.spectralelements.Legendre_quadrature"><code class="docutils literal notranslate"><span class="pre">Legendre_quadrature()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.spectralelements.spectral_element"><code class="docutils literal notranslate"><span class="pre">spectral_element()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.spectralelements.spectral_quadrature"><code class="docutils literal notranslate"><span class="pre">spectral_quadrature()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elastodynamicsx.utils.html#module-elastodynamicsx.utils.tags">elastodynamicsx.utils.tags</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.tags.make_facet_tags"><code class="docutils literal notranslate"><span class="pre">make_facet_tags()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.tags.make_cell_tags"><code class="docutils literal notranslate"><span class="pre">make_cell_tags()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="elastodynamicsx.utils.html#elastodynamicsx.utils.tags.make_tags"><code class="docutils literal notranslate"><span class="pre">make_tags()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/links.html">Useful links</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about/licence_link.html">Licence</a></li>
 </ul>
 
         </div>
@@ -987,7 +1179,7 @@ and is unconditionally stable.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Pierric Mora.</p>
+    <p>&#169; Copyright 2024, Pierric Mora.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
