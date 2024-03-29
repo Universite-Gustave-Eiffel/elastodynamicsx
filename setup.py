@@ -40,11 +40,13 @@ class SafetyChecks(setuptools.Command):
              + 'echo "\n\t##########\n\t-> running pytest..." && pytest'], shell=True)
 
 
+exec(open('elastodynamicsx/_version.py').read())
+
 setuptools.setup(
     name='ElastodynamiCSx',
     author="Pierric Mora",
     author_email="pierric.mora@univ-eiffel.fr",
-    version="0.2.2",
+    version=__version__,
     packages=setuptools.find_packages(),
     url='https://github.com/Universite-Gustave-Eiffel/elastodynamicsx',
     license='MIT License',

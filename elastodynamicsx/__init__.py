@@ -6,7 +6,7 @@
 
 """Main module for ElastodynamiCSx"""
 
-__version__ = '0.2.2'
+from ._version import __version__
 
 from elastodynamicsx import pde, plot, solutions, solvers, utils
 
