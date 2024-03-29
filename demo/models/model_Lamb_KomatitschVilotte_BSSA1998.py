@@ -130,5 +130,5 @@ def create_model(**kwargs):
 
 
 if __name__ == "__main__":
-    create_model(show=True)
+    create_model(show=False)
 

@@ -8,10 +8,11 @@
 
 import datetime, sys, os
 
-import elastodynamicsx
+os.environ['ELASTODYNAMICSX_DOCS_CFG'] = 'TRUE'
 
 sys.path.insert(0, os.path.abspath('..'))
 
+import elastodynamicsx
 
 # General information about the project.
 project = 'ElastodynamiCSx'
@@ -40,8 +41,18 @@ language = "en"
 
 extensions = ["sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc",
               'sphinx.ext.mathjax', 'sphinx.ext.ifconfig', 'sphinx.ext.napoleon',
+              'sphinx_tabs.tabs',
+              'jupyter_sphinx',
               "myst_parser",
-              'nbsphinx']
+              'nbsphinx',
+              'sphinx_copybutton',
+              ]
+
+nbsphinx_custom_formats = {
+    '.py': ['jupytext.reads', {'fmt': 'py:light'}],
+}
+
+copybutton_exclude = '.linenos, .gp'
 
 # myst-parser is used to manage (readme) markdown file
 # ref : https://myst-parser.readthedocs.io/en/latest/syntax/optional.html
@@ -63,7 +74,8 @@ myst_enable_extensions = [
 ]
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**/.ipynb_checkpoints',
+                    'demos/_ln_demo/__init__.py', 'demos/_ln_demo/models', 'demos/_ln_demo/analyticalsolutions.py', 'conf.py']
 autodoc_member_order = 'bysource'
 
 # -- Options for HTML output -------------------------------------------------
@@ -85,7 +97,6 @@ html_theme_options = {
     # Toc options
     'collapse_navigation': False,
     'sticky_navigation': True,
-    'navigation_depth': 3,
     'includehidden': True,
     'titles_only': False
     }

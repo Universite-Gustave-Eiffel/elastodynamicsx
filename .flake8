@@ -4,3 +4,5 @@ ignore = W605, W503
 exclude =
     demo
     conf.py
+    jupyter_execute
+    venv

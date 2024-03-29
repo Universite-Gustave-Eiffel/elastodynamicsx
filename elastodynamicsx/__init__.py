@@ -6,8 +6,16 @@
 
 """Main module for ElastodynamiCSx"""
 
-__version__ = '0.2.2'
+from ._version import __version__  # noqa
 
 from elastodynamicsx import pde, plot, solutions, solvers, utils
+
+import os
+# A simple flag to switch the jupyter_backend when building the docs
+_DOCS_CFG = os.environ.get("ELASTODYNAMICSX_DOCS_CFG", "FALSE").upper() == "TRUE"
+
+if _DOCS_CFG:
+    import pyvista
+    pyvista.set_jupyter_backend('static')
 
 __all__ = ["pde", "plot", "solutions", "solvers", "utils"]

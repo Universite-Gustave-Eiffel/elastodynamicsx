@@ -55,6 +55,7 @@ class PDE:
         self.jit_options = kwargs.get('jit_options', PDECONFIG.default_jit_options)
         self._u = ufl.TrialFunction(function_space)
         self._v = ufl.TestFunction(function_space)
+        self.verbose: bool = kwargs.get('verbose', False)
 
         # Declare stuff without building
         self._mpc: typing.Union[MultiPointConstraint, None] = None
@@ -100,10 +101,11 @@ class PDE:
         else:
             self.update_b_frequencydomain = self._update_b_frequencydomain_WITH_MPC
 
-        if self.is_linear:
-            print('linear PDE')
-        else:
-            print('non-linear PDE')
+        if self.verbose:
+            if self.is_linear:
+                print('linear PDE')
+            else:
+                print('non-linear PDE')
 
     def _build_mpc(self) -> None:
         """Required for handling multi-point constraints (e.g. periodic BC)"""

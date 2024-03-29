@@ -40,11 +40,13 @@ class SafetyChecks(setuptools.Command):
              + 'echo "\n\t##########\n\t-> running pytest..." && pytest'], shell=True)
 
 
+exec(open('elastodynamicsx/_version.py').read())
+
 setuptools.setup(
     name='ElastodynamiCSx',
     author="Pierric Mora",
     author_email="pierric.mora@univ-eiffel.fr",
-    version="0.2.2",
+    version=__version__,  # noqa
     packages=setuptools.find_packages(),
     url='https://github.com/Universite-Gustave-Eiffel/elastodynamicsx',
     license='MIT License',
@@ -66,7 +68,7 @@ setuptools.setup(
     install_requires=[
         'numpy',
         'matplotlib',
-        'pyvista',
-        'sphinx', 'sphinx-rtd-theme', 'myst-parser', 'nbsphinx',  # to generate the sphinx doc
+        'pyvista[trame]',
+        'sphinx', 'sphinx-rtd-theme', 'myst-parser', 'nbsphinx', 'sphinx-tabs', 'jupyter-sphinx',  # for sphinx doc
         ],  # noqa
     python_requires='>=3')
