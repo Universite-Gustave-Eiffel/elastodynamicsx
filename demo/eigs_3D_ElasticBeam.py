@@ -35,6 +35,10 @@ from petsc4py import PETSc
 from elastodynamicsx.pde import material, boundarycondition, PDE
 from elastodynamicsx.solvers import EigenmodesSolver
 from elastodynamicsx.utils import make_facet_tags
+
+#import pyvista
+#pyvista.start_xvfb()
+#pyvista.set_jupyter_backend("static")
 # -
 
 # ### FE domain

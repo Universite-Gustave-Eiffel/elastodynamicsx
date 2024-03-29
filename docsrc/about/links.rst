@@ -1,14 +1,21 @@
 Useful links
 ============
 
+| ElastodynamiCSx is hosted on github:  
+|     https://github.com/Universite-Gustave-Eiffel/elastodynamicsx
+
+The `Waveguicsx <https://github.com/Universite-Gustave-Eiffel/waveguicsx>`_ software can be used to solve waveguide problems alongside ElastodynamiCSx.
+
 Part of the code is largely inspired from:
 
-  * `The FEniCSx tutorial <https://jorgensd.github.io/dolfinx-tutorial/>`_
+  * The FEniCSx `tutorial <https://jorgensd.github.io/dolfinx-tutorial/>`_
+  * Snippets from the FEniCSx `discourse <https://fenicsproject.discourse.group/>`_ page
 
 Other useful references:
 
   * FEniCSx:
 
+    * `Numerical tours of Computational Mechanics with FEniCSx <https://bleyerj.github.io/comet-fenicsx/index.html>`_
     * `FEniCSx electromagnetic demos <https://mikics.github.io/>`_
     * `NewFrac FEniCSx Training <https://newfrac.gitlab.io/newfrac-fenicsx-training/index.html>`_
     * `multiphenicsx <https://github.com/multiphenics/multiphenicsx>`_

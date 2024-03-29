@@ -8,6 +8,13 @@
 
 import datetime, sys, os
 
+import pyvista
+#pyvista.start_xvfb()
+# necessary when building the sphinx gallery
+pyvista.BUILDING_GALLERY = True
+pyvista.OFF_SCREEN = True
+pyvista.set_jupyter_backend("static")
+
 import elastodynamicsx
 
 # from shutil import copytree, ignore_patterns
@@ -74,7 +81,7 @@ myst_enable_extensions = [
 ]
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**/.ipynb_checkpoints']
 autodoc_member_order = 'bysource'
 
 # -- Options for HTML output -------------------------------------------------
