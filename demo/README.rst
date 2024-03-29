@@ -17,7 +17,7 @@ Time domain
 | **Explicit** scheme
 |     *Wave propagation modeling*, *Spectral elements*
 
-.. toctree::
+.. nbgallery::
    :maxdepth: 3
    :titlesonly:
    :glob:
@@ -28,7 +28,7 @@ Time domain
 | **Implicit** scheme
 |     *Structural dynamics*
 
-.. toctree::
+.. nbgallery::
    :maxdepth: 3
    :titlesonly:
    :glob:
@@ -39,7 +39,7 @@ Time domain
 Frequency domain -- Helmoltz equation
 -------------------------------------
 
-.. toctree::
+.. nbgallery::
    :maxdepth: 3
    :titlesonly:
    :glob:
@@ -50,7 +50,7 @@ Frequency domain -- Helmoltz equation
 Eigenmodes
 ----------
 
-.. toctree::
+.. nbgallery::
    :maxdepth: 3
    :titlesonly:
    :glob:

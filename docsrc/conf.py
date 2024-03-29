@@ -8,22 +8,11 @@
 
 import datetime, sys, os
 
-import pyvista
-#pyvista.start_xvfb()
-# necessary when building the sphinx gallery
-pyvista.BUILDING_GALLERY = True
-pyvista.OFF_SCREEN = True
-pyvista.set_jupyter_backend("static")
-
-import elastodynamicsx
-
-# from shutil import copytree, ignore_patterns
-
-# copytree('../demo/', 'demos/_cp_demo/', ignore=ignore_patterns('*.ipynb*', '*.npz', '__pycache__'), dirs_exist_ok=True)
-
+os.environ['ELASTODYNAMICSX_DOCS_CFG'] = 'TRUE'
 
 sys.path.insert(0, os.path.abspath('..'))
 
+import elastodynamicsx
 
 # General information about the project.
 project = 'ElastodynamiCSx'
@@ -55,11 +44,15 @@ extensions = ["sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc",
               'sphinx_tabs.tabs',
               'jupyter_sphinx',
               "myst_parser",
-              'nbsphinx']
+              'nbsphinx',
+              'sphinx_copybutton',
+              ]
 
 nbsphinx_custom_formats = {
     '.py': ['jupytext.reads', {'fmt': 'py:light'}],
 }
+
+copybutton_exclude = '.linenos, .gp'
 
 # myst-parser is used to manage (readme) markdown file
 # ref : https://myst-parser.readthedocs.io/en/latest/syntax/optional.html
@@ -81,7 +74,8 @@ myst_enable_extensions = [
 ]
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**/.ipynb_checkpoints']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**/.ipynb_checkpoints',
+                    'demos/_ln_demo/__init__.py', 'demos/_ln_demo/models', 'demos/_ln_demo/analyticalsolutions.py', 'conf.py']
 autodoc_member_order = 'bysource'
 
 # -- Options for HTML output -------------------------------------------------

@@ -126,7 +126,7 @@ fdsolver = FrequencyDomainSolver(V.mesh.comm,
                                  b_update_function=pde.update_b_frequencydomain)
 
 
-# +
+# + {"tags": ["nbsphinx-thumbnail"]}
 # -----------------------------------------------------
 #          Ex 1: Solve for a single frequency
 # -----------------------------------------------------
