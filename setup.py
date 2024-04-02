@@ -20,6 +20,8 @@ class MakeTheDoc(setuptools.Command):
         """The command to run when users invoke python setup.py doc"""
         subprocess.run(
             ['sphinx-build docsrc docs'], shell=True)
+        subprocess.run(
+            ['touch -a docs/.nojekyll'], shell=True)
 
 
 class SafetyChecks(setuptools.Command):
