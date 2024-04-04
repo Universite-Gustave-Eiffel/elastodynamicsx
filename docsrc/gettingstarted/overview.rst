@@ -18,9 +18,40 @@ Build problems
 --------------
 Using the ``elastodynamicsx.pde`` package:
 
+.. jupyter-execute::
+    :hide-code:
+
+    import numpy as np
+
+    from dolfinx import mesh, fem, default_scalar_type
+    from mpi4py import MPI
+
+    degElement = 1
+    length, height = 1, 1
+    Nx, Ny = 10//degElement, 10//degElement
+
+    # create the mesh
+    extent = [[0., 0.], [length, height]]
+    domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny], mesh.CellType.triangle)
+
+    # create the function space
+    V = fem.FunctionSpace(domain, ("Lagrange", degElement, (domain.geometry.dim,)))
+
+    from elastodynamicsx.utils import make_facet_tags, make_cell_tags
+    # define some tags
+    tag_top = 1
+    boundaries = [(tag_top, lambda x: np.isclose(x[1], height)),]
+    subdomains = [(1, lambda x: x[0]<=length/2),\
+                  (2, lambda x: np.logical_and(x[0]>=length/2, x[1]<=height/2)),
+                  (3, lambda x: np.logical_and(x[0]>=length/2, x[1]>=height/2))]
+
+    cell_tags = make_cell_tags(domain, subdomains)
+    facet_tags = make_facet_tags(domain, boundaries)
+
+
 * Common **material laws**:
 
-  .. code-block:: python
+  .. jupyter-execute::
 
       # V is a dolfinx.fem.function_space
       # cell_tags is a dolfinx.mesh.MeshTags object
@@ -30,7 +61,7 @@ Using the ``elastodynamicsx.pde`` package:
       tag_mat1 = 1        # suppose this refers to cells associated with material no 1
       tags_mat2 = (2, 3)  # same for material no 2
       mat1 = material((V, cell_tags, tag_mat1), 'isotropic', rho=1, lambda_=2, mu=1)
-      mat2 = material((V, cell_tags, tag_mat2), 'isotropic', rho=2, lambda_=4, mu=2)
+      mat2 = material((V, cell_tags, tags_mat2), 'isotropic', rho=2, lambda_=4, mu=2)
 
   * linear elasticity:
     *scalar*, *isotropic*, *cubic*, *hexagonal*, *trigonal*, *tetragonal*, *orthotropic*, *monoclinic*, *triclinic*
@@ -43,7 +74,7 @@ Using the ``elastodynamicsx.pde`` package:
 
 * Common **boundary conditions** (BCs):
 
-  .. code-block:: python
+  .. jupyter-execute::
 
       # facet_tags is a dolfinx.mesh.MeshTags object
 
@@ -62,21 +93,23 @@ Using the ``elastodynamicsx.pde`` package:
 
 * Define **body forces**:
 
-  .. code-block:: python
+  .. jupyter-execute::
 
       from elastodynamicsx.pde import BodyForce
 
       amplitude = default_scalar_type([0, 0])  # a dummy load amplitude
       def shape_x(x):
-          return np.ones_like(x)  # a dummy shape
+          x1, x2 = 0.2, 0.3
+          y1, y2 = 0.4, 0.5
+          return (x[0] >= x1) * (x[0] <= x2) * (x[1] >= y1) * (x[1] <= y2)  # a dummy shape
 
       f_body = fem.Function(V)
       f_body.interpolate(lambda x: amplitude[:,np.newaxis] * shape_x(x)[np.newaxis,:])
-      f1 = BodyForce(V, f_body)  # not specifying cell_tags and a specific tag means the entire domain
+      f1 = BodyForce((V, cell_tags, None), f_body)  # None for the entire domain
 
 * **Assemble** several materials, BCs and body forces into a *PDE* instance:
 
-  .. code-block:: python
+  .. jupyter-execute::
 
       from elastodynamicsx.pde import PDE
 
@@ -106,7 +139,8 @@ Using the ``elastodynamicsx.solvers`` package:
 
     .. tab:: Time domain
 
-        .. code-block:: python
+        .. jupyter-execute::
+            :hide-output:
 
             # Time integration
             from elastodynamicsx.solvers import TimeStepper
@@ -119,7 +153,7 @@ Using the ``elastodynamicsx.solvers`` package:
                 T_N.value   = np.sin(t) * forceVector
 
             # Initialize the time stepper: compile forms and assemble the mass matrix
-            tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog')
+            tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=pde.bcs, scheme='newmark')
 
             # Define the initial values
             tStepper.set_initial_condition(u0=[0, 0], v0=[0, 0], t0=0)
@@ -169,7 +203,8 @@ Using the ``elastodynamicsx.solvers`` package:
 
     .. tab:: Eigenmodes
 
-        .. code-block:: python
+        .. jupyter-execute::
+            :hide-output:
 
             # Normal modes
             from elastodynamicsx.solvers import EigenmodesSolver
@@ -217,7 +252,8 @@ Using the ``elastodynamicsx.solutions`` package:
 
 * **Eigenmodes** solutions:
 
-.. code-block:: python
+.. jupyter-execute::
+    :hide-output:
 
     # eps is a elastodynamicsx.solvers.EigenmodesSolver
     # eps.solve() has already been performed
