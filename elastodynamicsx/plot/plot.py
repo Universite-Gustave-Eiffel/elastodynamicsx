@@ -17,6 +17,8 @@ from petsc4py import PETSc
 from dolfinx import plot, fem
 from dolfinx.mesh import Mesh, MeshTags
 
+from elastodynamicsx import _DOCS_CFG
+
 
 # ## ------------------------------------------------------------------------- ## #
 # ## --- preliminary: auto-configure pyvista backend for jupyter notebooks --- ## #
@@ -295,7 +297,6 @@ class CustomScalarPlotter(pyvista.Plotter):
                     im = IPython.display.Image(open(fname, 'rb').read())
                     IPython.display.display(im)  # display .gif in notebook
                 elif self.mwriter.request.extension.lower() == '.mp4':
-                    from elastodynamicsx import _DOCS_CFG
                     vi = IPython.display.Video(fname)
                     if _DOCS_CFG:
                         vi.embed = True
@@ -466,7 +467,20 @@ class CustomVectorPlotter(pyvista.Plotter):
         if render:
             self.render()
 
+    def _auto_record(self, fname=None, *args):
+        is_recording = hasattr(self, 'mwriter')
+        if is_recording:
+            return
+        if fname is None:
+            fname = 'tmp.mp4'
+        if fname.endswith('.gif'):
+            self.open_gif(fname, *args)
+        elif fname.endswith('.mp4'):
+            self.open_movie(fname, *args)
+
     def live_plotter_start(self):
+        if _DOCS_CFG:
+            self._auto_record()
         is_recording = hasattr(self, 'mwriter')
         if is_recording:
             self.notebook = False
@@ -483,7 +497,6 @@ class CustomVectorPlotter(pyvista.Plotter):
                     im = IPython.display.Image(open(fname, 'rb').read())
                     IPython.display.display(im)  # display .gif in notebook
                 elif self.mwriter.request.extension.lower() == '.mp4':
-                    from elastodynamicsx import _DOCS_CFG
                     vi = IPython.display.Video(fname)
                     if _DOCS_CFG:
                         vi.embed = True
