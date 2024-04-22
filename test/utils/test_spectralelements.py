@@ -9,7 +9,7 @@ import numpy as np
 from mpi4py import MPI
 from petsc4py import PETSc
 from dolfinx import mesh, fem
-import ufl
+import ufl  # type: ignore
 
 from elastodynamicsx.pde import PDE, material, PDECONFIG
 from elastodynamicsx.utils import spectral_element, spectral_quadrature
