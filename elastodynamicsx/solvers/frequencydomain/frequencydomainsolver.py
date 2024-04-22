@@ -169,6 +169,8 @@ class FrequencyDomainSolver:
 
         # Loop on values in omegas -> _solve_single_omega
 
+        call_on_leave = kwargs.get('call_on_leave', [])
+
         live_plt = kwargs.get('live_plotter', None)
 
         if not (live_plt is None):
@@ -176,13 +178,18 @@ class FrequencyDomainSolver:
                 # from elastodynamicsx.plot import live_plotter
                 # live_plt = live_plotter(self.u, live_plt.pop('refresh_step', 1), **live_plt)
                 raise NotImplementedError
+
             callbacks.append(live_plt.live_plotter_update_function)
-            live_plt.show(interactive_update=True)
+            call_on_leave.append(live_plt.live_plotter_stop)
+            live_plt.live_plotter_start()
 
         for i in tqdm(range(len(omegas))):
             self._solve_single_omega(omegas[i], out)
             for callback in callbacks:
                 callback(i, out)  # <- store solution, plot, print, ...
+
+        for function in call_on_leave:
+            function()
 
         return out
 

@@ -278,6 +278,32 @@ class CustomScalarPlotter(pyvista.Plotter):
         if kwargs.get('render', True):
             self.render()
 
+    def live_plotter_start(self):
+        is_recording = hasattr(self, 'mwriter')
+        if is_recording:
+            self.notebook = False
+        self.show(interactive_update=True)
+
+    def live_plotter_stop(self):
+        is_recording = hasattr(self, 'mwriter')
+        if is_recording:
+            self.close()
+            fname = self.mwriter.request.filename
+            try:
+                import IPython.display
+                if self.mwriter.request.extension.lower() == '.gif':
+                    im = IPython.display.Image(open(fname, 'rb').read())
+                    IPython.display.display(im)  # display .gif in notebook
+                elif self.mwriter.request.extension.lower() == '.mp4':
+                    from elastodynamicsx import _DOCS_CFG
+                    vi = IPython.display.Video(fname)
+                    if _DOCS_CFG:
+                        vi.embed = True
+                        vi.html_attributes = "controls loop autoplay"
+                    IPython.display.display(vi)  # display .mp4 in notebook
+            except ModuleNotFoundError:
+                pass
+
     def live_plotter_update_function(self, i: int, vec: PETSc.Vec) -> None:  # type: ignore[name-defined]
         if not isinstance(vec, PETSc.Vec):  # type: ignore[attr-defined]
             if issubclass(type(vec), fem.function.Function):
@@ -289,9 +315,13 @@ class CustomScalarPlotter(pyvista.Plotter):
                 except:  # noqa
                     raise TypeError
         if (self._refresh_step > 0) and (i % self._refresh_step == 0):
+            is_recording = hasattr(self, 'mwriter')
             with vec.localForm() as loc_v:  # Necessary for correct handling of ghosts in parallel
-                self.update_scalars(loc_v.array)
-            time.sleep(self._tsleep)
+                self.update_scalars(loc_v.array, render=not is_recording)
+            if is_recording:
+                self.write_frame()  # This triggers a render
+            else:
+                time.sleep(self._tsleep)
 
     def add_time_browser(self,
                          update_fields_function: Callable,
@@ -436,6 +466,32 @@ class CustomVectorPlotter(pyvista.Plotter):
         if render:
             self.render()
 
+    def live_plotter_start(self):
+        is_recording = hasattr(self, 'mwriter')
+        if is_recording:
+            self.notebook = False
+        self.show(interactive_update=True)
+
+    def live_plotter_stop(self):
+        is_recording = hasattr(self, 'mwriter')
+        if is_recording:
+            self.close()
+            fname = self.mwriter.request.filename
+            try:
+                import IPython.display
+                if self.mwriter.request.extension.lower() == '.gif':
+                    im = IPython.display.Image(open(fname, 'rb').read())
+                    IPython.display.display(im)  # display .gif in notebook
+                elif self.mwriter.request.extension.lower() == '.mp4':
+                    from elastodynamicsx import _DOCS_CFG
+                    vi = IPython.display.Video(fname)
+                    if _DOCS_CFG:
+                        vi.embed = True
+                        vi.html_attributes = "controls loop autoplay"
+                    IPython.display.display(vi)  # display .mp4 in notebook
+            except ModuleNotFoundError:
+                pass
+
     def live_plotter_update_function(self, i: int, vec: PETSc.Vec) -> None:  # type: ignore[name-defined]
         if not isinstance(vec, PETSc.Vec):  # type: ignore[attr-defined]
             if issubclass(type(vec), fem.function.Function):
@@ -446,9 +502,13 @@ class CustomVectorPlotter(pyvista.Plotter):
                 except:  # noqa
                     raise TypeError
         if (self._refresh_step > 0) and (i % self._refresh_step == 0):
+            is_recording = hasattr(self, 'mwriter')
             with vec.localForm() as loc_v:  # Necessary for correct handling of ghosts in parallel
-                self.update_vectors(loc_v.array)
-            time.sleep(self._tsleep)
+                self.update_vectors(loc_v.array, render=not is_recording)
+            if is_recording:
+                self.write_frame()  # This triggers a render
+            else:
+                time.sleep(self._tsleep)
 
     def add_time_browser(self,
                          update_fields_function: Callable,

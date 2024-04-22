@@ -280,6 +280,7 @@ class OneStepTimeStepper(LinearTimeStepper):
 
         callfirsts = kwargs.get('callfirsts', [])
         callbacks = kwargs.get('callbacks', [])
+        call_on_leave = kwargs.get('call_on_leave', [])
 
         live_plt = kwargs.get('live_plotter', None)
         if not (live_plt is None):
@@ -289,7 +290,8 @@ class OneStepTimeStepper(LinearTimeStepper):
                 live_plt = live_plotter(u_init, live_plt.pop('refresh_step', 1), **live_plt)
 
             callbacks.append(live_plt.live_plotter_update_function)
-            live_plt.show(interactive_update=True)
+            call_on_leave.append(live_plt.live_plotter_stop)
+            live_plt.live_plotter_start()
 
         t0 = self.t
         self._tscheme.initialStep(t0, callfirsts, callbacks, verbose=verbose)
@@ -331,3 +333,6 @@ class OneStepTimeStepper(LinearTimeStepper):
 
             for callback in callbacks:
                 callback(i, self._out)  # <- store solution, plot, print, ...
+
+        for function in call_on_leave:
+            function()
