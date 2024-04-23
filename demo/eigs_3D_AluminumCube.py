@@ -23,7 +23,6 @@ import numpy as np
 
 from dolfinx import mesh, fem, default_scalar_type
 from mpi4py import MPI
-from petsc4py import PETSc
 
 from elastodynamicsx.pde import material, PDE
 from elastodynamicsx.solvers import EigenmodesSolver
@@ -83,7 +82,7 @@ eps.solve()
 eigenfreqs = eps.getEigenfrequencies()
 # eigenmodes = eps.getEigenmodes()
 
-eps.plot(V, slice(6,6+9), wireframe=True, factor=30)  # Avoid the first 6 rigid body modes
+eps.plot(V, slice(6, 6+9), wireframe=True, factor=30)  # Avoid the first 6 rigid body modes
 # -
 
 
@@ -102,14 +101,15 @@ freqs_OgiEtAl_exp  = np.array([116.716, 143.783, 158.081, 166.5  , 169.523, 177.
                                310.109, 316.197, 317.392, 326.462, 329.034, 332.441, 333.364, 336.65,
                                337.359, 338.276])
 
-freqs_OgiEtAl_calc = np.array([116.32 , 143.186, 158.44 , 166.113, 169.338, 178.36 , 184.57 , 185.078, \
-                               190.206, 197.692, 201.462, 207.096, 211    , 215.613, 223.219, 230.804, \
-                               233.329, 234.758, 250.777, 251.038, 252.303, 256.849, 258.064, 258.874, \
-                               259.203, 267.746, 276.736, 279.144, 282.773, 293.016, 304.593, 305.316, \
-                               309.591, 315.775, 317.931, 326.556, 329.369, 332.732, 332.271, 336.218, \
+freqs_OgiEtAl_calc = np.array([116.32 , 143.186, 158.44 , 166.113, 169.338, 178.36 , 184.57 , 185.078,
+                               190.206, 197.692, 201.462, 207.096, 211    , 215.613, 223.219, 230.804,
+                               233.329, 234.758, 250.777, 251.038, 252.303, 256.849, 258.064, 258.874,
+                               259.203, 267.746, 276.736, 279.144, 282.773, 293.016, 304.593, 305.316,
+                               309.591, 315.775, 317.931, 326.556, 329.369, 332.732, 332.271, 336.218,
                                337.511, 337.71])
 
 print('Eigenfrequencies: comparison with litterature values')
 print('  FE   \tOgi et al, calc.\t Ogi et al, exp. \t(kHz)')
-for fFE, fOgi_calc, fOgi_exp in zip(eigenfreqs[6:]*1e3, freqs_OgiEtAl_calc, freqs_OgiEtAl_exp):  # *1e3 to convert MHz into kHz
-    print(str(round(fFE, 3)) +"\t     "+ str(round(fOgi_calc, 3)) +"\t\t     "+ str(round(fOgi_exp, 3)))
+for fFE, fOgi_calc, fOgi_exp in zip(eigenfreqs[6:] * 1e3, freqs_OgiEtAl_calc, freqs_OgiEtAl_exp):
+    # *1e3 to convert MHz into kHz
+    print(f"{fFE:.3f}\t     {fOgi_calc:.3f}\t\t     {fOgi_exp:.3f}")
