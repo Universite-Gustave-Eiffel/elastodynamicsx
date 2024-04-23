@@ -6,7 +6,8 @@
 # *.JPG
 *.npz
 # *.npy
-# *.mp4
+demo/*.gif
+demo/*.mp4
 # *.html
 # *.sqlite
 # *.hdf5

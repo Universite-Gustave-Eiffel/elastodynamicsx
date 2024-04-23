@@ -30,15 +30,10 @@ import numpy as np
 
 from dolfinx import mesh, fem, default_scalar_type
 from mpi4py import MPI
-from petsc4py import PETSc
 
 from elastodynamicsx.pde import material, boundarycondition, PDE
 from elastodynamicsx.solvers import EigenmodesSolver
 from elastodynamicsx.utils import make_facet_tags
-
-#import pyvista
-#pyvista.start_xvfb()
-#pyvista.set_jupyter_backend("static")
 # -
 
 # ### FE domain
@@ -48,8 +43,8 @@ L_, B_, H_ = 20., 0.5, 1.  # Lengths
 
 # Nb of elts.
 Nx = 20
-Ny = int(B_/L_ * Nx) + 1
-Nz = int(H_/L_ * Nx) + 1
+Ny = int(B_ / L_ * Nx) + 1
+Nz = int(H_ / L_ * Nx) + 1
 
 extent = [[0., 0., 0.], [L_, B_, H_]]
 
@@ -61,11 +56,11 @@ V = fem.FunctionSpace(domain, ("Lagrange", 2, (domain.geometry.dim,)))
 
 # define some tags
 tag_left, tag_top, tag_right, tag_bottom, tag_back, tag_front = 1, 2, 3, 4, 5, 6
-boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0 )),\
-              (tag_right , lambda x: np.isclose(x[0], L_)),\
-              (tag_bottom, lambda x: np.isclose(x[1], 0 )),\
-              (tag_top   , lambda x: np.isclose(x[1], B_)),\
-              (tag_back  , lambda x: np.isclose(x[2], 0 )),\
+boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0.)),
+              (tag_right , lambda x: np.isclose(x[0], L_)),
+              (tag_bottom, lambda x: np.isclose(x[1], 0.)),
+              (tag_top   , lambda x: np.isclose(x[1], B_)),
+              (tag_back  , lambda x: np.isclose(x[2], 0.)),
               (tag_front , lambda x: np.isclose(x[2], H_))]
 
 facet_tags = make_facet_tags(domain, boundaries)
@@ -88,7 +83,7 @@ rho = 1e-3
 
 # Scaling
 scaleRHO = 1e6  # a scaling factor to avoid blowing the solver
-scaleFREQ= np.sqrt(scaleRHO)  # the frequencies must be scaled accordingly
+scaleFREQ = np.sqrt(scaleRHO)  # the frequencies must be scaled accordingly
 rho *= scaleRHO
 
 # Convert Young & Poisson to Lamé's constants
@@ -134,12 +129,13 @@ eps.plot(V, wireframe=True, factor=50)
 # Exact solution computation
 from scipy.optimize import root
 from math import cos, cosh
-falpha = lambda x: cos(x)*cosh(x)+1
-alpha  = lambda n: root(falpha, (2*n+1)*np.pi/2)['x'][0]
+falpha = lambda x: cos(x) * cosh(x) + 1
+alpha  = lambda n: root(falpha, (2 * n + 1) * np.pi / 2)['x'][0]
 
 nev = eigenfreqs.size
-I_bend = H_*B_**3/12*(np.arange(nev)%2==0) + B_*H_**3/12*(np.arange(nev)%2==1)
-freq_beam = np.array([alpha(i//2) for i in range(nev)])**2 *np.sqrt(E*I_bend/(rho.value*B_*H_*L_**4))/2/np.pi
+I_bend = H_ * B_**3 / 12 * (np.arange(nev) % 2 == 0) + B_ * H_**3 / 12 * (np.arange(nev) % 2 == 1)
+freq_beam = np.array([alpha(i // 2) for i in range(nev)])**2 \
+    * np.sqrt(E * I_bend / (rho.value * B_ * H_ * L_**4)) / 2 / np.pi
 
 print('Eigenfrequencies: comparison with beam theory\n')
 print('mode || FE (Hz)\t|| Beam theory (Hz)\t|| Difference (%)')
