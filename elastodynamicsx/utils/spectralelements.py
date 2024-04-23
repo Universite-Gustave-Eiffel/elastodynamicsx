@@ -46,7 +46,11 @@ def GLL_element(cell_type,
                 shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
     """Element defined using the Gauss-Lobatto-Legendre points"""
     cell_type = _suitable_cell_type_format(cell_type)
-    element = basix.ufl.element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.gll_warped, shape=shape)
+    element = basix.ufl.element(basix.ElementFamily.P,
+                                cell_type,
+                                degree,
+                                basix.LagrangeVariant.gll_warped,
+                                shape=shape)
     return element
 
 
@@ -55,7 +59,12 @@ def GL_element(cell_type,
                shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
     """(discontinuous) Element defined using the Gauss-Legendre points"""
     cell_type = _suitable_cell_type_format(cell_type)
-    element = basix.ufl.element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.gl_warped, True)
+    element = basix.ufl.element(basix.ElementFamily.P,
+                                cell_type,
+                                degree,
+                                basix.LagrangeVariant.gl_warped,
+                                discontinuous=True,
+                                shape=shape)
     return element
 
 
@@ -64,7 +73,12 @@ def Legendre_element(cell_type,
                      shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
     """(discontinuous) Element whose basis functions are the orthonormal Legendre polynomials"""
     cell_type = _suitable_cell_type_format(cell_type)
-    element = basix.ufl.element(basix.ElementFamily.P, cell_type, degree, basix.LagrangeVariant.legendre, True)
+    element = basix.ufl.element(basix.ElementFamily.P,
+                                cell_type,
+                                degree,
+                                basix.LagrangeVariant.legendre,
+                                discontinuous=True,
+                                shape=shape)
     return element
 
 
@@ -74,20 +88,22 @@ def Legendre_element(cell_type,
 
 def GLL_quadrature(degree: int) -> dict:
     """Returns the dolfinx quadrature rule for use with GLL elements of the given degree."""
-    if degree == 2:
-        return {"quadrature_rule": "GLL", "quadrature_degree": 3}
+    if degree <= 2:
+        return {"quadrature_rule": "GLL", "quadrature_degree": degree}
     else:
         return {"quadrature_rule": "GLL", "quadrature_degree": 2 * (degree - 1)}
 
 
 def GL_quadrature(degree: int) -> dict:
     """Returns the dolfinx quadrature rule for use with GL elements of the given degree."""
-    return {"quadrature_rule": "GL", "quadrature_degree": 2 * degree}  # 2 * degree + 1 ?
+    return {"quadrature_rule": "GL", "quadrature_degree": 2 * degree}
 
 
 def Legendre_quadrature(degree: int) -> dict:
     """Returns the dolfinx quadrature rule for use with Legendre elements of the given degree."""
-    return {"quadrature_rule": "GL", "quadrature_degree": 2 * degree}
+    if degree <= 2:
+        return {"quadrature_rule": "GL", "quadrature_degree": degree}
+    return {"quadrature_rule": "GL", "quadrature_degree": 2 * (degree - 1)}
 
 
 # ## ### ### ### ###

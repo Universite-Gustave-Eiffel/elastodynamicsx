@@ -1,6 +1,6 @@
 import setuptools
 import subprocess
-# import os
+import os
 
 with open("Readme.md", "r") as fh:
     long_description = fh.read()
@@ -8,16 +8,17 @@ with open("Readme.md", "r") as fh:
 
 class MakeTheDoc(setuptools.Command):
     description = "Generate Documentation Pages using Sphinx"
-    user_options = []
+    user_options = [('light', 'l', 'light build')]
 
     def initialize_options(self):
-        pass
+        self.light = None
 
     def finalize_options(self):
         pass
 
     def run(self):
         """The command to run when users invoke python setup.py doc"""
+        os.environ['ELASTODYNAMICSX_DOCS_LIGHT'] = 'TRUE' if self.light else 'FALSE'
         subprocess.run(
             ['sphinx-build docsrc docs'], shell=True)
         subprocess.run(

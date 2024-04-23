@@ -51,6 +51,10 @@ extensions = ["sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc",
 nbsphinx_custom_formats = {
     '.py': ['jupytext.reads', {'fmt': 'py:light'}],
 }
+if os.environ.get('ELASTODYNAMICSX_DOCS_LIGHT', 'FALSE').upper() == 'TRUE':
+    nbsphinx_execute = 'never'
+else:
+    nbsphinx_execute = 'auto'
 
 copybutton_exclude = '.linenos, .gp'
 
