@@ -44,6 +44,7 @@ The library provides a high level interface to build and solve common problems i
    :caption: About
    :hidden:
 
+   about/authors
    about/links
    about/licence_link
 
