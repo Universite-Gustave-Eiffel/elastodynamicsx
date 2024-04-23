@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resonances of an aluminum cube &mdash; ElastodynamiCSx 0.2.2 documentation</title>
+  <title>Resonances of an aluminum cube &mdash; ElastodynamiCSx 0.2.3 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/jupyter-sphinx.css" type="text/css" />
@@ -18,7 +18,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=000c92bf"></script>
+        <script src="../../_static/documentation_options.js?v=a47416a6"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/thebelab-helper.js"></script>
@@ -48,7 +48,7 @@
             ElastodynamiCSx
           </a>
               <div class="version">
-                0.2.2
+                0.2.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -363,7 +363,6 @@
 
 <span class="kn">from</span> <span class="nn">dolfinx</span> <span class="kn">import</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">fem</span><span class="p">,</span> <span class="n">default_scalar_type</span>
 <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
-<span class="kn">from</span> <span class="nn">petsc4py</span> <span class="kn">import</span> <span class="n">PETSc</span>
 
 <span class="kn">from</span> <span class="nn">elastodynamicsx.pde</span> <span class="kn">import</span> <span class="n">material</span><span class="p">,</span> <span class="n">PDE</span>
 <span class="kn">from</span> <span class="nn">elastodynamicsx.solvers</span> <span class="kn">import</span> <span class="n">EigenmodesSolver</span>
@@ -450,7 +449,7 @@
 <span class="n">eigenfreqs</span> <span class="o">=</span> <span class="n">eps</span><span class="o">.</span><span class="n">getEigenfrequencies</span><span class="p">()</span>
 <span class="c1"># eigenmodes = eps.getEigenmodes()</span>
 
-<span class="n">eps</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="o">+</span><span class="mi">9</span><span class="p">),</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>  <span class="c1"># Avoid the first 6 rigid body modes</span>
+<span class="n">eps</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="o">+</span><span class="mi">9</span><span class="p">),</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>  <span class="c1"># Avoid the first 6 rigid body modes</span>
 </pre></div>
 </div>
 </div>
@@ -478,17 +477,18 @@
                                <span class="mf">310.109</span><span class="p">,</span> <span class="mf">316.197</span><span class="p">,</span> <span class="mf">317.392</span><span class="p">,</span> <span class="mf">326.462</span><span class="p">,</span> <span class="mf">329.034</span><span class="p">,</span> <span class="mf">332.441</span><span class="p">,</span> <span class="mf">333.364</span><span class="p">,</span> <span class="mf">336.65</span><span class="p">,</span>
                                <span class="mf">337.359</span><span class="p">,</span> <span class="mf">338.276</span><span class="p">])</span>
 
-<span class="n">freqs_OgiEtAl_calc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">116.32</span> <span class="p">,</span> <span class="mf">143.186</span><span class="p">,</span> <span class="mf">158.44</span> <span class="p">,</span> <span class="mf">166.113</span><span class="p">,</span> <span class="mf">169.338</span><span class="p">,</span> <span class="mf">178.36</span> <span class="p">,</span> <span class="mf">184.57</span> <span class="p">,</span> <span class="mf">185.078</span><span class="p">,</span> \
-                               <span class="mf">190.206</span><span class="p">,</span> <span class="mf">197.692</span><span class="p">,</span> <span class="mf">201.462</span><span class="p">,</span> <span class="mf">207.096</span><span class="p">,</span> <span class="mi">211</span>    <span class="p">,</span> <span class="mf">215.613</span><span class="p">,</span> <span class="mf">223.219</span><span class="p">,</span> <span class="mf">230.804</span><span class="p">,</span> \
-                               <span class="mf">233.329</span><span class="p">,</span> <span class="mf">234.758</span><span class="p">,</span> <span class="mf">250.777</span><span class="p">,</span> <span class="mf">251.038</span><span class="p">,</span> <span class="mf">252.303</span><span class="p">,</span> <span class="mf">256.849</span><span class="p">,</span> <span class="mf">258.064</span><span class="p">,</span> <span class="mf">258.874</span><span class="p">,</span> \
-                               <span class="mf">259.203</span><span class="p">,</span> <span class="mf">267.746</span><span class="p">,</span> <span class="mf">276.736</span><span class="p">,</span> <span class="mf">279.144</span><span class="p">,</span> <span class="mf">282.773</span><span class="p">,</span> <span class="mf">293.016</span><span class="p">,</span> <span class="mf">304.593</span><span class="p">,</span> <span class="mf">305.316</span><span class="p">,</span> \
-                               <span class="mf">309.591</span><span class="p">,</span> <span class="mf">315.775</span><span class="p">,</span> <span class="mf">317.931</span><span class="p">,</span> <span class="mf">326.556</span><span class="p">,</span> <span class="mf">329.369</span><span class="p">,</span> <span class="mf">332.732</span><span class="p">,</span> <span class="mf">332.271</span><span class="p">,</span> <span class="mf">336.218</span><span class="p">,</span> \
+<span class="n">freqs_OgiEtAl_calc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">116.32</span> <span class="p">,</span> <span class="mf">143.186</span><span class="p">,</span> <span class="mf">158.44</span> <span class="p">,</span> <span class="mf">166.113</span><span class="p">,</span> <span class="mf">169.338</span><span class="p">,</span> <span class="mf">178.36</span> <span class="p">,</span> <span class="mf">184.57</span> <span class="p">,</span> <span class="mf">185.078</span><span class="p">,</span>
+                               <span class="mf">190.206</span><span class="p">,</span> <span class="mf">197.692</span><span class="p">,</span> <span class="mf">201.462</span><span class="p">,</span> <span class="mf">207.096</span><span class="p">,</span> <span class="mi">211</span>    <span class="p">,</span> <span class="mf">215.613</span><span class="p">,</span> <span class="mf">223.219</span><span class="p">,</span> <span class="mf">230.804</span><span class="p">,</span>
+                               <span class="mf">233.329</span><span class="p">,</span> <span class="mf">234.758</span><span class="p">,</span> <span class="mf">250.777</span><span class="p">,</span> <span class="mf">251.038</span><span class="p">,</span> <span class="mf">252.303</span><span class="p">,</span> <span class="mf">256.849</span><span class="p">,</span> <span class="mf">258.064</span><span class="p">,</span> <span class="mf">258.874</span><span class="p">,</span>
+                               <span class="mf">259.203</span><span class="p">,</span> <span class="mf">267.746</span><span class="p">,</span> <span class="mf">276.736</span><span class="p">,</span> <span class="mf">279.144</span><span class="p">,</span> <span class="mf">282.773</span><span class="p">,</span> <span class="mf">293.016</span><span class="p">,</span> <span class="mf">304.593</span><span class="p">,</span> <span class="mf">305.316</span><span class="p">,</span>
+                               <span class="mf">309.591</span><span class="p">,</span> <span class="mf">315.775</span><span class="p">,</span> <span class="mf">317.931</span><span class="p">,</span> <span class="mf">326.556</span><span class="p">,</span> <span class="mf">329.369</span><span class="p">,</span> <span class="mf">332.732</span><span class="p">,</span> <span class="mf">332.271</span><span class="p">,</span> <span class="mf">336.218</span><span class="p">,</span>
                                <span class="mf">337.511</span><span class="p">,</span> <span class="mf">337.71</span><span class="p">])</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Eigenfrequencies: comparison with litterature values&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  FE   </span><span class="se">\t</span><span class="s1">Ogi et al, calc.</span><span class="se">\t</span><span class="s1"> Ogi et al, exp. </span><span class="se">\t</span><span class="s1">(kHz)&#39;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">fFE</span><span class="p">,</span> <span class="n">fOgi_calc</span><span class="p">,</span> <span class="n">fOgi_exp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">eigenfreqs</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span><span class="o">*</span><span class="mf">1e3</span><span class="p">,</span> <span class="n">freqs_OgiEtAl_calc</span><span class="p">,</span> <span class="n">freqs_OgiEtAl_exp</span><span class="p">):</span>  <span class="c1"># *1e3 to convert MHz into kHz</span>
-    <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">fFE</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="o">+</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">     &quot;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">fOgi_calc</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="o">+</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">     &quot;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">fOgi_exp</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+<span class="k">for</span> <span class="n">fFE</span><span class="p">,</span> <span class="n">fOgi_calc</span><span class="p">,</span> <span class="n">fOgi_exp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">eigenfreqs</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span> <span class="o">*</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">freqs_OgiEtAl_calc</span><span class="p">,</span> <span class="n">freqs_OgiEtAl_exp</span><span class="p">):</span>
+    <span class="c1"># *1e3 to convert MHz into kHz</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fFE</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="se">\t</span><span class="s2">     </span><span class="si">{</span><span class="n">fOgi_calc</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="se">\t\t</span><span class="s2">     </span><span class="si">{</span><span class="n">fOgi_exp</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -499,19 +499,19 @@
 <div class="highlight"><pre>
 Eigenfrequencies: comparison with litterature values
   FE    Ogi et al, calc.         Ogi et al, exp.        (kHz)
-116.414      116.32                  116.716
+116.414      116.320                 116.716
 143.605      143.186                 143.783
-158.517      158.44                  158.081
-166.27       166.113                 166.5
+158.517      158.440                 158.081
+166.270      166.113                 166.500
 169.457      169.338                 169.523
-178.607      178.36                  177.846
-184.935      184.57                  183.875
+178.607      178.360                 177.846
+184.935      184.570                 183.875
 185.384      185.078                 186.047
 190.293      190.206                 190.341
 198.003      197.692                 197.386
 202.098      201.462                 201.133
 207.531      207.096                 207.386
-211.323      211.0                   209.836
+211.323      211.000                 209.836
 216.115      215.613                 214.753
 </pre></div></div>
 </div>

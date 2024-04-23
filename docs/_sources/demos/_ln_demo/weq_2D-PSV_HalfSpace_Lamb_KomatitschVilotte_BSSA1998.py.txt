@@ -68,6 +68,7 @@ domain, cell_tags, facet_tags = gmshio.model_to_mesh(model, comm, gmsh_model_ran
 # Create the function space
 V = fem.FunctionSpace(domain, specFE)
 
+
 def y_surf(x):
     """
     A convenience function to obtain the 'y' coordinate of a point
@@ -88,8 +89,8 @@ def y_surf(x):
 
 # +
 # parameters here...
-rho     = 2.2  # density
-cP, cS  = 3.2, 1.8475  # P- and S-wave velocities
+rho    = 2.2  # density
+cP, cS = 3.2, 1.8475  # P- and S-wave velocities
 # ... end
 
 c11, c44 = rho * cP**2, rho * cS**2
@@ -97,7 +98,7 @@ rho      = fem.Constant(domain, default_scalar_type(rho))
 mu       = fem.Constant(domain, default_scalar_type(c44))
 lambda_  = fem.Constant(domain, default_scalar_type(c11 - 2 * c44))
 
-mat   = material(V, 'isotropic', rho, lambda_, mu)
+mat = material(V, 'isotropic', rho, lambda_, mu)
 # -
 
 # ### Boundary conditions
@@ -126,25 +127,30 @@ W0_src = 0.2 * L_ / 50  # Width
 # Gaussian function
 nrm = 1 / np.sqrt(2 * np.pi * W0_src**2)  # normalize to int[src_x(x) dx]=1
 
+
 def src_x(x):  # Source(x): Gaussian
     r = (x[0] - X0_src[0]) / np.cos(np.radians(tilt))
     return nrm * np.exp(-1/2 * (r / W0_src)**2, dtype=default_scalar_type)
 
+
 # ## -> Time function
 fc  = 14.5  # Central frequency
 sig = np.sqrt(2) / (2 * np.pi * fc)  # Gaussian standard deviation
-t0  = 4*sig
+t0  = 4 * sig
+
 
 def src_t(t):  # Source(t): Ricker
-    return (1 - ((t-t0)/sig)**2) * np.exp(-0.5*((t-t0)/sig)**2)
+    return (1 - ((t - t0) / sig)**2) * np.exp(-0.5 * ((t - t0) / sig)**2)
+
 
 # ## -> Space-Time function
 p0 = 1.  # Max amplitude
 F_0 = p0 * default_scalar_type([np.sin(np.radians(tilt)),
                                 -np.cos(np.radians(tilt))])  # Amplitude of the source
 
+
 def T_N_function(t):
-    return lambda x: F_0[:,np.newaxis] * src_t(t) * src_x(x)[np.newaxis,:]  # source(x) at a given time
+    return lambda x: F_0[:, np.newaxis] * src_t(t) * src_x(x)[np.newaxis, :]  # source(x) at a given time
 
 
 # -
@@ -161,16 +167,18 @@ tstart = 0  # Start time
 dt     = 0.25e-3  # Time step
 num_steps = int(6000 * sizefactor)
 
-cmax = ufl.sqrt((lambda_+2*mu)/rho)  # max velocity
+cmax = ufl.sqrt((lambda_ + 2 * mu) / rho)  # max velocity
 courant_number = TimeStepper.Courant_number(V.mesh, cmax, dt)  # Courant number
 PETSc.Sys.Print(f'CFL condition: Courant number = {courant_number:.2f}')
 
 #  Time integration
 #     diagonal=True assumes the left hand side operator is indeed diagonal
-tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog', diagonal=True)
+tStepper = TimeStepper.build(V,
+                             pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs,
+                             scheme='leapfrog', diagonal=True)
 
 # Set the initial values
-tStepper.set_initial_condition(u0=[0,0], v0=[0,0], t0=tstart)
+tStepper.set_initial_condition(u0=[0, 0], v0=[0, 0], t0=tstart)
 # -
 
 
@@ -197,17 +205,19 @@ signals_local = np.zeros((paraEval.nb_points_local,
                           V.num_sub_spaces,
                           num_steps))  # <- output stored here
 
+
 # -> Define callbacks: will be called at the end of each iteration
 def cbck_storeAtPoints(i, out):
     if paraEval.nb_points_local > 0:
-        signals_local[:,:,i+1] = u_res.eval(paraEval.points_local, paraEval.cells_local)
+        signals_local[:, :, i+1] = u_res.eval(paraEval.points_local, paraEval.cells_local)
+
 
 # -> enable live plotting
 enable_plot = True
 clim = 0.015 * np.linalg.norm(F_0) * np.array([0, 1])
 if domain.comm.rank == 0 and enable_plot:
-    kwplot = {'clim':clim, 'show_edges':False, 'warp_factor':0.05/np.amax(clim) }
-    p = plotter(u_res, refresh_step=30, **kwplot)
+    kwplot = {'clim': clim, 'show_edges': False, 'warp_factor': 0.05 / np.amax(clim)}
+    p = plotter(u_res, refresh_step=30, window_size=[640, 480], **kwplot)
     if paraEval.nb_points_local > 0:
         # add points to live_plotter
         p.add_points(paraEval.points_local, render_points_as_spheres=True, opacity=0.75)
@@ -224,6 +234,7 @@ else:
 # 'callfirsts': will be called at the beginning of each iteration#
 def cfst_updateSources(t):
     T_N.interpolate(T_N_function(t))
+
 
 # Run the big time loop!
 tStepper.solve(num_steps - 1,
@@ -242,8 +253,7 @@ tStepper.solve(num_steps - 1,
 all_signals = paraEval.gather(signals_local, root=0)
 
 if domain.comm.rank == 0:
-    
-    t = dt*np.arange(num_steps)
+    t = dt * np.arange(num_steps)
 
     # Export as .npz file
     np.savez('seismogram_weq_2D-PSV_HalfSpace_Lamb_KomatitschVilotte_BSSA1998.npz',
@@ -253,14 +263,14 @@ if domain.comm.rank == 0:
     x0 = np.linalg.norm(points_out.T[0] - X0_src)
     ampl = 4 * dx / np.amax(np.abs(all_signals))
     r11, r12 = np.cos(np.radians(tilt)), np.sin(np.radians(tilt))
-    #
-    fig, ax = plt.subplots(1,2)
+
+    fig, ax = plt.subplots(1, 2)
     ax[0].set_title(r'$u_{tangential}$')
     ax[1].set_title(r'$u_{normal}$')
     for i in range(len(all_signals)):
-        offset = i*dx - x0
-        u2plt_t= offset + ampl * ( r11 * all_signals[i,0,:] + r12 * all_signals[i,1,:])  # tangential
-        u2plt_n= offset + ampl * (-r12 * all_signals[i,0,:] + r11 * all_signals[i,1,:])  # normal
+        offset = i * dx - x0
+        u2plt_t = offset + ampl * ( r11 * all_signals[i, 0, :] + r12 * all_signals[i, 1, :])  # tangential
+        u2plt_n = offset + ampl * (-r12 * all_signals[i, 0, :] + r11 * all_signals[i, 1, :])  # normal
         ax[0].plot(u2plt_t, t, c='k')
         ax[1].plot(u2plt_n, t, c='k')
         ax[0].fill_betweenx(t, offset, u2plt_t, where=(u2plt_t > offset), color='k')
@@ -273,4 +283,3 @@ if domain.comm.rank == 0:
 
 
 # TODO: analytical formula
-

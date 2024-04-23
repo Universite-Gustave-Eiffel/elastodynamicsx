@@ -1,6 +1,7 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_json: true
 #     text_representation:
 #       extension: .py
 #       format_name: light
@@ -28,13 +29,11 @@ import matplotlib.pyplot as plt
 from dolfinx import mesh, fem, default_scalar_type
 import ufl
 from mpi4py import MPI
-from petsc4py import PETSc
 
 from elastodynamicsx.pde import material, BodyForce, boundarycondition, PDE
 from elastodynamicsx.solvers import FrequencyDomainSolver
 from elastodynamicsx.plot import plotter, live_plotter
-from elastodynamicsx.utils import make_facet_tags, make_cell_tags, ParallelEvaluator
-from analyticalsolutions import green_2D_SH_rw, int_Fraunhofer_2D
+from elastodynamicsx.utils import make_facet_tags, ParallelEvaluator
 
 assert np.issubdtype(default_scalar_type, np.complexfloating), \
        "Demo should only be executed with DOLFINx complex mode"
@@ -46,20 +45,20 @@ assert np.issubdtype(default_scalar_type, np.complexfloating), \
 # +
 degElement = 1
 length, height = 10, 10
-Nx, Ny = 100//degElement, 100//degElement
+Nx, Ny = 100 // degElement, 100 // degElement
 
 # create the mesh
 extent = [[0., 0.], [length, height]]
 domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny], mesh.CellType.triangle)
 
 # create the function space
-V  = fem.FunctionSpace(domain, ("Lagrange", degElement))
+V = fem.FunctionSpace(domain, ("Lagrange", degElement))
 
 tag_left, tag_top, tag_right, tag_bottom = 1, 2, 3, 4
 all_tags = (tag_left, tag_top, tag_right, tag_bottom)
-boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),\
-              (tag_right , lambda x: np.isclose(x[0], length)),\
-              (tag_bottom, lambda x: np.isclose(x[1], 0     )),\
+boundaries = [(tag_left  , lambda x: np.isclose(x[0], 0     )),
+              (tag_right , lambda x: np.isclose(x[0], length)),
+              (tag_bottom, lambda x: np.isclose(x[1], 0     )),
               (tag_top   , lambda x: np.isclose(x[1], height))]
 
 # define some tags
@@ -161,30 +160,35 @@ u_res = fem.Function(V, name='solution')
 from scipy.spatial.transform import Rotation as R
 theta = np.radians(35)
 pts = np.linspace(0, length / 2, endpoint=False)[1:]
-points_out = X0[:,np.newaxis] + R.from_rotvec([0, 0, theta]).as_matrix() @ np.array([pts,
-                                                                                     np.zeros_like(pts),
-                                                                                     np.zeros_like(pts)])
+points_out = X0[:, np.newaxis] + \
+    R.from_rotvec([0, 0, theta]).as_matrix() @ np.array([pts,
+                                                         np.zeros_like(pts),
+                                                         np.zeros_like(pts)])
 
 # Declare a convenience ParallelEvaluator
 paraEval = ParallelEvaluator(domain, points_out)
 
 # Declare data (local)
-u_at_pts_local = np.zeros((paraEval.nb_points_local,
-                           1,
-                           omegas.size),
-                           dtype=default_scalar_type)  # <- output stored here
+u_at_pts_local = np.zeros((paraEval.nb_points_local, 1, omegas.size),
+                          dtype=default_scalar_type)  # <- output stored here
+
 
 # Callback function: post process solution
 def cbck_storeAtPoints(i, out):
     if paraEval.nb_points_local > 0:
-        u_at_pts_local[:,:,i] = u_res.eval(paraEval.points_local, paraEval.cells_local)
+        u_at_pts_local[:, :, i] = u_res.eval(paraEval.points_local, paraEval.cells_local)
+
 
 # Live plotting
-enable_plot = True
-if domain.comm.rank == 0 and enable_plot:
-    p = live_plotter(u_res, clim=0.25 * np.linalg.norm(mu.value * F0.value) * np.array([-1, 1]))
+if domain.comm.rank == 0:
+    p = live_plotter(u_res,
+                     show_edges=False,
+                     clim=0.25 * np.linalg.norm(mu.value * F0.value) * np.array([-1, 1]))
     if paraEval.nb_points_local > 0:
         p.add_points(paraEval.points_local)  # add points to live_plotter
+    if p.off_screen:
+        p.window_size = [640, 480]
+        p.open_movie('freq_2D-SH_FullSpace.mp4', framerate=1)
 else:
     p = None
 
@@ -201,27 +205,27 @@ fdsolver.solve(omega=omegas, out=u_res.vector, callbacks=[cbck_storeAtPoints], l
 u_at_pts = paraEval.gather(u_at_pts_local, root=0)
 
 if domain.comm.rank == 0:
-    ### -> Exact solution, At few points
+    # -> Exact solution, At few points
     x = points_out.T
-    r = np.linalg.norm(x - X0[np.newaxis,:], axis=1)
+    r = np.linalg.norm(x - X0[np.newaxis, :], axis=1)
 
     # account for the size of the source in the analytical formula
+    from analyticalsolutions import green_2D_SH_rw, int_Fraunhofer_2D
     fn_kdomain_finite_size = int_Fraunhofer_2D['gaussian'](R0)
     u_at_pts_anal = green_2D_SH_rw(r, omegas, rho.value, mu.value, fn_kdomain_finite_size)
 
     #
     fn = np.real
 
-    fig, ax = plt.subplots(len(omegas),1)
+    fig, ax = plt.subplots(len(omegas), 1)
     fig.suptitle(r'u at few points, $\theta$=' + str(int(round(np.degrees(theta), 0))) + r'$^{\circ}$')
     for i in range(len(omegas)):
         ax[i].text(0.15, 0.95, r'$\omega$=' + str(round(omegas[i], 2)),
                    ha='left', va='top', transform=ax[i].transAxes)
-        ax[i].plot(r, fn(u_at_pts[:, 0, i]), ls='-' , label='FEM')
+        ax[i].plot(r, fn(u_at_pts[:, 0, i]), ls='-', label='FEM')
         ax[i].plot(r, fn(u_at_pts_anal[:, i]), ls='--', label='analytical')
     ax[0].legend()
     ax[-1].set_xlabel('Distance to source')
     plt.show()
 #
 # ------------------ end of Ex 2 ----------------------
-

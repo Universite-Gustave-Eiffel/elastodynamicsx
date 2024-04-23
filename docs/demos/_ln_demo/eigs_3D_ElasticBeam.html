@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resonances of a beam clamped at one end &mdash; ElastodynamiCSx 0.2.2 documentation</title>
+  <title>Resonances of a beam clamped at one end &mdash; ElastodynamiCSx 0.2.3 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/jupyter-sphinx.css" type="text/css" />
@@ -18,7 +18,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=000c92bf"></script>
+        <script src="../../_static/documentation_options.js?v=a47416a6"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/thebelab-helper.js"></script>
@@ -48,7 +48,7 @@
             ElastodynamiCSx
           </a>
               <div class="version">
-                0.2.2
+                0.2.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -372,15 +372,10 @@
 
 <span class="kn">from</span> <span class="nn">dolfinx</span> <span class="kn">import</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">fem</span><span class="p">,</span> <span class="n">default_scalar_type</span>
 <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
-<span class="kn">from</span> <span class="nn">petsc4py</span> <span class="kn">import</span> <span class="n">PETSc</span>
 
 <span class="kn">from</span> <span class="nn">elastodynamicsx.pde</span> <span class="kn">import</span> <span class="n">material</span><span class="p">,</span> <span class="n">boundarycondition</span><span class="p">,</span> <span class="n">PDE</span>
 <span class="kn">from</span> <span class="nn">elastodynamicsx.solvers</span> <span class="kn">import</span> <span class="n">EigenmodesSolver</span>
 <span class="kn">from</span> <span class="nn">elastodynamicsx.utils</span> <span class="kn">import</span> <span class="n">make_facet_tags</span>
-
-<span class="c1">#import pyvista</span>
-<span class="c1">#pyvista.start_xvfb()</span>
-<span class="c1">#pyvista.set_jupyter_backend(&quot;static&quot;)</span>
 </pre></div>
 </div>
 </div>
@@ -394,8 +389,8 @@
 
 <span class="c1"># Nb of elts.</span>
 <span class="n">Nx</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="n">Ny</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">B_</span><span class="o">/</span><span class="n">L_</span> <span class="o">*</span> <span class="n">Nx</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-<span class="n">Nz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">H_</span><span class="o">/</span><span class="n">L_</span> <span class="o">*</span> <span class="n">Nx</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">Ny</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">B_</span> <span class="o">/</span> <span class="n">L_</span> <span class="o">*</span> <span class="n">Nx</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">Nz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">H_</span> <span class="o">/</span> <span class="n">L_</span> <span class="o">*</span> <span class="n">Nx</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 
 <span class="n">extent</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="n">L_</span><span class="p">,</span> <span class="n">B_</span><span class="p">,</span> <span class="n">H_</span><span class="p">]]</span>
 
@@ -407,11 +402,11 @@
 
 <span class="c1"># define some tags</span>
 <span class="n">tag_left</span><span class="p">,</span> <span class="n">tag_top</span><span class="p">,</span> <span class="n">tag_right</span><span class="p">,</span> <span class="n">tag_bottom</span><span class="p">,</span> <span class="n">tag_back</span><span class="p">,</span> <span class="n">tag_front</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span>
-<span class="n">boundaries</span> <span class="o">=</span> <span class="p">[(</span><span class="n">tag_left</span>  <span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span> <span class="p">)),</span>\
-              <span class="p">(</span><span class="n">tag_right</span> <span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">L_</span><span class="p">)),</span>\
-              <span class="p">(</span><span class="n">tag_bottom</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span> <span class="p">)),</span>\
-              <span class="p">(</span><span class="n">tag_top</span>   <span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">B_</span><span class="p">)),</span>\
-              <span class="p">(</span><span class="n">tag_back</span>  <span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span> <span class="p">)),</span>\
+<span class="n">boundaries</span> <span class="o">=</span> <span class="p">[(</span><span class="n">tag_left</span>  <span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.</span><span class="p">)),</span>
+              <span class="p">(</span><span class="n">tag_right</span> <span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">L_</span><span class="p">)),</span>
+              <span class="p">(</span><span class="n">tag_bottom</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.</span><span class="p">)),</span>
+              <span class="p">(</span><span class="n">tag_top</span>   <span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">B_</span><span class="p">)),</span>
+              <span class="p">(</span><span class="n">tag_back</span>  <span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">0.</span><span class="p">)),</span>
               <span class="p">(</span><span class="n">tag_front</span> <span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">H_</span><span class="p">))]</span>
 
 <span class="n">facet_tags</span> <span class="o">=</span> <span class="n">make_facet_tags</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">boundaries</span><span class="p">)</span>
@@ -445,7 +440,7 @@
 
 <span class="c1"># Scaling</span>
 <span class="n">scaleRHO</span> <span class="o">=</span> <span class="mf">1e6</span>  <span class="c1"># a scaling factor to avoid blowing the solver</span>
-<span class="n">scaleFREQ</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">scaleRHO</span><span class="p">)</span>  <span class="c1"># the frequencies must be scaled accordingly</span>
+<span class="n">scaleFREQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">scaleRHO</span><span class="p">)</span>  <span class="c1"># the frequencies must be scaled accordingly</span>
 <span class="n">rho</span> <span class="o">*=</span> <span class="n">scaleRHO</span>
 
 <span class="c1"># Convert Young &amp; Poisson to Lamé&#39;s constants</span>
@@ -528,8 +523,8 @@
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Exact solution computation</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">root</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">cos</span><span class="p">,</span> <span class="n">cosh</span>
-<span class="n">falpha</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">cosh</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
-<span class="n">alpha</span>  <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">root</span><span class="p">(</span><span class="n">falpha</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">falpha</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">cosh</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">alpha</span>  <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">root</span><span class="p">(</span><span class="n">falpha</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -538,8 +533,9 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nev</span> <span class="o">=</span> <span class="n">eigenfreqs</span><span class="o">.</span><span class="n">size</span>
-<span class="n">I_bend</span> <span class="o">=</span> <span class="n">H_</span><span class="o">*</span><span class="n">B_</span><span class="o">**</span><span class="mi">3</span><span class="o">/</span><span class="mi">12</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nev</span><span class="p">)</span><span class="o">%</span><span class="k">2</span>==0) + B_*H_**3/12*(np.arange(nev)%2==1)
-<span class="n">freq_beam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">alpha</span><span class="p">(</span><span class="n">i</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nev</span><span class="p">)])</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">E</span><span class="o">*</span><span class="n">I_bend</span><span class="o">/</span><span class="p">(</span><span class="n">rho</span><span class="o">.</span><span class="n">value</span><span class="o">*</span><span class="n">B_</span><span class="o">*</span><span class="n">H_</span><span class="o">*</span><span class="n">L_</span><span class="o">**</span><span class="mi">4</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+<span class="n">I_bend</span> <span class="o">=</span> <span class="n">H_</span> <span class="o">*</span> <span class="n">B_</span><span class="o">**</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">12</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nev</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">B_</span> <span class="o">*</span> <span class="n">H_</span><span class="o">**</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">12</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nev</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">freq_beam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">alpha</span><span class="p">(</span><span class="n">i</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nev</span><span class="p">)])</span><span class="o">**</span><span class="mi">2</span> \
+    <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">E</span> <span class="o">*</span> <span class="n">I_bend</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">B_</span> <span class="o">*</span> <span class="n">H_</span> <span class="o">*</span> <span class="n">L_</span><span class="o">**</span><span class="mi">4</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
 </pre></div>
 </div>
 </div>

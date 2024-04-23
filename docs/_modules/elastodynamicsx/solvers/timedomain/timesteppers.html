@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>elastodynamicsx.solvers.timedomain.timesteppers &mdash; ElastodynamiCSx 0.2.2 documentation</title>
+  <title>elastodynamicsx.solvers.timedomain.timesteppers &mdash; ElastodynamiCSx 0.2.3 documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/jupyter-sphinx.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=000c92bf"></script>
+        <script src="../../../../_static/documentation_options.js?v=a47416a6"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../../../_static/thebelab-helper.js"></script>
@@ -43,7 +43,7 @@
             ElastodynamiCSx
           </a>
               <div class="version">
-                0.2.2
+                0.2.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -656,6 +656,7 @@
 
         <span class="n">callfirsts</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;callfirsts&#39;</span><span class="p">,</span> <span class="p">[])</span>
         <span class="n">callbacks</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;callbacks&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">call_on_leave</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;call_on_leave&#39;</span><span class="p">,</span> <span class="p">[])</span>
 
         <span class="n">live_plt</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;live_plotter&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">live_plt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
@@ -665,7 +666,8 @@
                 <span class="n">live_plt</span> <span class="o">=</span> <span class="n">live_plotter</span><span class="p">(</span><span class="n">u_init</span><span class="p">,</span> <span class="n">live_plt</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;refresh_step&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="o">**</span><span class="n">live_plt</span><span class="p">)</span>
 
             <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">live_plt</span><span class="o">.</span><span class="n">live_plotter_update_function</span><span class="p">)</span>
-            <span class="n">live_plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">interactive_update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">call_on_leave</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">live_plt</span><span class="o">.</span><span class="n">live_plotter_stop</span><span class="p">)</span>
+            <span class="n">live_plt</span><span class="o">.</span><span class="n">live_plotter_start</span><span class="p">()</span>
 
         <span class="n">t0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tscheme</span><span class="o">.</span><span class="n">initialStep</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">callfirsts</span><span class="p">,</span> <span class="n">callbacks</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
@@ -706,7 +708,10 @@
                 <span class="n">PETSc</span><span class="o">.</span><span class="n">Sys</span><span class="o">.</span><span class="n">Print</span><span class="p">(</span><span class="s1">&#39;Callbacks...&#39;</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="n">callbacks</span><span class="p">:</span>
-                <span class="n">callback</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out</span><span class="p">)</span>  <span class="c1"># &lt;- store solution, plot, print, ...</span></div>
+                <span class="n">callback</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out</span><span class="p">)</span>  <span class="c1"># &lt;- store solution, plot, print, ...</span>
+
+        <span class="k">for</span> <span class="n">function</span> <span class="ow">in</span> <span class="n">call_on_leave</span><span class="p">:</span>
+            <span class="n">function</span><span class="p">()</span></div>
 </div>
 
 </pre></div>

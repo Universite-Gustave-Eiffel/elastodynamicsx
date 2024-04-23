@@ -89,7 +89,13 @@ Dependencies
     import dolfinx
     print(f"DOLFINx version: {dolfinx.__version__}")
 
-* `DOLFINx-MPC <https://github.com/jorgensd/dolfinx_mpc>`_ v0.7.0.post1. This dependency is optional (periodic BCs).
+* `DOLFINx-MPC <https://github.com/jorgensd/dolfinx_mpc>`_. This dependency is optional (periodic BCs).
+
+.. jupyter-execute::
+    :hide-code:
+
+    from importlib.metadata import version
+    print(f"DOLFINx-MPC version: {version('dolfinx_mpc')}")
 
 * ``numpy``
 
