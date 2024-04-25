@@ -58,10 +58,9 @@ class BodyForce:
         # md = kwargs.get('metadata', None)
         self._dx = ufl.Measure("dx", domain=function_space.mesh, subdomain_data=cell_tags, metadata=md)(marker)
 
-    @property
-    def b_fn(self) -> typing.Callable:
+    def b_fn(self, v):
         """The linear form function"""
-        return lambda v: ufl.inner(self._value, v) * self._dx
+        return ufl.inner(self._value, v) * self._dx
 
     @property
     def value(self) -> typing.Union[Function, Constant, np.ndarray]:

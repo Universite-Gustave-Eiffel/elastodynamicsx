@@ -142,13 +142,18 @@ class PDE:
                                 subdomain_data=cint.subdomain_data(),
                                 metadata=cint.metadata())(cint.subdomain_id()) for cint in k.integrals()]
 
-        c = self.C_fn(u, v) if not (self.C_fn is None) else sum([zero * ufl.inner(u, v) * dx for dx in measures])
-        L = self.b_fn(v) if not (self.b_fn is None) else sum([ufl.inner(vzero, v) * dx for dx in measures])
+        c_NULL = sum([zero * ufl.inner(u, v) * dx for dx in measures])
+        L_NULL = sum([ufl.inner(vzero, v) * dx for dx in measures])
+        c = self.C_fn(u, v) if not (self.C_fn is None) else c_NULL
+
+        L = [self.b_fn(v)]
 
         # Boundaries
-        c += sum(filter(None, [bc.C_fn(u, v) for bc in self._bcs_weak]))
         k += sum(filter(None, [bc.K_fn(u, v) for bc in self._bcs_weak]))
-        L += sum(filter(None, [bc.b_fn(v) for bc in self._bcs_weak]))
+        c += sum(filter(None, [bc.C_fn(u, v) for bc in self._bcs_weak]))
+        L += [bc.b_fn(v) for bc in self._bcs_weak]
+
+        L = sum(filter(None, L)) if any(L) else L_NULL
 
         self._C_form = fem.form(c, jit_options=self.jit_options)
         self._K_form = fem.form(k, jit_options=self.jit_options)
@@ -235,13 +240,12 @@ class PDE:
         """(bilinear) Numerical flux form function (Disontinuous Galerkin)"""
         return lambda u, v: sum([mat.DG_numerical_flux(u, v) for mat in self.materials])
 
-    @property
-    def b_fn(self) -> typing.Union[typing.Callable, None]:
+    def b_fn(self, v):
         """Linear form function"""
         if len(self.bodyforces) == 0:
             return None
         else:
-            return lambda v: sum([f.b_fn(v) for f in self.bodyforces])
+            return sum([f.b_fn(v) for f in self.bodyforces])
 
 # ## ### ### ### ### ### ### ## #
 # ## Compiled dolfinx forms  ## #

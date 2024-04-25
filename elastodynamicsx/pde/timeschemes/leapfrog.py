@@ -90,9 +90,9 @@ class LeapFrog(FEniCSxTimeScheme):
         self._m0_form = M_fn(u, v)
         self._L0_form = -K_fn(self._u0, v)
 
+        _L_terms = []
         if not (b_fn is None):
-            self._L += dt_ * dt_ * b_fn(v)
-            self._L0_form += b_fn(v)
+            _L_terms.append(b_fn(v))
 
         # linear and bilinear forms for damping matrix if given
         if not (C_fn is None):
@@ -113,12 +113,16 @@ class LeapFrog(FEniCSxTimeScheme):
         self._a += dt_ * dt_ * sum(filter(None, [bc.K_fn(u, v) for bc in weak_BCs]))
 
         # load term, BC
-        self._L += dt_ * dt_ * sum(filter(None, [bc.b_fn(v) for bc in weak_BCs]))
+        _L_terms += [bc.b_fn(v) for bc in weak_BCs]
 
         # initial value rhs, BC
         self._L0_form += sum(filter(None, [bc.C_fn(self._v0, v) for bc in weak_BCs]))
         self._L0_form += sum(filter(None, [bc.K_fn(self._u0, v) for bc in weak_BCs]))
-        self._L0_form += sum(filter(None, [bc.b_fn(v) for bc in weak_BCs]))
+
+        # sum and report into forms
+        _L_terms_sum = sum(filter(None, _L_terms))
+        self._L += dt_ * dt_ * _L_terms_sum
+        self._L0_form += _L_terms_sum
 
         # compile forms
         bilinear_form = fem.form(self._a, jit_options=self.jit_options)
