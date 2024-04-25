@@ -112,13 +112,13 @@ class BCWeakBase(BoundaryConditionBase):
     def ds(self):
         return self._ds
 
-    def c(self, u, v):
+    def C_fn(self, u, v):
         return None
 
-    def k(self, u, v):
+    def K_fn(self, u, v):
         return None
 
-    def L(self, v):
+    def b_fn(self, v):
         return None
 
 # ### ### ### #
@@ -191,7 +191,7 @@ class BCNeumann(BCWeakBase):
         super().__init__(functionspace_tags_marker, **kwargs)
         self._value = value
 
-    def L(self, v):
+    def b_fn(self, v):
         return ufl.inner(self.value, v) * self.ds
 
     @property
@@ -218,7 +218,7 @@ class BCFree(BCNeumann):
 
         super().__init__(functionspace_tags_marker, value, **kwargs)
 
-    def L(self, v):
+    def b_fn(self, v):
         return None
 
 
@@ -245,10 +245,10 @@ class BCRobin(BCWeakBase):
         self._value1 = value1
         self._value2 = value2
 
-    def k(self, u, v):
+    def K_fn(self, u, v):
         return -ufl.inner(self.value1 * u, v) * self.ds
 
-    def L(self, v):
+    def b_fn(self, v):
         return -ufl.inner(self.value1 * self.value2, v) * self.ds
 
     @property
@@ -282,26 +282,26 @@ class BCDashpot(BCWeakBase):
         # number of components if vector space, 0 if scalar space
         nbcomps = function_space.element.num_sub_elements
 
-        self._c: Callable
+        self._C_fn: Callable
 
         # scalar function space
         if nbcomps == 0:
             assert len(values) == 1
             value = values[0]
 
-            def _c(u_t, v):
+            def _C_fn(u_t, v):
                 return value * ufl.inner(u_t, v) * ds
 
-            self._c = _c
+            self._C_fn = _C_fn
 
         # vector function space
         else:
             assert len(values) == 2
             if function_space.mesh.topology.dim == 1:
-                def _c(u_t, v):
+                def _C_fn(u_t, v):
                     return ((values[0] - values[1]) * ufl.inner(u_t[0], v[0]) + values[1] * ufl.inner(u_t, v)) * ds
 
-                self._c = _c
+                self._C_fn = _C_fn
 
             else:
                 n = ufl.FacetNormal(function_space.mesh)
@@ -309,14 +309,14 @@ class BCDashpot(BCWeakBase):
                 if nbcomps > dim:
                     n = ufl.as_vector([n[i] for i in range(dim)] + [0 for i in range(nbcomps - dim)])
 
-                def _c(u_t, v):
+                def _C_fn(u_t, v):
                     return ((values[0] - values[1]) * ufl.dot(u_t, n) * ufl.inner(n, v)
                             + values[1] * ufl.inner(u_t, v)) * ds
 
-                self._c = _c
+                self._C_fn = _C_fn
 
-    def c(self, u, v):
-        return self._c(u, v)
+    def C_fn(self, u, v):
+        return self._C_fn(u, v)
 
     @property
     def values(self):

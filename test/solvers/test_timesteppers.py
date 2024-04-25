@@ -50,6 +50,6 @@ def test():
     num_steps = 5
 
     for scheme in ('leapfrog', 'newmark', 'hht', 'generalized-alpha', 'midpoint', 'linear-acceleration-method'):
-        tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=pde.bcs, scheme=scheme)
+        tStepper = TimeStepper.build(V, pde.M_fn, pde.C_fn, pde.K_fn, pde.b_fn, dt, bcs=pde.bcs, scheme=scheme)
         tStepper.set_initial_condition(u0=[0, 0], v0=[0, 0], t0=0)
         tStepper.solve(num_steps)

@@ -62,7 +62,7 @@ def tst_bcs_scalar_material(dim, eltname="Lagrange"):
         _, _, _ = pde.M(), pde.C(), pde.K()
 
         print('tst_bcs_vector_materials:: TODO: test for waveguides')
-        # _, _, _ = pde.K1(), pde.K2(), pde.K3()
+        # _, _, _ = pde.K0(), pde.K1(), pde.K2()
 
     # The end
 
@@ -102,7 +102,7 @@ def tst_bcs_vector_materials(dim, nbcomps, eltname="Lagrange"):
         _, _, _ = pde.M(), pde.C(), pde.K()
 
         print('tst_bcs_vector_materials:: TODO: test for waveguides')
-        # _, _, _ = pde.K1(), pde.K2(), pde.K3()
+        # _, _, _ = pde.K0(), pde.K1(), pde.K2()
 
     # The end
 

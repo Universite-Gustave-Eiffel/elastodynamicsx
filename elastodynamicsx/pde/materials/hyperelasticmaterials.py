@@ -49,14 +49,15 @@ class HyperelasticMaterial(Material):
     def P(self, u):
         """First Piola-Kirchhoff stress"""
         print("supercharge me")
+        raise NotImplementedError
 
     @property
-    def k_CG(self):
+    def K_fn_CG(self):
         """Stiffness form function for a Continuous Galerkin formulation"""
         return lambda u, v: ufl.inner(self.P(u), self.Grad(v)) * self._dx
 
     @property
-    def k_DG(self) -> Callable:
+    def K_fn_DG(self) -> Callable:
         """**(Not implemented)** Stiffness form function for a Discontinuous Galerkin formulation"""
         raise NotImplementedError
 

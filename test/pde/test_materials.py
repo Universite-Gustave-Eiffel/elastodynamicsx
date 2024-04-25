@@ -42,7 +42,7 @@ def tst_scalar_material(dim, eltname="Lagrange"):
 
     # Compile some matrices
     _, _, _ = pde.M(), pde.C(), pde.K()
-    _, _, _ = pde.K1(), pde.K2(), pde.K3()
+    _, _, _ = pde.K0(), pde.K1(), pde.K2()
 
     # The end
 
@@ -81,7 +81,7 @@ def tst_vector_materials(dim, nbcomps, eltname="Lagrange"):
         print('skipping not implemented case for waveguides (DG)')
 
     else:
-        _, _, _ = pde.K1(), pde.K2(), pde.K3()
+        _, _, _ = pde.K0(), pde.K1(), pde.K2()
 
     # The end
 

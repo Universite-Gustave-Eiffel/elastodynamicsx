@@ -167,7 +167,9 @@ PETSc.Sys.Print(f'CFL condition: Courant number = {courant_number:.2f}')
 
 # Time integration: define a TimeStepper instance
 #     diagonal=True assumes the left hand side operator is indeed diagonal
-tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog', diagonal=True)
+tStepper = TimeStepper.build(V,
+                             pde.M_fn, pde.C_fn, pde.K_fn, pde.b_fn, dt, bcs=bcs,
+                             scheme='leapfrog', diagonal=True)
 
 # Set the initial values
 tStepper.set_initial_condition(u0=0, v0=0, t0=tstart)

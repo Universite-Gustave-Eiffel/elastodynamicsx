@@ -54,14 +54,14 @@ Getting the forms:
     .. code-block:: python
 
       # Python functions
-      m = pde.m
+      M_function = pde.M_fn
       # Use as:
       # u = ufl.TrialFunction(function_space)
       # v = ufl.TestFunction(function_space)
-      # m_ufl = m(u, v)
+      # M_ufl = M_function(u, v)
 
       # Compiled dolfinx forms
-      m_form = pde.m_form
+      M_form = pde.M_form
 
       # PETSc Matrices
       M = pde.M()

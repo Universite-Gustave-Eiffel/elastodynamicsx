@@ -24,7 +24,7 @@ class Damping():
     labels: List[str]
 
     @property
-    def c(self):
+    def C_fn(self):
         """The damping form"""
         print('supercharge me')
         raise NotImplementedError
@@ -36,7 +36,7 @@ class NoDamping(Damping):
     labels: List[str] = ['none']
 
     @property
-    def c(self):
+    def C_fn(self):
         """
         The damping form
 
@@ -77,8 +77,8 @@ class RayleighDamping(Damping):
         return self._eta_k
 
     @property
-    def c(self):
-        return lambda u, v: self.eta_m * self._material.m(u, v) + self.eta_k * self._material.k(u, v)
+    def C_fn(self):
+        return lambda u, v: self.eta_m * self._material.M_fn(u, v) + self.eta_k * self._material.K_fn(u, v)
 
     @property
     def host_material(self):

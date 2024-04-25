@@ -28,7 +28,7 @@ Using the ``elastodynamicsx.pde`` package:
 
     degElement = 1
     length, height = 1, 1
-    Nx, Ny = 10//degElement, 10//degElement
+    Nx, Ny = 10 // degElement, 10 // degElement
 
     # create the mesh
     extent = [[0., 0.], [length, height]]
@@ -41,9 +41,9 @@ Using the ``elastodynamicsx.pde`` package:
     # define some tags
     tag_top = 1
     boundaries = [(tag_top, lambda x: np.isclose(x[1], height)),]
-    subdomains = [(1, lambda x: x[0]<=length/2),\
-                  (2, lambda x: np.logical_and(x[0]>=length/2, x[1]<=height/2)),
-                  (3, lambda x: np.logical_and(x[0]>=length/2, x[1]>=height/2))]
+    subdomains = [(1, lambda x: x[0] <= length/2),\
+                  (2, lambda x: np.logical_and(x[0] >= length/2, x[1] <= height/2)),
+                  (3, lambda x: np.logical_and(x[0] >= length/2, x[1] >= height/2))]
 
     cell_tags = make_cell_tags(domain, subdomains)
     facet_tags = make_facet_tags(domain, boundaries)
@@ -104,7 +104,7 @@ Using the ``elastodynamicsx.pde`` package:
           return (x[0] >= x1) * (x[0] <= x2) * (x[1] >= y1) * (x[1] <= y2)  # a dummy shape
 
       f_body = fem.Function(V)
-      f_body.interpolate(lambda x: amplitude[:,np.newaxis] * shape_x(x)[np.newaxis,:])
+      f_body.interpolate(lambda x: amplitude[:, np.newaxis] * shape_x(x)[np.newaxis, :])
       f1 = BodyForce((V, cell_tags, None), f_body)  # None for the entire domain
 
 * **Assemble** several materials, BCs and body forces into a *PDE* instance:
@@ -115,9 +115,9 @@ Using the ``elastodynamicsx.pde`` package:
 
       pde = PDE(V, materials=[mat1, mat2], bodyforces=[f1], bcs=[bc1])
 
-      # m, c, k, L form functions: pde.m, pde.c, pde.k, pde.L
+      # M, C, K, b form functions: pde.M_fn, pde.C_fn, pde.K_fn, pde.b_fn
       # eigs / freq. domain -> M, C, K matrices:    pde.M(),  pde.C(),  pde.K()
-      # waveguides          -> K1, K2, K3 matrices: pde.K1(), pde.K2(), pde.K3()
+      # waveguides          -> K0, K1, K2 matrices: pde.K0(), pde.K1(), pde.K2()
 
   * Get the :math:`\mathbf{M}`, :math:`\mathbf{C}`, :math:`\mathbf{K}` weak forms - ``ufl`` format
   * Compile the :math:`\mathbf{M}`, :math:`\mathbf{C}`, :math:`\mathbf{K}` matrices - ``petsc`` format
@@ -153,7 +153,9 @@ Using the ``elastodynamicsx.solvers`` package:
                 T_N.value   = np.sin(t) * forceVector
 
             # Initialize the time stepper: compile forms and assemble the mass matrix
-            tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=pde.bcs, scheme='newmark')
+            tStepper = TimeStepper.build(V,
+                                         pde.M_fn, pde.C_fn, pde.K_fn, pde.b_fn, dt, bcs=pde.bcs,
+                                         scheme='newmark')
 
             # Define the initial values
             tStepper.set_initial_condition(u0=[0, 0], v0=[0, 0], t0=0)
@@ -241,7 +243,7 @@ Using the ``elastodynamicsx.solvers`` package:
 
             # PETSc.Mat matrices
             M = pde.M()
-            K1, K2, K3 = pde.K1(), pde.K2(), pde.K3()
+            K0, K1, K2 = pde.K0(), pde.K1(), pde.K2()
 
             # High-level solver: in the future...
 
