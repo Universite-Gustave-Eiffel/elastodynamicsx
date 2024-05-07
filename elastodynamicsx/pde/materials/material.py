@@ -70,13 +70,11 @@ class Material:
     def is_linear(self) -> bool:
         return self._is_linear
 
-    @property
-    def M_fn(self) -> typing.Callable:
+    def M_fn(self, u, v):
         """(bilinear) mass form function"""
-        return lambda u, v: self._rho * ufl.inner(u, v) * self._dx
+        return self._rho * ufl.inner(u, v) * self._dx
 
-    @property
-    def C_fn(self) -> typing.Union[typing.Callable, None]:
+    def C_fn(self, u, v):
         """(bilinear) damping form function"""
         return None
 

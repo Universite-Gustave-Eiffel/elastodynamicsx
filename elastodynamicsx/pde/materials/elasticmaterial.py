@@ -183,10 +183,9 @@ class ElasticMaterial(Material):
     # ## Damping and stiffness forms ## #
     # ## ### ### ### ### ### ### ### ## #
 
-    @property
-    def C_fn(self) -> typing.Callable:
+    def C_fn(self, u, v):
         """Damping form function"""
-        return self._damping.C_fn
+        return self._damping.C_fn(u, v)
 
     @property
     def K_fn_CG(self) -> typing.Callable:

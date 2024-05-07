@@ -143,9 +143,11 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
 
         # linear and bilinear forms for damping matrix if given
         if not (C_fn is None):
-            self._a += c1 * C_fn(u, v)
-            self._L += c1 * C_fn(self._u_nm1, v) + c2 * C_fn(self._v_nm1, v) - c3 * C_fn(self._a_nm1, v)
-            self._L0_form -= C_fn(self._v0, v)
+            C_uv_ufl = C_fn(u, v)
+            if not (C_uv_ufl is None):
+                self._a += c1 * C_uv_ufl
+                self._L += c1 * C_fn(self._u_nm1, v) + c2 * C_fn(self._v_nm1, v) - c3 * C_fn(self._a_nm1, v)
+                self._L0_form -= C_fn(self._v0, v)
 
         # boundary conditions
         mpc = _build_mpc(bcs)

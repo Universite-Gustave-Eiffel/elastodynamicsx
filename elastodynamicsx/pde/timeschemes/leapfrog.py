@@ -96,9 +96,11 @@ class LeapFrog(FEniCSxTimeScheme):
 
         # linear and bilinear forms for damping matrix if given
         if not (C_fn is None):
-            self._a += 0.5 * dt_ * C_fn(u, v)
-            self._L += 0.5 * dt_ * C_fn(self._u_nm2, v)
-            self._L0_form -= C_fn(self._v0, v)
+            C_uv_ufl = C_fn(u, v)
+            if not (C_uv_ufl is None):
+                self._a += 0.5 * dt_ * C_uv_ufl
+                self._L += 0.5 * dt_ * C_fn(self._u_nm2, v)
+                self._L0_form -= C_fn(self._v0, v)
 
         # boundary conditions
         mpc = _build_mpc(bcs)

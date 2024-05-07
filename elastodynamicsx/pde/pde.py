@@ -144,15 +144,16 @@ class PDE:
 
         c_NULL = sum([zero * ufl.inner(u, v) * dx for dx in measures])
         L_NULL = sum([ufl.inner(vzero, v) * dx for dx in measures])
-        c = self.C_fn(u, v) if not (self.C_fn is None) else c_NULL
+        c = [self.C_fn(u, v)]
 
         L = [self.b_fn(v)]
 
         # Boundaries
         k += sum(filter(None, [bc.K_fn(u, v) for bc in self._bcs_weak]))
-        c += sum(filter(None, [bc.C_fn(u, v) for bc in self._bcs_weak]))
+        c += [bc.C_fn(u, v) for bc in self._bcs_weak]
         L += [bc.b_fn(v) for bc in self._bcs_weak]
 
+        c = sum(filter(None, c)) if any(c) else c_NULL
         L = sum(filter(None, L)) if any(L) else L_NULL
 
         self._C_form = fem.form(c, jit_options=self.jit_options)
@@ -164,7 +165,7 @@ class PDE:
             # #Mat_lhs = -w*w*_M_ + 1J*w*_C_ + _K_
             m = self.M_fn(u, v)
             w = self._omega_ufl
-            self._a_form = fem.form(-w * w * m + 1J * w * c + k, jit_options=self.jit_options)
+            self._a_form = fem.form(-w * w * m + 1J * w * c + k, jit_options=self.jit_options)  # type: ignore
 
     def _compile_K0_K1_K2(self) -> None:
         """Required for waveguide problems"""
@@ -191,19 +192,14 @@ class PDE:
 # ## Linear and bilinear form functions  ## #
 # ## ### ### ### ### ### ### ### ### ### ## #
 
-    @property
-    def M_fn(self) -> typing.Callable:
+    def M_fn(self, u, v):
         """(bilinear) Mass form function"""
-        return lambda u, v: sum([mat.M_fn(u, v) for mat in self.materials])
+        return sum([mat.M_fn(u, v) for mat in self.materials])
 
-    @property
-    def C_fn(self) -> typing.Union[typing.Callable, None]:
+    def C_fn(self, u, v):
         """(bilinear) Damping form function"""
-        non0dampings = [mat.C_fn for mat in self.materials if not (mat.C_fn is None)]
-        if len(non0dampings) == 0:
-            return None
-        else:
-            return lambda u, v: sum([c(u, v) for c in non0dampings])
+        c_ = [mat.C_fn(u, v) for mat in self.materials]
+        return sum(filter(None, c_)) if any(c_) else None
 
     @property
     def K_fn(self) -> typing.Callable:
