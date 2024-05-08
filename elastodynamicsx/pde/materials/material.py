@@ -78,43 +78,36 @@ class Material:
         """(bilinear) damping form function"""
         return None
 
-    @property
-    def K_fn(self) -> typing.Callable:
+    def K_fn(self, u, v):
         """(bilinear) Stiffness form function"""
-        return self._K_fn
+        return self._K_fn(u, v)
 
-    @property
-    def K_fn_CG(self) -> typing.Callable:
+    def K_fn_CG(self, u, v):
         """Stiffness form function for a Continuous Galerkin formulation"""
         print("supercharge me")
         raise NotImplementedError
 
-    @property
-    def K0_fn_CG(self) -> typing.Callable:
+    def K0_fn_CG(self, u, v):
         """K0 stiffness form function for a Continuous Galerkin formulation (waveguides)"""
         print("supercharge me")
         raise NotImplementedError
 
-    @property
-    def K1_fn_CG(self) -> typing.Callable:
+    def K1_fn_CG(self, u, v):
         """K1 stiffness form function for a Continuous Galerkin formulation (waveguides)"""
         print("supercharge me")
         raise NotImplementedError
 
-    @property
-    def K2_fn_CG(self) -> typing.Callable:
+    def K2_fn_CG(self, u, v):
         """K2 stiffness form function for a Continuous Galerkin formulation (waveguides)"""
         print("supercharge me")
         raise NotImplementedError
 
-    @property
-    def K_fn_DG(self) -> typing.Callable:
+    def K_fn_DG(self, u, v):
         """Stiffness form function for a Disontinuous Galerkin formulation"""
         print("supercharge me")
         raise NotImplementedError
 
-    @property
-    def DG_numerical_flux(self) -> typing.Callable:
+    def DG_numerical_flux(self, u, v):
         """Numerical flux for a Disontinuous Galerkin formulation"""
         print("supercharge me")
         raise NotImplementedError

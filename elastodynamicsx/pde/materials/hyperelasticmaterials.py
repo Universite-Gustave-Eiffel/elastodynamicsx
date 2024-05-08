@@ -4,8 +4,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-from typing import Callable
-
 import ufl  # type: ignore
 
 from .material import Material
@@ -37,12 +35,22 @@ class HyperelasticMaterial(Material):
         dim = function_space.mesh.geometry.dim
         if dim == 1:  # 1D
             if nbcomps == 2:
-                self.Grad = lambda u: ufl.as_matrix([[u[0].dx(0), 0], [u[1].dx(0), 0]])
+                def _Grad(u):
+                    return ufl.as_matrix([[u[0].dx(0), 0], [u[1].dx(0), 0]])
+                self.Grad = _Grad
+
+            if nbcomps == 3:
+                def _Grad(u):
+                    return ufl.as_matrix([[u[0].dx(0), 0, 0], [u[1].dx(0), 0, 0], [u[2].dx(0), 0, 0]])
+                self.Grad = _Grad
+
             else:
-                self.Grad = lambda u: ufl.as_matrix([[u[0].dx(0), 0, 0], [u[1].dx(0), 0, 0], [u[2].dx(0), 0, 0]])
+                raise NotImplementedError(f'Expected 2 or 3 components, got: {nbcomps}')
 
         else:
-            self.Grad = lambda u: ufl.grad(u)
+            def _Grad(u):
+                return ufl.grad(u)
+            self.Grad = _Grad
 
         super().__init__(functionspace_tags_marker, rho, is_linear=False, **kwargs)
 
@@ -51,18 +59,15 @@ class HyperelasticMaterial(Material):
         print("supercharge me")
         raise NotImplementedError
 
-    @property
-    def K_fn_CG(self):
+    def K_fn_CG(self, u, v):
         """Stiffness form function for a Continuous Galerkin formulation"""
-        return lambda u, v: ufl.inner(self.P(u), self.Grad(v)) * self._dx
+        return ufl.inner(self.P(u), self.Grad(v)) * self._dx
 
-    @property
-    def K_fn_DG(self) -> Callable:
+    def K_fn_DG(self, u, v):
         """**(Not implemented)** Stiffness form function for a Discontinuous Galerkin formulation"""
         raise NotImplementedError
 
-    @property
-    def DG_numerical_flux(self) -> Callable:
+    def DG_numerical_flux(self, u, v):
         """**(Not implemented)** Numerical flux for a Disontinuous Galerkin formulation"""
         raise NotImplementedError
 

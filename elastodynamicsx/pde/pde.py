@@ -201,40 +201,33 @@ class PDE:
         c_ = [mat.C_fn(u, v) for mat in self.materials]
         return sum(filter(None, c_)) if any(c_) else None
 
-    @property
-    def K_fn(self) -> typing.Callable:
+    def K_fn(self, u, v):
         """(bilinear) Stiffness form function"""
-        return lambda u, v: sum([mat.K_fn(u, v) for mat in self.materials])
+        return sum([mat.K_fn(u, v) for mat in self.materials])
 
-    @property
-    def K0_fn(self) -> typing.Callable:
+    def K0_fn(self, u, v):
         """(bilinear) K0 stiffness form function (waveguide problems)"""
-        return lambda u, v: sum([mat.K0_fn_CG(u, v) for mat in self.materials])
+        return sum([mat.K0_fn_CG(u, v) for mat in self.materials])
 
-    @property
-    def K1_fn(self) -> typing.Callable:
+    def K1_fn(self, u, v):
         """(bilinear) K1 stiffness form function (waveguide problems)"""
-        return lambda u, v: sum([mat.K1_fn_CG(u, v) for mat in self.materials])
+        return sum([mat.K1_fn_CG(u, v) for mat in self.materials])
 
-    @property
-    def K2_fn(self) -> typing.Callable:
+    def K2_fn(self, u, v):
         """(bilinear) K2 stiffness form function (waveguide problems)"""
-        return lambda u, v: sum([mat.K2_fn_CG(u, v) for mat in self.materials])
+        return sum([mat.K2_fn_CG(u, v) for mat in self.materials])
 
-    @property
-    def K_fn_CG(self) -> typing.Callable:
+    def K_fn_CG(self, u, v):
         """(bilinear) Stiffness form function (Continuous Galerkin)"""
-        return lambda u, v: sum([mat.K_fn_CG(u, v) for mat in self.materials])
+        return sum([mat.K_fn_CG(u, v) for mat in self.materials])
 
-    @property
-    def K_fn_DG(self) -> typing.Callable:
+    def K_fn_DG(self, u, v):
         """(bilinear) Stiffness form function (Discontinuous Galerkin)"""
-        return lambda u, v: sum([mat.K_fn_DG(u, v) for mat in self.materials])
+        return sum([mat.K_fn_DG(u, v) for mat in self.materials])
 
-    @property
-    def DG_numerical_flux(self) -> typing.Callable:
+    def DG_numerical_flux(self, u, v):
         """(bilinear) Numerical flux form function (Disontinuous Galerkin)"""
-        return lambda u, v: sum([mat.DG_numerical_flux(u, v) for mat in self.materials])
+        return sum([mat.DG_numerical_flux(u, v) for mat in self.materials])
 
     def b_fn(self, v):
         """Linear form function"""
