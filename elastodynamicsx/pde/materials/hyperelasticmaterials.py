@@ -39,7 +39,7 @@ class HyperelasticMaterial(Material):
                     return ufl.as_matrix([[u[0].dx(0), 0], [u[1].dx(0), 0]])
                 self.Grad = _Grad
 
-            if nbcomps == 3:
+            elif nbcomps == 3:
                 def _Grad(u):
                     return ufl.as_matrix([[u[0].dx(0), 0, 0], [u[1].dx(0), 0, 0], [u[2].dx(0), 0, 0]])
                 self.Grad = _Grad
