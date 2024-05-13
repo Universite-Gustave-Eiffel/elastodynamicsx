@@ -322,6 +322,35 @@ class BCDashpot(BCWeakBase):
     def values(self):
         return self._values
 
+
+class BCCustom(BCWeakBase):
+    """
+    Representation of a boundary condition with user-defined
+    damping (C), stiffness (K) and linear (b) forms
+
+    Keyword Args:
+        C: (optional) callable returning the ufl (bilinear) damping form
+        K: (optional) callable returning the ufl (bilinear) stiffness form
+        b: (optional) callable returning the ufl linear form
+    """
+
+    labels: List[str] = ['custom']
+
+    def __init__(self, functionspace_tags_marker, **kwargs):
+
+        super().__init__(functionspace_tags_marker, **kwargs)
+        c_ = kwargs.pop('C', None)
+        if not (c_ is None):
+            self.C_fn = c_
+
+        k_ = kwargs.pop('K', None)
+        if not (k_ is None):
+            self.K_fn = k_
+
+        b_ = kwargs.pop('b', None)
+        if not (b_ is None):
+            self.b_fn = b_
+
 # ### ### ### ### ### ### ### #
 # Multi-point constraints BCs #
 # ### ### ### ### ### ### ### #
@@ -397,7 +426,7 @@ def get_weak_BCs(bcs: Union[Iterable[Union[BoundaryConditionBase, fem.DirichletB
 # ### ### #
 
 all_bcs = [BCDirichlet, BCClamp,
-           BCNeumann, BCFree, BCRobin, BCDashpot,
+           BCNeumann, BCFree, BCRobin, BCDashpot, BCCustom,
            BCPeriodic]
 
 all_strong_bcs = list(filter(lambda bctype: issubclass(bctype, BCStrongBase), all_bcs))

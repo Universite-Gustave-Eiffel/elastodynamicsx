@@ -9,6 +9,7 @@
 import numpy as np
 from mpi4py import MPI
 from dolfinx import mesh, fem, default_scalar_type
+import ufl
 
 from elastodynamicsx.pde import material, PDE, boundarycondition
 from elastodynamicsx.utils import make_facet_tags
@@ -53,6 +54,15 @@ def tst_bcs_scalar_material(dim, eltname="Lagrange"):
     supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Dashpot', mat.Z))
     supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Periodic', [1, 0, 0]))
 
+    # custom laws
+    def a_(u, v):
+        return ufl.inner(u, v) * ufl.ds(domain=V.mesh, subdomain_data=facet_tags)(tag_left)
+
+    def L_(v):
+        return ufl.inner(dummy_value, v) * ufl.ds(domain=V.mesh, subdomain_data=facet_tags)(tag_left)
+
+    supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Custom', C=a_, K=a_, b=L_))
+
     for bc in supported_bcs:
         print(type(bc).labels[0], end='; ')
         # PDE
@@ -92,6 +102,15 @@ def tst_bcs_vector_materials(dim, nbcomps, eltname="Lagrange"):
     supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Robin', dummy_matrix, dummy_vector))
     supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Dashpot', mat.Z_N, mat.Z_T))
     supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Periodic', [1, 0, 0]))
+
+    # custom laws
+    def a_(u, v):
+        return ufl.inner(u, v) * ufl.ds(domain=V.mesh, subdomain_data=facet_tags)(tag_left)
+
+    def L_(v):
+        return ufl.inner(dummy_vector, v) * ufl.ds(domain=V.mesh, subdomain_data=facet_tags)(tag_left)
+
+    supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Custom', C=a_, K=a_, b=L_))
 
     for bc in supported_bcs:
         print(type(bc).labels[0], end='; ')
