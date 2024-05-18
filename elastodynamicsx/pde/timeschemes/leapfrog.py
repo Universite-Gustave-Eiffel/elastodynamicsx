@@ -61,7 +61,7 @@ class LeapFrog(FEniCSxTimeScheme):
 
     labels = ['leapfrog', 'central-difference']
 
-    def __init__(self, function_space: fem.FunctionSpaceBase,
+    def __init__(self, function_space: fem.FunctionSpace,
                  M_fn: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
                  C_fn: Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
                  K_fn: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],

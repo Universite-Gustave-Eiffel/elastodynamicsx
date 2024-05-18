@@ -47,7 +47,7 @@ class PDE:
         finalize: (default=True) call self.finalize() on build
     """
 
-    def __init__(self, function_space: fem.FunctionSpaceBase, materials: typing.Iterable[Material], **kwargs):
+    def __init__(self, function_space: fem.FunctionSpace, materials: typing.Iterable[Material], **kwargs):
         self._function_space = function_space
         self.materials = materials
         self.bodyforces = kwargs.get('bodyforces', [])

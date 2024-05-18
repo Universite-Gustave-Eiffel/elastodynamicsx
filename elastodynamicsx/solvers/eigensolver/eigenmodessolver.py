@@ -14,7 +14,7 @@ from slepc4py import SLEPc  # type: ignore
 
 import numpy as np
 
-from dolfinx.fem import FunctionSpaceBase
+from dolfinx.fem import FunctionSpace
 
 from elastodynamicsx.solutions import ModalBasis
 
@@ -133,7 +133,7 @@ class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue proble
         return np.array([self.computeError(i, SLEPc.EPS.ErrorType.RELATIVE)
                          for i in range(self._getNout())])  # Compute error for i-th eigenvalue
 
-    def plot(self, function_space: FunctionSpaceBase, which='all', **kwargs) -> None:
+    def plot(self, function_space: FunctionSpace, which='all', **kwargs) -> None:
         """
         Plots the desired modeshapes
 
