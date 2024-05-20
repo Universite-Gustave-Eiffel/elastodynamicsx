@@ -59,7 +59,7 @@ extent = [[0., 0.], [length, height]]
 domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny], cell_type)
 
 # create the function space
-V = fem.FunctionSpace(domain, specFE)
+V = fem.functionspace(domain, specFE)
 
 # define some tags
 tag_left, tag_top, tag_right, tag_bottom = 1, 2, 3, 4

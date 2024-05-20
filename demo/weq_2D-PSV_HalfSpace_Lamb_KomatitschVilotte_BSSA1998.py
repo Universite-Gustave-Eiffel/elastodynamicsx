@@ -66,7 +66,7 @@ comm = MPI.COMM_WORLD
 domain, cell_tags, facet_tags = gmshio.model_to_mesh(model, comm, gmsh_model_rank, gdim=2)
 
 # Create the function space
-V = fem.FunctionSpace(domain, specFE)
+V = fem.functionspace(domain, specFE)
 
 
 def y_surf(x):
