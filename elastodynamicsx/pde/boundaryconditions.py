@@ -143,8 +143,10 @@ class BCDirichlet(BCStrongBase):
         function_space, facet_tags, marker = self.function_space, self.facet_tags, self.marker
         assert not (facet_tags is None), "facet_tags must not be None"
         assert not (marker is None), "marker must not be None"
-        fdim = function_space.mesh.topology.dim - 1
+        tdim = function_space.mesh.topology.dim
+        fdim = tdim - 1
         facets = facet_tags.find(marker)
+        function_space.mesh.topology.create_connectivity(fdim, tdim)
         dofs = fem.locate_dofs_topological(function_space, fdim, facets)
         self._bc = fem.dirichletbc(value, dofs, function_space)
 
