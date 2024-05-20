@@ -202,7 +202,7 @@ signals_local = np.zeros((paraEval.nb_points_local,
 # -> Define callbacks: will be called at the end of each iteration
 def cbck_storeFullField(i, out):
     if storeAllSteps:
-        all_u[i+1].vector.setArray(out)
+        all_u[i+1].x.petsc_vec.setArray(out)
 
 
 def cbck_storeAtPoints(i, out):

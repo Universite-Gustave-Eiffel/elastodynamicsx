@@ -79,7 +79,7 @@ class FrequencyDomainSolver:
           fdsolver = FrequencyDomainSolver(V.mesh.comm, pde.M(), pde.C(), pde.K(), pde.b())
           omega    = 1.0
           u        = fem.Function(V, name='solution')
-          fdsolver.solve(omega=omega, out=u.vector)
+          fdsolver.solve(omega=omega, out=u.x.petsc_vec)
     """
 
     default_petsc_options = {"ksp_type": "preonly", "pc_type": "lu"}  # "pc_factor_mat_solver_type": "mumps"

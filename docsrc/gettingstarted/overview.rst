@@ -196,7 +196,7 @@ Using the ``elastodynamicsx.solvers`` package:
 
             # Solve
             u = fem.Function(V, name='solution')
-            fdsolver.solve(omega=1.0, out=u.vector)
+            fdsolver.solve(omega=1.0, out=u.x.petsc_vec)
 
             # Plot
             from elastodynamicsx.plot import plotter

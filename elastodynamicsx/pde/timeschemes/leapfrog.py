@@ -188,6 +188,6 @@ class LeapFrog(FEniCSxTimeScheme):
         if verbose >= 10:
             PETSc.Sys.Print('Initial value problem solved, entering loop')  # type: ignore[attr-defined]
         for callback in callbacks:
-            callback(0, self._u_n.vector)  # <- store solution, plot, print, ...
+            callback(0, self._u_n.x.petsc_vec)  # <- store solution, plot, print, ...
         #
         # ## -------------------------------------------------

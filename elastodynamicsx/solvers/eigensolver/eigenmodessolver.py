@@ -52,7 +52,7 @@ class EigenmodesSolver(SLEPc.EPS):  # SLEPc.PEP for polynomial eigenvalue proble
           from elastodynamicsx.pde import material, PDE
 
           domain = mesh.create_box(MPI.COMM_WORLD, [[0,0,0], [1,1,1]], [10,10,10])
-          V      = dolfinx.fem.VectorFunctionSpace(domain, ("CG", 1))
+          V      = dolfinx.fem.functionspace(domain, ("CG", 1, (3,)))
 
           rho, lambda_, mu = 1, 2, 1
           mat = material(V, rho, lambda_, mu)
