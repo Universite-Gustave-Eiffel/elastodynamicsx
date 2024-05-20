@@ -130,7 +130,7 @@ class PDE:
 
         zero = fem.Constant(self._function_space.mesh, default_scalar_type(0.))
         vzero = zero
-        if v.ufl_function_space().num_sub_spaces != 0:  # VectorFunctionSpace
+        if v.ufl_function_space().num_sub_spaces != 0:  # a vector FunctionSpace
             vzero = fem.Constant(self._function_space.mesh, default_scalar_type([0.] * len(v)))
 
         # Interior

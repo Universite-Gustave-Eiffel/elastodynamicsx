@@ -54,7 +54,7 @@ class FrequencyDomainSolver:
           length, height = 10, 10
           Nx, Ny = 10, 10
           domain = mesh.create_rectangle(MPI.COMM_WORLD, [[0,0], [length,height]], [Nx,Ny])
-          V      = dolfinx.fem.VectorFunctionSpace(domain, ("CG", 1))
+          V      = dolfinx.fem.functionspace(domain, ("Lagrange", 1, (2,)))
 
           # material
           rho, lambda_, mu = 1, 2, 1
@@ -65,7 +65,7 @@ class FrequencyDomainSolver:
           bcs = [ BoundaryCondition(V, 'Dashpot', (Z_N, Z_T)) ]
 
           # gaussian source term
-          F0     = fem.Constant(domain, PETSc.ScalarType([1,0]))  # polarization
+          F0     = fem.Constant(domain, PETSc.ScalarType([1, 0]))  # polarization
           R0     = 0.1  # radius
           x0, y0 = length/2, height/2  # center
           x      = ufl.SpatialCoordinate(domain)
