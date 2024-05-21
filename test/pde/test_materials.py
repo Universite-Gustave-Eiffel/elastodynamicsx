@@ -8,6 +8,7 @@
 
 from mpi4py import MPI
 from dolfinx import mesh, fem, default_scalar_type
+import ufl
 
 from elastodynamicsx.pde import material, PDE, damping
 
@@ -33,6 +34,13 @@ def tst_scalar_material(dim, eltname="Lagrange"):
 
     mats = []
     mats.append(material(V, 'scalar', rho=const(1), mu=const(1)))
+    mats.append(material(V,
+                         'custom',
+                         M_fn=lambda u, v: const(1) * ufl.inner(u, v) * ufl.dx,
+                         K_fn=lambda u, v: const(1) * ufl.inner(ufl.grad(u), ufl.grad(v)) * ufl.dx,
+                         K0_fn=lambda u, v: ufl.inner(u, v) * ufl.dx,
+                         K1_fn=lambda u, v: ufl.inner(u, v) * ufl.dx,
+                         K2_fn=lambda u, v: ufl.inner(u, v) * ufl.dx))
 
     # Damping laws
     mats.append(material(V, 'scalar', rho=const(1), mu=const(1), damping=damping('Rayleigh', const(1), const(1))))
@@ -64,6 +72,15 @@ def tst_vector_materials(dim, nbcomps, eltname="Lagrange"):
     for type_, nb in zip(types, nbCij):
         Cij = [Coo] * nb
         mats.append(material(V, type_, rho, *Cij))
+
+    if dim == 2 and nbcomps == 2:  # skip other cases to avoid boring issues with ufl.grad
+        mats.append(material(V,
+                             'custom',
+                             M_fn=lambda u, v: const(1) * ufl.inner(u, v) * ufl.dx,
+                             K_fn=lambda u, v: const(1) * ufl.inner(ufl.grad(u), ufl.grad(v)) * ufl.dx,
+                             K0_fn=lambda u, v: ufl.inner(u, v) * ufl.dx,
+                             K1_fn=lambda u, v: ufl.inner(u, v) * ufl.dx,
+                             K2_fn=lambda u, v: ufl.inner(u, v) * ufl.dx))
 
     # Damping laws
     mats.append(material(V, 'isotropic', rho, Coo, Coo, damping=damping('Rayleigh', const(1), const(1))))
