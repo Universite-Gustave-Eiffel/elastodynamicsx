@@ -17,7 +17,7 @@ The library provides a high level interface to build and solve common problems i
    * The **FEniCSx library**. See:
 
       * The `FEniCSx tutorial <https://jsdokken.com/dolfinx-tutorial/>`_,
-      * The `dolfinx <https://docs.fenicsproject.org/dolfinx/v0.7.3/python/>`_ module documentation,
+      * The `dolfinx <https://docs.fenicsproject.org/dolfinx/v0.8.0/python/>`_ module documentation,
       * The `Unified Form Language <https://docs.fenicsproject.org/ufl/2023.2.0/manual/form_language.html>`_ (*ufl*) documentation,
       * The reference page for FEniCSx documentation: https://docs.fenicsproject.org/.
 
