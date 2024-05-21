@@ -25,7 +25,7 @@ def create_mesh(dim):
 
 def tst_scalar_material(dim, eltname="Lagrange"):
     # FE domain
-    V = fem.FunctionSpace(create_mesh(dim), (eltname, 1))
+    V = fem.functionspace(create_mesh(dim), (eltname, 1))
 
     # Material
     def const(x):
@@ -49,7 +49,7 @@ def tst_scalar_material(dim, eltname="Lagrange"):
 
 def tst_vector_materials(dim, nbcomps, eltname="Lagrange"):
     # FE domain
-    V = fem.FunctionSpace(create_mesh(dim), (eltname, 1, (nbcomps,)))
+    V = fem.functionspace(create_mesh(dim), (eltname, 1, (nbcomps,)))
 
     # Material
     def const(x):

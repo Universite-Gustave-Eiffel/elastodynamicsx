@@ -35,7 +35,7 @@ Using the ``elastodynamicsx.pde`` package:
     domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny], mesh.CellType.triangle)
 
     # create the function space
-    V = fem.FunctionSpace(domain, ("Lagrange", degElement, (domain.geometry.dim,)))
+    V = fem.functionspace(domain, ("Lagrange", degElement, (domain.geometry.dim,)))
 
     from elastodynamicsx.utils import make_facet_tags, make_cell_tags
     # define some tags
@@ -53,7 +53,7 @@ Using the ``elastodynamicsx.pde`` package:
 
   .. jupyter-execute::
 
-      # V is a dolfinx.fem.function_space
+      # V is a dolfinx.fem.FunctionSpace
       # cell_tags is a dolfinx.mesh.MeshTags object
 
       from elastodynamicsx.pde import material
@@ -196,7 +196,7 @@ Using the ``elastodynamicsx.solvers`` package:
 
             # Solve
             u = fem.Function(V, name='solution')
-            fdsolver.solve(omega=1.0, out=u.vector)
+            fdsolver.solve(omega=1.0, out=u.x.petsc_vec)
 
             # Plot
             from elastodynamicsx.plot import plotter
@@ -232,7 +232,7 @@ Using the ``elastodynamicsx.solvers`` package:
 
             # Plot
             eigenfreqs = eps.getEigenfrequencies()  # a np.ndarray
-            eps.plot(function_space=V)              # V is a dolfinx.fem.function_space
+            eps.plot(function_space=V)              # V is a dolfinx.fem.FunctionSpace
 
     .. tab:: Guided waves
 
@@ -268,5 +268,5 @@ Using the ``elastodynamicsx.solutions`` package:
     modeshape5 = mbasis.un[5]  # a PETSc.Vec vector
 
     # Visualize
-    mbasis.plot(function_space=V)  # V is a dolfinx.fem.function_space
+    mbasis.plot(function_space=V)  # V is a dolfinx.fem.FunctionSpace
 

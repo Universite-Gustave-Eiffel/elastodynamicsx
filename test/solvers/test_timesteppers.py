@@ -31,7 +31,7 @@ def test():
     eltname = "Lagrange"
 
     # FE domain
-    V = fem.FunctionSpace(create_mesh(dim), (eltname, 1, (nbcomps,)))
+    V = fem.functionspace(create_mesh(dim), (eltname, 1, (nbcomps,)))
 
     # Material
     def const(x):

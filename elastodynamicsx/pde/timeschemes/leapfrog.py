@@ -61,7 +61,7 @@ class LeapFrog(FEniCSxTimeScheme):
 
     labels = ['leapfrog', 'central-difference']
 
-    def __init__(self, function_space: fem.FunctionSpaceBase,
+    def __init__(self, function_space: fem.FunctionSpace,
                  M_fn: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
                  C_fn: Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
                  K_fn: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
@@ -188,6 +188,6 @@ class LeapFrog(FEniCSxTimeScheme):
         if verbose >= 10:
             PETSc.Sys.Print('Initial value problem solved, entering loop')  # type: ignore[attr-defined]
         for callback in callbacks:
-            callback(0, self._u_n.vector)  # <- store solution, plot, print, ...
+            callback(0, self._u_n.x.petsc_vec)  # <- store solution, plot, print, ...
         #
         # ## -------------------------------------------------

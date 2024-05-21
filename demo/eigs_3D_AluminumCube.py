@@ -36,7 +36,7 @@ Nx = Ny = Nz = 6  # Nb of elts.
 extent = [[0., 0., 0.], [L1, L2, L3]]
 domain = mesh.create_box(MPI.COMM_WORLD, extent, [Nx, Ny, Nz])
 
-V = fem.FunctionSpace(domain, ("Lagrange", 2, (domain.geometry.dim,)))
+V = fem.functionspace(domain, ("Lagrange", 2, (domain.geometry.dim,)))
 # -
 
 # ### Define the material law

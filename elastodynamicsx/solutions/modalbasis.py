@@ -47,7 +47,7 @@ class ModalBasis():
         """The eigen modeshapes :math:`\mathbf{u}_n`"""
         return self._un
 
-    def plot(self, function_space: fem.FunctionSpaceBase, which='all', **kwargs) -> None:
+    def plot(self, function_space: fem.FunctionSpace, which='all', **kwargs) -> None:
         """
         Plots the desired modeshapes
 

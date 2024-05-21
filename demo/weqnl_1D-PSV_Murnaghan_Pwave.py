@@ -55,7 +55,7 @@ extent = [0, length]
 domain = mesh.create_interval(MPI.COMM_WORLD, Nx, extent)
 
 # create the function space
-V = fem.FunctionSpace(domain, specFE)
+V = fem.functionspace(domain, specFE)
 
 # define some tags
 tag_left, tag_right = 1, 2

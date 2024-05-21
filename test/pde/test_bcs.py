@@ -35,7 +35,7 @@ def tst_bcs_scalar_material(dim, eltname="Lagrange"):
     # FE domain
     domain = create_mesh(dim)
     facet_tags = make_facet_tags(domain, tagged_boundaries)
-    V = fem.FunctionSpace(domain, (eltname, 1))
+    V = fem.functionspace(domain, (eltname, 1))
 
     # Material
     def const(x):
@@ -81,7 +81,7 @@ def tst_bcs_vector_materials(dim, nbcomps, eltname="Lagrange"):
     # FE domain
     domain = create_mesh(dim)
     facet_tags = make_facet_tags(domain, tagged_boundaries)
-    V = fem.FunctionSpace(domain, (eltname, 1, (nbcomps,)))
+    V = fem.functionspace(domain, (eltname, 1, (nbcomps,)))
 
     # Material
     def const(x):
