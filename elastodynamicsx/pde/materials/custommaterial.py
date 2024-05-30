@@ -59,7 +59,7 @@ class CustomMaterial(Material):
 
     def __init__(self, functionspace_tags_marker, **kwargs):
         rho = None
-        is_linear = kwargs.get('is_linear', None)
+        is_linear = kwargs.pop('is_linear', None)
         super().__init__(functionspace_tags_marker, rho, is_linear, **kwargs)
 
         def fn_None(u, v):
