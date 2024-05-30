@@ -19,7 +19,7 @@ RUN pip3 install . &&\
 ARG PYTHON_VERSION=3.10
 
 # Clone DOLFINX_MPC source dir
-RUN git clone  --branch v0.8.0.post1 https://github.com/jorgensd/dolfinx_mpc.git
+RUN git clone  --branch v0.8.1 https://github.com/jorgensd/dolfinx_mpc.git
 
 # Install real mode
 RUN . /usr/local/bin/dolfinx-real-mode && \
