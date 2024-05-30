@@ -91,6 +91,26 @@ Using the ``elastodynamicsx.pde`` package:
   * Multi-point constraint BCs:
     *Periodic*
 
+* User-defined material laws and BCs:
+
+  .. jupyter-execute::
+
+      import ufl
+
+      # ###
+      # Here we re-implement mat1 using the interface for custom material laws
+      dx_mat1 = ufl.Measure("dx", domain=V.mesh, subdomain_data=cell_tags)(tag_mat1)
+
+      # mass form
+      m = lambda u, v: ufl.inner(u, v) * dx_mat1
+
+      # stiffness form
+      epsilon = lambda u: ufl.sym(ufl.grad(u))
+      sigma = lambda u: 2 * ufl.nabla_div(u) * ufl.Identity(len(u)) + 2 * 1 * epsilon(u)
+      k = lambda u, v: ufl.inner(sigma(u), epsilon(v)) * dx_mat1
+
+      mat1_user_defined = material(V, 'custom', is_linear=True, M_fn=m, K_fn=k)
+
 * Define **body forces**:
 
   .. jupyter-execute::
