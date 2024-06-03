@@ -14,6 +14,8 @@ demo/*.mp4
 # *.fifo
 # *.prof
 
+docs/demos/_ln_demo/*.ipynb
+
 # Mac
 .DS_Store
 *._*
