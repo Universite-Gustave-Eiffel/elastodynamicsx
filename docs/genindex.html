@@ -1,23 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; ElastodynamiCSx 0.2.3 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/jupyter-sphinx.css" type="text/css" />
-      <link rel="stylesheet" href="_static/thebelab.css" type="text/css" />
-      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="_static/tabs.css" type="text/css" />
+  <title>Index &mdash; ElastodynamiCSx 0.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/jupyter-sphinx.css" />
+      <link rel="stylesheet" type="text/css" href="_static/thebelab.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/tabs.css?v=a5c4661c" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=87e54e7c" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=a47416a6"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/documentation_options.js?v=e259d695"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="_static/thebelab-helper.js"></script>
         <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -25,6 +28,7 @@
         <script src="_static/tabs.js?v=3030b3cb"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+        <script src="_static/design-tabs.js?v=f930bc37"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
@@ -43,7 +47,7 @@
             ElastodynamiCSx
           </a>
               <div class="version">
-                0.2.3
+                0.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -202,6 +206,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCFree"><code class="docutils literal notranslate"><span class="pre">BCFree</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin"><code class="docutils literal notranslate"><span class="pre">BCRobin</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDashpot"><code class="docutils literal notranslate"><span class="pre">BCDashpot</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCCustom"><code class="docutils literal notranslate"><span class="pre">BCCustom</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCPeriodic"><code class="docutils literal notranslate"><span class="pre">BCPeriodic</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.get_dirichlet_BCs"><code class="docutils literal notranslate"><span class="pre">get_dirichlet_BCs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.get_mpc_BCs"><code class="docutils literal notranslate"><span class="pre">get_mpc_BCs()</span></code></a></li>
@@ -314,6 +319,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">About</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="about/authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="about/links.html">Useful links</a></li>
 <li class="toctree-l1"><a class="reference internal" href="about/licence_link.html">Licence</a></li>
 </ul>
@@ -422,6 +428,24 @@
         <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.b">(elastodynamicsx.pde.pde.PDE method)</a>
 </li>
       </ul></li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.BodyForce.b_fn">b_fn() (elastodynamicsx.pde.BodyForce method)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.bodyforce.BodyForce.b_fn">(elastodynamicsx.pde.bodyforce.BodyForce method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCFree.b_fn">(elastodynamicsx.pde.boundaryconditions.BCFree method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCNeumann.b_fn">(elastodynamicsx.pde.boundaryconditions.BCNeumann method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin.b_fn">(elastodynamicsx.pde.boundaryconditions.BCRobin method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCWeakBase.b_fn">(elastodynamicsx.pde.boundaryconditions.BCWeakBase method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.b_fn">(elastodynamicsx.pde.PDE method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.b_fn">(elastodynamicsx.pde.pde.PDE method)</a>
+</li>
+      </ul></li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.b_form">b_form (elastodynamicsx.pde.PDE property)</a>
 
       <ul>
@@ -434,16 +458,18 @@
         <li><a href="api/elastodynamicsx.pde.timeschemes.html#elastodynamicsx.pde.timeschemes.TimeScheme.b_update_function">(elastodynamicsx.pde.timeschemes.TimeScheme method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase.bc">bc (elastodynamicsx.pde.boundaryconditions.BoundaryConditionBase property)</a>
 </li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCClamp">BCClamp (class in elastodynamicsx.pde.boundaryconditions)</a>
+</li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCCustom">BCCustom (class in elastodynamicsx.pde.boundaryconditions)</a>
 </li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDashpot">BCDashpot (class in elastodynamicsx.pde.boundaryconditions)</a>
 </li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDirichlet">BCDirichlet (class in elastodynamicsx.pde.boundaryconditions)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCFree">BCFree (class in elastodynamicsx.pde.boundaryconditions)</a>
 </li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCMPCBase">BCMPCBase (class in elastodynamicsx.pde.boundaryconditions)</a>
@@ -486,38 +512,12 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.dampings.Damping.c">c (elastodynamicsx.pde.materials.dampings.Damping property)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.dampings.NoDamping.c">(elastodynamicsx.pde.materials.dampings.NoDamping property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.dampings.RayleighDamping.c">(elastodynamicsx.pde.materials.dampings.RayleighDamping property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.c">(elastodynamicsx.pde.materials.ElasticMaterial property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.c">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.c">(elastodynamicsx.pde.materials.Material property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.c">(elastodynamicsx.pde.materials.material.Material property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.c">(elastodynamicsx.pde.PDE property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.c">(elastodynamicsx.pde.pde.PDE property)</a>
-</li>
-      </ul></li>
       <li><a href="api/elastodynamicsx.solvers.frequencydomain.html#elastodynamicsx.solvers.frequencydomain.FrequencyDomainSolver.C">C (elastodynamicsx.solvers.frequencydomain.FrequencyDomainSolver property)</a>
 
       <ul>
         <li><a href="api/elastodynamicsx.solvers.frequencydomain.html#elastodynamicsx.solvers.frequencydomain.frequencydomainsolver.FrequencyDomainSolver.C">(elastodynamicsx.solvers.frequencydomain.frequencydomainsolver.FrequencyDomainSolver property)</a>
 </li>
         <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.FrequencyDomainSolver.C">(elastodynamicsx.solvers.FrequencyDomainSolver property)</a>
-</li>
-      </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDashpot.c">c() (elastodynamicsx.pde.boundaryconditions.BCDashpot method)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCWeakBase.c">(elastodynamicsx.pde.boundaryconditions.BCWeakBase method)</a>
 </li>
       </ul></li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.C">C() (elastodynamicsx.pde.PDE method)</a>
@@ -604,8 +604,6 @@
         <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.C26">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.C33">C33 (elastodynamicsx.pde.materials.ElasticMaterial property)</a>
 
       <ul>
@@ -642,6 +640,8 @@
         <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.C45">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.C46">C46 (elastodynamicsx.pde.materials.ElasticMaterial property)</a>
 
       <ul>
@@ -666,10 +666,34 @@
         <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.C66">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.c_form">c_form (elastodynamicsx.pde.PDE property)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDashpot.C_fn">C_fn() (elastodynamicsx.pde.boundaryconditions.BCDashpot method)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.c_form">(elastodynamicsx.pde.pde.PDE property)</a>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCWeakBase.C_fn">(elastodynamicsx.pde.boundaryconditions.BCWeakBase method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.dampings.Damping.C_fn">(elastodynamicsx.pde.materials.dampings.Damping method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.dampings.NoDamping.C_fn">(elastodynamicsx.pde.materials.dampings.NoDamping method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.dampings.RayleighDamping.C_fn">(elastodynamicsx.pde.materials.dampings.RayleighDamping method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.C_fn">(elastodynamicsx.pde.materials.ElasticMaterial method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.C_fn">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.C_fn">(elastodynamicsx.pde.materials.Material method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.C_fn">(elastodynamicsx.pde.materials.material.Material method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.C_fn">(elastodynamicsx.pde.PDE method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.C_fn">(elastodynamicsx.pde.pde.PDE method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.C_form">C_form (elastodynamicsx.pde.PDE property)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.C_form">(elastodynamicsx.pde.pde.PDE property)</a>
 </li>
       </ul></li>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.Cij">Cij() (elastodynamicsx.pde.materials.ElasticMaterial static method)</a>
@@ -773,37 +797,39 @@
       <ul>
         <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.DG_numerical_flux">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
 </li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.HyperelasticMaterial.DG_numerical_flux">(elastodynamicsx.pde.materials.HyperelasticMaterial property)</a>
+      </ul></li>
+      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.HyperelasticMaterial.DG_numerical_flux">DG_numerical_flux() (elastodynamicsx.pde.materials.HyperelasticMaterial method)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.hyperelasticmaterials.HyperelasticMaterial.DG_numerical_flux">(elastodynamicsx.pde.materials.hyperelasticmaterials.HyperelasticMaterial method)</a>
 </li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.hyperelasticmaterials.HyperelasticMaterial.DG_numerical_flux">(elastodynamicsx.pde.materials.hyperelasticmaterials.HyperelasticMaterial property)</a>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.DG_numerical_flux">(elastodynamicsx.pde.materials.Material method)</a>
 </li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.DG_numerical_flux">(elastodynamicsx.pde.materials.Material property)</a>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.DG_numerical_flux">(elastodynamicsx.pde.materials.material.Material method)</a>
 </li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.DG_numerical_flux">(elastodynamicsx.pde.materials.material.Material property)</a>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.DG_numerical_flux">(elastodynamicsx.pde.PDE method)</a>
 </li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.DG_numerical_flux">(elastodynamicsx.pde.PDE property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.DG_numerical_flux">(elastodynamicsx.pde.pde.PDE property)</a>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.DG_numerical_flux">(elastodynamicsx.pde.pde.PDE method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.DG_numerical_flux_IIPG">DG_numerical_flux_IIPG (elastodynamicsx.pde.materials.ElasticMaterial property)</a>
+      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.DG_numerical_flux_IIPG">DG_numerical_flux_IIPG() (elastodynamicsx.pde.materials.ElasticMaterial method)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.DG_numerical_flux_IIPG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.DG_numerical_flux_IIPG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.DG_numerical_flux_NIPG">DG_numerical_flux_NIPG (elastodynamicsx.pde.materials.ElasticMaterial property)</a>
+      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.DG_numerical_flux_NIPG">DG_numerical_flux_NIPG() (elastodynamicsx.pde.materials.ElasticMaterial method)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.DG_numerical_flux_NIPG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.DG_numerical_flux_NIPG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.DG_numerical_flux_SIPG">DG_numerical_flux_SIPG (elastodynamicsx.pde.materials.ElasticMaterial property)</a>
+      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.DG_numerical_flux_SIPG">DG_numerical_flux_SIPG() (elastodynamicsx.pde.materials.ElasticMaterial method)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.DG_numerical_flux_SIPG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.DG_numerical_flux_SIPG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial method)</a>
 </li>
       </ul></li>
       <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.DG_SIPG_regularization_parameter">DG_SIPG_regularization_parameter() (elastodynamicsx.pde.materials.ElasticMaterial method)</a>
@@ -1298,16 +1324,6 @@
 <h2 id="K">K</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.k">k (elastodynamicsx.pde.materials.Material property)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.k">(elastodynamicsx.pde.materials.material.Material property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.k">(elastodynamicsx.pde.PDE property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.k">(elastodynamicsx.pde.pde.PDE property)</a>
-</li>
-      </ul></li>
       <li><a href="api/elastodynamicsx.solvers.frequencydomain.html#elastodynamicsx.solvers.frequencydomain.FrequencyDomainSolver.K">K (elastodynamicsx.solvers.frequencydomain.FrequencyDomainSolver property)</a>
 
       <ul>
@@ -1316,22 +1332,32 @@
         <li><a href="api/elastodynamicsx.solvers.html#elastodynamicsx.solvers.FrequencyDomainSolver.K">(elastodynamicsx.solvers.FrequencyDomainSolver property)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin.k">k() (elastodynamicsx.pde.boundaryconditions.BCRobin method)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCWeakBase.k">(elastodynamicsx.pde.boundaryconditions.BCWeakBase method)</a>
-</li>
-      </ul></li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K">K() (elastodynamicsx.pde.PDE method)</a>
 
       <ul>
         <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.K">(elastodynamicsx.pde.pde.PDE method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.k1">k1 (elastodynamicsx.pde.PDE property)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K0">K0() (elastodynamicsx.pde.PDE method)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.k1">(elastodynamicsx.pde.pde.PDE property)</a>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.K0">(elastodynamicsx.pde.pde.PDE method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K0_fn">K0_fn() (elastodynamicsx.pde.PDE method)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.K0_fn">(elastodynamicsx.pde.pde.PDE method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.K0_fn_CG">K0_fn_CG() (elastodynamicsx.pde.materials.ElasticMaterial method)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.K0_fn_CG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.K0_fn_CG">(elastodynamicsx.pde.materials.Material method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.K0_fn_CG">(elastodynamicsx.pde.materials.material.Material method)</a>
 </li>
       </ul></li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K1">K1() (elastodynamicsx.pde.PDE method)</a>
@@ -1340,20 +1366,20 @@
         <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.K1">(elastodynamicsx.pde.pde.PDE method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.k1_CG">k1_CG (elastodynamicsx.pde.materials.ElasticMaterial property)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K1_fn">K1_fn() (elastodynamicsx.pde.PDE method)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.k1_CG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.k1_CG">(elastodynamicsx.pde.materials.Material property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.k1_CG">(elastodynamicsx.pde.materials.material.Material property)</a>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.K1_fn">(elastodynamicsx.pde.pde.PDE method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.k2">k2 (elastodynamicsx.pde.PDE property)</a>
+      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.K1_fn_CG">K1_fn_CG() (elastodynamicsx.pde.materials.ElasticMaterial method)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.k2">(elastodynamicsx.pde.pde.PDE property)</a>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.K1_fn_CG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.K1_fn_CG">(elastodynamicsx.pde.materials.Material method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.K1_fn_CG">(elastodynamicsx.pde.materials.material.Material method)</a>
 </li>
       </ul></li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K2">K2() (elastodynamicsx.pde.PDE method)</a>
@@ -1362,80 +1388,78 @@
         <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.K2">(elastodynamicsx.pde.pde.PDE method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.k2_CG">k2_CG (elastodynamicsx.pde.materials.ElasticMaterial property)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K2_fn">K2_fn() (elastodynamicsx.pde.PDE method)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.k2_CG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.K2_fn">(elastodynamicsx.pde.pde.PDE method)</a>
 </li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.k2_CG">(elastodynamicsx.pde.materials.Material property)</a>
+      </ul></li>
+      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.K2_fn_CG">K2_fn_CG() (elastodynamicsx.pde.materials.ElasticMaterial method)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.K2_fn_CG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial method)</a>
 </li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.k2_CG">(elastodynamicsx.pde.materials.material.Material property)</a>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.K2_fn_CG">(elastodynamicsx.pde.materials.Material method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.K2_fn_CG">(elastodynamicsx.pde.materials.material.Material method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.k3">k3 (elastodynamicsx.pde.PDE property)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin.K_fn">K_fn() (elastodynamicsx.pde.boundaryconditions.BCRobin method)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.k3">(elastodynamicsx.pde.pde.PDE property)</a>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCWeakBase.K_fn">(elastodynamicsx.pde.boundaryconditions.BCWeakBase method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.K_fn">(elastodynamicsx.pde.materials.Material method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.K_fn">(elastodynamicsx.pde.materials.material.Material method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K_fn">(elastodynamicsx.pde.PDE method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.K_fn">(elastodynamicsx.pde.pde.PDE method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K3">K3() (elastodynamicsx.pde.PDE method)</a>
+      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.K_fn_CG">K_fn_CG() (elastodynamicsx.pde.materials.ElasticMaterial method)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.K3">(elastodynamicsx.pde.pde.PDE method)</a>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.K_fn_CG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.HyperelasticMaterial.K_fn_CG">(elastodynamicsx.pde.materials.HyperelasticMaterial method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.hyperelasticmaterials.HyperelasticMaterial.K_fn_CG">(elastodynamicsx.pde.materials.hyperelasticmaterials.HyperelasticMaterial method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.K_fn_CG">(elastodynamicsx.pde.materials.Material method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.K_fn_CG">(elastodynamicsx.pde.materials.material.Material method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K_fn_CG">(elastodynamicsx.pde.PDE method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.K_fn_CG">(elastodynamicsx.pde.pde.PDE method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.k3_CG">k3_CG (elastodynamicsx.pde.materials.ElasticMaterial property)</a>
+      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.K_fn_DG">K_fn_DG() (elastodynamicsx.pde.materials.ElasticMaterial method)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.k3_CG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.K_fn_DG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial method)</a>
 </li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.k3_CG">(elastodynamicsx.pde.materials.Material property)</a>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.HyperelasticMaterial.K_fn_DG">(elastodynamicsx.pde.materials.HyperelasticMaterial method)</a>
 </li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.k3_CG">(elastodynamicsx.pde.materials.material.Material property)</a>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.hyperelasticmaterials.HyperelasticMaterial.K_fn_DG">(elastodynamicsx.pde.materials.hyperelasticmaterials.HyperelasticMaterial method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.K_fn_DG">(elastodynamicsx.pde.materials.Material method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.K_fn_DG">(elastodynamicsx.pde.materials.material.Material method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K_fn_DG">(elastodynamicsx.pde.PDE method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.K_fn_DG">(elastodynamicsx.pde.pde.PDE method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.k_CG">k_CG (elastodynamicsx.pde.materials.ElasticMaterial property)</a>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.K_form">K_form (elastodynamicsx.pde.PDE property)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.k_CG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.HyperelasticMaterial.k_CG">(elastodynamicsx.pde.materials.HyperelasticMaterial property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.hyperelasticmaterials.HyperelasticMaterial.k_CG">(elastodynamicsx.pde.materials.hyperelasticmaterials.HyperelasticMaterial property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.k_CG">(elastodynamicsx.pde.materials.Material property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.k_CG">(elastodynamicsx.pde.materials.material.Material property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.k_CG">(elastodynamicsx.pde.PDE property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.k_CG">(elastodynamicsx.pde.pde.PDE property)</a>
-</li>
-      </ul></li>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.ElasticMaterial.k_DG">k_DG (elastodynamicsx.pde.materials.ElasticMaterial property)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial.k_DG">(elastodynamicsx.pde.materials.elasticmaterial.ElasticMaterial property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.HyperelasticMaterial.k_DG">(elastodynamicsx.pde.materials.HyperelasticMaterial property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.hyperelasticmaterials.HyperelasticMaterial.k_DG">(elastodynamicsx.pde.materials.hyperelasticmaterials.HyperelasticMaterial property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.k_DG">(elastodynamicsx.pde.materials.Material property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.k_DG">(elastodynamicsx.pde.materials.material.Material property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.k_DG">(elastodynamicsx.pde.PDE property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.k_DG">(elastodynamicsx.pde.pde.PDE property)</a>
-</li>
-      </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.k_form">k_form (elastodynamicsx.pde.PDE property)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.k_form">(elastodynamicsx.pde.pde.PDE property)</a>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.K_form">(elastodynamicsx.pde.pde.PDE property)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1444,29 +1468,11 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.BodyForce.L">L (elastodynamicsx.pde.BodyForce property)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.bodyforce.BodyForce.L">(elastodynamicsx.pde.bodyforce.BodyForce property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.L">(elastodynamicsx.pde.PDE property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.L">(elastodynamicsx.pde.pde.PDE property)</a>
-</li>
-      </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCFree.L">L() (elastodynamicsx.pde.boundaryconditions.BCFree method)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCNeumann.L">(elastodynamicsx.pde.boundaryconditions.BCNeumann method)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin.L">(elastodynamicsx.pde.boundaryconditions.BCRobin method)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCWeakBase.L">(elastodynamicsx.pde.boundaryconditions.BCWeakBase method)</a>
-</li>
-      </ul></li>
       <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCClamp.labels">labels (elastodynamicsx.pde.boundaryconditions.BCClamp attribute)</a>
 
       <ul>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCCustom.labels">(elastodynamicsx.pde.boundaryconditions.BCCustom attribute)</a>
+</li>
         <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDashpot.labels">(elastodynamicsx.pde.boundaryconditions.BCDashpot attribute)</a>
 </li>
         <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDirichlet.labels">(elastodynamicsx.pde.boundaryconditions.BCDirichlet attribute)</a>
@@ -1614,16 +1620,6 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.m">m (elastodynamicsx.pde.materials.Material property)</a>
-
-      <ul>
-        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.m">(elastodynamicsx.pde.materials.material.Material property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.m">(elastodynamicsx.pde.PDE property)</a>
-</li>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.m">(elastodynamicsx.pde.pde.PDE property)</a>
-</li>
-      </ul></li>
       <li><a href="api/elastodynamicsx.solvers.frequencydomain.html#elastodynamicsx.solvers.frequencydomain.FrequencyDomainSolver.M">M (elastodynamicsx.solvers.frequencydomain.FrequencyDomainSolver property)</a>
 
       <ul>
@@ -1638,10 +1634,20 @@
         <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.M">(elastodynamicsx.pde.pde.PDE method)</a>
 </li>
       </ul></li>
-      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.m_form">m_form (elastodynamicsx.pde.PDE property)</a>
+      <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.Material.M_fn">M_fn() (elastodynamicsx.pde.materials.Material method)</a>
 
       <ul>
-        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.m_form">(elastodynamicsx.pde.pde.PDE property)</a>
+        <li><a href="api/elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material.M_fn">(elastodynamicsx.pde.materials.material.Material method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.M_fn">(elastodynamicsx.pde.PDE method)</a>
+</li>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.M_fn">(elastodynamicsx.pde.pde.PDE method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.PDE.M_form">M_form (elastodynamicsx.pde.PDE property)</a>
+
+      <ul>
+        <li><a href="api/elastodynamicsx.pde.html#elastodynamicsx.pde.pde.PDE.M_form">(elastodynamicsx.pde.pde.PDE property)</a>
 </li>
       </ul></li>
       <li><a href="api/elastodynamicsx.utils.html#elastodynamicsx.utils.make_cell_tags">make_cell_tags() (in module elastodynamicsx.utils)</a>

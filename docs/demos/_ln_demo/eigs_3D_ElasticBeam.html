@@ -1,31 +1,35 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resonances of a beam clamped at one end &mdash; ElastodynamiCSx 0.2.3 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/jupyter-sphinx.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/thebelab.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/tabs.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+  <title>Resonances of a beam clamped at one end &mdash; ElastodynamiCSx 0.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/tabs.css?v=a5c4661c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=a47416a6"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/documentation_options.js?v=e259d695"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/thebelab-helper.js"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
         <script src="../../_static/copybutton.js?v=35a8b989"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -48,7 +52,7 @@
             ElastodynamiCSx
           </a>
               <div class="version">
-                0.2.3
+                0.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -207,6 +211,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCFree"><code class="docutils literal notranslate"><span class="pre">BCFree</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin"><code class="docutils literal notranslate"><span class="pre">BCRobin</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDashpot"><code class="docutils literal notranslate"><span class="pre">BCDashpot</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCCustom"><code class="docutils literal notranslate"><span class="pre">BCCustom</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCPeriodic"><code class="docutils literal notranslate"><span class="pre">BCPeriodic</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.get_dirichlet_BCs"><code class="docutils literal notranslate"><span class="pre">get_dirichlet_BCs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.get_mpc_BCs"><code class="docutils literal notranslate"><span class="pre">get_mpc_BCs()</span></code></a></li>
@@ -319,6 +324,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">About</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about/authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../about/links.html">Useful links</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../about/licence_link.html">Licence</a></li>
 </ul>
@@ -398,7 +404,7 @@
 <span class="n">domain</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">create_box</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="p">[</span><span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">Nz</span><span class="p">])</span>
 
 <span class="c1"># create the function space</span>
-<span class="n">V</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">FunctionSpace</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;Lagrange&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">dim</span><span class="p">,)))</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">functionspace</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;Lagrange&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">dim</span><span class="p">,)))</span>
 
 <span class="c1"># define some tags</span>
 <span class="n">tag_left</span><span class="p">,</span> <span class="n">tag_top</span><span class="p">,</span> <span class="n">tag_right</span><span class="p">,</span> <span class="n">tag_bottom</span><span class="p">,</span> <span class="n">tag_back</span><span class="p">,</span> <span class="n">tag_front</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span>

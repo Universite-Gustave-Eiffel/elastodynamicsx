@@ -1,23 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>elastodynamicsx.pde.timeschemes.leapfrog &mdash; ElastodynamiCSx 0.2.3 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/jupyter-sphinx.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/thebelab.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/tabs.css" type="text/css" />
+  <title>elastodynamicsx.pde.timeschemes.leapfrog &mdash; ElastodynamiCSx 0.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/jupyter-sphinx.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/thebelab.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/tabs.css?v=a5c4661c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=a47416a6"></script>
-        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/documentation_options.js?v=e259d695"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../../../_static/thebelab-helper.js"></script>
         <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -25,6 +28,7 @@
         <script src="../../../../_static/tabs.js?v=3030b3cb"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+        <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -43,7 +47,7 @@
             ElastodynamiCSx
           </a>
               <div class="version">
-                0.2.3
+                0.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -202,6 +206,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCFree"><code class="docutils literal notranslate"><span class="pre">BCFree</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCRobin"><code class="docutils literal notranslate"><span class="pre">BCRobin</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCDashpot"><code class="docutils literal notranslate"><span class="pre">BCDashpot</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCCustom"><code class="docutils literal notranslate"><span class="pre">BCCustom</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.BCPeriodic"><code class="docutils literal notranslate"><span class="pre">BCPeriodic</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.get_dirichlet_BCs"><code class="docutils literal notranslate"><span class="pre">get_dirichlet_BCs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../api/elastodynamicsx.pde.html#elastodynamicsx.pde.boundaryconditions.get_mpc_BCs"><code class="docutils literal notranslate"><span class="pre">get_mpc_BCs()</span></code></a></li>
@@ -314,6 +319,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">About</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../about/authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../about/links.html">Useful links</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../about/licence_link.html">Licence</a></li>
 </ul>
@@ -384,19 +390,19 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        function_space: The Finite Element functionnal space</span>
-<span class="sd">        m: The mass form. Usually:</span>
+<span class="sd">        M_fn: The mass form. Usually:</span>
 
-<span class="sd">            :python:`m = lambda u,v: rho* ufl.dot(u, v) * ufl.dx`</span>
+<span class="sd">            :python:`M_fn = lambda u,v: rho* ufl.dot(u, v) * ufl.dx`</span>
 
-<span class="sd">        c (optional, ignored if None): The damping form. E.g. for Rayleigh damping:</span>
+<span class="sd">        C_fn (optional, ignored if None): The damping form. E.g. for Rayleigh damping:</span>
 
-<span class="sd">            :python:`c = lambda u,v: eta_m * m(u,v) + eta_k * k(u,v)`</span>
+<span class="sd">            :python:`C_fn = lambda u,v: eta_m * M_fn(u,v) + eta_k * K_fn(u,v)`</span>
 
-<span class="sd">        k: The stiffness form. Usually:</span>
+<span class="sd">        K_fn: The stiffness form. Usually:</span>
 
-<span class="sd">            :python:`k = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx`</span>
+<span class="sd">            :python:`K_fn = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx`</span>
 
-<span class="sd">        L (optional, ignored if None): Linear form</span>
+<span class="sd">        b_fn (optional, ignored if None): Right hand term</span>
 <span class="sd">        dt: Time step</span>
 <span class="sd">        bcs: The set of boundary conditions</span>
 
@@ -409,11 +415,11 @@
 
     <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;leapfrog&#39;</span><span class="p">,</span> <span class="s1">&#39;central-difference&#39;</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_space</span><span class="p">:</span> <span class="n">fem</span><span class="o">.</span><span class="n">FunctionSpaceBase</span><span class="p">,</span>
-                 <span class="n">m_</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;ufl.TrialFunction&#39;</span><span class="p">,</span> <span class="s1">&#39;ufl.TestFunction&#39;</span><span class="p">],</span> <span class="n">ufl</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">Form</span><span class="p">],</span>
-                 <span class="n">c_</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;ufl.TrialFunction&#39;</span><span class="p">,</span> <span class="s1">&#39;ufl.TestFunction&#39;</span><span class="p">],</span> <span class="n">ufl</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">Form</span><span class="p">]],</span>
-                 <span class="n">k_</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;ufl.TrialFunction&#39;</span><span class="p">,</span> <span class="s1">&#39;ufl.TestFunction&#39;</span><span class="p">],</span> <span class="n">ufl</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">Form</span><span class="p">],</span>
-                 <span class="n">L</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;ufl.TestFunction&#39;</span><span class="p">],</span> <span class="n">ufl</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">Form</span><span class="p">]],</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_space</span><span class="p">:</span> <span class="n">fem</span><span class="o">.</span><span class="n">FunctionSpace</span><span class="p">,</span>
+                 <span class="n">M_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;ufl.TrialFunction&#39;</span><span class="p">,</span> <span class="s1">&#39;ufl.TestFunction&#39;</span><span class="p">],</span> <span class="n">ufl</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">Form</span><span class="p">],</span>
+                 <span class="n">C_fn</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;ufl.TrialFunction&#39;</span><span class="p">,</span> <span class="s1">&#39;ufl.TestFunction&#39;</span><span class="p">],</span> <span class="n">ufl</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">Form</span><span class="p">]],</span>
+                 <span class="n">K_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;ufl.TrialFunction&#39;</span><span class="p">,</span> <span class="s1">&#39;ufl.TestFunction&#39;</span><span class="p">],</span> <span class="n">ufl</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">Form</span><span class="p">],</span>
+                 <span class="n">b_fn</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;ufl.TestFunction&#39;</span><span class="p">],</span> <span class="n">ufl</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">Form</span><span class="p">]],</span>
                  <span class="n">dt</span><span class="p">,</span>
                  <span class="n">bcs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">BoundaryConditionBase</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[()]]</span> <span class="o">=</span> <span class="p">(),</span>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -432,21 +438,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_a0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_u_nm2</span>
 
         <span class="c1"># linear and bilinear forms for mass and stiffness matrices</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">m_</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_L</span> <span class="o">=</span> <span class="o">-</span><span class="n">dt_</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">k_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u_nm1</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">m_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u_nm1</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">-</span> <span class="n">m_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u_nm2</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">M_fn</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_L</span> <span class="o">=</span> <span class="o">-</span><span class="n">dt_</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">K_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u_nm1</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">M_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u_nm1</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">-</span> <span class="n">M_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u_nm2</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_m0_form</span> <span class="o">=</span> <span class="n">m_</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_L0_form</span> <span class="o">=</span> <span class="o">-</span><span class="n">k_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u0</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_m0_form</span> <span class="o">=</span> <span class="n">M_fn</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_L0_form</span> <span class="o">=</span> <span class="o">-</span><span class="n">K_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u0</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">L</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_L</span> <span class="o">+=</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">L</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_L0_form</span> <span class="o">+=</span> <span class="n">L</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">_L_terms</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">b_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">_L_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b_fn</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 
         <span class="c1"># linear and bilinear forms for damping matrix if given</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">c_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">c_</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_L</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">c_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u_nm2</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_L0_form</span> <span class="o">-=</span> <span class="n">c_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_v0</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">C_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">C_uv_ufl</span> <span class="o">=</span> <span class="n">C_fn</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">C_uv_ufl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">C_uv_ufl</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_L</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">C_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u_nm2</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_L0_form</span> <span class="o">-=</span> <span class="n">C_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_v0</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 
         <span class="c1"># boundary conditions</span>
         <span class="n">mpc</span> <span class="o">=</span> <span class="n">_build_mpc</span><span class="p">(</span><span class="n">bcs</span><span class="p">)</span>
@@ -454,19 +462,23 @@
         <span class="n">weak_BCs</span> <span class="o">=</span> <span class="n">get_weak_BCs</span><span class="p">(</span><span class="n">bcs</span><span class="p">)</span>
 
         <span class="c1"># damping term, BC</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">c</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_L</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u_nm2</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">C_fn</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_L</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">C_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u_nm2</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]))</span>
 
         <span class="c1"># stiffness term, BC</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">+=</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">+=</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">K_fn</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]))</span>
 
         <span class="c1"># load term, BC</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_L</span> <span class="o">+=</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">L</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]))</span>
+        <span class="n">_L_terms</span> <span class="o">+=</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">b_fn</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]</span>
 
         <span class="c1"># initial value rhs, BC</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_L0_form</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_v0</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_L0_form</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u0</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_L0_form</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">L</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_L0_form</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">C_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_v0</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_L0_form</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">bc</span><span class="o">.</span><span class="n">K_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u0</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">weak_BCs</span><span class="p">]))</span>
+
+        <span class="c1"># sum and report into forms</span>
+        <span class="n">_L_terms_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">_L_terms</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_L</span> <span class="o">+=</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">dt_</span> <span class="o">*</span> <span class="n">_L_terms_sum</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_L0_form</span> <span class="o">+=</span> <span class="n">_L_terms_sum</span>
 
         <span class="c1"># compile forms</span>
         <span class="n">bilinear_form</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">form</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_a</span><span class="p">,</span> <span class="n">jit_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jit_options</span><span class="p">)</span>
@@ -525,7 +537,8 @@
         <span class="n">u1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_u_n</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">array</span>
 
         <span class="c1"># remember that self._u_nm1 = self._u0 -&gt; self._u_nm1 is already at the correct value</span>
-        <span class="n">u1</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">u0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">*</span> <span class="n">v0</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">a0</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>  <span class="c1"># keep good speed if self.dt is e.g. a fem.Constant</span>
+        <span class="n">u1</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">u0</span> <span class="o">+</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">v0</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">a0</span>
         <span class="c1"># unm1 is not needed</span>
         <span class="c1"># at this point: self._u_n = u1, self._u_nm1 = u0</span>
 
@@ -534,7 +547,7 @@
         <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
             <span class="n">PETSc</span><span class="o">.</span><span class="n">Sys</span><span class="o">.</span><span class="n">Print</span><span class="p">(</span><span class="s1">&#39;Initial value problem solved, entering loop&#39;</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
         <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="n">callbacks</span><span class="p">:</span>
-            <span class="n">callback</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_u_n</span><span class="o">.</span><span class="n">vector</span><span class="p">)</span>  <span class="c1"># &lt;- store solution, plot, print, ...</span></div>
+            <span class="n">callback</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_u_n</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">petsc_vec</span><span class="p">)</span>  <span class="c1"># &lt;- store solution, plot, print, ...</span></div>
 </div>
 
         <span class="c1">#</span>

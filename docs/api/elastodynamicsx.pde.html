@@ -1,30 +1,34 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>elastodynamicsx.pde &mdash; ElastodynamiCSx 0.2.3 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/jupyter-sphinx.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/thebelab.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+  <title>elastodynamicsx.pde &mdash; ElastodynamiCSx 0.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=a47416a6"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/documentation_options.js?v=e259d695"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/thebelab-helper.js"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
         <script src="../_static/copybutton.js?v=35a8b989"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+        <script src="../_static/design-tabs.js?v=f930bc37"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -47,7 +51,7 @@
             ElastodynamiCSx
           </a>
               <div class="version">
-                0.2.3
+                0.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -206,6 +210,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#elastodynamicsx.pde.boundaryconditions.BCFree"><code class="docutils literal notranslate"><span class="pre">BCFree</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#elastodynamicsx.pde.boundaryconditions.BCRobin"><code class="docutils literal notranslate"><span class="pre">BCRobin</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#elastodynamicsx.pde.boundaryconditions.BCDashpot"><code class="docutils literal notranslate"><span class="pre">BCDashpot</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#elastodynamicsx.pde.boundaryconditions.BCCustom"><code class="docutils literal notranslate"><span class="pre">BCCustom</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#elastodynamicsx.pde.boundaryconditions.BCPeriodic"><code class="docutils literal notranslate"><span class="pre">BCPeriodic</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#elastodynamicsx.pde.boundaryconditions.get_dirichlet_BCs"><code class="docutils literal notranslate"><span class="pre">get_dirichlet_BCs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#elastodynamicsx.pde.boundaryconditions.get_mpc_BCs"><code class="docutils literal notranslate"><span class="pre">get_mpc_BCs()</span></code></a></li>
@@ -318,6 +323,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">About</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../about/links.html">Useful links</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../about/licence_link.html">Licence</a></li>
 </ul>
@@ -386,14 +392,14 @@ the <code class="code highlight python docutils literal highlight-python"><span 
 </div>
 </dd>
 <dt>Getting the forms:</dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Python functions</span>
-<span class="n">m</span> <span class="o">=</span> <span class="n">pde</span><span class="o">.</span><span class="n">m</span>
+<span class="n">M_function</span> <span class="o">=</span> <span class="n">pde</span><span class="o">.</span><span class="n">M_fn</span>
 <span class="c1"># Use as:</span>
 <span class="c1"># u = ufl.TrialFunction(function_space)</span>
 <span class="c1"># v = ufl.TestFunction(function_space)</span>
-<span class="c1"># m_ufl = m(u, v)</span>
+<span class="c1"># M_ufl = M_function(u, v)</span>
 
 <span class="c1"># Compiled dolfinx forms</span>
-<span class="n">m_form</span> <span class="o">=</span> <span class="n">pde</span><span class="o">.</span><span class="n">m_form</span>
+<span class="n">M_form</span> <span class="o">=</span> <span class="n">pde</span><span class="o">.</span><span class="n">M_form</span>
 
 <span class="c1"># PETSc Matrices</span>
 <span class="n">M</span> <span class="o">=</span> <span class="n">pde</span><span class="o">.</span><span class="n">M</span><span class="p">()</span>
@@ -424,23 +430,23 @@ in the PDE class. An instance represents a single source.</p>
 <span class="c1"># Gaussian source distribution</span>
 <span class="n">X0_src</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">length</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">height</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>  <span class="c1"># center</span>
 <span class="n">R0_src</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># radius</span>
-<span class="n">F0_src</span> <span class="o">=</span> <span class="n">default_scalar_type</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># amplitude of the source</span>
+<span class="n">F0_src</span> <span class="o">=</span> <span class="n">default_scalar_type</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>  <span class="c1"># amplitude of the source</span>
 
 <span class="k">def</span> <span class="nf">src_x</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># source(x): Gaussian</span>
-    <span class="n">nrm</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">R0_src</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># normalize to int[src_x(x) dx]=1</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">X0_src</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">nrm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">r</span><span class="o">/</span><span class="n">R0_src</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">default_scalar_type</span><span class="p">)</span>
+    <span class="n">nrm</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">R0_src</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># normalize to int[src_x(x) dx]=1</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">X0_src</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nrm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">r</span> <span class="o">/</span> <span class="n">R0_src</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">default_scalar_type</span><span class="p">)</span>
 
 <span class="n">value</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
-<span class="n">value</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">F0_src</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">src_x</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:])</span>
+<span class="n">value</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">F0_src</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">src_x</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:])</span>
 
 <span class="n">bf</span> <span class="o">=</span> <span class="n">BodyForce</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>  <span class="c1"># defined in the entire domain</span>
 <span class="n">bf</span> <span class="o">=</span> <span class="n">BodyForce</span><span class="p">((</span><span class="n">V</span><span class="p">,</span> <span class="n">cell_tags</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span> <span class="n">value</span><span class="p">)</span>  <span class="c1"># definition restricted to tags 1 and 4</span>
 </pre></div>
 </div>
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.BodyForce.L">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">L</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.BodyForce.L" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.BodyForce.b_fn">
+<span class="sig-name descname"><span class="pre">b_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/bodyforce.html#BodyForce.b_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.BodyForce.b_fn" title="Link to this definition"></a></dt>
 <dd><p>The linear form function</p>
 </dd></dl>
 
@@ -625,6 +631,12 @@ in the PDE class. An instance represents a single source.</p>
 <span class="n">mat</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span> <span class="n">function_space</span><span class="p">,</span> <span class="s1">&#39;saintvenant-kirchhoff&#39;</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">C12</span><span class="p">,</span> <span class="n">C44</span><span class="p">)</span>
 <span class="n">mat</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span> <span class="n">function_space</span><span class="p">,</span> <span class="s1">&#39;murnaghan&#39;</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">C12</span><span class="p">,</span> <span class="n">C44</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
 <span class="n">mat</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span> <span class="n">function_space</span><span class="p">,</span> <span class="s1">&#39;mooney-rivlin-incomp&#39;</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">C1</span><span class="p">,</span> <span class="n">C2</span><span class="p">)</span>
+
+<span class="c1"># Arbitrary</span>
+<span class="n">mat</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span> <span class="n">function_space</span><span class="p">,</span>
+                <span class="s1">&#39;custom&#39;</span><span class="p">,</span>
+                <span class="n">M_fn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span>
+                <span class="n">K_fn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">:</span> <span class="o">...</span> <span class="o">*</span> <span class="n">ufl</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -662,7 +674,7 @@ in the PDE class. An instance represents a single source.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="elastodynamicsx.pde.PDE">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.</span></span><span class="sig-name descname"><span class="pre">PDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FunctionSpaceBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">materials</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material" title="elastodynamicsx.pde.materials.material.Material"><span class="pre">Material</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.</span></span><span class="sig-name descname"><span class="pre">PDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FunctionSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">materials</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material" title="elastodynamicsx.pde.materials.material.Material"><span class="pre">Material</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Representation of a PDE of the kind:</p>
 <blockquote>
@@ -673,7 +685,7 @@ in the PDE class. An instance represents a single source.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>functions_space</strong> – </p></li>
+<li><p><strong>functions_space</strong></p></li>
 <li><p><strong>materials</strong> – a list of pde.Material instances</p></li>
 </ul>
 </dd>
@@ -702,81 +714,81 @@ in the PDE class. An instance represents a single source.</p>
 <dd><p>Finalize dolfinx-mpc objects</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.m">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.m" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.M_fn">
+<span class="sig-name descname"><span class="pre">M_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.M_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.M_fn" title="Link to this definition"></a></dt>
 <dd><p>(bilinear) Mass form function</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.c">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">c</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.c" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.C_fn">
+<span class="sig-name descname"><span class="pre">C_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.C_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.C_fn" title="Link to this definition"></a></dt>
 <dd><p>(bilinear) Damping form function</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.k">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.k" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.K_fn">
+<span class="sig-name descname"><span class="pre">K_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.K_fn" title="Link to this definition"></a></dt>
 <dd><p>(bilinear) Stiffness form function</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.k1">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.k1" title="Link to this definition"></a></dt>
-<dd><p>(bilinear) k1 stiffness form function (waveguide problems)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.K0_fn">
+<span class="sig-name descname"><span class="pre">K0_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K0_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.K0_fn" title="Link to this definition"></a></dt>
+<dd><p>(bilinear) K0 stiffness form function (waveguide problems)</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.k2">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.k2" title="Link to this definition"></a></dt>
-<dd><p>(bilinear) k2 stiffness form function (waveguide problems)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.K1_fn">
+<span class="sig-name descname"><span class="pre">K1_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K1_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.K1_fn" title="Link to this definition"></a></dt>
+<dd><p>(bilinear) K1 stiffness form function (waveguide problems)</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.k3">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k3</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.k3" title="Link to this definition"></a></dt>
-<dd><p>(bilinear) k3 stiffness form function (waveguide problems)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.K2_fn">
+<span class="sig-name descname"><span class="pre">K2_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K2_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.K2_fn" title="Link to this definition"></a></dt>
+<dd><p>(bilinear) K2 stiffness form function (waveguide problems)</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.k_CG">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_CG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.k_CG" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.K_fn_CG">
+<span class="sig-name descname"><span class="pre">K_fn_CG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K_fn_CG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.K_fn_CG" title="Link to this definition"></a></dt>
 <dd><p>(bilinear) Stiffness form function (Continuous Galerkin)</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.k_DG">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_DG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.k_DG" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.K_fn_DG">
+<span class="sig-name descname"><span class="pre">K_fn_DG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K_fn_DG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.K_fn_DG" title="Link to this definition"></a></dt>
 <dd><p>(bilinear) Stiffness form function (Discontinuous Galerkin)</p>
 </dd></dl>
 
-<dl class="py property">
+<dl class="py method">
 <dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.DG_numerical_flux">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DG_numerical_flux</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.DG_numerical_flux" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">DG_numerical_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.DG_numerical_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.DG_numerical_flux" title="Link to this definition"></a></dt>
 <dd><p>(bilinear) Numerical flux form function (Disontinuous Galerkin)</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.L">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">L</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.L" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.b_fn">
+<span class="sig-name descname"><span class="pre">b_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.b_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.b_fn" title="Link to this definition"></a></dt>
 <dd><p>Linear form function</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.m_form">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m_form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Form</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.m_form" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.M_form">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">M_form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Form</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.M_form" title="Link to this definition"></a></dt>
 <dd><p>Compiled mass bilinear form</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.c_form">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">c_form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Form</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.c_form" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.C_form">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">C_form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Form</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.C_form" title="Link to this definition"></a></dt>
 <dd><p>Compiled damping bilinear form</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.k_form">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Form</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.k_form" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.K_form">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">K_form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Form</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.PDE.K_form" title="Link to this definition"></a></dt>
 <dd><p>Compiled stiffness bilinear form</p>
 </dd></dl>
 
@@ -817,6 +829,12 @@ in the PDE class. An instance represents a single source.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.K0">
+<span class="sig-name descname"><span class="pre">K0</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mat</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.K0" title="Link to this definition"></a></dt>
+<dd><p>K0 stiffness matrix (waveguide problems)</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.K1">
 <span class="sig-name descname"><span class="pre">K1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mat</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.K1" title="Link to this definition"></a></dt>
 <dd><p>K1 stiffness matrix (waveguide problems)</p>
@@ -826,12 +844,6 @@ in the PDE class. An instance represents a single source.</p>
 <dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.K2">
 <span class="sig-name descname"><span class="pre">K2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mat</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.K2" title="Link to this definition"></a></dt>
 <dd><p>K2 stiffness matrix (waveguide problems)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.PDE.K3">
-<span class="sig-name descname"><span class="pre">K3</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mat</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.PDE.K3" title="Link to this definition"></a></dt>
-<dd><p>K3 stiffness matrix (waveguide problems)</p>
 </dd></dl>
 
 </dd></dl>
@@ -901,23 +913,23 @@ in the PDE class. An instance represents a single source.</p>
 <span class="c1"># Gaussian source distribution</span>
 <span class="n">X0_src</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">length</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">height</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>  <span class="c1"># center</span>
 <span class="n">R0_src</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># radius</span>
-<span class="n">F0_src</span> <span class="o">=</span> <span class="n">default_scalar_type</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># amplitude of the source</span>
+<span class="n">F0_src</span> <span class="o">=</span> <span class="n">default_scalar_type</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>  <span class="c1"># amplitude of the source</span>
 
 <span class="k">def</span> <span class="nf">src_x</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># source(x): Gaussian</span>
-    <span class="n">nrm</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">R0_src</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># normalize to int[src_x(x) dx]=1</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">X0_src</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">nrm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">r</span><span class="o">/</span><span class="n">R0_src</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">default_scalar_type</span><span class="p">)</span>
+    <span class="n">nrm</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">R0_src</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># normalize to int[src_x(x) dx]=1</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">X0_src</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nrm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">r</span> <span class="o">/</span> <span class="n">R0_src</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">default_scalar_type</span><span class="p">)</span>
 
 <span class="n">value</span> <span class="o">=</span> <span class="n">fem</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
-<span class="n">value</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">F0_src</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">src_x</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:])</span>
+<span class="n">value</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">F0_src</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">src_x</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:])</span>
 
 <span class="n">bf</span> <span class="o">=</span> <span class="n">BodyForce</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>  <span class="c1"># defined in the entire domain</span>
 <span class="n">bf</span> <span class="o">=</span> <span class="n">BodyForce</span><span class="p">((</span><span class="n">V</span><span class="p">,</span> <span class="n">cell_tags</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span> <span class="n">value</span><span class="p">)</span>  <span class="c1"># definition restricted to tags 1 and 4</span>
 </pre></div>
 </div>
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.bodyforce.BodyForce.L">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">L</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.bodyforce.BodyForce.L" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.bodyforce.BodyForce.b_fn">
+<span class="sig-name descname"><span class="pre">b_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/bodyforce.html#BodyForce.b_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.bodyforce.BodyForce.b_fn" title="Link to this definition"></a></dt>
 <dd><p>The linear form function</p>
 </dd></dl>
 
@@ -1003,18 +1015,18 @@ Requires <cite>dolfinx_mpc</cite> to be installed.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCWeakBase.c">
-<span class="sig-name descname"><span class="pre">c</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCWeakBase.c"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCWeakBase.c" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCWeakBase.C_fn">
+<span class="sig-name descname"><span class="pre">C_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCWeakBase.C_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCWeakBase.C_fn" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCWeakBase.k">
-<span class="sig-name descname"><span class="pre">k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCWeakBase.k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCWeakBase.k" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCWeakBase.K_fn">
+<span class="sig-name descname"><span class="pre">K_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCWeakBase.K_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCWeakBase.K_fn" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCWeakBase.L">
-<span class="sig-name descname"><span class="pre">L</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCWeakBase.L"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCWeakBase.L" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCWeakBase.b_fn">
+<span class="sig-name descname"><span class="pre">b_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCWeakBase.b_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCWeakBase.b_fn" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1065,8 +1077,8 @@ with <span class="math notranslate nohighlight">\(t_n\)</span> a boundary tracti
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCNeumann.L">
-<span class="sig-name descname"><span class="pre">L</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCNeumann.L"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCNeumann.L" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCNeumann.b_fn">
+<span class="sig-name descname"><span class="pre">b_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCNeumann.b_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCNeumann.b_fn" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1089,8 +1101,8 @@ with <span class="math notranslate nohighlight">\(t_n\)</span> a boundary tracti
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCFree.L">
-<span class="sig-name descname"><span class="pre">L</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCFree.L"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCFree.L" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCFree.b_fn">
+<span class="sig-name descname"><span class="pre">b_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCFree.b_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCFree.b_fn" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1108,13 +1120,13 @@ with <span class="math notranslate nohighlight">\(z\)</span> an impedance matrix
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCRobin.k">
-<span class="sig-name descname"><span class="pre">k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCRobin.k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCRobin.k" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCRobin.K_fn">
+<span class="sig-name descname"><span class="pre">K_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCRobin.K_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCRobin.K_fn" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCRobin.L">
-<span class="sig-name descname"><span class="pre">L</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCRobin.L"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCRobin.L" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCRobin.b_fn">
+<span class="sig-name descname"><span class="pre">b_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCRobin.b_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCRobin.b_fn" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1144,14 +1156,37 @@ with <span class="math notranslate nohighlight">\(v_n\)</span> and <span class="
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCDashpot.c">
-<span class="sig-name descname"><span class="pre">c</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCDashpot.c"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCDashpot.c" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCDashpot.C_fn">
+<span class="sig-name descname"><span class="pre">C_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCDashpot.C_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCDashpot.C_fn" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCDashpot.values">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">values</span></span><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCDashpot.values" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCCustom">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.boundaryconditions.</span></span><span class="sig-name descname"><span class="pre">BCCustom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functionspace_tags_marker</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/boundaryconditions.html#BCCustom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCCustom" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#elastodynamicsx.pde.boundaryconditions.BCWeakBase" title="elastodynamicsx.pde.boundaryconditions.BCWeakBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BCWeakBase</span></code></a></p>
+<p>Representation of a boundary condition with user-defined
+damping (C), stiffness (K) and linear (b) forms</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>C_fn</strong> – (optional) callable returning the ufl (bilinear) damping form</p></li>
+<li><p><strong>K_fn</strong> – (optional) callable returning the ufl (bilinear) stiffness form</p></li>
+<li><p><strong>b_fn</strong> – (optional) callable returning the ufl linear form</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.boundaryconditions.BCCustom.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['custom']</span></em><a class="headerlink" href="#elastodynamicsx.pde.boundaryconditions.BCCustom.labels" title="Link to this definition"></a></dt>
+<dd><p>String identifier(s) of the class, recognized by the <cite>boundarycondition</cite> function</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -1340,7 +1375,7 @@ to the master boundary</p>
 <span id="elastodynamicsx-pde-pde"></span><h2>elastodynamicsx.pde.pde<a class="headerlink" href="#module-elastodynamicsx.pde.pde" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.pde.</span></span><span class="sig-name descname"><span class="pre">PDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FunctionSpaceBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">materials</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material" title="elastodynamicsx.pde.materials.material.Material"><span class="pre">Material</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">elastodynamicsx.pde.pde.</span></span><span class="sig-name descname"><span class="pre">PDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FunctionSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">materials</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="elastodynamicsx.pde.materials.html#elastodynamicsx.pde.materials.material.Material" title="elastodynamicsx.pde.materials.material.Material"><span class="pre">Material</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Representation of a PDE of the kind:</p>
 <blockquote>
@@ -1351,7 +1386,7 @@ to the master boundary</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>functions_space</strong> – </p></li>
+<li><p><strong>functions_space</strong></p></li>
 <li><p><strong>materials</strong> – a list of pde.Material instances</p></li>
 </ul>
 </dd>
@@ -1380,81 +1415,81 @@ to the master boundary</p>
 <dd><p>Finalize dolfinx-mpc objects</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.m">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.m" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.M_fn">
+<span class="sig-name descname"><span class="pre">M_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.M_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.M_fn" title="Link to this definition"></a></dt>
 <dd><p>(bilinear) Mass form function</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.c">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">c</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.c" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.C_fn">
+<span class="sig-name descname"><span class="pre">C_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.C_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.C_fn" title="Link to this definition"></a></dt>
 <dd><p>(bilinear) Damping form function</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.k">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.k" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.K_fn">
+<span class="sig-name descname"><span class="pre">K_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.K_fn" title="Link to this definition"></a></dt>
 <dd><p>(bilinear) Stiffness form function</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.k1">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.k1" title="Link to this definition"></a></dt>
-<dd><p>(bilinear) k1 stiffness form function (waveguide problems)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.K0_fn">
+<span class="sig-name descname"><span class="pre">K0_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K0_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.K0_fn" title="Link to this definition"></a></dt>
+<dd><p>(bilinear) K0 stiffness form function (waveguide problems)</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.k2">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.k2" title="Link to this definition"></a></dt>
-<dd><p>(bilinear) k2 stiffness form function (waveguide problems)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.K1_fn">
+<span class="sig-name descname"><span class="pre">K1_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K1_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.K1_fn" title="Link to this definition"></a></dt>
+<dd><p>(bilinear) K1 stiffness form function (waveguide problems)</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.k3">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k3</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.k3" title="Link to this definition"></a></dt>
-<dd><p>(bilinear) k3 stiffness form function (waveguide problems)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.K2_fn">
+<span class="sig-name descname"><span class="pre">K2_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K2_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.K2_fn" title="Link to this definition"></a></dt>
+<dd><p>(bilinear) K2 stiffness form function (waveguide problems)</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.k_CG">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_CG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.k_CG" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.K_fn_CG">
+<span class="sig-name descname"><span class="pre">K_fn_CG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K_fn_CG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.K_fn_CG" title="Link to this definition"></a></dt>
 <dd><p>(bilinear) Stiffness form function (Continuous Galerkin)</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.k_DG">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_DG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.k_DG" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.K_fn_DG">
+<span class="sig-name descname"><span class="pre">K_fn_DG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K_fn_DG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.K_fn_DG" title="Link to this definition"></a></dt>
 <dd><p>(bilinear) Stiffness form function (Discontinuous Galerkin)</p>
 </dd></dl>
 
-<dl class="py property">
+<dl class="py method">
 <dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.DG_numerical_flux">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DG_numerical_flux</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.DG_numerical_flux" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">DG_numerical_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.DG_numerical_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.DG_numerical_flux" title="Link to this definition"></a></dt>
 <dd><p>(bilinear) Numerical flux form function (Disontinuous Galerkin)</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.L">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">L</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.L" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.b_fn">
+<span class="sig-name descname"><span class="pre">b_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.b_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.b_fn" title="Link to this definition"></a></dt>
 <dd><p>Linear form function</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.m_form">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m_form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Form</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.m_form" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.M_form">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">M_form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Form</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.M_form" title="Link to this definition"></a></dt>
 <dd><p>Compiled mass bilinear form</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.c_form">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">c_form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Form</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.c_form" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.C_form">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">C_form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Form</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.C_form" title="Link to this definition"></a></dt>
 <dd><p>Compiled damping bilinear form</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.k_form">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Form</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.k_form" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.K_form">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">K_form</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Form</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.K_form" title="Link to this definition"></a></dt>
 <dd><p>Compiled stiffness bilinear form</p>
 </dd></dl>
 
@@ -1495,6 +1530,12 @@ to the master boundary</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.K0">
+<span class="sig-name descname"><span class="pre">K0</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mat</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.K0" title="Link to this definition"></a></dt>
+<dd><p>K0 stiffness matrix (waveguide problems)</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.K1">
 <span class="sig-name descname"><span class="pre">K1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mat</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.K1" title="Link to this definition"></a></dt>
 <dd><p>K1 stiffness matrix (waveguide problems)</p>
@@ -1504,12 +1545,6 @@ to the master boundary</p>
 <dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.K2">
 <span class="sig-name descname"><span class="pre">K2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mat</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.K2" title="Link to this definition"></a></dt>
 <dd><p>K2 stiffness matrix (waveguide problems)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="elastodynamicsx.pde.pde.PDE.K3">
-<span class="sig-name descname"><span class="pre">K3</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mat</span></span></span><a class="reference internal" href="../_modules/elastodynamicsx/pde/pde.html#PDE.K3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elastodynamicsx.pde.pde.PDE.K3" title="Link to this definition"></a></dt>
-<dd><p>K3 stiffness matrix (waveguide problems)</p>
 </dd></dl>
 
 </dd></dl>

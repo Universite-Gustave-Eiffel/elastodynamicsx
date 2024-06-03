@@ -52,7 +52,7 @@ extent = [[0., 0.], [length, height]]
 domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny], mesh.CellType.triangle)
 
 # create the function space
-V = fem.FunctionSpace(domain, ("Lagrange", degElement))
+V = fem.functionspace(domain, ("Lagrange", degElement))
 
 tag_left, tag_top, tag_right, tag_bottom = 1, 2, 3, 4
 all_tags = (tag_left, tag_top, tag_right, tag_bottom)
@@ -136,7 +136,7 @@ omega = 1.0
 u_res = fem.Function(V, name='solution')
 
 # Solve
-fdsolver.solve(omega=omega, out=u_res.vector)
+fdsolver.solve(omega=omega, out=u_res.x.petsc_vec)
 
 # Plot
 if domain.comm.rank == 0:
@@ -193,7 +193,7 @@ else:
     p = None
 
 # Solve
-fdsolver.solve(omega=omegas, out=u_res.vector, callbacks=[cbck_storeAtPoints], live_plotter=p)
+fdsolver.solve(omega=omegas, out=u_res.x.petsc_vec, callbacks=[cbck_storeAtPoints], live_plotter=p)
 # -
 
 # ### Post-processing
