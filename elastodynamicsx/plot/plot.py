@@ -132,7 +132,7 @@ def live_plotter(u: fem.Function, refresh_step: int = 1, **kwargs) -> pyvista.Pl
           u_res = fem.Function(V, name='solution')
           p = live_plotter(u_res)
           fdsolver.solve(omega=omegas,
-                         out=u_res.vector,
+                         out=u_res.x.petsc_vec,
                          callbacks=[],
                          live_plotter=p)
     """
@@ -308,11 +308,11 @@ class CustomScalarPlotter(pyvista.Plotter):
     def live_plotter_update_function(self, i: int, vec: PETSc.Vec) -> None:  # type: ignore[name-defined]
         if not isinstance(vec, PETSc.Vec):  # type: ignore[attr-defined]
             if issubclass(type(vec), fem.function.Function):
-                vec = vec.vector
+                vec = vec.x.petsc_vec
             else:
                 try:
                     # assume vec is a TimeStepper instance
-                    vec = vec.u.vector
+                    vec = vec.u.x.petsc_vec
                 except:  # noqa
                     raise TypeError
         if (self._refresh_step > 0) and (i % self._refresh_step == 0):
@@ -508,10 +508,10 @@ class CustomVectorPlotter(pyvista.Plotter):
     def live_plotter_update_function(self, i: int, vec: PETSc.Vec) -> None:  # type: ignore[name-defined]
         if not isinstance(vec, PETSc.Vec):  # type: ignore[attr-defined]
             if issubclass(type(vec), fem.function.Function):
-                vec = vec.vector
+                vec = vec.x.petsc_vec
             else:
                 try:
-                    vec = vec.u.vector  # assume vec is a TimeStepper instance
+                    vec = vec.u.x.petsc_vec  # assume vec is a TimeStepper instance
                 except:  # noqa
                     raise TypeError
         if (self._refresh_step > 0) and (i % self._refresh_step == 0):

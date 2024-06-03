@@ -28,6 +28,7 @@ a single (possibly arbitrarily space-dependent) material.
 from .material import Material
 from .elasticmaterial import ElasticMaterial
 from .hyperelasticmaterials import HyperelasticMaterial
+from .custommaterial import CustomMaterial
 
 # import builder
 from .dampings import damping
@@ -51,7 +52,7 @@ all_linear_materials = [ScalarLinearMaterial, IsotropicMaterial, CubicMaterial, 
                         TriclinicMaterial]
 all_nonlinear_materials = [DummyIsotropicMaterial, Murnaghan, StVenantKirchhoff, MooneyRivlinIncompressible,
                            MooneyRivlinCompressible]
-all_materials = all_linear_materials + all_nonlinear_materials
+all_materials = all_linear_materials + all_nonlinear_materials + [CustomMaterial]
 
 
 def material(functionspace_tags_marker, type_, *args, **kwargs) -> Material:
@@ -134,6 +135,12 @@ def material(functionspace_tags_marker, type_, *args, **kwargs) -> Material:
           mat = material( function_space, 'saintvenant-kirchhoff', rho, C12, C44)
           mat = material( function_space, 'murnaghan', rho, C12, C44, l, m, n)
           mat = material( function_space, 'mooney-rivlin-incomp', rho, C1, C2)
+
+          # Arbitrary
+          mat = material( function_space,
+                          'custom',
+                          M_fn=lambda u,v: ufl.inner(u,v) * ufl.dx,
+                          K_fn=lambda u,v: ... * ufl.dx)
     """
     for Mat in all_materials:
         assert issubclass(Mat, Material)

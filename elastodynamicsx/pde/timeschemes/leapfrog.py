@@ -36,19 +36,19 @@ class LeapFrog(FEniCSxTimeScheme):
 
     Args:
         function_space: The Finite Element functionnal space
-        m: The mass form. Usually:
+        M_fn: The mass form. Usually:
 
-            :python:`m = lambda u,v: rho* ufl.dot(u, v) * ufl.dx`
+            :python:`M_fn = lambda u,v: rho* ufl.dot(u, v) * ufl.dx`
 
-        c (optional, ignored if None): The damping form. E.g. for Rayleigh damping:
+        C_fn (optional, ignored if None): The damping form. E.g. for Rayleigh damping:
 
-            :python:`c = lambda u,v: eta_m * m(u,v) + eta_k * k(u,v)`
+            :python:`C_fn = lambda u,v: eta_m * M_fn(u,v) + eta_k * K_fn(u,v)`
 
-        k: The stiffness form. Usually:
+        K_fn: The stiffness form. Usually:
 
-            :python:`k = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx`
+            :python:`K_fn = lambda u,v: ufl.inner(sigma(u), epsilon(v)) * ufl.dx`
 
-        L (optional, ignored if None): Linear form
+        b_fn (optional, ignored if None): Right hand term
         dt: Time step
         bcs: The set of boundary conditions
 
@@ -61,11 +61,11 @@ class LeapFrog(FEniCSxTimeScheme):
 
     labels = ['leapfrog', 'central-difference']
 
-    def __init__(self, function_space: fem.FunctionSpaceBase,
-                 m_: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
-                 c_: Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
-                 k_: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
-                 L: Union[None, Callable[['ufl.TestFunction'], ufl.form.Form]],
+    def __init__(self, function_space: fem.FunctionSpace,
+                 M_fn: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
+                 C_fn: Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
+                 K_fn: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
+                 b_fn: Union[None, Callable[['ufl.TestFunction'], ufl.form.Form]],
                  dt,
                  bcs: Union[Tuple[BoundaryConditionBase], Tuple[()]] = (),
                  **kwargs):
@@ -84,21 +84,23 @@ class LeapFrog(FEniCSxTimeScheme):
         self._a0 = self._u_nm2
 
         # linear and bilinear forms for mass and stiffness matrices
-        self._a = m_(u, v)
-        self._L = -dt_ * dt_ * k_(self._u_nm1, v) + 2 * m_(self._u_nm1, v) - m_(self._u_nm2, v)
+        self._a = M_fn(u, v)
+        self._L = -dt_ * dt_ * K_fn(self._u_nm1, v) + 2 * M_fn(self._u_nm1, v) - M_fn(self._u_nm2, v)
 
-        self._m0_form = m_(u, v)
-        self._L0_form = -k_(self._u0, v)
+        self._m0_form = M_fn(u, v)
+        self._L0_form = -K_fn(self._u0, v)
 
-        if not (L is None):
-            self._L += dt_ * dt_ * L(v)
-            self._L0_form += L(v)
+        _L_terms = []
+        if not (b_fn is None):
+            _L_terms.append(b_fn(v))
 
         # linear and bilinear forms for damping matrix if given
-        if not (c_ is None):
-            self._a += 0.5 * dt_ * c_(u, v)
-            self._L += 0.5 * dt_ * c_(self._u_nm2, v)
-            self._L0_form -= c_(self._v0, v)
+        if not (C_fn is None):
+            C_uv_ufl = C_fn(u, v)
+            if not (C_uv_ufl is None):
+                self._a += 0.5 * dt_ * C_uv_ufl
+                self._L += 0.5 * dt_ * C_fn(self._u_nm2, v)
+                self._L0_form -= C_fn(self._v0, v)
 
         # boundary conditions
         mpc = _build_mpc(bcs)
@@ -106,19 +108,23 @@ class LeapFrog(FEniCSxTimeScheme):
         weak_BCs = get_weak_BCs(bcs)
 
         # damping term, BC
-        self._a += 0.5 * dt_ * sum(filter(None, [bc.c(u, v) for bc in weak_BCs]))
-        self._L += 0.5 * dt_ * sum(filter(None, [bc.c(self._u_nm2, v) for bc in weak_BCs]))
+        self._a += 0.5 * dt_ * sum(filter(None, [bc.C_fn(u, v) for bc in weak_BCs]))
+        self._L += 0.5 * dt_ * sum(filter(None, [bc.C_fn(self._u_nm2, v) for bc in weak_BCs]))
 
         # stiffness term, BC
-        self._a += dt_ * dt_ * sum(filter(None, [bc.k(u, v) for bc in weak_BCs]))
+        self._a += dt_ * dt_ * sum(filter(None, [bc.K_fn(u, v) for bc in weak_BCs]))
 
         # load term, BC
-        self._L += dt_ * dt_ * sum(filter(None, [bc.L(v) for bc in weak_BCs]))
+        _L_terms += [bc.b_fn(v) for bc in weak_BCs]
 
         # initial value rhs, BC
-        self._L0_form += sum(filter(None, [bc.c(self._v0, v) for bc in weak_BCs]))
-        self._L0_form += sum(filter(None, [bc.k(self._u0, v) for bc in weak_BCs]))
-        self._L0_form += sum(filter(None, [bc.L(v) for bc in weak_BCs]))
+        self._L0_form += sum(filter(None, [bc.C_fn(self._v0, v) for bc in weak_BCs]))
+        self._L0_form += sum(filter(None, [bc.K_fn(self._u0, v) for bc in weak_BCs]))
+
+        # sum and report into forms
+        _L_terms_sum = sum(filter(None, _L_terms))
+        self._L += dt_ * dt_ * _L_terms_sum
+        self._L0_form += _L_terms_sum
 
         # compile forms
         bilinear_form = fem.form(self._a, jit_options=self.jit_options)
@@ -172,7 +178,8 @@ class LeapFrog(FEniCSxTimeScheme):
         u1 = self._u_n.x.array
 
         # remember that self._u_nm1 = self._u0 -> self._u_nm1 is already at the correct value
-        u1[:] = u0 + self.dt * v0 + 0.5 * self.dt**2 * a0
+        dt = float(self.dt)  # keep good speed if self.dt is e.g. a fem.Constant
+        u1[:] = u0 + dt * v0 + 0.5 * dt**2 * a0
         # unm1 is not needed
         # at this point: self._u_n = u1, self._u_nm1 = u0
 
@@ -181,6 +188,6 @@ class LeapFrog(FEniCSxTimeScheme):
         if verbose >= 10:
             PETSc.Sys.Print('Initial value problem solved, entering loop')  # type: ignore[attr-defined]
         for callback in callbacks:
-            callback(0, self._u_n.vector)  # <- store solution, plot, print, ...
+            callback(0, self._u_n.x.petsc_vec)  # <- store solution, plot, print, ...
         #
         # ## -------------------------------------------------

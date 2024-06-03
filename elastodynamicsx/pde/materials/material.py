@@ -61,62 +61,53 @@ class Material:
         e = function_space.element.basix_element
         if e.discontinuous is True:  # True for discontinuous Galerkin
             print('Material: Using discontinuous elements -> DG formulation')
-            self._k = self.k_DG
+            self._K_fn = self.K_fn_DG
         else:
             # print('Material: Using continuous elements -> CG formulation')
-            self._k = self.k_CG
+            self._K_fn = self.K_fn_CG
 
     @property
     def is_linear(self) -> bool:
         return self._is_linear
 
-    @property
-    def m(self) -> typing.Callable:
+    def M_fn(self, u, v):
         """(bilinear) mass form function"""
-        return lambda u, v: self._rho * ufl.inner(u, v) * self._dx
+        return self._rho * ufl.inner(u, v) * self._dx
 
-    @property
-    def c(self) -> typing.Union[typing.Callable, None]:
+    def C_fn(self, u, v):
         """(bilinear) damping form function"""
         return None
 
-    @property
-    def k(self) -> typing.Callable:
+    def K_fn(self, u, v):
         """(bilinear) Stiffness form function"""
-        return self._k
+        return self._K_fn(u, v)
 
-    @property
-    def k_CG(self) -> typing.Callable:
+    def K_fn_CG(self, u, v):
         """Stiffness form function for a Continuous Galerkin formulation"""
         print("supercharge me")
         raise NotImplementedError
 
-    @property
-    def k1_CG(self) -> typing.Callable:
+    def K0_fn_CG(self, u, v):
+        """K0 stiffness form function for a Continuous Galerkin formulation (waveguides)"""
+        print("supercharge me")
+        raise NotImplementedError
+
+    def K1_fn_CG(self, u, v):
         """K1 stiffness form function for a Continuous Galerkin formulation (waveguides)"""
         print("supercharge me")
         raise NotImplementedError
 
-    @property
-    def k2_CG(self) -> typing.Callable:
+    def K2_fn_CG(self, u, v):
         """K2 stiffness form function for a Continuous Galerkin formulation (waveguides)"""
         print("supercharge me")
         raise NotImplementedError
 
-    @property
-    def k3_CG(self) -> typing.Callable:
-        """K3 stiffness form function for a Continuous Galerkin formulation (waveguides)"""
-        print("supercharge me")
-        raise NotImplementedError
-
-    @property
-    def k_DG(self) -> typing.Callable:
+    def K_fn_DG(self, u, v):
         """Stiffness form function for a Disontinuous Galerkin formulation"""
         print("supercharge me")
         raise NotImplementedError
 
-    @property
-    def DG_numerical_flux(self) -> typing.Callable:
+    def DG_numerical_flux(self, u, v):
         """Numerical flux for a Disontinuous Galerkin formulation"""
         print("supercharge me")
         raise NotImplementedError

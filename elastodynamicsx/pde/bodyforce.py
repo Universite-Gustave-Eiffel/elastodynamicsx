@@ -37,15 +37,15 @@ class BodyForce:
           # Gaussian source distribution
           X0_src = np.array([length/2, height/2, 0])  # center
           R0_src = 0.1  # radius
-          F0_src = default_scalar_type([1,0])  # amplitude of the source
+          F0_src = default_scalar_type([1, 0])  # amplitude of the source
 
           def src_x(x):  # source(x): Gaussian
-              nrm = 1/(2*np.pi*R0_src**2)  # normalize to int[src_x(x) dx]=1
-              r = np.linalg.norm(x-X0_src[:,np.newaxis], axis=0)
-              return nrm * np.exp(-1/2*(r/R0_src)**2, dtype=default_scalar_type)
+              nrm = 1 / (2 * np.pi * R0_src**2)  # normalize to int[src_x(x) dx]=1
+              r = np.linalg.norm(x - X0_src[:, np.newaxis], axis=0)
+              return nrm * np.exp(-1/2 * (r / R0_src)**2, dtype=default_scalar_type)
 
           value = fem.Function(V)
-          value.interpolate(lambda x: F0_src[:,np.newaxis] * src_x(x)[np.newaxis,:])
+          value.interpolate(lambda x: F0_src[:, np.newaxis] * src_x(x)[np.newaxis,:])
 
           bf = BodyForce(V, value)  # defined in the entire domain
           bf = BodyForce((V, cell_tags, (1, 4)), value)  # definition restricted to tags 1 and 4
@@ -58,10 +58,9 @@ class BodyForce:
         # md = kwargs.get('metadata', None)
         self._dx = ufl.Measure("dx", domain=function_space.mesh, subdomain_data=cell_tags, metadata=md)(marker)
 
-    @property
-    def L(self) -> typing.Callable:
+    def b_fn(self, v):
         """The linear form function"""
-        return lambda v: ufl.inner(self._value, v) * self._dx
+        return ufl.inner(self._value, v) * self._dx
 
     @property
     def value(self) -> typing.Union[Function, Constant, np.ndarray]:

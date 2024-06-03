@@ -26,7 +26,7 @@ def test():
         for name in names:
             specFE = spectral_element(name, mesh.CellType.quadrilateral, degree)
             specmd = spectral_quadrature(name, degree)
-            V = fem.FunctionSpace(domain, specFE)
+            V = fem.functionspace(domain, specFE)
 
             #######
             # Compile mass matrices using pure fenicsx code

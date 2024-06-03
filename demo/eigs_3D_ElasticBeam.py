@@ -52,7 +52,7 @@ extent = [[0., 0., 0.], [L_, B_, H_]]
 domain = mesh.create_box(MPI.COMM_WORLD, extent, [Nx, Ny, Nz])
 
 # create the function space
-V = fem.FunctionSpace(domain, ("Lagrange", 2, (domain.geometry.dim,)))
+V = fem.functionspace(domain, ("Lagrange", 2, (domain.geometry.dim,)))
 
 # define some tags
 tag_left, tag_top, tag_right, tag_bottom, tag_back, tag_front = 1, 2, 3, 4, 5, 6

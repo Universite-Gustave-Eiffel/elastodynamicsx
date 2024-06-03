@@ -55,7 +55,7 @@ extent = [0, length]
 domain = mesh.create_interval(MPI.COMM_WORLD, Nx, extent)
 
 # create the function space
-V = fem.FunctionSpace(domain, specFE)
+V = fem.functionspace(domain, specFE)
 
 # define some tags
 tag_left, tag_right = 1, 2
@@ -164,7 +164,9 @@ PETSc.Sys.Print(f'CFL condition: Courant number = {courant_number:.2f}')
 
 # Time integration
 #     diagonal=True assumes the left hand side operator is indeed diagonal
-tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, scheme='leapfrog', diagonal=True)
+tStepper = TimeStepper.build(V,
+                             pde.M_fn, pde.C_fn, pde.K_fn, pde.b_fn, dt, bcs=bcs,
+                             scheme='leapfrog', diagonal=True)
 
 # Set the initial values
 tStepper.set_initial_condition(u0=[0, 0], v0=[0, 0], t0=tstart)
