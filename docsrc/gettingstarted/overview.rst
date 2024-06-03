@@ -91,25 +91,46 @@ Using the ``elastodynamicsx.pde`` package:
   * Multi-point constraint BCs:
     *Periodic*
 
-* User-defined material laws and BCs:
+* User-defined material laws and BCs, using the ```ufl``` library:
 
-  .. jupyter-execute::
+  .. dropdown:: Custom material laws
 
-      import ufl
+    Specify :math:`\mathbf{M}`, :math:`\mathbf{C}` and :math:`\mathbf{K}`:
 
-      # ###
-      # Here we re-implement mat1 using the interface for custom material laws
-      dx_mat1 = ufl.Measure("dx", domain=V.mesh, subdomain_data=cell_tags)(tag_mat1)
+    .. jupyter-execute::
 
-      # mass form
-      m = lambda u, v: ufl.inner(u, v) * dx_mat1
+        import ufl
 
-      # stiffness form
-      epsilon = lambda u: ufl.sym(ufl.grad(u))
-      sigma = lambda u: 2 * ufl.nabla_div(u) * ufl.Identity(len(u)) + 2 * 1 * epsilon(u)
-      k = lambda u, v: ufl.inner(sigma(u), epsilon(v)) * dx_mat1
+        # ###
+        # Here we re-implement mat1 using the interface for custom material laws
+        dx_mat1 = ufl.Measure("dx", domain=V.mesh, subdomain_data=cell_tags)(tag_mat1)
 
-      mat1_user_defined = material(V, 'custom', is_linear=True, M_fn=m, K_fn=k)
+        # mass form
+        m = lambda u, v: 1 * ufl.inner(u, v) * dx_mat1
+
+        # stiffness form
+        epsilon = lambda u: ufl.sym(ufl.grad(u))
+        sigma = lambda u: 2 * ufl.nabla_div(u) * ufl.Identity(len(u)) + 2 * 1 * epsilon(u)
+        k = lambda u, v: ufl.inner(sigma(u), epsilon(v)) * dx_mat1
+
+        mat1_user_defined = material(V, 'custom', is_linear=True, M_fn=m, K_fn=k)
+
+  .. dropdown:: Custom BCs
+
+    Specify :math:`\mathbf{C}`, :math:`\mathbf{K}` and :math:`\mathbf{b}`:
+
+    .. jupyter-execute::
+
+        import ufl
+
+        # ###
+        # Here we re-implement bc1 using the interface for custom BCs
+        ds_bc1 = ufl.Measure("ds", domain=V.mesh, subdomain_data=facet_tags)(tag_top)
+
+        # right hand side term
+        b = lambda v: ufl.inner(T_N, v) * ds_bc1
+
+        bc1_user_defined = boundarycondition(V , 'custom', b_fn=b)
 
 * Define **body forces**:
 
