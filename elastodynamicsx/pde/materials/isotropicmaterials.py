@@ -4,8 +4,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-import typing
-
 from dolfinx import fem, default_scalar_type
 import ufl  # type: ignore
 
@@ -63,21 +61,17 @@ class ScalarLinearMaterial(ElasticMaterial):
         """Stress function (Voigt representation): sigma(u)"""
         return self.mu * self._epsilonVoigt(u)
 
-    @property
-    def k1_CG(self) -> typing.Callable:
-        return lambda u, v: ufl.inner(self.mu * self._L_crosssection(u), self._L_crosssection(v)) * self._dx
+    def K0_fn_CG(self, u, v):
+        return ufl.inner(self.mu * self._L_crosssection(u), self._L_crosssection(v)) * self._dx
 
-    @property
-    def k2_CG(self) -> typing.Callable:
-        return lambda u, v: fem.Constant(u.ufl_function_space().mesh, default_scalar_type(0)) \
+    def K1_fn_CG(self, u, v):
+        return fem.Constant(u.ufl_function_space().mesh, default_scalar_type(0)) \
             * ufl.inner(u, v) * self._dx
 
-    @property
-    def k3_CG(self) -> typing.Callable:
-        return lambda u, v: ufl.inner(self.mu * self._L_onaxis(u), self._L_onaxis(v)) * self._dx
+    def K2_fn_CG(self, u, v):
+        return ufl.inner(self.mu * self._L_onaxis(u), self._L_onaxis(v)) * self._dx
 
-    @property
-    def DG_numerical_flux_SIPG(self) -> typing.Callable:
+    def DG_numerical_flux_SIPG(self, u, v):
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -87,15 +81,14 @@ class ScalarLinearMaterial(ElasticMaterial):
         dS = self._dS
         sigma = self.sigma
 
-        def k_int_facets(u, v):
-            return -inner(avg(sigma(u)), jump(v, n)) * dS \
-                - inner(jump(u, n), avg(sigma(v))) * dS \
-                + R_ / h_avg * inner(jump(u), jump(v)) * dS
+        K_fn_int_facets = \
+            - inner(avg(sigma(u)), jump(v, n)) * dS \
+            - inner(jump(u, n), avg(sigma(v))) * dS \
+            + R_ / h_avg * inner(jump(u), jump(v)) * dS
 
-        return k_int_facets
+        return K_fn_int_facets
 
-    @property
-    def DG_numerical_flux_NIPG(self) -> typing.Callable:
+    def DG_numerical_flux_NIPG(self, u, v):
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -105,15 +98,14 @@ class ScalarLinearMaterial(ElasticMaterial):
         dS = self._dS
         sigma = self.sigma
 
-        def k_int_facets(u, v):
-            return -inner(avg(sigma(u)), jump(v, n)) * dS \
-                + inner(jump(u, n), avg(sigma(v))) * dS \
-                + R_ / h_avg * inner(jump(u), jump(v)) * dS
+        K_fn_int_facets = \
+            - inner(avg(sigma(u)), jump(v, n)) * dS \
+            + inner(jump(u, n), avg(sigma(v))) * dS \
+            + R_ / h_avg * inner(jump(u), jump(v)) * dS
 
-        return k_int_facets
+        return K_fn_int_facets
 
-    @property
-    def DG_numerical_flux_IIPG(self) -> typing.Callable:
+    def DG_numerical_flux_IIPG(self, u, v):
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -123,10 +115,10 @@ class ScalarLinearMaterial(ElasticMaterial):
         dS = self._dS
         sigma = self.sigma
 
-        def k_int_facets(u, v):
-            return -inner(avg(sigma(u)), jump(v, n)) * dS + R_ / h_avg * inner(jump(u), jump(v)) * dS
+        K_fn_int_facets = \
+            -inner(avg(sigma(u)), jump(v, n)) * dS + R_ / h_avg * inner(jump(u), jump(v)) * dS
 
-        return k_int_facets
+        return K_fn_int_facets
 
 
 class IsotropicMaterial(ElasticMaterial):

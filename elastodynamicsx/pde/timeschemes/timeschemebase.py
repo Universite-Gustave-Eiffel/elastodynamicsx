@@ -107,7 +107,7 @@ class FEniCSxTimeScheme(TimeScheme):
                  mpc: typing.Union[MultiPointConstraint, None] = None,
                  bcs=[],
                  **kwargs):
-        super().__init__(dt, out.vector, **kwargs)
+        super().__init__(dt, out.x.petsc_vec, **kwargs)
         self._bilinear_form = bilinear_form
         self._linear_form = linear_form
         self._mpc = mpc

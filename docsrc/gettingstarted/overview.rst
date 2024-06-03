@@ -28,22 +28,22 @@ Using the ``elastodynamicsx.pde`` package:
 
     degElement = 1
     length, height = 1, 1
-    Nx, Ny = 10//degElement, 10//degElement
+    Nx, Ny = 10 // degElement, 10 // degElement
 
     # create the mesh
     extent = [[0., 0.], [length, height]]
     domain = mesh.create_rectangle(MPI.COMM_WORLD, extent, [Nx, Ny], mesh.CellType.triangle)
 
     # create the function space
-    V = fem.FunctionSpace(domain, ("Lagrange", degElement, (domain.geometry.dim,)))
+    V = fem.functionspace(domain, ("Lagrange", degElement, (domain.geometry.dim,)))
 
     from elastodynamicsx.utils import make_facet_tags, make_cell_tags
     # define some tags
     tag_top = 1
     boundaries = [(tag_top, lambda x: np.isclose(x[1], height)),]
-    subdomains = [(1, lambda x: x[0]<=length/2),\
-                  (2, lambda x: np.logical_and(x[0]>=length/2, x[1]<=height/2)),
-                  (3, lambda x: np.logical_and(x[0]>=length/2, x[1]>=height/2))]
+    subdomains = [(1, lambda x: x[0] <= length/2),\
+                  (2, lambda x: np.logical_and(x[0] >= length/2, x[1] <= height/2)),
+                  (3, lambda x: np.logical_and(x[0] >= length/2, x[1] >= height/2))]
 
     cell_tags = make_cell_tags(domain, subdomains)
     facet_tags = make_facet_tags(domain, boundaries)
@@ -53,7 +53,7 @@ Using the ``elastodynamicsx.pde`` package:
 
   .. jupyter-execute::
 
-      # V is a dolfinx.fem.function_space
+      # V is a dolfinx.fem.FunctionSpace
       # cell_tags is a dolfinx.mesh.MeshTags object
 
       from elastodynamicsx.pde import material
@@ -91,6 +91,47 @@ Using the ``elastodynamicsx.pde`` package:
   * Multi-point constraint BCs:
     *Periodic*
 
+* User-defined material laws and BCs, using the ```ufl``` library:
+
+  .. dropdown:: Custom material laws
+
+    Specify :math:`\mathbf{M}`, :math:`\mathbf{C}` and :math:`\mathbf{K}`:
+
+    .. jupyter-execute::
+
+        import ufl
+
+        # ###
+        # Here we re-implement mat1 using the interface for custom material laws
+        dx_mat1 = ufl.Measure("dx", domain=V.mesh, subdomain_data=cell_tags)(tag_mat1)
+
+        # mass form
+        m = lambda u, v: 1 * ufl.inner(u, v) * dx_mat1
+
+        # stiffness form
+        epsilon = lambda u: ufl.sym(ufl.grad(u))
+        sigma = lambda u: 2 * ufl.nabla_div(u) * ufl.Identity(len(u)) + 2 * 1 * epsilon(u)
+        k = lambda u, v: ufl.inner(sigma(u), epsilon(v)) * dx_mat1
+
+        mat1_user_defined = material(V, 'custom', is_linear=True, M_fn=m, K_fn=k)
+
+  .. dropdown:: Custom BCs
+
+    Specify :math:`\mathbf{C}`, :math:`\mathbf{K}` and :math:`\mathbf{b}`:
+
+    .. jupyter-execute::
+
+        import ufl
+
+        # ###
+        # Here we re-implement bc1 using the interface for custom BCs
+        ds_bc1 = ufl.Measure("ds", domain=V.mesh, subdomain_data=facet_tags)(tag_top)
+
+        # right hand side term
+        b = lambda v: ufl.inner(T_N, v) * ds_bc1
+
+        bc1_user_defined = boundarycondition(V , 'custom', b_fn=b)
+
 * Define **body forces**:
 
   .. jupyter-execute::
@@ -104,7 +145,7 @@ Using the ``elastodynamicsx.pde`` package:
           return (x[0] >= x1) * (x[0] <= x2) * (x[1] >= y1) * (x[1] <= y2)  # a dummy shape
 
       f_body = fem.Function(V)
-      f_body.interpolate(lambda x: amplitude[:,np.newaxis] * shape_x(x)[np.newaxis,:])
+      f_body.interpolate(lambda x: amplitude[:, np.newaxis] * shape_x(x)[np.newaxis, :])
       f1 = BodyForce((V, cell_tags, None), f_body)  # None for the entire domain
 
 * **Assemble** several materials, BCs and body forces into a *PDE* instance:
@@ -115,9 +156,9 @@ Using the ``elastodynamicsx.pde`` package:
 
       pde = PDE(V, materials=[mat1, mat2], bodyforces=[f1], bcs=[bc1])
 
-      # m, c, k, L form functions: pde.m, pde.c, pde.k, pde.L
+      # M, C, K, b form functions: pde.M_fn, pde.C_fn, pde.K_fn, pde.b_fn
       # eigs / freq. domain -> M, C, K matrices:    pde.M(),  pde.C(),  pde.K()
-      # waveguides          -> K1, K2, K3 matrices: pde.K1(), pde.K2(), pde.K3()
+      # waveguides          -> K0, K1, K2 matrices: pde.K0(), pde.K1(), pde.K2()
 
   * Get the :math:`\mathbf{M}`, :math:`\mathbf{C}`, :math:`\mathbf{K}` weak forms - ``ufl`` format
   * Compile the :math:`\mathbf{M}`, :math:`\mathbf{C}`, :math:`\mathbf{K}` matrices - ``petsc`` format
@@ -153,7 +194,9 @@ Using the ``elastodynamicsx.solvers`` package:
                 T_N.value   = np.sin(t) * forceVector
 
             # Initialize the time stepper: compile forms and assemble the mass matrix
-            tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=pde.bcs, scheme='newmark')
+            tStepper = TimeStepper.build(V,
+                                         pde.M_fn, pde.C_fn, pde.K_fn, pde.b_fn, dt, bcs=pde.bcs,
+                                         scheme='newmark')
 
             # Define the initial values
             tStepper.set_initial_condition(u0=[0, 0], v0=[0, 0], t0=0)
@@ -194,7 +237,7 @@ Using the ``elastodynamicsx.solvers`` package:
 
             # Solve
             u = fem.Function(V, name='solution')
-            fdsolver.solve(omega=1.0, out=u.vector)
+            fdsolver.solve(omega=1.0, out=u.x.petsc_vec)
 
             # Plot
             from elastodynamicsx.plot import plotter
@@ -230,7 +273,7 @@ Using the ``elastodynamicsx.solvers`` package:
 
             # Plot
             eigenfreqs = eps.getEigenfrequencies()  # a np.ndarray
-            eps.plot(function_space=V)              # V is a dolfinx.fem.function_space
+            eps.plot(function_space=V)              # V is a dolfinx.fem.FunctionSpace
 
     .. tab:: Guided waves
 
@@ -241,7 +284,7 @@ Using the ``elastodynamicsx.solvers`` package:
 
             # PETSc.Mat matrices
             M = pde.M()
-            K1, K2, K3 = pde.K1(), pde.K2(), pde.K3()
+            K0, K1, K2 = pde.K0(), pde.K1(), pde.K2()
 
             # High-level solver: in the future...
 
@@ -266,5 +309,5 @@ Using the ``elastodynamicsx.solutions`` package:
     modeshape5 = mbasis.un[5]  # a PETSc.Vec vector
 
     # Visualize
-    mbasis.plot(function_space=V)  # V is a dolfinx.fem.function_space
+    mbasis.plot(function_space=V)  # V is a dolfinx.fem.FunctionSpace
 

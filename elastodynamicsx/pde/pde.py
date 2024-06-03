@@ -47,7 +47,7 @@ class PDE:
         finalize: (default=True) call self.finalize() on build
     """
 
-    def __init__(self, function_space: fem.FunctionSpaceBase, materials: typing.Iterable[Material], **kwargs):
+    def __init__(self, function_space: fem.FunctionSpace, materials: typing.Iterable[Material], **kwargs):
         self._function_space = function_space
         self.materials = materials
         self.bodyforces = kwargs.get('bodyforces', [])
@@ -59,13 +59,13 @@ class PDE:
 
         # Declare stuff without building
         self._mpc: typing.Union[MultiPointConstraint, None] = None
-        self._m_form: typing.Union[fem.forms.Form, None] = None
-        self._c_form: typing.Union[fem.forms.Form, None] = None
-        self._k_form: typing.Union[fem.forms.Form, None] = None
+        self._M_form: typing.Union[fem.forms.Form, None] = None
+        self._C_form: typing.Union[fem.forms.Form, None] = None
+        self._K_form: typing.Union[fem.forms.Form, None] = None
         self._b_form: typing.Union[fem.forms.Form, None] = None
-        self._k1_form: typing.Union[fem.forms.Form, None] = None
-        self._k2_form: typing.Union[fem.forms.Form, None] = None
-        self._k3_form: typing.Union[fem.forms.Form, None] = None
+        self._K0_form: typing.Union[fem.forms.Form, None] = None
+        self._K1_form: typing.Union[fem.forms.Form, None] = None
+        self._K2_form: typing.Union[fem.forms.Form, None] = None
 
         # ## Sort boundary conditions
         self._bcs_weak: typing.List[BCWeakBase] = get_weak_BCs(self.bcs)
@@ -121,8 +121,8 @@ class PDE:
 
     def _compile_M(self) -> None:
         u, v = self._u, self._v
-        m = self.m(u, v)
-        self._m_form = fem.form(m, jit_options=self.jit_options)
+        M_ufl = self.M_fn(u, v)
+        self._M_form = fem.form(M_ufl, jit_options=self.jit_options)
 
     def _compile_C_K_b(self) -> None:
         """Required for frequency domain or eigenvalue problems"""
@@ -130,11 +130,11 @@ class PDE:
 
         zero = fem.Constant(self._function_space.mesh, default_scalar_type(0.))
         vzero = zero
-        if v.ufl_function_space().num_sub_spaces != 0:  # VectorFunctionSpace
+        if v.ufl_function_space().num_sub_spaces != 0:  # a vector FunctionSpace
             vzero = fem.Constant(self._function_space.mesh, default_scalar_type([0.] * len(v)))
 
         # Interior
-        k = self.k(u, v)
+        k = self.K_fn(u, v)
 
         # Retrieve the integral measures in k to build compatible default zero forms 'c' and 'L'
         measures = [ufl.Measure("dx",
@@ -142,123 +142,118 @@ class PDE:
                                 subdomain_data=cint.subdomain_data(),
                                 metadata=cint.metadata())(cint.subdomain_id()) for cint in k.integrals()]
 
-        c = self.c(u, v) if not (self.c is None) else sum([zero * ufl.inner(u, v) * dx for dx in measures])
-        L = self.L(v) if not (self.L is None) else sum([ufl.inner(vzero, v) * dx for dx in measures])
+        c_NULL = sum([zero * ufl.inner(u, v) * dx for dx in measures])
+        L_NULL = sum([ufl.inner(vzero, v) * dx for dx in measures])
+        c = [self.C_fn(u, v)]
+
+        L = [self.b_fn(v)]
 
         # Boundaries
-        c += sum(filter(None, [bc.c(u, v) for bc in self._bcs_weak]))
-        k += sum(filter(None, [bc.k(u, v) for bc in self._bcs_weak]))
-        L += sum(filter(None, [bc.L(v) for bc in self._bcs_weak]))
+        k += sum(filter(None, [bc.K_fn(u, v) for bc in self._bcs_weak]))
+        c += [bc.C_fn(u, v) for bc in self._bcs_weak]
+        L += [bc.b_fn(v) for bc in self._bcs_weak]
 
-        self._c_form = fem.form(c, jit_options=self.jit_options)
-        self._k_form = fem.form(k, jit_options=self.jit_options)
+        c = sum(filter(None, c)) if any(c) else c_NULL
+        L = sum(filter(None, L)) if any(L) else L_NULL
+
+        self._C_form = fem.form(c, jit_options=self.jit_options)
+        self._K_form = fem.form(k, jit_options=self.jit_options)
         self._b_form = fem.form(L, jit_options=self.jit_options)
 
         # Executes the following only if using complex numbers
         if np.issubdtype(default_scalar_type, np.complexfloating):
             # #Mat_lhs = -w*w*_M_ + 1J*w*_C_ + _K_
-            m = self.m(u, v)
+            m = self.M_fn(u, v)
             w = self._omega_ufl
-            self._a_form = fem.form(-w * w * m + 1J * w * c + k, jit_options=self.jit_options)
+            self._a_form = fem.form(-w * w * m + 1J * w * c + k, jit_options=self.jit_options)  # type: ignore
 
-    def _compile_K1_K2_K3(self) -> None:
+    def _compile_K0_K1_K2(self) -> None:
         """Required for waveguide problems"""
         u, v = self._u, self._v
 
         assert self._function_space.element.basix_element.discontinuous is False, \
-            'K1, K2, K3 are not implemented for a DG formulation'
+            'K0, K1, K2 are not implemented for a DG formulation'
 
         # Interior
-        k1 = self.k1(u, v)
-        k2 = self.k2(u, v)
-        k3 = self.k3(u, v)
+        k0 = self.K0_fn(u, v)
+        k1 = self.K1_fn(u, v)
+        k2 = self.K2_fn(u, v)
 
-        assert not any(filter(None, [bc.c(u, v) for bc in self._bcs_weak])), 'c!=0 not yet implemented for waveguides'
-        assert not any(filter(None, [bc.c(u, v) for bc in self._bcs_weak])), 'k!=0 not yet implemented for waveguides'
+        assert not any(filter(None, [bc.C_fn(u, v) for bc in self._bcs_weak])), \
+            'C!=0 not yet implemented for waveguides'
+        assert not any(filter(None, [bc.C_fn(u, v) for bc in self._bcs_weak])), \
+            'K!=0 not yet implemented for waveguides'
 
-        self._k1_form = fem.form(k1, jit_options=self.jit_options)
-        self._k2_form = fem.form(k2, jit_options=self.jit_options)
-        self._k3_form = fem.form(k3, jit_options=self.jit_options)
+        self._K0_form = fem.form(k0, jit_options=self.jit_options)
+        self._K1_form = fem.form(k1, jit_options=self.jit_options)
+        self._K2_form = fem.form(k2, jit_options=self.jit_options)
 
 # ## ### ### ### ### ### ### ### ### ### ## #
 # ## Linear and bilinear form functions  ## #
 # ## ### ### ### ### ### ### ### ### ### ## #
 
-    @property
-    def m(self) -> typing.Callable:
+    def M_fn(self, u, v):
         """(bilinear) Mass form function"""
-        return lambda u, v: sum([mat.m(u, v) for mat in self.materials])
+        return sum([mat.M_fn(u, v) for mat in self.materials])
 
-    @property
-    def c(self) -> typing.Union[typing.Callable, None]:
+    def C_fn(self, u, v):
         """(bilinear) Damping form function"""
-        non0dampings = [mat.c for mat in self.materials if not (mat.c is None)]
-        if len(non0dampings) == 0:
-            return None
-        else:
-            return lambda u, v: sum([c(u, v) for c in non0dampings])
+        c_ = [mat.C_fn(u, v) for mat in self.materials]
+        return sum(filter(None, c_)) if any(c_) else None
 
-    @property
-    def k(self) -> typing.Callable:
+    def K_fn(self, u, v):
         """(bilinear) Stiffness form function"""
-        return lambda u, v: sum([mat.k(u, v) for mat in self.materials])
+        return sum([mat.K_fn(u, v) for mat in self.materials])
 
-    @property
-    def k1(self) -> typing.Callable:
-        """(bilinear) k1 stiffness form function (waveguide problems)"""
-        return lambda u, v: sum([mat.k1_CG(u, v) for mat in self.materials])
+    def K0_fn(self, u, v):
+        """(bilinear) K0 stiffness form function (waveguide problems)"""
+        return sum([mat.K0_fn_CG(u, v) for mat in self.materials])
 
-    @property
-    def k2(self) -> typing.Callable:
-        """(bilinear) k2 stiffness form function (waveguide problems)"""
-        return lambda u, v: sum([mat.k2_CG(u, v) for mat in self.materials])
+    def K1_fn(self, u, v):
+        """(bilinear) K1 stiffness form function (waveguide problems)"""
+        return sum([mat.K1_fn_CG(u, v) for mat in self.materials])
 
-    @property
-    def k3(self) -> typing.Callable:
-        """(bilinear) k3 stiffness form function (waveguide problems)"""
-        return lambda u, v: sum([mat.k3_CG(u, v) for mat in self.materials])
+    def K2_fn(self, u, v):
+        """(bilinear) K2 stiffness form function (waveguide problems)"""
+        return sum([mat.K2_fn_CG(u, v) for mat in self.materials])
 
-    @property
-    def k_CG(self) -> typing.Callable:
+    def K_fn_CG(self, u, v):
         """(bilinear) Stiffness form function (Continuous Galerkin)"""
-        return lambda u, v: sum([mat.k_CG(u, v) for mat in self.materials])
+        return sum([mat.K_fn_CG(u, v) for mat in self.materials])
 
-    @property
-    def k_DG(self) -> typing.Callable:
+    def K_fn_DG(self, u, v):
         """(bilinear) Stiffness form function (Discontinuous Galerkin)"""
-        return lambda u, v: sum([mat.k_DG(u, v) for mat in self.materials])
+        return sum([mat.K_fn_DG(u, v) for mat in self.materials])
 
-    @property
-    def DG_numerical_flux(self) -> typing.Callable:
+    def DG_numerical_flux(self, u, v):
         """(bilinear) Numerical flux form function (Disontinuous Galerkin)"""
-        return lambda u, v: sum([mat.DG_numerical_flux(u, v) for mat in self.materials])
+        return sum([mat.DG_numerical_flux(u, v) for mat in self.materials])
 
-    @property
-    def L(self) -> typing.Union[typing.Callable, None]:
+    def b_fn(self, v):
         """Linear form function"""
         if len(self.bodyforces) == 0:
             return None
         else:
-            return lambda v: sum([f.L(v) for f in self.bodyforces])
+            return sum([f.b_fn(v) for f in self.bodyforces])
 
 # ## ### ### ### ### ### ### ## #
 # ## Compiled dolfinx forms  ## #
 # ## ### ### ### ### ### ### ## #
 
     @property
-    def m_form(self) -> typing.Union[fem.forms.Form, None]:
+    def M_form(self) -> typing.Union[fem.forms.Form, None]:
         """Compiled mass bilinear form"""
-        return self._m_form
+        return self._M_form
 
     @property
-    def c_form(self) -> typing.Union[fem.forms.Form, None]:
+    def C_form(self) -> typing.Union[fem.forms.Form, None]:
         """Compiled damping bilinear form"""
-        return self._c_form
+        return self._C_form
 
     @property
-    def k_form(self) -> typing.Union[fem.forms.Form, None]:
+    def K_form(self) -> typing.Union[fem.forms.Form, None]:
         """Compiled stiffness bilinear form"""
-        return self._k_form
+        return self._K_form
 
     @property
     def b_form(self) -> typing.Union[fem.forms.Form, None]:
@@ -271,43 +266,43 @@ class PDE:
 
     def M(self) -> PETSc.Mat:  # type: ignore[name-defined]
         """Mass matrix"""
-        if self._m_form is None:
+        if self._M_form is None:
             self._compile_M()
 
-        assert not (self._m_form is None)
+        assert not (self._M_form is None)
 
         if self._mpc is None:
-            M = fem.petsc.assemble_matrix(self._m_form, bcs=self._bcs_strong)
+            M = fem.petsc.assemble_matrix(self._M_form, bcs=self._bcs_strong)
         else:
-            M = dolfinx_mpc.assemble_matrix(self._m_form, self._mpc, bcs=self._bcs_strong)
+            M = dolfinx_mpc.assemble_matrix(self._M_form, self._mpc, bcs=self._bcs_strong)
         M.assemble()
         return M
 
     def C(self) -> PETSc.Mat:  # type: ignore[name-defined]
         """Damping matrix"""
-        if self._c_form is None:
+        if self._C_form is None:
             self._compile_C_K_b()
 
-        assert not (self._c_form is None)
+        assert not (self._C_form is None)
 
         if self._mpc is None:
-            C = fem.petsc.assemble_matrix(self._c_form, bcs=self._bcs_strong)
+            C = fem.petsc.assemble_matrix(self._C_form, bcs=self._bcs_strong)
         else:
-            C = dolfinx_mpc.assemble_matrix(self._c_form, self._mpc, bcs=self._bcs_strong)
+            C = dolfinx_mpc.assemble_matrix(self._C_form, self._mpc, bcs=self._bcs_strong)
         C.assemble()
         return C
 
     def K(self) -> PETSc.Mat:  # type: ignore[name-defined]
         """Stiffness matrix"""
-        if self._k_form is None:
+        if self._K_form is None:
             self._compile_C_K_b()
 
-        assert not (self._k_form is None)
+        assert not (self._K_form is None)
 
         if self._mpc is None:
-            K = fem.petsc.assemble_matrix(self._k_form, bcs=self._bcs_strong)
+            K = fem.petsc.assemble_matrix(self._K_form, bcs=self._bcs_strong)
         else:
-            K = dolfinx_mpc.assemble_matrix(self._k_form, self._mpc, bcs=self._bcs_strong)
+            K = dolfinx_mpc.assemble_matrix(self._K_form, self._mpc, bcs=self._bcs_strong)
         K.assemble()
         return K
 
@@ -329,51 +324,51 @@ class PDE:
         else:
             return dolfinx_mpc.assemble_vector(self._b_form, self._mpc)
 
-    def K1(self) -> PETSc.Mat:  # type: ignore[name-defined]
-        """K1 stiffness matrix (waveguide problems)"""
-        if self._k1_form is None:
-            self._compile_K1_K2_K3()
+    def K0(self) -> PETSc.Mat:  # type: ignore[name-defined]
+        """K0 stiffness matrix (waveguide problems)"""
+        if self._K0_form is None:
+            self._compile_K0_K1_K2()
 
-        assert not (self._k1_form is None)
+        assert not (self._K0_form is None)
 
         if self._mpc is None:
-            K1 = fem.petsc.assemble_matrix(self._k1_form, bcs=self._bcs_strong)
+            K0 = fem.petsc.assemble_matrix(self._K0_form, bcs=self._bcs_strong)
         else:
-            K1 = dolfinx_mpc.assemble_matrix(self._k1_form, self._mpc, bcs=self._bcs_strong)
+            K0 = dolfinx_mpc.assemble_matrix(self._K0_form, self._mpc, bcs=self._bcs_strong)
+        K0.assemble()
+        return K0
+
+    def K1(self) -> PETSc.Mat:  # type: ignore[name-defined]
+        """K1 stiffness matrix (waveguide problems)"""
+        if self._function_space.mesh.geometry.dim == 3:  # special case: K1=K, K2=K3=0
+            return None
+        if self._K1_form is None:
+            self._compile_K0_K1_K2()
+
+        assert not (self._K1_form is None)
+
+        if self._mpc is None:
+            K1 = fem.petsc.assemble_matrix(self._K1_form, bcs=self._bcs_strong)
+        else:
+            K1 = dolfinx_mpc.assemble_matrix(self._K1_form, self._mpc, bcs=self._bcs_strong)
         K1.assemble()
         return K1
 
     def K2(self) -> PETSc.Mat:  # type: ignore[name-defined]
         """K2 stiffness matrix (waveguide problems)"""
-        if self._function_space.mesh.geometry.dim == 3:  # special case: K1=K, K2=K3=0
+        if self._function_space.mesh.geometry.dim == 3:  # special case: K0=K, K1=K2=0
             return None
-        if self._k2_form is None:
-            self._compile_K1_K2_K3()
+        if self._K2_form is None:
+            self._compile_K0_K1_K2()
 
-        assert not (self._k2_form is None)
+        assert not (self._K2_form is None)
 
         if self._mpc is None:
-            K2 = fem.petsc.assemble_matrix(self._k2_form, bcs=self._bcs_strong)
+            K2 = fem.petsc.assemble_matrix(self._K2_form, bcs=self._bcs_strong)
         else:
-            K2 = dolfinx_mpc.assemble_matrix(self._k2_form, self._mpc, bcs=self._bcs_strong)
+            K2 = dolfinx_mpc.assemble_matrix(self._K2_form, self._mpc, bcs=self._bcs_strong)
         K2.assemble()
         return K2
-
-    def K3(self) -> PETSc.Mat:  # type: ignore[name-defined]
-        """K3 stiffness matrix (waveguide problems)"""
-        if self._function_space.mesh.geometry.dim == 3:  # special case: K1=K, K2=K3=0
-            return None
-        if self._k3_form is None:
-            self._compile_K1_K2_K3()
-
-        assert not (self._k3_form is None)
-
-        if self._mpc is None:
-            K3 = fem.petsc.assemble_matrix(self._k3_form, bcs=self._bcs_strong)
-        else:
-            K3 = dolfinx_mpc.assemble_matrix(self._k3_form, self._mpc, bcs=self._bcs_strong)
-        K3.assemble()
-        return K3
 
 # ## ### ### ### ###  ## #
 # ## Update functions ## #

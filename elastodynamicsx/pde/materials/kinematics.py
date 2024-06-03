@@ -25,32 +25,51 @@ def epsilon_scalar(u):
 
 
 def get_epsilon_function(dim, nbcomps):
+    """
+    The strain function for a given dimension and number of components, in matrix form.
+    """
     if nbcomps == 0:  # scalar function space
         return epsilon_scalar
 
     elif dim == nbcomps:
         return epsilon_vector
 
+    eps: Callable  # epsilon
+
     if dim == 1:
         if nbcomps == 2:  # [ [exx, exy], [eyx, eyy] ]
-            return lambda u: ufl.as_matrix([[u[0].dx(0), 0.5 * u[1].dx(0)],
-                                            [0.5 * u[1].dx(0), 0]])
+            def _eps_d1n2(u):
+                return ufl.as_matrix([[u[0].dx(0), 0.5 * u[1].dx(0)],
+                                      [0.5 * u[1].dx(0), 0]])
+            eps = _eps_d1n2
+
         elif nbcomps == 3:  # [ [exx, exy, exz], [eyx, eyy, eyz], [ezx, ezy, ezz] ]
-            return lambda u: ufl.as_matrix([[u[0].dx(0), 0.5 * u[1].dx(0), 0.5 * u[2].dx(0)],
-                                            [0.5 * u[1].dx(0), 0, 0],
-                                            [0.5 * u[2].dx(0), 0, 0]])
+            def _eps_d1n3(u):
+                return ufl.as_matrix([[u[0].dx(0), 0.5 * u[1].dx(0), 0.5 * u[2].dx(0)],
+                                      [0.5 * u[1].dx(0), 0, 0],
+                                      [0.5 * u[2].dx(0), 0, 0]])
+            eps = _eps_d1n3
 
     elif dim == 2:
+        # nbcomps == 1 -> == 0 -> scalar, see upper
+        # nbcomps == 2 -> dim == nbcomps -> see upper
         if nbcomps == 3:  # [ [exx, exy, exz], [eyx, eyy, eyz], [ezx, ezy, ezz] ]
-            return lambda u: ufl.as_matrix([[u[0].dx(0), 0.5 * (u[1].dx(0) + u[0].dx(1)), 0.5 * u[2].dx(0)],
-                                            [0.5 * (u[1].dx(0) + u[0].dx(1)), u[1].dx(1), 0.5 * u[2].dx(1)],
-                                            [0.5 * u[2].dx(0), 0.5 * u[2].dx(1), 0]])
+            def _eps_d2n3(u):
+                return ufl.as_matrix([[u[0].dx(0), 0.5 * (u[1].dx(0) + u[0].dx(1)), 0.5 * u[2].dx(0)],
+                                      [0.5 * (u[1].dx(0) + u[0].dx(1)), u[1].dx(1), 0.5 * u[2].dx(1)],
+                                      [0.5 * u[2].dx(0), 0.5 * u[2].dx(1), 0]])
+            eps = _eps_d2n3
 
     else:
         raise NotImplementedError('dim = ' + str(dim) + ', nbcomps = ' + str(nbcomps))
 
+    return eps
+
 
 def get_epsilonVoigt_function(dim, nbcomps):
+    """
+    The strain function for a given dimension and number of components, in vector form (Voigt notation).
+    """
     epsV: Callable  # epsilonVoigt
 
     if nbcomps == 0:  # scalar function space

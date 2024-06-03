@@ -112,13 +112,13 @@ class BCWeakBase(BoundaryConditionBase):
     def ds(self):
         return self._ds
 
-    def c(self, u, v):
+    def C_fn(self, u, v):
         return None
 
-    def k(self, u, v):
+    def K_fn(self, u, v):
         return None
 
-    def L(self, v):
+    def b_fn(self, v):
         return None
 
 # ### ### ### #
@@ -143,8 +143,10 @@ class BCDirichlet(BCStrongBase):
         function_space, facet_tags, marker = self.function_space, self.facet_tags, self.marker
         assert not (facet_tags is None), "facet_tags must not be None"
         assert not (marker is None), "marker must not be None"
-        fdim = function_space.mesh.topology.dim - 1
+        tdim = function_space.mesh.topology.dim
+        fdim = tdim - 1
         facets = facet_tags.find(marker)
+        function_space.mesh.topology.create_connectivity(fdim, tdim)
         dofs = fem.locate_dofs_topological(function_space, fdim, facets)
         self._bc = fem.dirichletbc(value, dofs, function_space)
 
@@ -191,7 +193,7 @@ class BCNeumann(BCWeakBase):
         super().__init__(functionspace_tags_marker, **kwargs)
         self._value = value
 
-    def L(self, v):
+    def b_fn(self, v):
         return ufl.inner(self.value, v) * self.ds
 
     @property
@@ -218,7 +220,7 @@ class BCFree(BCNeumann):
 
         super().__init__(functionspace_tags_marker, value, **kwargs)
 
-    def L(self, v):
+    def b_fn(self, v):
         return None
 
 
@@ -245,10 +247,10 @@ class BCRobin(BCWeakBase):
         self._value1 = value1
         self._value2 = value2
 
-    def k(self, u, v):
+    def K_fn(self, u, v):
         return -ufl.inner(self.value1 * u, v) * self.ds
 
-    def L(self, v):
+    def b_fn(self, v):
         return -ufl.inner(self.value1 * self.value2, v) * self.ds
 
     @property
@@ -282,26 +284,26 @@ class BCDashpot(BCWeakBase):
         # number of components if vector space, 0 if scalar space
         nbcomps = function_space.element.num_sub_elements
 
-        self._c: Callable
+        self._C_fn: Callable
 
         # scalar function space
         if nbcomps == 0:
             assert len(values) == 1
             value = values[0]
 
-            def _c(u_t, v):
+            def _C_fn(u_t, v):
                 return value * ufl.inner(u_t, v) * ds
 
-            self._c = _c
+            self._C_fn = _C_fn
 
         # vector function space
         else:
             assert len(values) == 2
             if function_space.mesh.topology.dim == 1:
-                def _c(u_t, v):
+                def _C_fn(u_t, v):
                     return ((values[0] - values[1]) * ufl.inner(u_t[0], v[0]) + values[1] * ufl.inner(u_t, v)) * ds
 
-                self._c = _c
+                self._C_fn = _C_fn
 
             else:
                 n = ufl.FacetNormal(function_space.mesh)
@@ -309,18 +311,47 @@ class BCDashpot(BCWeakBase):
                 if nbcomps > dim:
                     n = ufl.as_vector([n[i] for i in range(dim)] + [0 for i in range(nbcomps - dim)])
 
-                def _c(u_t, v):
+                def _C_fn(u_t, v):
                     return ((values[0] - values[1]) * ufl.dot(u_t, n) * ufl.inner(n, v)
                             + values[1] * ufl.inner(u_t, v)) * ds
 
-                self._c = _c
+                self._C_fn = _C_fn
 
-    def c(self, u, v):
-        return self._c(u, v)
+    def C_fn(self, u, v):
+        return self._C_fn(u, v)
 
     @property
     def values(self):
         return self._values
+
+
+class BCCustom(BCWeakBase):
+    """
+    Representation of a boundary condition with user-defined
+    damping (C), stiffness (K) and linear (b) forms
+
+    Keyword Args:
+        C_fn: (optional) callable returning the ufl (bilinear) damping form
+        K_fn: (optional) callable returning the ufl (bilinear) stiffness form
+        b_fn: (optional) callable returning the ufl linear form
+    """
+
+    labels: List[str] = ['custom']
+
+    def __init__(self, functionspace_tags_marker, **kwargs):
+
+        super().__init__(functionspace_tags_marker, **kwargs)
+        c_ = kwargs.pop('C_fn', None)
+        if not (c_ is None):
+            self.C_fn = c_
+
+        k_ = kwargs.pop('K_fn', None)
+        if not (k_ is None):
+            self.K_fn = k_
+
+        b_ = kwargs.pop('b_fn', None)
+        if not (b_ is None):
+            self.b_fn = b_
 
 # ### ### ### ### ### ### ### #
 # Multi-point constraints BCs #
@@ -397,7 +428,7 @@ def get_weak_BCs(bcs: Union[Iterable[Union[BoundaryConditionBase, fem.DirichletB
 # ### ### #
 
 all_bcs = [BCDirichlet, BCClamp,
-           BCNeumann, BCFree, BCRobin, BCDashpot,
+           BCNeumann, BCFree, BCRobin, BCDashpot, BCCustom,
            BCPeriodic]
 
 all_strong_bcs = list(filter(lambda bctype: issubclass(bctype, BCStrongBase), all_bcs))

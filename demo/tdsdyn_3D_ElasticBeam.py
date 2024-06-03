@@ -46,7 +46,7 @@ extent = [[0., 0., 0.], [L_, B_, H_]]
 domain = mesh.create_box(MPI.COMM_WORLD, extent, [Nx, Ny, Nz])
 
 # create the function space
-V = fem.FunctionSpace(domain, ("Lagrange", 1, (domain.geometry.dim,)))
+V = fem.functionspace(domain, ("Lagrange", 1, (domain.geometry.dim,)))
 
 # define some tags
 tag_left, tag_top, tag_right, tag_bottom, tag_back, tag_front = 1, 2, 3, 4, 5, 6
@@ -152,7 +152,9 @@ alpha_f = 0.4
 kwargsTScheme = dict(scheme='g-a-newmark', alpha_m=alpha_m, alpha_f=alpha_f)
 
 # Time integration: define a TimeStepper instance
-tStepper = TimeStepper.build(V, pde.m, pde.c, pde.k, pde.L, dt, bcs=bcs, **kwargsTScheme)
+tStepper = TimeStepper.build(V,
+                             pde.M_fn, pde.C_fn, pde.K_fn, pde.b_fn, dt, bcs=bcs,
+                             **kwargsTScheme)
 
 # Set the initial values
 tStepper.set_initial_condition(u0=[0, 0, 0], v0=[0, 0, 0], t0=0)
@@ -184,9 +186,19 @@ E_damp = 0  # declare; init value
 u_n = tStepper.timescheme.u  # The displacement at time t_n
 v_n = tStepper.timescheme.v  # The velocity at time t_n
 comm = V.mesh.comm
-Energy_elastic = lambda *a: comm.allreduce(fem.assemble_scalar(fem.form(1/2 * pde.k(u_n, u_n))), op=MPI.SUM)
-Energy_kinetic = lambda *a: comm.allreduce(fem.assemble_scalar(fem.form(1/2 * pde.m(v_n, v_n))), op=MPI.SUM)
-Energy_damping = lambda *a: dt * comm.allreduce(fem.assemble_scalar(fem.form(pde.c(v_n, v_n))), op=MPI.SUM)
+
+
+def Energy_elastic():
+    return comm.allreduce(fem.assemble_scalar(fem.form(1/2 * pde.K_fn(u_n, u_n))), op=MPI.SUM)
+
+
+def Energy_kinetic():
+    return comm.allreduce(fem.assemble_scalar(fem.form(1/2 * pde.M_fn(v_n, v_n))), op=MPI.SUM)
+
+
+def Energy_damping():
+    return dt * comm.allreduce(fem.assemble_scalar(fem.form(pde.C_fn(v_n, v_n))), op=MPI.SUM)
+
 
 # -> live plotting parameters
 clim = 0.4 * L_ * B_ * H_ / (E * B_ * H_**3 / 12) * np.amax(F_0) * np.array([0, 1])

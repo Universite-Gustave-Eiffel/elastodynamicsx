@@ -183,42 +183,35 @@ class ElasticMaterial(Material):
     # ## Damping and stiffness forms ## #
     # ## ### ### ### ### ### ### ### ## #
 
-    @property
-    def c(self) -> typing.Callable:
+    def C_fn(self, u, v):
         """Damping form function"""
-        return self._damping.c
+        return self._damping.C_fn(u, v)
 
-    @property
-    def k_CG(self) -> typing.Callable:
+    def K_fn_CG(self, u, v):
         """Stiffness form function for a Continuous Galerkin formulation"""
-        # return lambda u, v: ufl.inner(self.sigma(u), self.epsilon(v)) * self._dx
-        return lambda u, v: ufl.inner(self.sigmaVoigt(u), self._epsilonVoigt(v)) * self._dx
+        # return ufl.inner(self.sigma(u), self.epsilon(v)) * self._dx
+        return ufl.inner(self.sigmaVoigt(u), self._epsilonVoigt(v)) * self._dx
 
-    @property
-    def k1_CG(self) -> typing.Callable:
-        return lambda u, v: ufl.inner(self._Cij * self._L_crosssection(u), self._L_crosssection(v)) * self._dx
+    def K0_fn_CG(self, u, v):
+        return ufl.inner(self._Cij * self._L_crosssection(u), self._L_crosssection(v)) * self._dx
 
-    # @property
-    # def k2_CG(self) -> typing.Callable:  # This is K2 - K2.T
-    #     return lambda u, v: ( ufl.inner(self._Cij * self._L_onaxis(u), self._L_crosssection(v)) \
+    # def K1_fn_CG(self, u, v):  # This is K2 - K2.T
+    #     return ( ufl.inner(self._Cij * self._L_onaxis(u), self._L_crosssection(v)) \
     #         - ufl.inner(self._L_crosssection(u), self._Cij * self._L_onaxis(v)) )* self._dx
 
-    @property
-    def k2_CG(self) -> typing.Callable:
-        return lambda u, v: ufl.inner(self._Cij * self._L_onaxis(u), self._L_crosssection(v)) * self._dx
+    def K1_fn_CG(self, u, v):
+        return ufl.inner(self._Cij * self._L_onaxis(u), self._L_crosssection(v)) * self._dx
 
-    @property
-    def k3_CG(self) -> typing.Callable:
-        return lambda u, v: ufl.inner(self._Cij * self._L_onaxis(u), self._L_onaxis(v)) * self._dx
+    def K2_fn_CG(self, u, v):
+        return ufl.inner(self._Cij * self._L_onaxis(u), self._L_onaxis(v)) * self._dx
 
     # ## ### ### ### ### ### ### ### ### ### ## #
     # ## Discontinuous Galerkin formulation  ## #
     # ## ### ### ### ### ### ### ### ### ### ## #
 
-    @property
-    def k_DG(self) -> typing.Callable:
+    def K_fn_DG(self, u, v):
         """Stiffness form function for a Discontinuous Galerkin formulation"""
-        return lambda u, v: self.k_CG(u, v) + self.DG_numerical_flux(u, v)
+        return self.K_fn_CG(u, v) + self.DG_numerical_flux(u, v)
 
     def select_DG_numerical_flux(self, variant: str = 'SIPG') -> typing.Callable:
         if variant.upper() == 'SIPG':
@@ -245,8 +238,7 @@ class ElasticMaterial(Material):
         R_ = gamma * P_mod
         return R_
 
-    @property
-    def DG_numerical_flux_SIPG(self) -> typing.Callable:
+    def DG_numerical_flux_SIPG(self, u, v):
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
         n = ufl.FacetNormal(V)
@@ -256,15 +248,14 @@ class ElasticMaterial(Material):
         dS = self._dS
         sig_n = self.sigma_n
 
-        def k_int_facets(u, v):
-            return -inner(avg(sig_n(u, n)), jump(v)) * dS \
-                - inner(jump(u), avg(sig_n(v, n))) * dS \
-                + R_ / h_avg * inner(jump(u), jump(v)) * dS
+        K_fn_int_facets = \
+            - inner(avg(sig_n(u, n)), jump(v)) * dS \
+            - inner(jump(u), avg(sig_n(v, n))) * dS \
+            + R_ / h_avg * inner(jump(u), jump(v)) * dS
 
-        return k_int_facets
+        return K_fn_int_facets
 
-    @property
-    def DG_numerical_flux_NIPG(self) -> typing.Callable:
+    def DG_numerical_flux_NIPG(self, u, v):
         """WARNING, instable for elasticity"""
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
@@ -275,15 +266,14 @@ class ElasticMaterial(Material):
         dS = self._dS
         sig_n = self.sigma_n
 
-        def k_int_facets(u, v):
-            return -inner(avg(sig_n(u, n)), jump(v)) * dS \
-                + inner(jump(u), avg(sig_n(v, n))) * dS \
-                + R_ / h_avg * inner(jump(u), jump(v)) * dS
+        K_fn_int_facets = \
+            - inner(avg(sig_n(u, n)), jump(v)) * dS \
+            + inner(jump(u), avg(sig_n(v, n))) * dS \
+            + R_ / h_avg * inner(jump(u), jump(v)) * dS
 
-        return k_int_facets
+        return K_fn_int_facets
 
-    @property
-    def DG_numerical_flux_IIPG(self) -> typing.Callable:
+    def DG_numerical_flux_IIPG(self, u, v):
         """WARNING, instable for elasticity"""
         inner, avg, jump = ufl.inner, ufl.avg, ufl.jump
         V = self._function_space
@@ -294,11 +284,11 @@ class ElasticMaterial(Material):
         dS = self._dS
         sig_n = self.sigma_n
 
-        def k_int_facets(u, v):
-            return -inner(avg(sig_n(u, n)), jump(v)) * dS \
-                + R_ / h_avg * inner(jump(u), jump(v)) * dS
+        K_fn_int_facets = \
+            - inner(avg(sig_n(u, n)), jump(v)) * dS \
+            + R_ / h_avg * inner(jump(u), jump(v)) * dS
 
-        return k_int_facets
+        return K_fn_int_facets
 
     # ## ### ### ### ### ### ## #
     # ## material constants  ## #

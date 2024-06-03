@@ -90,7 +90,7 @@ class TimeStepper:
         See:
             https://en.wikipedia.org/wiki/Courant%E2%80%93Friedrichs%E2%80%93Lewy_condition
         """
-        V = fem.FunctionSpace(domain, ("DG", 0))
+        V = fem.functionspace(domain, ("DG", 0))
         c_number = fem.Function(V)
         pts = V.element.interpolation_points()  # DOLFINx.__version__ >=0.5
         h = ufl.MinCellEdgeLength(V.mesh)  # or rather ufl.CellDiameter?

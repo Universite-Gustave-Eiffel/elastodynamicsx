@@ -137,7 +137,7 @@ def spectral_element(name: str,
           specmd = spectral_quadrature("GLL", degree)
           domain = mesh.create_unit_square(MPI.COMM_WORLD, 10, 10,
                                            cell_type=mesh.CellType.quadrilateral)
-          V = fem.FunctionSpace( domain, specFE )
+          V = fem.functionspace(domain, specFE)
 
           #######
           # Compile mass matrices using pure fenicsx code

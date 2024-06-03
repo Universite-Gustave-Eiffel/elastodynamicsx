@@ -9,6 +9,7 @@
 import numpy as np
 from mpi4py import MPI
 from dolfinx import mesh, fem, default_scalar_type
+import ufl
 
 from elastodynamicsx.pde import material, PDE, boundarycondition
 from elastodynamicsx.utils import make_facet_tags
@@ -34,7 +35,7 @@ def tst_bcs_scalar_material(dim, eltname="Lagrange"):
     # FE domain
     domain = create_mesh(dim)
     facet_tags = make_facet_tags(domain, tagged_boundaries)
-    V = fem.FunctionSpace(domain, (eltname, 1))
+    V = fem.functionspace(domain, (eltname, 1))
 
     # Material
     def const(x):
@@ -53,6 +54,15 @@ def tst_bcs_scalar_material(dim, eltname="Lagrange"):
     supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Dashpot', mat.Z))
     supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Periodic', [1, 0, 0]))
 
+    # custom laws
+    def a_(u, v):
+        return ufl.inner(u, v) * ufl.ds(domain=V.mesh, subdomain_data=facet_tags)(tag_left)
+
+    def L_(v):
+        return ufl.inner(dummy_value, v) * ufl.ds(domain=V.mesh, subdomain_data=facet_tags)(tag_left)
+
+    supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Custom', C_fn=a_, K_fn=a_, b_fn=L_))
+
     for bc in supported_bcs:
         print(type(bc).labels[0], end='; ')
         # PDE
@@ -62,7 +72,7 @@ def tst_bcs_scalar_material(dim, eltname="Lagrange"):
         _, _, _ = pde.M(), pde.C(), pde.K()
 
         print('tst_bcs_vector_materials:: TODO: test for waveguides')
-        # _, _, _ = pde.K1(), pde.K2(), pde.K3()
+        # _, _, _ = pde.K0(), pde.K1(), pde.K2()
 
     # The end
 
@@ -71,7 +81,7 @@ def tst_bcs_vector_materials(dim, nbcomps, eltname="Lagrange"):
     # FE domain
     domain = create_mesh(dim)
     facet_tags = make_facet_tags(domain, tagged_boundaries)
-    V = fem.FunctionSpace(domain, (eltname, 1, (nbcomps,)))
+    V = fem.functionspace(domain, (eltname, 1, (nbcomps,)))
 
     # Material
     def const(x):
@@ -93,6 +103,15 @@ def tst_bcs_vector_materials(dim, nbcomps, eltname="Lagrange"):
     supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Dashpot', mat.Z_N, mat.Z_T))
     supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Periodic', [1, 0, 0]))
 
+    # custom laws
+    def a_(u, v):
+        return ufl.inner(u, v) * ufl.ds(domain=V.mesh, subdomain_data=facet_tags)(tag_left)
+
+    def L_(v):
+        return ufl.inner(dummy_vector, v) * ufl.ds(domain=V.mesh, subdomain_data=facet_tags)(tag_left)
+
+    supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Custom', C=a_, K=a_, b=L_))
+
     for bc in supported_bcs:
         print(type(bc).labels[0], end='; ')
         # PDE
@@ -102,7 +121,7 @@ def tst_bcs_vector_materials(dim, nbcomps, eltname="Lagrange"):
         _, _, _ = pde.M(), pde.C(), pde.K()
 
         print('tst_bcs_vector_materials:: TODO: test for waveguides')
-        # _, _, _ = pde.K1(), pde.K2(), pde.K3()
+        # _, _, _ = pde.K0(), pde.K1(), pde.K2()
 
     # The end
 
