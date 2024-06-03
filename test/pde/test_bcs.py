@@ -61,7 +61,7 @@ def tst_bcs_scalar_material(dim, eltname="Lagrange"):
     def L_(v):
         return ufl.inner(dummy_value, v) * ufl.ds(domain=V.mesh, subdomain_data=facet_tags)(tag_left)
 
-    supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Custom', C=a_, K=a_, b=L_))
+    supported_bcs.append(boundarycondition((V, facet_tags, tag_left), 'Custom', C_fn=a_, K_fn=a_, b_fn=L_))
 
     for bc in supported_bcs:
         print(type(bc).labels[0], end='; ')

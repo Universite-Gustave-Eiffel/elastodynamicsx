@@ -331,9 +331,9 @@ class BCCustom(BCWeakBase):
     damping (C), stiffness (K) and linear (b) forms
 
     Keyword Args:
-        C: (optional) callable returning the ufl (bilinear) damping form
-        K: (optional) callable returning the ufl (bilinear) stiffness form
-        b: (optional) callable returning the ufl linear form
+        C_fn: (optional) callable returning the ufl (bilinear) damping form
+        K_fn: (optional) callable returning the ufl (bilinear) stiffness form
+        b_fn: (optional) callable returning the ufl linear form
     """
 
     labels: List[str] = ['custom']
@@ -341,15 +341,15 @@ class BCCustom(BCWeakBase):
     def __init__(self, functionspace_tags_marker, **kwargs):
 
         super().__init__(functionspace_tags_marker, **kwargs)
-        c_ = kwargs.pop('C', None)
+        c_ = kwargs.pop('C_fn', None)
         if not (c_ is None):
             self.C_fn = c_
 
-        k_ = kwargs.pop('K', None)
+        k_ = kwargs.pop('K_fn', None)
         if not (k_ is None):
             self.K_fn = k_
 
-        b_ = kwargs.pop('b', None)
+        b_ = kwargs.pop('b_fn', None)
         if not (b_ is None):
             self.b_fn = b_
 
