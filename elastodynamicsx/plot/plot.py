@@ -164,7 +164,7 @@ def plotter(*args: Union[List[fem.Function], Mesh], **kwargs) -> pyvista.Plotter
     if isinstance(u1, Mesh):
         msh = u1
         assert len(args) < 3
-        mt = args[1] if len(args) == 2 else None
+        mt = args[1] if len(args) == 2 else kwargs.pop('cell_tags', None)
         assert isinstance(mt, MeshTags) or (mt is None)
         return plot_mesh(msh, mt, **kwargs)
 
