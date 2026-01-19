@@ -43,7 +43,7 @@ def _suitable_cell_type_format(cell_type):
 
 def GLL_element(cell_type,
                 degree: int,
-                shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
+                shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._ElementBase:
     """Element defined using the Gauss-Lobatto-Legendre points"""
     cell_type = _suitable_cell_type_format(cell_type)
     element = basix.ufl.element(basix.ElementFamily.P,
@@ -56,7 +56,7 @@ def GLL_element(cell_type,
 
 def GL_element(cell_type,
                degree: int,
-               shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
+               shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._ElementBase:
     """(discontinuous) Element defined using the Gauss-Legendre points"""
     cell_type = _suitable_cell_type_format(cell_type)
     element = basix.ufl.element(basix.ElementFamily.P,
@@ -70,7 +70,7 @@ def GL_element(cell_type,
 
 def Legendre_element(cell_type,
                      degree: int,
-                     shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
+                     shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._ElementBase:
     """(discontinuous) Element whose basis functions are the orthonormal Legendre polynomials"""
     cell_type = _suitable_cell_type_format(cell_type)
     element = basix.ufl.element(basix.ElementFamily.P,
@@ -113,7 +113,7 @@ def Legendre_quadrature(degree: int) -> dict:
 def spectral_element(name: str,
                      cell_type,
                      degree: int,
-                     shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._BasixElement:
+                     shape: typing.Optional[typing.Tuple[int, ...]] = None) -> basix.ufl._ElementBase:
     """
     A spectral element that can be used in a dolfinx.fem.FunctionSpace
 

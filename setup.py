@@ -38,7 +38,7 @@ class SafetyChecks(setuptools.Command):
     def run(self):
         """The command to run when users invoke python setup.py doc"""
         subprocess.run(
-            ['echo "\n\t##########\n\t-> running flake8..." && flake8 && '
+            ['echo "\n\t##########\n\t-> running flake8..." && python3 -m flake8 && '
              + 'echo "\n\t##########\n\t-> running mypy..." && mypy test/ && mypy elastodynamicsx/ && '
              + 'echo "\n\t##########\n\t-> running pytest..." && pytest'], shell=True)
 

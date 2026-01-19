@@ -322,7 +322,7 @@ class PDE:
         if self._mpc is None:
             return fem.petsc.create_vector(fem.extract_function_spaces(self._b_form))
         else:
-            return dolfinx_mpc.assemble_vector(self._b_form, self._mpc)
+            return dolfinx_mpc.assemble_vector(self._b_form, self._mpc)  # type: ignore[arg-type]
 
     def K0(self) -> PETSc.Mat:  # type: ignore[name-defined]
         """K0 stiffness matrix (waveguide problems)"""
@@ -404,8 +404,7 @@ class PDE:
             loc_b.set(0)
 
         # fill with values
-        # fem.petsc.assemble_vector(b, self.b_form)
-        dolfinx_mpc.assemble_vector(self.b_form, self._mpc, b)
+        dolfinx_mpc.assemble_vector(self.b_form, self._mpc, b)  # type: ignore[arg-type]
 
         # BC modifyier
         self._omega_ufl.value = omega

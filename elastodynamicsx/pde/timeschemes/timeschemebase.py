@@ -136,7 +136,7 @@ class FEniCSxTimeScheme(TimeScheme):
         if self._mpc is None:
             return fem.petsc.create_vector(fem.extract_function_spaces(self._linear_form))
         else:
-            return dolfinx_mpc.assemble_vector(self._linear_form, self._mpc)
+            return dolfinx_mpc.assemble_vector(self._linear_form, self._mpc)  # type: ignore[arg-type]
 
     def b_update_function(self, b: PETSc.Vec, t) -> None:  # type: ignore[name-defined]  # TODO: use t?
         """Updates the b vector (in-place) for a given time t"""

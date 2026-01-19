@@ -140,7 +140,7 @@ def live_plotter(u: fem.Function, refresh_step: int = 1, **kwargs) -> pyvista.Pl
     return plotter(u, **kwargs)
 
 
-def plotter(*args: Union[List[fem.Function], Mesh], **kwargs) -> pyvista.Plotter:
+def plotter(*args: Union[fem.Function, List[fem.Function], Mesh], **kwargs) -> pyvista.Plotter:
     """
     A generic function to plot a mesh or one/several fields
 
