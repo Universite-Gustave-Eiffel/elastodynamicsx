@@ -199,7 +199,7 @@ class CustomScalarPlotter(pyvista.Plotter):
         **kwargs: any valid kwarg for pyvista.Plotter and pyvista.Plotter.add_mesh
     """
 
-    default_cmap = plt.cm.get_cmap("RdBu_r", 25)
+    default_cmap = plt.get_cmap("RdBu_r", 25)
 
     def __init__(self, *all_scalars, **kwargs):
         self.grids: List[pyvista.UnstructuredGrid] = []
@@ -355,7 +355,7 @@ class CustomVectorPlotter(pyvista.Plotter):
         **kwargs: any valid kwarg for pyvista.Plotter and pyvista.Plotter.add_mesh
     """
 
-    default_cmap = plt.cm.get_cmap("viridis")
+    default_cmap = plt.get_cmap("viridis")
 
     def __init__(self, *all_vectors, **kwargs):
         ###
