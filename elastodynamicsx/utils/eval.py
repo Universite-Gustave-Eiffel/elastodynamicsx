@@ -61,12 +61,13 @@ class ParallelEvaluator:
             points = np.zeros((3, 0))
 
         collision_data = determine_point_ownership(domain._cpp_object, points.T, padding, None)
+        dest_points = collision_data.dest_points
 
         self.comm: MPI.Comm = domain.comm
         self.points: np.ndarray = points
         self.src_owner = collision_data.src_owner
         self.dest_owners = collision_data.dest_owners
-        self.points_local: np.ndarray = np.array(collision_data.dest_points).reshape(collision_data.dest_points.size // 3, 3)
+        self.points_local: np.ndarray = np.array(dest_points).reshape(dest_points.size // 3, 3)
         self.cells_local = collision_data.dest_cells
 
     @property
