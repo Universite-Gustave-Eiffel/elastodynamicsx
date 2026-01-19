@@ -171,6 +171,7 @@ class LeapFrog(FEniCSxTimeScheme):
         # u2 requires to solve a new system (enter the time loop)
         problem = fem.petsc.LinearProblem(self._m0_form, self._L0_form, bcs=self._bcs, u=self._a0,
                                           petsc_options=TimeScheme.petsc_options_t0,
+                                          petsc_options_prefix="leapfrog_",
                                           jit_options=self.jit_options)
         problem.solve()
 

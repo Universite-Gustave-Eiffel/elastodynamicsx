@@ -281,13 +281,13 @@ class CustomScalarPlotter(pyvista.Plotter):
             self.render()
 
     def live_plotter_start(self):
-        is_recording = hasattr(self, 'mwriter')
+        is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
         if is_recording:
             self.notebook = False
         self.show(interactive_update=True)
 
     def live_plotter_stop(self):
-        is_recording = hasattr(self, 'mwriter')
+        is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
         if is_recording:
             self.close()
             fname = self.mwriter.request.filename
@@ -316,7 +316,7 @@ class CustomScalarPlotter(pyvista.Plotter):
                 except:  # noqa
                     raise TypeError
         if (self._refresh_step > 0) and (i % self._refresh_step == 0):
-            is_recording = hasattr(self, 'mwriter')
+            is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
             with vec.localForm() as loc_v:  # Necessary for correct handling of ghosts in parallel
                 self.update_scalars(loc_v.array, render=not is_recording)
             if is_recording:
@@ -438,9 +438,8 @@ class CustomVectorPlotter(pyvista.Plotter):
                 self.add_mesh(grid, style='wireframe', color='black')
 
             self.add_text(labels[i])
-            warped = grid.warp_by_vector("u", factor=self.warp_factor)
-            grid.warped = warped
-            self.add_mesh(warped, scalars="u_nrm", show_edges=show_edges[i],
+            self.warped = grid.warp_by_vector("u", factor=self.warp_factor)
+            self.add_mesh(self.warped, scalars="u_nrm", show_edges=show_edges[i],
                           lighting=False, scalar_bar_args=sargs, cmap=cmap, **kwargs)
 
             if dims[i] == 2:
@@ -462,13 +461,13 @@ class CustomVectorPlotter(pyvista.Plotter):
             nbpts = grid.number_of_points
             u3D = _get_3D_array_from_nparray(u_, nbpts)
             grid["u"] = self._trans(u3D)
-            grid.warped.points = grid.warp_by_vector("u", factor=self.warp_factor).points
-            grid.warped["u_nrm"] = np.linalg.norm(u3D, axis=1)
+            self.warped.points = grid.warp_by_vector("u", factor=self.warp_factor).points
+            self.warped["u_nrm"] = np.linalg.norm(u3D, axis=1)
         if render:
             self.render()
 
     def _auto_record(self, fname=None, *args):
-        is_recording = hasattr(self, 'mwriter')
+        is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
         if is_recording:
             return
         if fname is None:
@@ -481,13 +480,13 @@ class CustomVectorPlotter(pyvista.Plotter):
     def live_plotter_start(self):
         if _DOCS_CFG:
             self._auto_record()
-        is_recording = hasattr(self, 'mwriter')
+        is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
         if is_recording:
             self.notebook = False
         self.show(interactive_update=True)
 
     def live_plotter_stop(self):
-        is_recording = hasattr(self, 'mwriter')
+        is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
         if is_recording:
             self.close()
             fname = self.mwriter.request.filename
@@ -515,7 +514,7 @@ class CustomVectorPlotter(pyvista.Plotter):
                 except:  # noqa
                     raise TypeError
         if (self._refresh_step > 0) and (i % self._refresh_step == 0):
-            is_recording = hasattr(self, 'mwriter')
+            is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
             with vec.localForm() as loc_v:  # Necessary for correct handling of ghosts in parallel
                 self.update_vectors(loc_v.array, render=not is_recording)
             if is_recording:

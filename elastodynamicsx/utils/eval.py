@@ -9,6 +9,8 @@ import typing
 from mpi4py import MPI
 
 import numpy as np
+import numpy.typing as npt
+
 from dolfinx.mesh import Mesh
 from dolfinx.cpp.geometry import determine_point_ownership  # type: ignore
 
@@ -51,22 +53,21 @@ class ParallelEvaluator:
     Adapted from:
         https://github.com/jorgensd/dolfinx-tutorial/issues/116
     """
-    def __init__(self, domain: Mesh, points: np.ndarray, padding: float = 1.e-4):
+    def __init__(self, domain: Mesh, points: npt.NDArray[np.floating], padding: float = 1.e-4):
         if domain.comm.rank == 0:
             pass
         else:
             # Only add points on one process
             points = np.zeros((3, 0))
 
-        src_owner, dest_owner, dest_points, dest_cells = \
-            determine_point_ownership(domain._cpp_object, points.T, padding)
+        collision_data = determine_point_ownership(domain._cpp_object, points.T, padding, None)
 
         self.comm: MPI.Comm = domain.comm
         self.points: np.ndarray = points
-        self.src_owner = src_owner
-        self.dest_owner = dest_owner
-        self.points_local: np.ndarray = np.array(dest_points).reshape(len(dest_points) // 3, 3)
-        self.cells_local = dest_cells
+        self.src_owner = collision_data.src_owner
+        self.dest_owners = collision_data.dest_owners
+        self.points_local: np.ndarray = np.array(collision_data.dest_points).reshape(collision_data.dest_points.size // 3, 3)
+        self.cells_local = collision_data.dest_cells
 
     @property
     def nb_points_local(self) -> int:

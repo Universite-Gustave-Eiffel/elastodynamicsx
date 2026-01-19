@@ -320,7 +320,7 @@ class PDE:
         assert not (self._b_form is None)
 
         if self._mpc is None:
-            return fem.petsc.create_vector(self._b_form)
+            return fem.petsc.create_vector(fem.extract_function_spaces(self._b_form))
         else:
             return dolfinx_mpc.assemble_vector(self._b_form, self._mpc)
 

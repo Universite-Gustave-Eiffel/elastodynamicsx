@@ -134,7 +134,7 @@ class FEniCSxTimeScheme(TimeScheme):
     def init_b(self) -> PETSc.Vec:  # type: ignore[name-defined]
         """Declares a zero vector compatible with the linear form"""
         if self._mpc is None:
-            return fem.petsc.create_vector(self._linear_form)
+            return fem.petsc.create_vector(fem.extract_function_spaces(self._linear_form))
         else:
             return dolfinx_mpc.assemble_vector(self._linear_form, self._mpc)
 
