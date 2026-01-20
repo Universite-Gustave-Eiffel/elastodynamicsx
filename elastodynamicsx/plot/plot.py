@@ -432,14 +432,15 @@ class CustomVectorPlotter(pyvista.Plotter):
     def live_plotter_stop(self):
         is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
         if is_recording:
-            self.close()
             fname = self.mwriter.request.filename
+            extention = self.mwriter.request.extension
+            self.close()
             try:
                 import IPython.display
-                if self.mwriter.request.extension.lower() == '.gif':
+                if extention.lower() == '.gif':
                     im = IPython.display.Image(open(fname, 'rb').read())
                     IPython.display.display(im)  # display .gif in notebook
-                elif self.mwriter.request.extension.lower() == '.mp4':
+                elif extention.lower() == '.mp4':
                     vi = IPython.display.Video(fname)
                     if _DOCS_CFG:
                         vi.embed = True
