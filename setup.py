@@ -72,6 +72,16 @@ setuptools.setup(
         'numpy',
         'matplotlib',
         'pyvista[trame]',
-        'sphinx', 'sphinx-rtd-theme', 'myst-parser', 'nbsphinx', 'sphinx-tabs', 'jupyter-sphinx',  # for sphinx doc
         ],  # noqa
+    extras_require={'dev': [
+        'sphinx',
+        'sphinx-rtd-theme',
+        'myst-parser',
+        'nbsphinx',
+        'sphinx-tabs',
+        'jupyter-sphinx',
+        'sphinx_copybutton',
+        'sphinx_design',
+        'jupytext',
+        'imageio', 'imageio[ffmpeg]', 'imageio[pyav]']},
     python_requires='>=3')
