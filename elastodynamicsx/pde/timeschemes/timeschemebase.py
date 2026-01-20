@@ -134,9 +134,9 @@ class FEniCSxTimeScheme(TimeScheme):
     def init_b(self) -> PETSc.Vec:  # type: ignore[name-defined]
         """Declares a zero vector compatible with the linear form"""
         if self._mpc is None:
-            return fem.petsc.create_vector(self._linear_form)
+            return fem.petsc.create_vector(fem.extract_function_spaces(self._linear_form))
         else:
-            return dolfinx_mpc.assemble_vector(self._linear_form, self._mpc)
+            return dolfinx_mpc.assemble_vector(self._linear_form, self._mpc)  # type: ignore[arg-type]
 
     def b_update_function(self, b: PETSc.Vec, t) -> None:  # type: ignore[name-defined]  # TODO: use t?
         """Updates the b vector (in-place) for a given time t"""
@@ -150,7 +150,7 @@ class FEniCSxTimeScheme(TimeScheme):
             loc_b.set(0)
 
         # fill with values
-        fem.petsc.assemble_vector(b, self._linear_form)
+        fem.petsc.assemble_vector(b, self._linear_form)  # type: ignore[arg-type]
 
         # BC modifyier
         fem.petsc.apply_lifting(b, [self._bilinear_form], [self._bcs])
@@ -168,7 +168,7 @@ class FEniCSxTimeScheme(TimeScheme):
             loc_b.set(0)
 
         # fill with values
-        dolfinx_mpc.assemble_vector(self._linear_form, self._mpc, b)
+        dolfinx_mpc.assemble_vector(self._linear_form, self._mpc, b)  # type: ignore[arg-type]
 
         # BC modifyier
         dolfinx_mpc.apply_lifting(b, [self._bilinear_form], [self._bcs], self._mpc)

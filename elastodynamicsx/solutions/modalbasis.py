@@ -73,7 +73,7 @@ class ModalBasis():
         eigenmodes = _slice_array(self.un, which)
         eigenfreqs = _slice_array(self.fn, which)
         #
-        topology, cell_types, geom = plot.vtk_mesh(function_space)
+        topology, cell_types, geom = plot.vtk_mesh(function_space)  # type: ignore[arg-type]
         grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
 
         for i, eigM in zip(indexes, eigenmodes):

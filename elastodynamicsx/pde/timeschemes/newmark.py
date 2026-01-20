@@ -77,10 +77,10 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
     labels = ['g-a-newmark', 'generalized-alpha']
 
     def __init__(self, function_space: fem.FunctionSpace,
-                 M_fn: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
-                 C_fn: Union[None, Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form]],
-                 K_fn: Callable[['ufl.TrialFunction', 'ufl.TestFunction'], ufl.form.Form],
-                 b_fn: Union[None, Callable[['ufl.TestFunction'], ufl.form.Form]],
+                 M_fn: Callable[[ufl.argument.Argument, ufl.argument.Argument], ufl.form.Form],
+                 C_fn: Union[None, Callable[[ufl.argument.Argument, ufl.argument.Argument], ufl.form.Form]],
+                 K_fn: Callable[[ufl.argument.Argument, ufl.argument.Argument], ufl.form.Form],
+                 b_fn: Union[None, Callable[[ufl.argument.Argument], ufl.form.Form]],
                  dt,
                  bcs: Union[Tuple[BoundaryConditionBase], Tuple[()]] = (), **kwargs):
 
@@ -131,11 +131,13 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
 
         # linear and bilinear forms for mass and stiffness matrices
         self._a = m1 * M_fn(u, v) + dt_ * dt_ * const(1 - alpha_f) * K_fn(u, v)
-        self._L = -const(dt * dt * alpha_f) * K_fn(self._u_nm1, v) \
-            + m1 * M_fn(self._u_nm1, v) + m2 * M_fn(self._v_nm1, v) - m3 * M_fn(self._a_nm1, v)
+        self._L = (-const(dt * dt * alpha_f) * K_fn(self._u_nm1, v)  # type: ignore[arg-type]
+                   + m1 * M_fn(self._u_nm1, v)  # type: ignore[arg-type]
+                   + m2 * M_fn(self._v_nm1, v)  # type: ignore[arg-type]
+                   - m3 * M_fn(self._a_nm1, v))  # type: ignore[arg-type]
 
         self._m0_form = M_fn(u, v)
-        self._L0_form = -K_fn(self._u0, v)
+        self._L0_form = -K_fn(self._u0, v)  # type: ignore[arg-type]
 
         _L_terms = []
         if not (b_fn is None):
@@ -146,8 +148,10 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
             C_uv_ufl = C_fn(u, v)
             if not (C_uv_ufl is None):
                 self._a += c1 * C_uv_ufl
-                self._L += c1 * C_fn(self._u_nm1, v) + c2 * C_fn(self._v_nm1, v) - c3 * C_fn(self._a_nm1, v)
-                self._L0_form -= C_fn(self._v0, v)
+                self._L += (c1 * C_fn(self._u_nm1, v)  # type: ignore[arg-type]
+                            + c2 * C_fn(self._v_nm1, v)  # type: ignore[arg-type]
+                            - c3 * C_fn(self._a_nm1, v))  # type: ignore[arg-type]
+                self._L0_form -= C_fn(self._v0, v)  # type: ignore[arg-type]
 
         # boundary conditions
         mpc = _build_mpc(bcs)
@@ -228,6 +232,7 @@ class GalphaNewmarkBeta(FEniCSxTimeScheme):
         # known: u0, v0. Solve for a0. u1 requires to solve a new system (loop)
         problem = fem.petsc.LinearProblem(self._m0_form, self._L0_form, bcs=self._bcs, u=self._a0,
                                           petsc_options=TimeScheme.petsc_options_t0,
+                                          petsc_options_prefix="newmark_",
                                           jit_options=self.jit_options)
         problem.solve()
 

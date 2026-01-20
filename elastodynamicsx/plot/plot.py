@@ -15,7 +15,6 @@ import pyvista
 
 from petsc4py import PETSc
 from dolfinx import plot, fem
-from dolfinx.mesh import Mesh, MeshTags
 
 from elastodynamicsx import _DOCS_CFG
 
@@ -52,53 +51,6 @@ if _is_notebook():
 # ## ---------------------------------------- ## #
 # ## --- define useful plotting functions --- ## #
 # ## ---------------------------------------- ## #
-
-def plot_mesh(mesh: Mesh, cell_tags: Union[MeshTags, None] = None, **kwargs) -> pyvista.Plotter:
-    """
-    Plot the mesh with colored subdomains
-
-    Args:
-        mesh: a dolfinx mesh
-        cell_tags: (optional) a dolfinx MeshTag instance
-
-    Returns:
-        The pyvista.Plotter
-
-    Adapted from:
-        https://jsdokken.com/dolfinx-tutorial/chapter3/em.html
-
-    Example:
-        .. highlight:: python
-        .. code-block:: python
-
-          from mpi4py import MPI
-          from dolfinx.mesh import create_unit_square
-          from elastodynamicsx.utils import make_tags
-
-          domain = create_unit_square(MPI.COMM_WORLD, 10, 10)
-
-          Omegas = [(1, lambda x: x[1] <= 0.5),
-                    (2, lambda x: x[1] >= 0.5)]
-          cell_tags = make_tags(domain, Omegas, 'domains')
-
-          p = plot_mesh(domain, cell_tags=cell_tags)
-          p.show()
-    """
-    p = pyvista.Plotter()
-    grid = pyvista.UnstructuredGrid(*plot.vtk_mesh(mesh, mesh.topology.dim))
-    num_local_cells = mesh.topology.index_map(mesh.topology.dim).size_local
-
-    if not (cell_tags is None):
-        grid.cell_data["Marker"] = cell_tags.values[cell_tags.indices < num_local_cells]
-        grid.set_active_scalars("Marker")
-
-    p.add_mesh(grid, show_edges=True)
-
-    if mesh.topology.dim == 2:
-        p.view_xy()
-
-    return p
-
 
 def live_plotter(u: fem.Function, refresh_step: int = 1, **kwargs) -> pyvista.Plotter:
     """
@@ -140,9 +92,9 @@ def live_plotter(u: fem.Function, refresh_step: int = 1, **kwargs) -> pyvista.Pl
     return plotter(u, **kwargs)
 
 
-def plotter(*args: Union[List[fem.Function], Mesh], **kwargs) -> pyvista.Plotter:
+def plotter(*args: Union[fem.Function, List[fem.Function]], **kwargs) -> pyvista.Plotter:
     """
-    A generic function to plot a mesh or one/several fields
+    A generic function to plot one/several fields
 
     Args:
         *args: FEM functions to be plotted, sharing the same underlying function space
@@ -161,22 +113,14 @@ def plotter(*args: Union[List[fem.Function], Mesh], **kwargs) -> pyvista.Plotter
     """
     u1 = args[0]
 
-    if isinstance(u1, Mesh):
-        msh = u1
-        assert len(args) < 3
-        mt = args[1] if len(args) == 2 else kwargs.pop('cell_tags', None)
-        assert isinstance(mt, MeshTags) or (mt is None)
-        return plot_mesh(msh, mt, **kwargs)
+    assert isinstance(u1, fem.Function)
+    # test whether u is scalar or vector and returns the appropriate plotter
+    nbcomps = u1.function_space.element.num_sub_elements  # number of components if vector space, 0 if scalar space
 
+    if nbcomps == 0:
+        return CustomScalarPlotter(*args, **kwargs)
     else:
-        assert isinstance(u1, fem.Function)
-        # test whether u is scalar or vector and returns the appropriate plotter
-        nbcomps = u1.function_space.element.num_sub_elements  # number of components if vector space, 0 if scalar space
-
-        if nbcomps == 0:
-            return CustomScalarPlotter(*args, **kwargs)
-        else:
-            return CustomVectorPlotter(*args, **kwargs)
+        return CustomVectorPlotter(*args, **kwargs)
 
 
 # ## -------------------------------------- ## #
@@ -199,7 +143,7 @@ class CustomScalarPlotter(pyvista.Plotter):
         **kwargs: any valid kwarg for pyvista.Plotter and pyvista.Plotter.add_mesh
     """
 
-    default_cmap = plt.cm.get_cmap("RdBu_r", 25)
+    default_cmap = plt.get_cmap("RdBu_r", 25)
 
     def __init__(self, *all_scalars, **kwargs):
         self.grids: List[pyvista.UnstructuredGrid] = []
@@ -281,22 +225,23 @@ class CustomScalarPlotter(pyvista.Plotter):
             self.render()
 
     def live_plotter_start(self):
-        is_recording = hasattr(self, 'mwriter')
+        is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
         if is_recording:
             self.notebook = False
         self.show(interactive_update=True)
 
     def live_plotter_stop(self):
-        is_recording = hasattr(self, 'mwriter')
+        is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
         if is_recording:
-            self.close()
             fname = self.mwriter.request.filename
+            extension = self.mwriter.request.extension
+            self.close()
             try:
                 import IPython.display
-                if self.mwriter.request.extension.lower() == '.gif':
+                if extension.lower() == '.gif':
                     im = IPython.display.Image(open(fname, 'rb').read())
                     IPython.display.display(im)  # display .gif in notebook
-                elif self.mwriter.request.extension.lower() == '.mp4':
+                elif extension.lower() == '.mp4':
                     vi = IPython.display.Video(fname)
                     if _DOCS_CFG:
                         vi.embed = True
@@ -316,7 +261,7 @@ class CustomScalarPlotter(pyvista.Plotter):
                 except:  # noqa
                     raise TypeError
         if (self._refresh_step > 0) and (i % self._refresh_step == 0):
-            is_recording = hasattr(self, 'mwriter')
+            is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
             with vec.localForm() as loc_v:  # Necessary for correct handling of ghosts in parallel
                 self.update_scalars(loc_v.array, render=not is_recording)
             if is_recording:
@@ -355,7 +300,7 @@ class CustomVectorPlotter(pyvista.Plotter):
         **kwargs: any valid kwarg for pyvista.Plotter and pyvista.Plotter.add_mesh
     """
 
-    default_cmap = plt.cm.get_cmap("viridis")
+    default_cmap = plt.get_cmap("viridis")
 
     def __init__(self, *all_vectors, **kwargs):
         ###
@@ -438,9 +383,8 @@ class CustomVectorPlotter(pyvista.Plotter):
                 self.add_mesh(grid, style='wireframe', color='black')
 
             self.add_text(labels[i])
-            warped = grid.warp_by_vector("u", factor=self.warp_factor)
-            grid.warped = warped
-            self.add_mesh(warped, scalars="u_nrm", show_edges=show_edges[i],
+            self.warped = grid.warp_by_vector("u", factor=self.warp_factor)
+            self.add_mesh(self.warped, scalars="u_nrm", show_edges=show_edges[i],
                           lighting=False, scalar_bar_args=sargs, cmap=cmap, **kwargs)
 
             if dims[i] == 2:
@@ -462,13 +406,13 @@ class CustomVectorPlotter(pyvista.Plotter):
             nbpts = grid.number_of_points
             u3D = _get_3D_array_from_nparray(u_, nbpts)
             grid["u"] = self._trans(u3D)
-            grid.warped.points = grid.warp_by_vector("u", factor=self.warp_factor).points
-            grid.warped["u_nrm"] = np.linalg.norm(u3D, axis=1)
+            self.warped.points = grid.warp_by_vector("u", factor=self.warp_factor).points
+            self.warped["u_nrm"] = np.linalg.norm(u3D, axis=1)
         if render:
             self.render()
 
     def _auto_record(self, fname=None, *args):
-        is_recording = hasattr(self, 'mwriter')
+        is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
         if is_recording:
             return
         if fname is None:
@@ -481,22 +425,23 @@ class CustomVectorPlotter(pyvista.Plotter):
     def live_plotter_start(self):
         if _DOCS_CFG:
             self._auto_record()
-        is_recording = hasattr(self, 'mwriter')
+        is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
         if is_recording:
             self.notebook = False
         self.show(interactive_update=True)
 
     def live_plotter_stop(self):
-        is_recording = hasattr(self, 'mwriter')
+        is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
         if is_recording:
-            self.close()
             fname = self.mwriter.request.filename
+            extension = self.mwriter.request.extension
+            self.close()
             try:
                 import IPython.display
-                if self.mwriter.request.extension.lower() == '.gif':
+                if extension.lower() == '.gif':
                     im = IPython.display.Image(open(fname, 'rb').read())
                     IPython.display.display(im)  # display .gif in notebook
-                elif self.mwriter.request.extension.lower() == '.mp4':
+                elif extension.lower() == '.mp4':
                     vi = IPython.display.Video(fname)
                     if _DOCS_CFG:
                         vi.embed = True
@@ -515,7 +460,7 @@ class CustomVectorPlotter(pyvista.Plotter):
                 except:  # noqa
                     raise TypeError
         if (self._refresh_step > 0) and (i % self._refresh_step == 0):
-            is_recording = hasattr(self, 'mwriter')
+            is_recording = hasattr(self, 'mwriter') and self.mwriter is not None
             with vec.localForm() as loc_v:  # Necessary for correct handling of ghosts in parallel
                 self.update_vectors(loc_v.array, render=not is_recording)
             if is_recording:

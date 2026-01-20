@@ -92,7 +92,7 @@ class TimeStepper:
         """
         V = fem.functionspace(domain, ("DG", 0))
         c_number = fem.Function(V)
-        pts = V.element.interpolation_points()  # DOLFINx.__version__ >=0.5
+        pts = V.element.interpolation_points  # DOLFINx.__version__ =0.10.0
         h = ufl.MinCellEdgeLength(V.mesh)  # or rather ufl.CellDiameter?
         c_number.interpolate(fem.Expression(dt * c_max / h, pts))
         c_number_max = max(c_number.x.array)
