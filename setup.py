@@ -77,9 +77,9 @@ setuptools.setup(
         'flake8',
         'mypy',
         'pytest',
-        'myst-parser',
-        'docutils<0.22',  # will be fixed with sphinx-tabs>0.4.0
-        'sphinx',
+        'myst-parser==2.0.0',
+        'docutils==0.20.1',  # will be fixed with sphinx-tabs>0.4.0
+        'sphinx==7.3.7',
         'sphinx-rtd-theme',
         'sphinx-tabs',
         'sphinx_copybutton',
