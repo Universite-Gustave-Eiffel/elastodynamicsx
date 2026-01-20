@@ -27,7 +27,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from dolfinx import mesh, fem, default_scalar_type
-from dolfinx.io import gmshio
+from dolfinx.io import gmsh as gmshio
 import ufl
 from mpi4py import MPI
 from petsc4py import PETSc
@@ -63,7 +63,10 @@ model = create_model(sizefactor=sizefactor, tilt=tilt, tagBdFree=tagBdFree, tagB
 # Convert the GMSH model into a DOLFINx mesh
 gmsh_model_rank = 0
 comm = MPI.COMM_WORLD
-domain, cell_tags, facet_tags = gmshio.model_to_mesh(model, comm, gmsh_model_rank, gdim=2)
+mesh_data = gmshio.model_to_mesh(model, comm, gmsh_model_rank, gdim=2)
+domain = mesh_data.mesh
+cell_tags = mesh_data.cell_tags
+facet_tags = mesh_data.facet_tags
 
 # Create the function space
 V = fem.functionspace(domain, specFE)

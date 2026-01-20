@@ -38,7 +38,7 @@ class SafetyChecks(setuptools.Command):
     def run(self):
         """The command to run when users invoke python setup.py doc"""
         subprocess.run(
-            ['echo "\n\t##########\n\t-> running flake8..." && flake8 && '
+            ['echo "\n\t##########\n\t-> running flake8..." && python3 -m flake8 && '
              + 'echo "\n\t##########\n\t-> running mypy..." && mypy test/ && mypy elastodynamicsx/ && '
              + 'echo "\n\t##########\n\t-> running pytest..." && pytest'], shell=True)
 
@@ -72,6 +72,20 @@ setuptools.setup(
         'numpy',
         'matplotlib',
         'pyvista[trame]',
-        'sphinx', 'sphinx-rtd-theme', 'myst-parser', 'nbsphinx', 'sphinx-tabs', 'jupyter-sphinx',  # for sphinx doc
         ],  # noqa
+    extras_require={'dev': [
+        'flake8',
+        'mypy',
+        'pytest',
+        'myst-parser==2.0.0',
+        'docutils==0.20.1',  # will be fixed with sphinx-tabs>0.4.0
+        'sphinx==7.3.7',
+        'sphinx-rtd-theme',
+        'sphinx-tabs',
+        'sphinx_copybutton',
+        'sphinx_design',
+        'nbsphinx',
+        'jupyter-sphinx',
+        'jupytext',
+        'imageio', 'imageio[ffmpeg]', 'imageio[pyav]']},
     python_requires='>=3')

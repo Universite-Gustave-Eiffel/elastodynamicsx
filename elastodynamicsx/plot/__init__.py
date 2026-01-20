@@ -6,8 +6,8 @@
 
 """The *plot* module contains convenience tools for plotting"""
 
-from .plot import live_plotter, plot_mesh, plotter, CustomScalarPlotter, CustomVectorPlotter, spy_petscMatrix, \
+from .plot import live_plotter, plotter, CustomScalarPlotter, CustomVectorPlotter, spy_petscMatrix, \
     _get_3D_array_from_nparray
 
-__all__ = ["live_plotter", "plot_mesh", "plotter", "CustomScalarPlotter", "CustomVectorPlotter", "spy_petscMatrix",
+__all__ = ["live_plotter", "plotter", "CustomScalarPlotter", "CustomVectorPlotter", "spy_petscMatrix",
            "_get_3D_array_from_nparray"]
