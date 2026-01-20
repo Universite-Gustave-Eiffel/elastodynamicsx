@@ -150,7 +150,7 @@ class FEniCSxTimeScheme(TimeScheme):
             loc_b.set(0)
 
         # fill with values
-        fem.petsc.assemble_vector(b, self._linear_form)
+        fem.petsc.assemble_vector(b, self._linear_form)  # type: ignore[arg-type]
 
         # BC modifyier
         fem.petsc.apply_lifting(b, [self._bilinear_form], [self._bcs])
@@ -168,7 +168,7 @@ class FEniCSxTimeScheme(TimeScheme):
             loc_b.set(0)
 
         # fill with values
-        dolfinx_mpc.assemble_vector(self._linear_form, self._mpc, b)
+        dolfinx_mpc.assemble_vector(self._linear_form, self._mpc, b)  # type: ignore[arg-type]
 
         # BC modifyier
         dolfinx_mpc.apply_lifting(b, [self._bilinear_form], [self._bcs], self._mpc)

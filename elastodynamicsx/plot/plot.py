@@ -15,7 +15,6 @@ import pyvista
 
 from petsc4py import PETSc
 from dolfinx import plot, fem
-from dolfinx.mesh import Mesh, MeshTags
 
 from elastodynamicsx import _DOCS_CFG
 
@@ -52,53 +51,6 @@ if _is_notebook():
 # ## ---------------------------------------- ## #
 # ## --- define useful plotting functions --- ## #
 # ## ---------------------------------------- ## #
-
-def plot_mesh(mesh: Mesh, cell_tags: Union[MeshTags, None] = None, **kwargs) -> pyvista.Plotter:
-    """
-    Plot the mesh with colored subdomains
-
-    Args:
-        mesh: a dolfinx mesh
-        cell_tags: (optional) a dolfinx MeshTag instance
-
-    Returns:
-        The pyvista.Plotter
-
-    Adapted from:
-        https://jsdokken.com/dolfinx-tutorial/chapter3/em.html
-
-    Example:
-        .. highlight:: python
-        .. code-block:: python
-
-          from mpi4py import MPI
-          from dolfinx.mesh import create_unit_square
-          from elastodynamicsx.utils import make_tags
-
-          domain = create_unit_square(MPI.COMM_WORLD, 10, 10)
-
-          Omegas = [(1, lambda x: x[1] <= 0.5),
-                    (2, lambda x: x[1] >= 0.5)]
-          cell_tags = make_tags(domain, Omegas, 'domains')
-
-          p = plot_mesh(domain, cell_tags=cell_tags)
-          p.show()
-    """
-    p = pyvista.Plotter()
-    grid = pyvista.UnstructuredGrid(*plot.vtk_mesh(mesh, mesh.topology.dim))
-    num_local_cells = mesh.topology.index_map(mesh.topology.dim).size_local
-
-    if not (cell_tags is None):
-        grid.cell_data["Marker"] = cell_tags.values[cell_tags.indices < num_local_cells]
-        grid.set_active_scalars("Marker")
-
-    p.add_mesh(grid, show_edges=True)
-
-    if mesh.topology.dim == 2:
-        p.view_xy()
-
-    return p
-
 
 def live_plotter(u: fem.Function, refresh_step: int = 1, **kwargs) -> pyvista.Plotter:
     """
@@ -140,9 +92,9 @@ def live_plotter(u: fem.Function, refresh_step: int = 1, **kwargs) -> pyvista.Pl
     return plotter(u, **kwargs)
 
 
-def plotter(*args: Union[fem.Function, List[fem.Function], Mesh], **kwargs) -> pyvista.Plotter:
+def plotter(*args: Union[fem.Function, List[fem.Function]], **kwargs) -> pyvista.Plotter:
     """
-    A generic function to plot a mesh or one/several fields
+    A generic function to plot one/several fields
 
     Args:
         *args: FEM functions to be plotted, sharing the same underlying function space
@@ -161,22 +113,14 @@ def plotter(*args: Union[fem.Function, List[fem.Function], Mesh], **kwargs) -> p
     """
     u1 = args[0]
 
-    if isinstance(u1, Mesh):
-        msh = u1
-        assert len(args) < 3
-        mt = args[1] if len(args) == 2 else kwargs.pop('cell_tags', None)
-        assert isinstance(mt, MeshTags) or (mt is None)
-        return plot_mesh(msh, mt, **kwargs)
+    assert isinstance(u1, fem.Function)
+    # test whether u is scalar or vector and returns the appropriate plotter
+    nbcomps = u1.function_space.element.num_sub_elements  # number of components if vector space, 0 if scalar space
 
+    if nbcomps == 0:
+        return CustomScalarPlotter(*args, **kwargs)
     else:
-        assert isinstance(u1, fem.Function)
-        # test whether u is scalar or vector and returns the appropriate plotter
-        nbcomps = u1.function_space.element.num_sub_elements  # number of components if vector space, 0 if scalar space
-
-        if nbcomps == 0:
-            return CustomScalarPlotter(*args, **kwargs)
-        else:
-            return CustomVectorPlotter(*args, **kwargs)
+        return CustomVectorPlotter(*args, **kwargs)
 
 
 # ## -------------------------------------- ## #

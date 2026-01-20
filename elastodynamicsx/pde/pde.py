@@ -383,7 +383,7 @@ class PDE:
             loc_b.set(0)
 
         # fill with values
-        fem.petsc.assemble_vector(b, self.b_form)
+        fem.petsc.assemble_vector(b, self.b_form)  # type: ignore[arg-type]
 
         # BC modifyier
         self._omega_ufl.value = omega
