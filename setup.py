@@ -79,6 +79,7 @@ setuptools.setup(
         'myst-parser',
         'nbsphinx',
         'sphinx-tabs',
+        'docutils<0.22',  # will be fixed with sphinx-tabs>0.4.0
         'jupyter-sphinx',
         'sphinx_copybutton',
         'sphinx_design',
