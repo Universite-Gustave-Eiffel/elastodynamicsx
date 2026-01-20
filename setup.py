@@ -74,15 +74,18 @@ setuptools.setup(
         'pyvista[trame]',
         ],  # noqa
     extras_require={'dev': [
+        'flake8',
+        'mypy',
+        'pytest',
+        'myst-parser',
+        'docutils<0.22',  # will be fixed with sphinx-tabs>0.4.0
         'sphinx',
         'sphinx-rtd-theme',
-        'myst-parser',
-        'nbsphinx',
         'sphinx-tabs',
-        'docutils<0.22',  # will be fixed with sphinx-tabs>0.4.0
-        'jupyter-sphinx',
         'sphinx_copybutton',
         'sphinx_design',
+        'nbsphinx',
+        'jupyter-sphinx',
         'jupytext',
         'imageio', 'imageio[ffmpeg]', 'imageio[pyav]']},
     python_requires='>=3')
