@@ -152,7 +152,11 @@ class FrequencyDomainSolver:
 
         # Update PDE matrix
         w = omega
-        A = PETSc.ScalarType(-w * w) * self._M + PETSc.ScalarType(1J * w) * self._C + self._K  # type: ignore
+        A = PETSc.ScalarType(-w * w) * self._M + self._K  # type: ignore
+
+        if self._C is not None:
+            A += PETSc.ScalarType(1J * w) * self._C
+
         self.solver.setOperators(A)
 
         # Solve
