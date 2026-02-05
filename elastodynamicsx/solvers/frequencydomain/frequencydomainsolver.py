@@ -10,11 +10,18 @@ from mpi4py import MPI
 from petsc4py import PETSc
 import numpy as np
 
-try:
-    from tqdm.auto import tqdm
-except ModuleNotFoundError:
-    def tqdm(x):  # type: ignore[no-redef]
-        return x
+
+def tqdm_none(x):
+    return x
+
+
+if MPI.COMM_WORLD.rank > 0:
+    tqdm = tqdm_none
+else:
+    try:
+        from tqdm.auto import tqdm  # type: ignore[no-redef, import-untyped]
+    except ModuleNotFoundError:
+        tqdm = tqdm_none
 
 
 class FrequencyDomainSolver:
@@ -155,7 +162,7 @@ class FrequencyDomainSolver:
         A = PETSc.ScalarType(-w * w) * self._M + self._K  # type: ignore
 
         if self._C is not None:
-            A += PETSc.ScalarType(1J * w) * self._C
+            A += PETSc.ScalarType(1J * w) * self._C  # type: ignore
 
         self.solver.setOperators(A)
 

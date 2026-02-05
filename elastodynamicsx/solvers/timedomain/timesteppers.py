@@ -14,11 +14,18 @@ import ufl  # type: ignore
 
 from elastodynamicsx.pde.timeschemes import TimeScheme, timescheme
 
-try:
-    from tqdm.auto import tqdm
-except ModuleNotFoundError:
-    def tqdm(x):  # type: ignore[no-redef]
-        return x
+
+def tqdm_none(x):
+    return x
+
+
+if MPI.COMM_WORLD.rank > 0:
+    tqdm = tqdm_none
+else:
+    try:
+        from tqdm.auto import tqdm  # type: ignore[no-redef, import-untyped]
+    except ModuleNotFoundError:
+        tqdm = tqdm_none
 
 
 class DiagonalSolver:
