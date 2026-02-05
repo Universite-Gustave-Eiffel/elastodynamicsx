@@ -509,7 +509,7 @@ def spy_petscMatrix(Z: PETSc.Mat, *args, **kwargs) -> AxesImage:  # type: ignore
 # ## --- define useful util functions --- ## #
 # ## ------------------------------------ ## #
 
-def _get_3D_array_from_FEFunction(u_):
+def _get_3D_array_from_FEFunction(u_) -> np.ndarray:
     """Not intended to be called by user"""
     # u_ is a fem.Function
     nbcomps = max(1, u_.function_space.element.num_sub_elements)  # number of components
@@ -521,12 +521,14 @@ def _get_3D_array_from_FEFunction(u_):
         return u_.x.array.reshape((nbpts, 3))
 
 
-def _get_3D_array_from_nparray(u_, nbpts):
+def _get_3D_array_from_nparray(u_: np.ndarray, nbpts: int) -> np.ndarray:
     """Not intended to be called by user"""
     # u_ is a np.array
     nbcomps = u_.size // nbpts
     if nbcomps < 3:
         z0s = np.zeros((nbpts, 3 - nbcomps), dtype=u_.dtype)
         return np.append(u_.reshape((nbpts, nbcomps)), z0s, axis=1)
-    else:
+    elif nbcomps == 3:
         return u_.reshape((nbpts, 3))
+    else:
+        raise RuntimeError(f'Unsupported number of components. Expected: 1, 2 or 3. Got: {nbcomps}')

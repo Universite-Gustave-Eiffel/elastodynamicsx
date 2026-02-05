@@ -58,6 +58,8 @@ class ModalBasis():
                 shape: (default: attempts a square mosaic) shape of the pyvista.Plotter
                 factor: (default=1) Scale factor for the deformation
                 wireframe: (default=False) Plot the wireframe of the undeformed mesh
+                field_mapper: Optional alternative function to read (u_x, u_y, u_z) from the modeshapes.
+                    Inputs: (modeshape: 1D numpy array, nbpts: int) -> Output: 3D numpy array of shape (nbpts, 3)
 
         Example:
             .. highlight:: python
@@ -76,10 +78,11 @@ class ModalBasis():
         topology, cell_types, geom = plot.vtk_mesh(function_space)  # type: ignore[arg-type]
         grid = pyvista.UnstructuredGrid(topology, cell_types, geom)
 
+        field_mapper = kwargs.pop('field_mapper', _get_3D_array_from_nparray)
         for i, eigM in zip(indexes, eigenmodes):
             nbpts = grid.number_of_points
             with eigM.localForm() as loc_eigM:  # Necessary for correct handling of ghosts in parallel
-                grid['eigenmode_' + str(i)] = _get_3D_array_from_nparray(loc_eigM.array, nbpts)
+                grid['eigenmode_' + str(i)] = field_mapper(loc_eigM.array, nbpts)
 
         nbcols = int(np.ceil(np.sqrt(indexes.size)))
         nbrows = int(np.ceil(indexes.size / nbcols))
