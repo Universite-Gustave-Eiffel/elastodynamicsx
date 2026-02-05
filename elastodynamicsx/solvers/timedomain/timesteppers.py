@@ -43,7 +43,7 @@ class DiagonalSolver:
         Solve (in-place) the linear system
         :math:`\mathbf{A} * \mathbf{out} = \mathbf{b}`
         """
-        out.setArray(b / self._A)
+        out.pointwiseDivide(b, self._A)
 
 
 class TimeStepper:
