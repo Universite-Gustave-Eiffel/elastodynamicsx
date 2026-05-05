@@ -76,7 +76,7 @@ class TimeStepper:
 
         if tscheme.linear_ODE is True:
             if tscheme.nbsteps == 1:
-                return OneStepTimeStepper(comm, tscheme, tscheme.A(), tscheme.init_b(), **kwargs)
+                return OneStepTimeStepper(comm, tscheme, tscheme.A, tscheme.b, **kwargs)
             else:
                 raise NotImplementedError  # TODO: multi-steps?
         else:
@@ -197,6 +197,13 @@ class LinearTimeStepper(TimeStepper):
                 default_petsc_options = TimeStepper.petsc_options_implicit_scheme_linear
             petsc_options = kwargs.get('petsc_options', default_petsc_options)
             self._init_solver(comm, petsc_options)
+
+    def __del__(self):  # based on https://github.com/FEniCS/dolfinx/.../python/dolfinx/fem/petsc.py
+        """Destroy internally held PETSc objects."""
+        if isinstance(self._solver, DiagonalSolver):
+            pass
+        else:
+            self._solver.destroy()
 
     @property
     def A(self) -> Union[PETSc.Mat, PETSc.Vec]:  # type: ignore

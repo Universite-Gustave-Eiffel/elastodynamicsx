@@ -117,26 +117,40 @@ class FEniCSxTimeScheme(TimeScheme):
         self._u0: fem.Function
         self._v0: fem.Function
 
+        # Initialize the (time-independent) A matrix (bilinear form)
+        if self._mpc is None:
+            self._A = fem.petsc.assemble_matrix(self._bilinear_form, bcs=self._bcs)
+        else:
+            self._A = dolfinx_mpc.assemble_matrix(self._bilinear_form, self._mpc, bcs=self._bcs)
+        self._A.assemble()
+
+        # Declare a zero vector compatible with the linear form
+        if self._mpc is None:
+            self._b = fem.petsc.create_vector(fem.extract_function_spaces(self._linear_form))
+        else:
+            self._b = dolfinx_mpc.assemble_vector(self._linear_form, self._mpc)  # type: ignore[arg-type]
+
+    def __del__(self):  # based on https://github.com/FEniCS/dolfinx/.../python/dolfinx/fem/petsc.py
+        """Destroy internally held PETSc objects."""
+        for obj in filter(
+            lambda obj: obj is not None, (self._A, self._b)
+        ):
+            obj.destroy()
+
+    @property
+    def A(self) -> PETSc.Mat:
+        """The time-independent bilinear form matrix"""
+        return self._A
+
+    @property
+    def b(self) -> PETSc.Vec:
+        """The linear form vector"""
+        return self._b
+
     @property
     def out_fenicsx(self) -> fem.Function:
         """The solution vector"""
         return self._out_fenicsx
-
-    def A(self) -> PETSc.Mat:  # type: ignore[name-defined]
-        """The time-independent matrix (bilinear form)"""
-        if self._mpc is None:
-            A = fem.petsc.assemble_matrix(self._bilinear_form, bcs=self._bcs)
-        else:
-            A = dolfinx_mpc.assemble_matrix(self._bilinear_form, self._mpc, bcs=self._bcs)
-        A.assemble()
-        return A
-
-    def init_b(self) -> PETSc.Vec:  # type: ignore[name-defined]
-        """Declares a zero vector compatible with the linear form"""
-        if self._mpc is None:
-            return fem.petsc.create_vector(fem.extract_function_spaces(self._linear_form))
-        else:
-            return dolfinx_mpc.assemble_vector(self._linear_form, self._mpc)  # type: ignore[arg-type]
 
     def b_update_function(self, b: PETSc.Vec, t) -> None:  # type: ignore[name-defined]  # TODO: use t?
         """Updates the b vector (in-place) for a given time t"""
