@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.19.0
 #   kernelspec:
 #     display_name: Python 3 (DOLFINx complex)
 #     language: python
@@ -111,7 +111,40 @@ bf = BodyForce(V, gaussianBF)
 pde = PDE(V, materials=[mat], bodyforces=[bf], bcs=bcs)
 
 
-# ### Solve
+# ### Solve. Option 1: by using Fenicsx LinearProblem interface
+# More flexible if parameters are frequency-dependent
+
+# +
+# Get bilinear and linear forms
+a_helmoltz = pde.a_ufl_frequencydomain
+L_helmoltz = pde.b_ufl
+
+# Declare solution
+u_res = fem.Function(V, name='solution')
+
+# Frequency to solve for
+omega = pde.omega
+omega.value = 1.0  # this updates `a_helmoltz` and `L_helmoltz`
+# -
+
+problem = fem.petsc.LinearProblem(
+    a_helmoltz, L_helmoltz, bcs=pde.bcs_strong, u=u_res,
+    petsc_options_prefix="heltmoltz",
+    petsc_options={"ksp_type": "preonly", "pc_type": "lu", "ksp_error_if_not_converged": True},
+)
+_ = problem.solve()
+
+# omega.value = 2.0
+# _ = problem.solve()
+# and so forth for other values of omega
+
+# Plot
+if domain.comm.rank == 0:
+    p = plotter(u_res, complex='real')
+    p.show()
+
+# ### Solve. Option 2: by using compiled matrices.
+# More efficient for frequency loops
 # 0. Initialize the solver
 # 1. Ex. 1: Solve for a single frequency
 # 2. Ex. 2: Solve for several frequencies
