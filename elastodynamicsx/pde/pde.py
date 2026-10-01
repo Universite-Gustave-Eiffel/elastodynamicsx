@@ -62,10 +62,14 @@ class PDE:
         self._M_form: typing.Union[fem.forms.Form, None] = None
         self._C_form: typing.Union[fem.forms.Form, None] = None
         self._K_form: typing.Union[fem.forms.Form, None] = None
+        self._a_form: typing.Union[fem.forms.Form, None] = None
         self._b_form: typing.Union[fem.forms.Form, None] = None
         self._K0_form: typing.Union[fem.forms.Form, None] = None
         self._K1_form: typing.Union[fem.forms.Form, None] = None
         self._K2_form: typing.Union[fem.forms.Form, None] = None
+
+        self._a_ufl: typing.Union[ufl.form.Form, None] = None
+        self._b_ufl: typing.Union[ufl.form.Form, None] = None
 
         # ## Sort boundary conditions
         self._bcs_weak: typing.List[BCWeakBase] = get_weak_BCs(self.bcs)
@@ -86,6 +90,18 @@ class PDE:
     @property
     def mpc(self):
         return self._mpc
+
+    @property
+    def bcs_weak(self) -> typing.List[BCWeakBase]:
+        return self._bcs_weak
+
+    @property
+    def bcs_strong(self) -> typing.List[fem.DirichletBC]:
+        return self._bcs_strong
+
+    @property
+    def bcs_mpc(self) -> typing.List[BCMPCBase]:
+        return self._bcs_mpc
 
 # ## ### ### ### ### ### ### ### ### ## #
 # ## Finalize the PDE (compile, ...) ## #
@@ -160,12 +176,15 @@ class PDE:
         self._K_form = fem.form(k, jit_options=self.jit_options)
         self._b_form = fem.form(L, jit_options=self.jit_options)
 
+        self._b_ufl = L
+
         # Executes the following only if using complex numbers
         if np.issubdtype(default_scalar_type, np.complexfloating):
             # #Mat_lhs = -w*w*_M_ + 1J*w*_C_ + _K_
             m = self.M_fn(u, v)
             w = self._omega_ufl
-            self._a_form = fem.form(-w * w * m + 1J * w * c + k, jit_options=self.jit_options)  # type: ignore
+            self._a_ufl = -w * w * m + 1J * w * c + k
+            self._a_form = fem.form(self._a_ufl, jit_options=self.jit_options)  # type: ignore
 
     def _compile_K0_K1_K2(self) -> None:
         """Required for waveguide problems"""
@@ -236,6 +255,26 @@ class PDE:
         else:
             return sum([f.b_fn(v) for f in self.bodyforces])
 
+# ## ### ### ### #
+# ## UFL forms ## #
+# ## ### ### ### #
+
+    @property
+    def a_ufl_frequencydomain(self) -> ufl.form.Form:
+        """Ufl bilinear form for the Helmoltz equation"""
+        if self._a_ufl is None:
+            self._compile_C_K_b()
+        assert self._a_ufl is not None
+        return self._a_ufl
+
+    @property
+    def b_ufl(self) -> ufl.form.Form:
+        """linear form (ufl)"""
+        if self._b_ufl is None:
+            self._compile_C_K_b()
+        assert self._b_ufl is not None
+        return self._b_ufl
+
 # ## ### ### ### ### ### ### ## #
 # ## Compiled dolfinx forms  ## #
 # ## ### ### ### ### ### ### ## #
@@ -259,6 +298,15 @@ class PDE:
     def b_form(self) -> typing.Union[fem.forms.Form, None]:
         """Compiled linear form"""
         return self._b_form
+
+# ## ### ### ### ## #
+# ## Parameters  ## #
+# ## ### ### ### ## #
+
+    @property
+    def omega(self) -> fem.Constant:
+        """Angular frequency. Used in self.a_form_frequencydomain"""
+        return self._omega_ufl
 
 # ## ### ### ### ### ### ### ### ## #
 # ## PETSc matrices and vectors  ## #
@@ -387,6 +435,8 @@ class PDE:
 
         # BC modifyier
         self._omega_ufl.value = omega
+
+        assert self._a_form is not None
         fem.petsc.apply_lifting(b, [self._a_form], [self._bcs_strong])
 
         # ghost
@@ -409,6 +459,7 @@ class PDE:
         # BC modifyier
         self._omega_ufl.value = omega
         # fem.petsc.apply_lifting(b, [self._a_form], [self._bcs_strong])
+        assert self._a_form is not None
         dolfinx_mpc.apply_lifting(b, [self._a_form], [self._bcs_strong], self._mpc)
 
         # ghost

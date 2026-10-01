@@ -138,12 +138,12 @@ class FEniCSxTimeScheme(TimeScheme):
             obj.destroy()
 
     @property
-    def A(self) -> PETSc.Mat:
+    def A(self) -> PETSc.Mat:  # type: ignore[name-defined]
         """The time-independent bilinear form matrix"""
         return self._A
 
     @property
-    def b(self) -> PETSc.Vec:
+    def b(self) -> PETSc.Vec:  # type: ignore[name-defined]
         """The linear form vector"""
         return self._b
 
